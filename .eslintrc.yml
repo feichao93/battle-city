@@ -32,8 +32,10 @@ rules:
   linebreak-style: off
   class-methods-use-this: off
   import/imports-first: off
+  import/prefer-default-export: off
   no-mixed-operators: off
   no-else-return: off
   jsx-a11y/no-static-element-interactions: off
   react/forbid-prop-types: off
   jsx-a11y/aria-role: off
+  comma-dangle: off

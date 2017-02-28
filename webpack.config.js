@@ -73,11 +73,11 @@ module.exports = {
         test: /\.styl$/,
         use: ['style-loader?sourceMap', 'css-loader', 'stylus-loader'],
       },
-      {
-        test: /\.jsx?$/,
-        use: ['eslint-loader'],
-        exclude: /node_modules/,
-      },
+      // {
+      //   test: /\.jsx?$/,
+      //   use: ['eslint-loader'],
+      //   exclude: /node_modules/,
+      // },
     ],
   },
 
