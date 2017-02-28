@@ -28,6 +28,7 @@ rules:
   new-cap: off
   quotes: [warn, single]
   react/prefer-stateless-function: off
+  react/no-array-index-key: off
   import/prefer- -export: off
   linebreak-style: off
   class-methods-use-this: off
