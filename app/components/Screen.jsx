@@ -49,7 +49,7 @@ export default class Screen extends React.Component {
         <BrickWall x={BLOCK_SIZE * 2} y={BLOCK_SIZE * 2} />
         <BrickWall x={BLOCK_SIZE * 3} y={BLOCK_SIZE * 2} />
         <BrickWall x={BLOCK_SIZE * 2} y={BLOCK_SIZE * 3} />
-        <BrickWall x={BLOCK_SIZE * 3} y={BLOCK_SIZE * 3 } />
+        <BrickWall x={BLOCK_SIZE * 3} y={BLOCK_SIZE * 3} />
         <SteelWall x={16} y={16} />
       </g>
     )

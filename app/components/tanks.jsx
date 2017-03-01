@@ -109,22 +109,22 @@ const TankLevel0 = ({ transform, color, shape }) => {
         <rect x={1} y={5} width={3} height={9} fill={a} />
         <rect x={2} y={5} width={1} height={9} fill={b} />
         {shape === 0 ? (
-            <g role="left-tire-shape-0">
-              <Bitmap x={1} y={4} d={['abb']} scheme={scheme} />
-              <Bitmap x={1} y={14} d={['abb']} scheme={scheme} />
-              {_.range(5).map(i =>
-                <rect key={i} x={1} width={2} y={5 + 2 * i} height={1} fill={c} />
-              )}
-            </g>
-          ) : (
-            <g role="left-tire-shape-1">
-              <Bitmap x={1} y={4} d={['acc']} scheme={scheme} />
-              <Bitmap x={1} y={14} d={['bcc']} scheme={scheme} />
-              {_.range(4).map(i =>
-                <rect key={i} x={1} width={2} y={6 + 2 * i} height={1} fill={c} />
-              )}
-            </g>
-          )}
+          <g role="left-tire-shape-0">
+            <Bitmap x={1} y={4} d={['abb']} scheme={scheme} />
+            <Bitmap x={1} y={14} d={['abb']} scheme={scheme} />
+            {_.range(5).map(i =>
+              <rect key={i} x={1} width={2} y={5 + 2 * i} height={1} fill={c} />
+            )}
+          </g>
+        ) : (
+          <g role="left-tire-shape-1">
+            <Bitmap x={1} y={4} d={['acc']} scheme={scheme} />
+            <Bitmap x={1} y={14} d={['bcc']} scheme={scheme} />
+            {_.range(4).map(i =>
+              <rect key={i} x={1} width={2} y={6 + 2 * i} height={1} fill={c} />
+            )}
+          </g>
+        )}
       </g>
 
 
@@ -133,18 +133,18 @@ const TankLevel0 = ({ transform, color, shape }) => {
         <Pixel x={11} y={4} fill={a} />
 
         {shape === 0 ? (
-            <g role="right-tire-shape-0">
-              {_.range(6).map(i =>
-                <rect key={i} x={12} width={2} y={4 + 2 * i} height={1} fill={b} />
-              )}
-            </g>
-          ) : (
-            <g role="right-tire-shape-1">
-              {_.range(5).map(i =>
-                <rect key={i} x={12} width={2} y={5 + 2 * i} height={1} fill={b} />
-              )}
-            </g>
-          )}
+          <g role="right-tire-shape-0">
+            {_.range(6).map(i =>
+              <rect key={i} x={12} width={2} y={4 + 2 * i} height={1} fill={b} />
+            )}
+          </g>
+        ) : (
+          <g role="right-tire-shape-1">
+            {_.range(5).map(i =>
+              <rect key={i} x={12} width={2} y={5 + 2 * i} height={1} fill={b} />
+            )}
+          </g>
+        )}
       </g>
 
       <g role="tank-body">
@@ -173,22 +173,22 @@ const TankLevel1 = ({ transform, color, shape }) => {
         <Pixel x={3} y={5} fill={a} />
         <Pixel x={3} y={14} fill={a} />
         {shape === 0 ? (
-            <g role="left-tire-shape-0">
-              <Bitmap x={1} y={4} d={['abb']} scheme={scheme} />
-              <Bitmap x={1} y={15} d={['ccc']} scheme={scheme} />
-              {_.range(5).map(i =>
-                <rect key={i} x={1} width={2} y={5 + 2 * i} height={1} fill={c} />
-              )}
-            </g>
-          ) : (
-            <g role="left-tire-shape-1">
-              <Bitmap x={1} y={4} d={['bcc']} scheme={scheme} />
-              <Bitmap x={1} y={15} d={['abb']} scheme={scheme} />
-              {_.range(5).map(i =>
-                <rect key={i} x={1} width={2} y={6 + 2 * i} height={1} fill={c} />
-              )}
-            </g>
-          )}
+          <g role="left-tire-shape-0">
+            <Bitmap x={1} y={4} d={['abb']} scheme={scheme} />
+            <Bitmap x={1} y={15} d={['ccc']} scheme={scheme} />
+            {_.range(5).map(i =>
+              <rect key={i} x={1} width={2} y={5 + 2 * i} height={1} fill={c} />
+            )}
+          </g>
+        ) : (
+          <g role="left-tire-shape-1">
+            <Bitmap x={1} y={4} d={['bcc']} scheme={scheme} />
+            <Bitmap x={1} y={15} d={['abb']} scheme={scheme} />
+            {_.range(5).map(i =>
+              <rect key={i} x={1} width={2} y={6 + 2 * i} height={1} fill={c} />
+            )}
+          </g>
+        )}
       </g>
 
 
@@ -196,19 +196,19 @@ const TankLevel1 = ({ transform, color, shape }) => {
         <rect x={11} y={4} width={3} height={12} fill={c} />
         <Pixel x={11} y={4} fill={a} />
         {shape === 0 ? (
-            <g role="right-tire-shape-0">
-              {_.range(6).map(i =>
-                <rect key={i} x={12} width={2} y={4 + 2 * i} height={1} fill={b} />
-              )}
-            </g>
-          ) : (
-            <g role="right-tire-shape-1">
-              {_.range(6).map(i =>
-                <rect key={i} x={12} width={2} y={5 + 2 * i} height={1} fill={b} />
-              )}
-              <Pixel x={11} y={15} fill={b} />
-            </g>
-          )}
+          <g role="right-tire-shape-0">
+            {_.range(6).map(i =>
+              <rect key={i} x={12} width={2} y={4 + 2 * i} height={1} fill={b} />
+            )}
+          </g>
+        ) : (
+          <g role="right-tire-shape-1">
+            {_.range(6).map(i =>
+              <rect key={i} x={12} width={2} y={5 + 2 * i} height={1} fill={b} />
+            )}
+            <Pixel x={11} y={15} fill={b} />
+          </g>
+        )}
       </g>
 
       <g role="tank-body">
@@ -233,40 +233,40 @@ const TankLevel2 = ({ transform, color, shape }) => {
         <rect x={1} y={3} width={1} height={12} fill={a} />
         <rect x={2} y={3} width={2} height={12} fill={b} />
         {shape === 0 ? (
-            <g role="left-tire-shape-0">
-              <Bitmap x={1} y={3} d={['bcc']} scheme={scheme} />
-              {_.range(5).map(i =>
-                <rect key={i} x={1} width={1} y={5 + 2 * i} height={1} fill={c} />
-              )}
-            </g>
-          ) : (
-            <g role="left-tire-shape-1">
-              <Bitmap x={1} y={3} d={['aaa']} scheme={scheme} />
-              {_.range(5).map(i =>
-                <rect key={i} x={1} width={1} y={4 + 2 * i} height={1} fill={c} />
-              )}
-            </g>
-          )}
+          <g role="left-tire-shape-0">
+            <Bitmap x={1} y={3} d={['bcc']} scheme={scheme} />
+            {_.range(5).map(i =>
+              <rect key={i} x={1} width={1} y={5 + 2 * i} height={1} fill={c} />
+            )}
+          </g>
+        ) : (
+          <g role="left-tire-shape-1">
+            <Bitmap x={1} y={3} d={['aaa']} scheme={scheme} />
+            {_.range(5).map(i =>
+              <rect key={i} x={1} width={1} y={4 + 2 * i} height={1} fill={c} />
+            )}
+          </g>
+        )}
       </g>
 
 
       <g role="right-tire">
         <rect x={11} y={3} width={3} height={12} fill={c} />
         {shape === 0 ? (
-            <g role="right-tire-shape-0">
-              <Bitmap x={11} y={3} d={['a']} scheme={scheme} />
-              {_.range(6).map(i =>
-                <rect key={i} x={13} width={1} y={4 + 2 * i} height={1} fill={b} />
-              )}
-            </g>
-          ) : (
-            <g role="right-tire-shape-1">
-              <Bitmap x={11} y={3} d={['ab']} scheme={scheme} />
-              {_.range(6).map(i =>
-                <rect key={i} x={13} width={1} y={3 + 2 * i} height={1} fill={b} />
-              )}
-            </g>
-          )}
+          <g role="right-tire-shape-0">
+            <Bitmap x={11} y={3} d={['a']} scheme={scheme} />
+            {_.range(6).map(i =>
+              <rect key={i} x={13} width={1} y={4 + 2 * i} height={1} fill={b} />
+            )}
+          </g>
+        ) : (
+          <g role="right-tire-shape-1">
+            <Bitmap x={11} y={3} d={['ab']} scheme={scheme} />
+            {_.range(6).map(i =>
+              <rect key={i} x={13} width={1} y={3 + 2 * i} height={1} fill={b} />
+            )}
+          </g>
+        )}
       </g>
 
       <g role="tank-body">
