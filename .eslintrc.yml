@@ -40,3 +40,6 @@ rules:
   react/forbid-prop-types: off
   jsx-a11y/aria-role: off
   comma-dangle: off
+  no-use-before-define: off
+  no-lonely-if: off
+  no-constant-condition: off

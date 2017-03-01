@@ -55,7 +55,6 @@ export class Tank extends React.Component {
 
   render() {
     const { x, y, color, level, direction } = this.props
-    // todo 不能这么简单的计算dx, dy, rotate. 这样算和实际有点出入
     let rotate
     let dx
     let dy
@@ -64,12 +63,12 @@ export class Tank extends React.Component {
       dy = y
       rotate = 0
     } else if (direction === DOWN) {
-      dx = x + BLOCK_SIZE
+      dx = x + BLOCK_SIZE - 1
       dy = y + BLOCK_SIZE
       rotate = 180
     } else if (direction === LEFT) {
       dx = x
-      dy = y + BLOCK_SIZE
+      dy = y + BLOCK_SIZE - 1
       rotate = -90
     } else { // RIGHT
       dx = x + BLOCK_SIZE
