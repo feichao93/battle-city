@@ -1,24 +1,17 @@
+import * as R from 'ramda'
 import { takeEvery } from 'redux-saga'
 import { put, select } from 'redux-saga/effects'
-import { BULLET_SIZE, FIELD_BSIZE, UP, DOWN, LEFT, RIGHT, BLOCK_SIZE } from 'utils/constants'
+import { BULLET_SIZE, FIELD_BSIZE, BLOCK_SIZE, DIRECTION_MAP } from 'utils/constants'
 import * as A from 'utils/actions'
 import * as selectors from 'utils/selectors'
 
 function* update({ delta }) {
   const bullets = yield select(selectors.bullets)
-  const newBullets = bullets.map((b) => {
-    const { direction, speed, x, y } = b
-    if (direction === UP) {
-      return b.set('y', y - speed * delta)
-    } else if (direction === DOWN) {
-      return b.set('y', y + speed * delta)
-    } else if (direction === LEFT) {
-      return b.set('x', x - speed * delta)
-    } else if (direction === RIGHT) {
-      return b.set('x', x + speed * delta)
-    } else {
-      throw new Error(`Invalid direction ${direction}`)
-    }
+  const newBullets = bullets.map((bullet) => {
+    const { direction, speed } = bullet
+    const distance = speed * delta
+    const [xy, incdec] = DIRECTION_MAP[direction]
+    return bullet.update(xy, incdec === 'inc' ? R.add(distance) : R.subtract(R.__, distance))
   })
   yield put({ type: A.SET_BULLETS, bullets: newBullets })
 }
