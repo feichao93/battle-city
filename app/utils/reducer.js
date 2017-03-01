@@ -1,4 +1,4 @@
-import { Map, List } from 'immutable'
+import { Map } from 'immutable'
 import { combineReducers } from 'redux-immutable'
 import { UP, DOWN, LEFT, RIGHT, FIELD_BSIZE, BLOCK_SIZE } from 'utils/constants'
 import BulletRecord from 'types/BulletRecord'
@@ -41,15 +41,12 @@ function player(state = playerInitialState, action) {
   }
 }
 
-// todo List需要改成Map
-function bullets(state = List(), action) {
+function bullets(state = Map(), action) {
   if (action.type === A.ADD_BULLET) {
     const { direction, speed, x, y, owner } = action
-    return state.push(BulletRecord({ owner, direction, speed, x, y }))
-  } else if (action.type === A.DESTROY_BULLET) {
-    return state.filterNot(b => b.owner === action.owner)
+    return state.set(owner, BulletRecord({ owner, direction, speed, x, y }))
   } else if (action.type === A.SET_BULLETS) {
-    return action.bullets
+    return Map(action.bullets)
   } else {
     return state
   }
