@@ -4,6 +4,8 @@ import { BLOCK_SIZE } from 'utils/constants'
 import { Tank } from 'components/tanks'
 import Bullet from 'components/Bullet'
 import * as selectors from 'utils/selectors'
+import { BrickWall } from 'components/brickWall'
+import { SteelWall } from 'components/steelWall'
 
 function mapStateToProps(state) {
   return {
@@ -39,11 +41,16 @@ export default class Screen extends React.Component {
             direction={direction}
             x={x}
             y={y}
-            level={0}
+            level={2}
             color="yellow"
             moving={moving}
           />
         </g>
+        <BrickWall x={BLOCK_SIZE * 2} y={BLOCK_SIZE * 2} />
+        <BrickWall x={BLOCK_SIZE * 3} y={BLOCK_SIZE * 2} />
+        <BrickWall x={BLOCK_SIZE * 2} y={BLOCK_SIZE * 3} />
+        <BrickWall x={BLOCK_SIZE * 3} y={BLOCK_SIZE * 3 } />
+        <SteelWall x={16} y={16} />
       </g>
     )
   }
