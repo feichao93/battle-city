@@ -25,17 +25,31 @@ export class Tank extends React.Component {
     }
   }
 
-  // todo componentWillReceiveProps 根据moving的变化来设置handle
-
   componentDidMount() {
     if (this.props.moving) {
-      this.handle = setInterval(() => {
-        this.setState({ shape: this.state.shape + 1 })
-      }, 250)
+      this.startMoving()
+    }
+  }
+
+  componentWillUpdate(nextProps) {
+    if (!this.props.moving && nextProps.moving) {
+      this.startMoving()
+    } else if (this.props.moving && !nextProps.moving) {
+      this.stopMoving()
     }
   }
 
   componentWillUnmount() {
+    this.stopMoving()
+  }
+
+  startMoving() {
+    this.handle = setInterval(() => {
+      this.setState({ shape: this.state.shape + 1 })
+    }, 100)
+  }
+
+  stopMoving() {
     clearInterval(this.handle)
   }
 
