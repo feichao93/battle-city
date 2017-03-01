@@ -2,7 +2,6 @@ const path = require('path')
 const webpack = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const packageInfo = require('./package.json')
-const UglifyJSPlugin = require('uglifyjs-webpack-plugin')
 
 const isProduction = process.env.NODE_ENV === 'production'
 
@@ -17,7 +16,6 @@ const devPlugins = [
 ]
 
 const productionPlugins = [
-  new UglifyJSPlugin(),
   new webpack.DefinePlugin({
     'process.env': {
       NODE_ENV: JSON.stringify('production'),
