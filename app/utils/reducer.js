@@ -1,8 +1,9 @@
 import { Map, List } from 'immutable'
 import { combineReducers } from 'redux-immutable'
-import { UP, DOWN, LEFT, RIGHT } from 'utils/constants'
+import { UP, DOWN, LEFT, RIGHT, FIELD_BSIZE, BLOCK_SIZE } from 'utils/constants'
 import BulletRecord from 'types/BulletRecord'
 import * as A from 'utils/actions'
+import * as R from 'ramda'
 
 const playerInitialState = Map({
   x: 0,
@@ -11,19 +12,23 @@ const playerInitialState = Map({
   moving: false,
 })
 
+const clamp = R.clamp(0, BLOCK_SIZE * (FIELD_BSIZE - 1))
+
 function player(state = playerInitialState, action) {
   if (action.type === A.MOVE) {
     const { direction, distance } = action
+    const decAndClamp = R.pipe(R.subtract(R.__, distance), clamp)
+    const incAndClamp = R.pipe(R.add(distance), clamp)
     if (direction !== state.get('direction')) {
       return state.set('direction', direction)
     } else if (direction === UP) {
-      return state.update('y', y => y - distance)
+      return state.update('y', decAndClamp)
     } else if (direction === DOWN) {
-      return state.update('y', y => y + distance)
+      return state.update('y', incAndClamp)
     } else if (direction === LEFT) {
-      return state.update('x', x => x - distance)
+      return state.update('x', decAndClamp)
     } else if (direction === RIGHT) {
-      return state.update('x', x => x + distance)
+      return state.update('x', incAndClamp)
     } else {
       throw new Error(`Invalid direction ${direction}`)
     }

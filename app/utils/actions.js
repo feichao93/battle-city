@@ -10,6 +10,9 @@ export const STOP_MOVE = 'STOP_MOVE'
 // { type: TICK, delta: <seconds-elapsed-since-last-tick> }
 export const TICK = 'TICK'
 
+// { type: AFTER_TICK, delta: <seconds-elapsed-since-last-tick> }
+export const AFTER_TICK = 'AFTER_TICK'
+
 // { type: ADD_BULLET, direction, speed, x, y, owner }
 export const ADD_BULLET = 'ADD_BULLET'
 

@@ -1,6 +1,10 @@
 // 一块的大小对应16个像素
 export const BLOCK_SIZE = 16
 export const HALF_SIZE = BLOCK_SIZE / 2
+// 战场的大小 (13block * 13block)
+export const FIELD_BSIZE = 13
+// 子弹的大小
+export const BULLET_SIZE = 3
 
 // 坦克的配色方案
 // 共有4种配色方案: 黄色方案, 绿色方案, 银色方案, 红色方案

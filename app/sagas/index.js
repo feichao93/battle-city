@@ -2,7 +2,7 @@ import { eventChannel } from 'redux-saga'
 import { fork, take, put } from 'redux-saga/effects'
 import fireController from 'sagas/fireController'
 import directionController from 'sagas/directionController'
-import displacementSaga from 'sagas/displacementSaga'
+import bulletsSaga from 'sagas/bulletsSaga'
 import * as A from 'utils/actions'
 
 const tickChannel = eventChannel((emit) => {
@@ -12,6 +12,7 @@ const tickChannel = eventChannel((emit) => {
   function emitTick() {
     const now = performance.now()
     emit({ type: A.TICK, delta: (now - lastTime) / 1000 })
+    emit({ type: A.AFTER_TICK, delta: (now - lastTime) / 1000 })
     lastTime = now
     requestId = requestAnimationFrame(emitTick)
   }
@@ -23,9 +24,11 @@ const tickChannel = eventChannel((emit) => {
 
 export default function* rootSaga() {
   console.debug('root saga started')
+  // 注意各个saga的启动顺序, 这将影响到后续action的put顺序
+  yield fork(bulletsSaga)
+
   yield fork(directionController)
   yield fork(fireController)
-  yield fork(displacementSaga)
 
   yield fork(function* handleTick() {
     while (true) {
