@@ -1,7 +1,8 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import { BLOCK_SIZE } from 'utils/constants'
+import { BLOCK_SIZE, UP, DOWN, LEFT, RIGHT } from 'utils/constants'
 import { Tank } from 'components/tanks'
+import Bullet from 'components/Bullet'
 import * as selectors from 'utils/selectors'
 
 function mapStateToProps(state) {
@@ -23,6 +24,10 @@ export default class Screen extends React.Component {
       <g role="screen">
         <g role="board" transform={`translate(${BLOCK_SIZE},${BLOCK_SIZE})`}>
           <rect width={13 * BLOCK_SIZE} height={13 * BLOCK_SIZE} fill="#000000" />
+          <Bullet x={20} y={20} direction={UP} />
+          <Bullet x={28} y={20} direction={DOWN} />
+          <Bullet x={36} y={20} direction={LEFT} />
+          <Bullet x={44} y={20} direction={RIGHT} />
           <Tank
             direction={direction}
             x={x}
