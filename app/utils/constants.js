@@ -38,23 +38,17 @@ export const DOWN = 'DOWN'
 export const RIGHT = 'RIGHT'
 export const LEFT = 'LEFT'
 
-// 砖墙的颜色
-export const BRACK_WALL_COLOR_SCHEMES = {
-  a: '#6B0800',
-  b: '#9C4A00',
-  c: '#636363',
-}
-
-// 钢墙的颜色
-export const STEEL_WALL_COLOR_SCHEMES = {
-  a: '#FFFFFF',
-  b: '#636363',
-  c: '#ADADAD',
-}
-
 export const DIRECTION_MAP = {
   [UP]: ['y', 'dec'],
   [DOWN]: ['y', 'inc'],
   [LEFT]: ['x', 'dec'],
   [RIGHT]: ['x', 'inc'],
+}
+
+export const ITEM_SIZE_MAP = {
+  BRICK: 8,
+  STEEL: 8,
+  RIVER: 1,
+  SNOW: 1,
+  FOREST: 1,
 }
