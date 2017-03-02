@@ -16,8 +16,8 @@ export const AFTER_TICK = 'AFTER_TICK'
 // { type: ADD_BULLET, direction, speed, x, y, owner }
 export const ADD_BULLET = 'ADD_BULLET'
 
-// { type: DESTROY_BULLET, owner }
-export const DESTROY_BULLET = 'DESTROY_BULLET'
+// { type: DESTROY_BULLETS, owner }
+export const DESTROY_BULLETS = 'DESTROY_BULLETS'
 
-// { type: SET_BULLETS, bullets }
-export const SET_BULLETS = 'SET_BULLETS'
+// { type: UPDATE_BULLETS, updatedBullets: <updated-bullets-map> }
+export const UPDATE_BULLETS = 'UPDATE_BULLETS'
