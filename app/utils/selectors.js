@@ -1,4 +1,4 @@
-import { between, testCollision } from 'utils/common'
+import { between, testCollide } from 'utils/common'
 import { BLOCK_SIZE, FIELD_BSIZE, ITEM_SIZE_MAP } from 'utils/constants'
 
 export const player = state => state.get('player')
@@ -8,6 +8,8 @@ export const bullets = state => state.get('bullets')
 export const canFire = (state, targetOwner) => !(bullets(state).has(targetOwner))
 
 export const map = state => state.get('map')
+map.bricks = state => map(state).get('bricks')
+map.steels = state => map(state).get('steels')
 
 export const canMove = (state, movedPlayer) => {
   const { x, y } = movedPlayer.toObject()
@@ -17,10 +19,16 @@ export const canMove = (state, movedPlayer) => {
   }
 
   const { bricks, steels } = map(state).toObject()
-  if (testCollision(x, y, ITEM_SIZE_MAP.BRICK, bricks)) {
+  const target = {
+    x,
+    y,
+    width: BLOCK_SIZE,
+    height: BLOCK_SIZE,
+  }
+  if (testCollide(target, ITEM_SIZE_MAP.BRICK, bricks, -0.05)) {
     return false
   }
-  if (testCollision(x, y, ITEM_SIZE_MAP.STEEL, steels)) {
+  if (testCollide(target, ITEM_SIZE_MAP.STEEL, steels, -0.05)) {
     return false
   }
 

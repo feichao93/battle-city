@@ -48,7 +48,7 @@ export const DIRECTION_MAP = {
 export const ITEM_SIZE_MAP = {
   BRICK: 8,
   STEEL: 8,
-  RIVER: 1,
-  SNOW: 1,
-  FOREST: 1,
+  RIVER: BLOCK_SIZE,
+  SNOW: BLOCK_SIZE,
+  FOREST: BLOCK_SIZE,
 }

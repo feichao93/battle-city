@@ -1,7 +1,8 @@
 import * as R from 'ramda'
 import { takeEvery } from 'redux-saga'
 import { put, select } from 'redux-saga/effects'
-import { BULLET_SIZE, FIELD_BSIZE, BLOCK_SIZE, DIRECTION_MAP } from 'utils/constants'
+import { BULLET_SIZE, FIELD_BSIZE, BLOCK_SIZE, DIRECTION_MAP, ITEM_SIZE_MAP } from 'utils/constants'
+import { testCollide } from 'utils/common'
 import * as A from 'utils/actions'
 import * as selectors from 'utils/selectors'
 
@@ -20,7 +21,29 @@ function* afterUpdate() {
   const bullets = yield select(selectors.bullets)
   // todo 判断是否有和其他坦克相撞
   // todo 判断是否有和其他子弹相撞
-  // todo 判断是否有和brickWall/steelWall等物体碰撞
+
+  // 判断是否有和brickWall/steelWall等物体碰撞
+  const bricks = yield select(selectors.map.bricks)
+  const out1 = bullets.filter(bullet => testCollide({
+    x: bullet.x,
+    y: bullet.y,
+    width: BULLET_SIZE,
+    height: BULLET_SIZE,
+  }, ITEM_SIZE_MAP.BRICK, bricks))
+  if (!out1.isEmpty()) {
+    yield put({ type: A.DESTROY_BULLETS, bullets: out1 })
+  }
+
+  const steels = yield select(selectors.map.steels)
+  const out2 = bullets.filter(bullet => testCollide({
+    x: bullet.x,
+    y: bullet.y,
+    width: BULLET_SIZE,
+    height: BULLET_SIZE,
+  }, ITEM_SIZE_MAP.STEEL, steels))
+  if (!out2.isEmpty()) {
+    yield put({ type: A.DESTROY_BULLETS, bullets: out2 })
+  }
 
   // 判断是否移动到了边界外面
   const outBullets = bullets.filterNot(isInField)
