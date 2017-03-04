@@ -5,6 +5,7 @@ import testStage from 'stages/stage-test.json'
 
 const mapInitialState = parseStageConfig(testStage)
 
+// todo eagle的坐标也应该从json文件中导入
 export default function mapReducer(state = mapInitialState, action) {
   if (action.type === A.LOAD_STAGE) {
     return state // todo

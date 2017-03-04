@@ -21,6 +21,7 @@ export default function* directionController() {
     if (pressed.length > 0) {
       const player = yield select(selectors.player)
       const direction = _.last(pressed)
+      // todo 尝试同时往多个方向移动 (例如玩家按住右键和下键, 坦克不能往下移动时, 尝试往右移动)
       if (direction !== player.get('direction')) {
         yield put({ type: A.TURN, direction })
       } else {
