@@ -46,7 +46,7 @@ export const DIRECTION_MAP = {
 }
 
 export const ITEM_SIZE_MAP = {
-  BRICK: 8,
+  BRICK: 8, // todo 改成4
   STEEL: 8,
   RIVER: BLOCK_SIZE,
   SNOW: BLOCK_SIZE,

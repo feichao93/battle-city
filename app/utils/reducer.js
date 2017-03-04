@@ -6,17 +6,25 @@ import * as A from 'utils/actions'
 
 const bricks = []
 const steels = []
+const rivers = []
+const snows = []
+const forests = []
 for (let i = 0; i < (BLOCK_SIZE / ITEM_SIZE_MAP.BRICK * FIELD_BSIZE) ** 2; i += 1) {
-  bricks.push(Math.random() < 0.03)
+  bricks.push(Math.random() < 0.01)
   steels.push(Math.random() < 0.01)
+}
+for (let i = 0; i < (BLOCK_SIZE / ITEM_SIZE_MAP.RIVER * FIELD_BSIZE) ** 2; i += 1) {
+  rivers.push(Math.random() < 0.015)
+  snows.push(Math.random() < 0.015)
+  forests.push(Math.random() < 0.015)
 }
 
 const mapInitialState = Map({
   bricks: List(bricks),
   steels: List(steels),
-  // river: Repeat(false, (config.river * FIELD_BSIZE) ** 2),
-  // snow: Repeat(false, (config.snow * FIELD_BSIZE) ** 2),
-  // forest: Repeat(false, (config.forest * FIELD_BSIZE) ** 2),
+  rivers: List(rivers),
+  snows: List(snows),
+  forests: List(forests),
 })
 
 function map(state = mapInitialState, action) {
