@@ -9,6 +9,7 @@ import SteelLayer from 'components/SteelLayer'
 import RiverLayer from 'components/RiverLayer'
 import SnowLayer from 'components/SnowLayer'
 import ForestLayer from 'components/ForestLayer'
+import Eagle from 'components/Eagle'
 
 function mapStateToProps(state) {
   return {
@@ -58,6 +59,7 @@ export default class Screen extends React.Component {
             moving={moving}
           />
           <ForestLayer forests={forests} />
+          <Eagle x={6 * BLOCK_SIZE} y={12 * BLOCK_SIZE} broken />
         </g>
       </g>
     )
