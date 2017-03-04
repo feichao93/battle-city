@@ -1,14 +1,14 @@
 import { Map } from 'immutable'
 import { combineReducers } from 'redux-immutable'
-import { LEFT, DIRECTION_MAP } from 'utils/constants'
+import { UP, DIRECTION_MAP, BLOCK_SIZE } from 'utils/constants'
 import BulletRecord from 'types/BulletRecord'
 import map from 'reducers/map'
 import * as A from 'utils/actions'
 
 const playerInitialState = Map({
-  x: 0,
-  y: 0,
-  direction: LEFT,
+  x: 4 * BLOCK_SIZE,
+  y: 12 * BLOCK_SIZE,
+  direction: UP,
   moving: false,
 })
 

@@ -1,6 +1,7 @@
 import React from 'react'
+import { ITEM_SIZE_MAP } from 'utils/constants'
 
-export default class BrickWall extends React.Component {
+export default class BrickWall extends React.PureComponent {
   static propTypes = {
     x: React.PropTypes.number.isRequired,
     y: React.PropTypes.number.isRequired,
@@ -8,32 +9,34 @@ export default class BrickWall extends React.Component {
 
   render() {
     const { x, y } = this.props
-    const brickWallPart = (transform, type) => (
-      <g role={`brickwall${type}`} transform={transform}>
+    const brickWallPart = (transform, shape) => (
+      <g role="brickwall" transform={transform}>
         <rect width={4} height={4} fill="#636363" />
         <rect
-          x={type === 1 ? 0 : 1}
+          x={shape ? 0 : 1}
           y={0}
-          width={type === 1 ? 4 : 3}
+          width={shape ? 4 : 3}
           height={3}
           fill="#6B0800"
         />
         <rect
-          x={type === 1 ? 0 : 2}
+          x={shape ? 0 : 2}
           y={1}
-          width={type === 1 ? 4 : 2}
+          width={shape ? 4 : 2}
           height={2}
           fill="#9C4A00"
         />
       </g>
     )
-    return (
-      <g role="wall" transform={`translate(${x},${y})`}>
-        {brickWallPart('translate(0,0)', 1)}
-        {brickWallPart('translate(0,4)', 2)}
-        {brickWallPart('translate(4,0)', 2)}
-        {brickWallPart('translate(4,4)', 1)}
-      </g>
-    )
+    const row = Math.floor(y / ITEM_SIZE_MAP.BRICK)
+    const col = Math.floor(x / ITEM_SIZE_MAP.BRICK)
+
+    if ((row + col) % 2 === 0) {
+      return (
+        brickWallPart(`translate(${x},${y})`, true)
+      )
+    } else {
+      return brickWallPart(`translate(${x},${y})`, false)
+    }
   }
 }

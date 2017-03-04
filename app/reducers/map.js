@@ -21,6 +21,7 @@ export default function mapReducer(state = mapInitialState, action) {
 // 森林 forest F
 // 钢块 steel  T<n>
 // 老鹰 eagle  E
+// todo 优化代码
 function parseStageConfig({ map }) {
   const bricks = new Set()
   const steels = new Set()
@@ -34,17 +35,32 @@ function parseStageConfig({ map }) {
       if (item[0] === 'b') {
         const bits = parseInt(item[1], 16)
         // console.assert(0 < bits && bits < 16)
+        const rowrow = 4 * row
+        const colcol = 4 * col
+        const N = 52
         if (bits & 0b0001) {
-          bricks.add(2 * row * 26 + 2 * col)
+          bricks.add(rowrow * N + colcol + 0)
+          bricks.add(rowrow * N + colcol + 1)
+          bricks.add(rowrow * N + colcol + N)
+          bricks.add(rowrow * N + colcol + N + 1)
         }
         if (bits & 0b0010) {
-          bricks.add(2 * row * 26 + 2 * col + 1)
+          bricks.add(rowrow * N + colcol + 2 + 0)
+          bricks.add(rowrow * N + colcol + 2 + 1)
+          bricks.add(rowrow * N + colcol + 2 + N)
+          bricks.add(rowrow * N + colcol + 2 + N + 1)
         }
         if (bits & 0b0100) {
-          bricks.add((2 * row + 1) * 26 + 2 * col)
+          bricks.add((rowrow + 2) * N + colcol + 0)
+          bricks.add((rowrow + 2) * N + colcol + 1)
+          bricks.add((rowrow + 2) * N + colcol + N)
+          bricks.add((rowrow + 2) * N + colcol + N + 1)
         }
         if (bits & 0b1000) {
-          bricks.add((2 * row + 1) * 26 + 2 * col + 1)
+          bricks.add((rowrow + 2) * N + colcol + 2 + 0)
+          bricks.add((rowrow + 2) * N + colcol + 2 + 1)
+          bricks.add((rowrow + 2) * N + colcol + 2 + N)
+          bricks.add((rowrow + 2) * N + colcol + 2 + N + 1)
         }
       } else if (item[0] === 't') {
         const bits = parseInt(item[1], 16)
