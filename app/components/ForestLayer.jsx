@@ -1,9 +1,7 @@
 import React from 'react'
 import { getRowCol } from 'utils/common'
-import { ITEM_SIZE_MAP, BLOCK_SIZE, FIELD_BSIZE } from 'utils/constants'
+import { ITEM_SIZE_MAP, N_MAP } from 'utils/constants'
 import Forest from 'components/Forest'
-
-const N = BLOCK_SIZE / ITEM_SIZE_MAP.FOREST * FIELD_BSIZE
 
 export default class ForestLayer extends React.PureComponent {
   static propTypes = {
@@ -16,7 +14,7 @@ export default class ForestLayer extends React.PureComponent {
       <g role="forest-layer">
         {forests.map((set, t) => {
           if (set) {
-            const [row, col] = getRowCol(t, N)
+            const [row, col] = getRowCol(t, N_MAP.FOREST)
             return (
               <Forest
                 key={t}

@@ -43,6 +43,7 @@
     "eslint-plugin-react": "^6.3.0",
     "extract-text-webpack-plugin": "^2.0.0",
     "html-webpack-plugin": "^2.22.0",
+    "json-loader": "^0.5.4",
     "style-loader": "^0.13.1",
     "stylus": "^0.54.5",
     "stylus-loader": "^2.3.1",

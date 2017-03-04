@@ -1,0 +1,19 @@
+{
+  "name": "test",
+  "difficulty": "easy",
+  "map": [
+    "X  X  X  X  X  X  X  X  X  X  X  X  X  ",
+    "X  Bf X  Bf X  Bf X  Bf X  Bf X  Bf X  ",
+    "X  Bf X  Bf X  Bf X  Bf X  Bf X  Bf X  ",
+    "X  Bf X  Bf X  Bf Tf Bf X  Bf X  Bf X  ",
+    "X  Bf X  Bf X  X  X  Bf F  Bf X  Bf X  ",
+    "X  F  F  F  F  Bf X  Bf F  F  X  X  X  ",
+    "Tc X  Bc BF R  R  R  R  R  BF BF X  Tc ",
+    "X  X  X  X  S  BF Bc Bf S  X  X  X  X  ",
+    "X  BF X  BF X  BF B3 BF X  BF X  BF X  ",
+    "X  BF X  BF X  BF X  BF X  BF X  BF X  ",
+    "X  BF X  BF X  X  X  X  X  BF X  BF X  ",
+    "X  BF X  BF X  B8 Bc B4 X  BF X  BF X  ",
+    "X  X  X  X  X  Ba EE B5 X  X  X  X  X  "
+  ]
+}

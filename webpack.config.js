@@ -49,6 +49,10 @@ module.exports = {
   module: {
     rules: [
       {
+        test: '/.json$/',
+        use: ['json-loader'],
+      },
+      {
         test: /\.(jsx?)$/,
         use: ['react-hot-loader/webpack', {
           loader: 'babel-loader',

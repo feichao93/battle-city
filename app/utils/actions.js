@@ -24,5 +24,5 @@ export const DESTROY_BULLETS = 'DESTROY_BULLETS'
 // { type: UPDATE_BULLETS, updatedBullets: <updated-bullets-map> }
 export const UPDATE_BULLETS = 'UPDATE_BULLETS'
 
-// { type: LOAD_MAP }
-export const LOAD_MAP = 'LOAD_MAP'
+// { type: LOAD_STAGE, stage: <stage-configuration> }
+export const LOAD_STAGE = 'LOAD_STAGE'

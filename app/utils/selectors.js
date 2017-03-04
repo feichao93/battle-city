@@ -1,5 +1,5 @@
 import { between, testCollide } from 'utils/common'
-import { BLOCK_SIZE, FIELD_BSIZE, ITEM_SIZE_MAP } from 'utils/constants'
+import { BLOCK_SIZE, FIELD_BLOCK_SIZE, ITEM_SIZE_MAP } from 'utils/constants'
 
 export const player = state => state.get('player')
 
@@ -13,8 +13,8 @@ map.steels = state => map(state).get('steels')
 
 export const canMove = (state, movedPlayer) => {
   const { x, y } = movedPlayer.toObject()
-  if (!between(0, x, BLOCK_SIZE * (FIELD_BSIZE - 1))
-    || !between(0, y, BLOCK_SIZE * (FIELD_BSIZE - 1))) {
+  if (!between(0, x, BLOCK_SIZE * (FIELD_BLOCK_SIZE - 1))
+    || !between(0, y, BLOCK_SIZE * (FIELD_BLOCK_SIZE - 1))) {
     return false
   }
 

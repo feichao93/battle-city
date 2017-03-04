@@ -45,3 +45,4 @@ rules:
   no-constant-condition: off
   yoda: off
   no-underscore-dangle: off
+  no-bitwise: off

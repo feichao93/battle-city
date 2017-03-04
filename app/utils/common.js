@@ -1,4 +1,4 @@
-import { FIELD_BSIZE, UP, DOWN, LEFT, RIGHT, BLOCK_SIZE } from 'utils/constants'
+import { FIELD_SIZE, UP, DOWN, LEFT, RIGHT, BLOCK_SIZE } from 'utils/constants'
 
 // 根据坦克的位置计算子弹的生成位置
 // 参数x,y,direction为坦克的位置和方向
@@ -30,7 +30,7 @@ export function filterCollide(target, itemSize, itemList, threshhold = 0) {
   const right = (x + width) / itemSize
   const top = y / itemSize - 1
   const bottom = (y + height) / itemSize
-  const N = BLOCK_SIZE / itemSize * FIELD_BSIZE
+  const N = FIELD_SIZE / itemSize
   return itemList.toMap().filter((set, t) => {
     if (set) {
       const [row, col] = getRowCol(t, N)

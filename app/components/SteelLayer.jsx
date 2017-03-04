@@ -1,9 +1,7 @@
 import React from 'react'
-import { BLOCK_SIZE, ITEM_SIZE_MAP, FIELD_BSIZE } from 'utils/constants'
+import { ITEM_SIZE_MAP, N_MAP } from 'utils/constants'
 import { getRowCol } from 'utils/common'
 import SteelWall from 'components/SteelWall'
-
-const N = BLOCK_SIZE / ITEM_SIZE_MAP.STEEL * FIELD_BSIZE
 
 export default class SteelLayer extends React.PureComponent {
   static propTypes = {
@@ -17,7 +15,7 @@ export default class SteelLayer extends React.PureComponent {
       <g role="steel-layer">
         {steels.map((set, t) => {
           if (set) {
-            const [row, col] = getRowCol(t, N)
+            const [row, col] = getRowCol(t, N_MAP.STEEL)
             return (
               <SteelWall
                 key={t}

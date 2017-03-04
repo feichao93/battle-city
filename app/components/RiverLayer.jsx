@@ -1,9 +1,7 @@
 import React from 'react'
 import { getRowCol } from 'utils/common'
-import { ITEM_SIZE_MAP, BLOCK_SIZE, FIELD_BSIZE } from 'utils/constants'
+import { N_MAP, ITEM_SIZE_MAP } from 'utils/constants'
 import River from 'components/River'
-
-const N = BLOCK_SIZE / ITEM_SIZE_MAP.RIVER * FIELD_BSIZE
 
 export default class RiverLayer extends React.PureComponent {
   static propTypes = {
@@ -17,7 +15,7 @@ export default class RiverLayer extends React.PureComponent {
       <g role="river-layer">
         {rivers.map((set, t) => {
           if (set) {
-            const [row, col] = getRowCol(t, N)
+            const [row, col] = getRowCol(t, N_MAP.RIVER)
             return (
               <River
                 key={t}
