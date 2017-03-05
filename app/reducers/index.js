@@ -17,7 +17,7 @@ function player(state = playerInitialState, action) {
     const { direction } = action
     const [xy] = DIRECTION_MAP[direction]
     return state.set('direction', direction)
-      .update(xy === 'x' ? 'y' : 'x', t => Math.round(t / 4) * 4)
+      .update(xy === 'x' ? 'y' : 'x', t => Math.round(t / 8) * 8)
   } else if (action.type === A.MOVE) {
     return action.player
   } else if (action.type === A.START_MOVE) {
@@ -33,6 +33,8 @@ function bullets(state = Map(), action) {
   if (action.type === A.ADD_BULLET) {
     const { direction, speed, x, y, owner } = action
     return state.set(owner, BulletRecord({ owner, direction, speed, x, y }))
+  } else if (action.type === A.DESTROY_BULLETS_BY_ONWER) {
+    return state.filterNot((bullet, owner) => action.owners.has(owner))
   } else if (action.type === A.DESTROY_BULLETS) {
     const set = action.bullets.toSet()
     return state.filterNot(bullet => set.has(bullet))

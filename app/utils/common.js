@@ -24,6 +24,7 @@ export function getRowCol(t, N) {
   return [Math.floor(t / N), t % N]
 }
 
+/** @deprecated */
 export function filterCollide(target, itemSize, itemList, threshhold = 0) {
   const { x, y, width, height } = target
   const left = x / itemSize - 1
@@ -42,6 +43,12 @@ export function filterCollide(target, itemSize, itemList, threshhold = 0) {
   })
 }
 
+/** @deprecated */
 export function testCollide(target, itemSize, itemList, threshhold) {
   return filterCollide(target, itemSize, itemList, threshhold).count() > 0
+}
+
+export function testCollide2(subject, object, threshhold = 0) {
+  return between(subject.x - object.width, object.x, subject.x + subject.width, threshhold)
+    && between(subject.y - object.height, object.y, subject.y + subject.height, threshhold)
 }
