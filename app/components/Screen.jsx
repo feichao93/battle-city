@@ -4,18 +4,21 @@ import { BLOCK_SIZE } from 'utils/constants'
 import { Tank } from 'components/tanks'
 import Bullet from 'components/Bullet'
 import * as selectors from 'utils/selectors'
+import * as A from 'utils/actions'
 import BrickLayer from 'components/BrickLayer'
 import SteelLayer from 'components/SteelLayer'
 import RiverLayer from 'components/RiverLayer'
 import SnowLayer from 'components/SnowLayer'
 import ForestLayer from 'components/ForestLayer'
 import Eagle from 'components/Eagle'
+import Explosion from 'components/Explosion'
 
 function mapStateToProps(state) {
   return {
     player: selectors.player(state),
     bullets: selectors.bullets(state),
     map: selectors.map(state),
+    explosions: selectors.explosions(state),
   }
 }
 
@@ -28,13 +31,15 @@ export default class Screen extends React.Component {
     //   direction: React.PropTypes.string.isRequired,
     //   moving: React.PropTypes.bool.isRequired,
     // }).isRequired,
-    player: React.PropTypes.any.isRequired, // todo
-    bullets: React.PropTypes.any.isRequired, // todo
-    map: React.PropTypes.any.isRequired, // todo
+    // todo
+    player: React.PropTypes.any.isRequired,
+    bullets: React.PropTypes.any.isRequired,
+    map: React.PropTypes.any.isRequired,
+    explosions: React.PropTypes.any.isRequired,
   }
 
   render() {
-    const { player, bullets, map } = this.props
+    const { player, bullets, map, explosions } = this.props
     const { bricks, steels, rivers, snows, forests } = map.toObject()
     const { direction, x, y, moving } = player.toObject()
     return (
@@ -60,6 +65,19 @@ export default class Screen extends React.Component {
           />
           <ForestLayer forests={forests} />
           <Eagle x={6 * BLOCK_SIZE} y={12 * BLOCK_SIZE} />
+          <g role="explosion-layer">
+            {explosions.map(exp =>
+              <Explosion
+                key={exp.explosionId}
+                x={exp.x}
+                y={exp.y}
+                delayedAction={{
+                  type: A.REMOVE_EXPLOSION,
+                  explosionId: exp.explosionId,
+                }}
+              />
+            ).toArray()}
+          </g>
         </g>
       </g>
     )

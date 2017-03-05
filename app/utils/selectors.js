@@ -1,6 +1,8 @@
 import { between, testCollide } from 'utils/common'
 import { BLOCK_SIZE, FIELD_BLOCK_SIZE, ITEM_SIZE_MAP } from 'utils/constants'
 
+export const time = state => state.get('time')
+
 export const player = state => state.get('player')
 
 export const bullets = state => state.get('bullets')
@@ -37,3 +39,5 @@ export const canMove = (state, movedPlayer) => {
 
   return true
 }
+
+export const explosions = state => state.get('explosions')

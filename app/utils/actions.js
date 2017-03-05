@@ -19,11 +19,7 @@ export const AFTER_TICK = 'AFTER_TICK'
 export const ADD_BULLET = 'ADD_BULLET'
 
 // { type: DESTROY_BULLETS, owner }
-/** @deprecated */
 export const DESTROY_BULLETS = 'DESTROY_BULLETS'
-
-// { type: DESTROY_BULLETS_BY_ONWER, owners: <set-of-owner> }
-export const DESTROY_BULLETS_BY_ONWER = 'DESTROY_BULLETS_BY_ONWER'
 
 // { type: DESTROY_BRICKS, ts: <set-of-t> }
 export const DESTROY_BRICKS = 'DESTROY_BRICKS'
@@ -33,3 +29,7 @@ export const UPDATE_BULLETS = 'UPDATE_BULLETS'
 
 // { type: LOAD_STAGE, stage: <stage-configuration> }
 export const LOAD_STAGE = 'LOAD_STAGE'
+
+export const SPAWN_EXPLOSION = 'SPAWN_EXPLOSION'
+
+export const REMOVE_EXPLOSION = 'REMOVE_EXPLOSION'

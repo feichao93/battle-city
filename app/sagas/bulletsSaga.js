@@ -16,10 +16,8 @@ import * as A from 'utils/actions'
 import * as selectors from 'utils/selectors'
 
 function isInField(bullet) {
-  const x = Math.round(bullet.x)
-  const y = Math.round(bullet.y)
-  return 0 <= x && x + BULLET_SIZE < FIELD_SIZE
-    && 0 <= y && y + BULLET_SIZE < FIELD_SIZE
+  return 0 <= bullet.x && bullet.x + BULLET_SIZE < FIELD_SIZE
+    && 0 <= bullet.y && bullet.y + BULLET_SIZE < FIELD_SIZE
 }
 
 function* update({ delta }) {
@@ -32,6 +30,8 @@ function* update({ delta }) {
   })
   yield put({ type: A.UPDATE_BULLETS, updatedBullets })
 }
+
+// todo 子弹与brick/steel的接触检测应当在一个函数内, 因为一颗子弹可能同时碰到brick和steel
 
 function* handleCollisionsBetweenBulletsAndBricks(bullets) {
   // Array<[bullet_owner, brick_index]>
@@ -54,8 +54,8 @@ function* handleCollisionsBetweenBulletsAndBricks(bullets) {
   if (collisions.length > 0) {
     const collidedBullets = Set(collisions.map(R.head))
     yield put({
-      type: A.DESTROY_BULLETS_BY_ONWER,
-      owners: collidedBullets.map(R.prop('owner')),
+      type: A.DESTROY_BULLETS,
+      bullets: collidedBullets,
     })
 
     const spread = 4
@@ -115,7 +115,19 @@ function* afterUpdate() {
   })
 }
 
+let nextExplosionId = 1
+
 export default function* bulletsSaga() {
   yield takeEvery(A.TICK, update)
   yield takeEvery(A.AFTER_TICK, afterUpdate)
+
+  yield takeEvery(A.DESTROY_BULLETS, function* spawnExplosion({ bullets }) {
+    yield* bullets.map(b => put({
+      type: A.SPAWN_EXPLOSION,
+      x: b.x - 6,
+      y: b.y - 6,
+      explosionType: 'bullet',
+      explosionId: nextExplosionId++, // eslint-disable-line no-plusplus
+    })).toArray()
+  })
 }
