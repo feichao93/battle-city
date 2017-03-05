@@ -3,7 +3,7 @@ import React from 'react'
 export const Pixel = ({ x, y, fill }) => (
   <rect x={x} y={y} width={1} height={1} fill={fill} />
 )
-
+Pixel.displayName = 'Pixel'
 Pixel.propTypes = {
   x: React.PropTypes.number.isRequired,
   y: React.PropTypes.number.isRequired,
@@ -25,6 +25,7 @@ export const Bitmap = ({ x, y, d, scheme }) => {
     </g>
   )
 }
+Bitmap.displayName = 'Bitmap'
 Bitmap.propTypes = {
   x: React.PropTypes.number.isRequired,
   y: React.PropTypes.number.isRequired,
