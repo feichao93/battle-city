@@ -1,8 +1,10 @@
 import React from 'react'
 import * as _ from 'lodash'
 import { Pixel, Bitmap } from 'components/elements'
+import registerTick from 'hocs/registerTick'
 import { TANK_COLOR_SCHEMES, UP, DOWN, LEFT, RIGHT, BLOCK_SIZE } from 'utils/constants'
 
+@registerTick(80, 80)
 export class Tank extends React.Component {
   static propTypes = {
     x: React.PropTypes.number.isRequired,
@@ -10,6 +12,7 @@ export class Tank extends React.Component {
     color: React.PropTypes.string.isRequired,
     level: React.PropTypes.oneOf([0, 1, 2, 3, 4, 5, 6, 7]).isRequired,
     direction: React.PropTypes.oneOf([UP, DOWN, LEFT, RIGHT]).isRequired,
+    tickIndex: React.PropTypes.number.isRequired,
     moving: React.PropTypes.bool,
   }
 
@@ -19,42 +22,20 @@ export class Tank extends React.Component {
 
   constructor(props) {
     super(props)
-    this.handle = null
     this.state = {
-      shape: 0,
+      lastShape: 0,
     }
   }
 
-  componentDidMount() {
-    if (this.props.moving) {
-      this.startMoving()
+  componentWillReceiveProps(nextProps) {
+    if (this.props.moving && !nextProps.moving) {
+      this.setState({ lastShape: this.props.tickIndex })
     }
-  }
-
-  componentWillUpdate(nextProps) {
-    if (!this.props.moving && nextProps.moving) {
-      this.startMoving()
-    } else if (this.props.moving && !nextProps.moving) {
-      this.stopMoving()
-    }
-  }
-
-  componentWillUnmount() {
-    this.stopMoving()
-  }
-
-  startMoving() {
-    this.handle = setInterval(() => {
-      this.setState({ shape: this.state.shape + 1 })
-    }, 100)
-  }
-
-  stopMoving() {
-    clearInterval(this.handle)
   }
 
   render() {
-    const { x, y, color, level, direction } = this.props
+    const { x, y, color, level, direction, tickIndex, moving } = this.props
+    const { lastShape } = this.state
     let rotate
     let dx
     let dy
@@ -75,6 +56,7 @@ export class Tank extends React.Component {
       dy = y
       rotate = 90
     }
+    const shape = moving ? tickIndex : lastShape
     if (level === 0) {
       return (
         <TankLevel0
@@ -82,7 +64,7 @@ export class Tank extends React.Component {
           y={y}
           transform={`translate(${dx}, ${dy})rotate(${rotate})`}
           color={color}
-          shape={this.state.shape % 2}
+          shape={shape}
         />
       )
     } else {
@@ -93,7 +75,7 @@ export class Tank extends React.Component {
           y={y}
           transform={`translate(${dx}, ${dy})rotate(${rotate})`}
           color={color}
-          shape={this.state.shape % 2}
+          shape={shape}
         />
       )
     }

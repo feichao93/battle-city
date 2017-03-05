@@ -22,29 +22,11 @@ export default class River extends React.PureComponent {
   static propTypes = {
     x: React.PropTypes.number.isRequired,
     y: React.PropTypes.number.isRequired,
-  }
-
-  constructor(props) {
-    super(props)
-    this.state = {
-      shape: 0,
-    }
-    this.handle = null
-  }
-
-  componentDidMount() {
-    this.handle = setInterval(() => {
-      this.setState({ shape: this.state.shape + 1 })
-    }, 600)
-  }
-
-  componentWillUnmount() {
-    clearInterval(this.handle)
+    shape: React.PropTypes.number.isRequired,
   }
 
   render() {
-    const { x, y } = this.props
-    const { shape } = this.state
+    const { x, y, shape } = this.props
     return (
       <g transform={`translate(${x},${y})`}>
         {riverPart(shape, 0, 0)}
