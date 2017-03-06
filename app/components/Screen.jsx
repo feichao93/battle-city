@@ -12,6 +12,7 @@ import SnowLayer from 'components/SnowLayer'
 import ForestLayer from 'components/ForestLayer'
 import Eagle from 'components/Eagle'
 import Explosion from 'components/Explosion'
+import Flicker from 'components/Flicker'
 
 function mapStateToProps(state) {
   return {
@@ -65,6 +66,7 @@ export default class Screen extends React.Component {
           />
           <ForestLayer forests={forests} />
           <Eagle x={6 * BLOCK_SIZE} y={12 * BLOCK_SIZE} />
+          <Flicker x={2 * BLOCK_SIZE} y={12 * BLOCK_SIZE} />
           <g role="explosion-layer">
             {explosions.map(exp =>
               <Explosion
