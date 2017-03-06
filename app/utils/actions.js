@@ -1,5 +1,3 @@
-export const TURN = 'TURN'
-
 // { type: MOVE, palyer: <player-after-move> }
 export const MOVE = 'MOVE'
 

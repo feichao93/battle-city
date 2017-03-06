@@ -13,7 +13,7 @@ export const map = state => state.get('map')
 map.bricks = state => map(state).get('bricks')
 map.steels = state => map(state).get('steels')
 
-export const canMove = (state, movedPlayer) => {
+export const canMove = (state, movedPlayer, threshhold = -0.01) => {
   const { x, y } = movedPlayer.toObject()
   if (!between(0, x, BLOCK_SIZE * (FIELD_BLOCK_SIZE - 1))
     || !between(0, y, BLOCK_SIZE * (FIELD_BLOCK_SIZE - 1))) {
@@ -27,13 +27,13 @@ export const canMove = (state, movedPlayer) => {
     width: BLOCK_SIZE,
     height: BLOCK_SIZE,
   }
-  if (testCollide(target, ITEM_SIZE_MAP.BRICK, bricks, -0.02)) {
+  if (testCollide(target, ITEM_SIZE_MAP.BRICK, bricks, threshhold)) {
     return false
   }
-  if (testCollide(target, ITEM_SIZE_MAP.STEEL, steels, -0.02)) {
+  if (testCollide(target, ITEM_SIZE_MAP.STEEL, steels, threshhold)) {
     return false
   }
-  if (testCollide(target, ITEM_SIZE_MAP.RIVER, rivers, -0.02)) {
+  if (testCollide(target, ITEM_SIZE_MAP.RIVER, rivers, threshhold)) {
     return false
   }
 

@@ -25,7 +25,7 @@ export function getRowCol(t, N) {
 }
 
 /** @deprecated */
-export function filterCollide(target, itemSize, itemList, threshhold = 0) {
+export function filterCollide(target, itemSize, itemList, threshhold) {
   const { x, y, width, height } = target
   const left = x / itemSize - 1
   const right = (x + width) / itemSize

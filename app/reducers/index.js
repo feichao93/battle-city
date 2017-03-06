@@ -14,12 +14,7 @@ const playerInitialState = Map({
 })
 
 function player(state = playerInitialState, action) {
-  if (action.type === A.TURN) {
-    const { direction } = action
-    const [xy] = DIRECTION_MAP[direction]
-    return state.set('direction', direction)
-      .update(xy === 'x' ? 'y' : 'x', t => Math.round(t / 8) * 8)
-  } else if (action.type === A.MOVE) {
+  if (action.type === A.MOVE) {
     return action.player
   } else if (action.type === A.START_MOVE) {
     return state.set('moving', true)
