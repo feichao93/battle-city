@@ -21,6 +21,8 @@ export const ADD_BULLET = 'ADD_BULLET'
 // { type: DESTROY_BULLETS, owner }
 export const DESTROY_BULLETS = 'DESTROY_BULLETS'
 
+export const DESTROY_STEELS = 'DESTROY_STEELS'
+
 // { type: DESTROY_BRICKS, ts: <set-of-t> }
 export const DESTROY_BRICKS = 'DESTROY_BRICKS'
 
