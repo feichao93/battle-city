@@ -21,6 +21,7 @@ function mapStateToProps(state) {
     map: selectors.map(state),
     explosions: selectors.explosions(state),
     flickers: selectors.flickers(state),
+    tanks: selectors.tanks(state),
   }
 }
 
@@ -35,33 +36,15 @@ export default class Screen extends React.Component {
     //   active: React.PropTypes.bool.isRequired,
     // }).isRequired,
     // todo
-    player: React.PropTypes.any.isRequired,
     bullets: React.PropTypes.any.isRequired,
     map: React.PropTypes.any.isRequired,
     explosions: React.PropTypes.any.isRequired,
     flickers: React.PropTypes.any.isRequired,
-  }
-
-  renderPlayerTank() {
-    const { active, direction, x, y, moving } = this.props.player.toObject()
-    if (active) {
-      return (
-        <Tank
-          direction={direction}
-          x={x}
-          y={y}
-          level={0}
-          color="yellow"
-          moving={moving}
-        />
-      )
-    } else {
-      return null
-    }
+    tanks: React.PropTypes.any.isRequired,
   }
 
   render() {
-    const { bullets, map, explosions, flickers } = this.props
+    const { bullets, map, explosions, flickers, tanks } = this.props
     const { bricks, steels, rivers, snows, forests, eagle } = map.toObject()
     return (
       <g role="screen">
@@ -71,12 +54,24 @@ export default class Screen extends React.Component {
           <SteelLayer steels={steels} />
           <BrickLayer bricks={bricks} />
           <SnowLayer snows={snows} />
-          <g role="bullets">
+          <g role="bullet-layer">
             {bullets.map((b, i) =>
               <Bullet key={i} direction={b.direction} x={b.x} y={b.y} />
             ).toArray()}
           </g>
-          {this.renderPlayerTank()}
+          <g role="tank-layer">
+            {tanks.map(tank =>
+              <Tank
+                key={tank.tankId}
+                x={tank.x}
+                y={tank.y}
+                direction={tank.direction}
+                level={0}
+                color={tank.color}
+                moving={tank.moving}
+              />
+            ).toArray()}
+          </g>
           <ForestLayer forests={forests} />
           <Eagle
             x={eagle.get('x')}

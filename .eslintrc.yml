@@ -47,3 +47,4 @@ rules:
   no-underscore-dangle: off
   no-bitwise: off
   no-plusplus: off
+  no-continue: off

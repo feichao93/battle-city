@@ -8,6 +8,11 @@ export const FIELD_SIZE = BLOCK_SIZE * FIELD_BLOCK_SIZE
 export const BULLET_SIZE = 3
 // 坦克生成的延迟
 export const TANK_SPAWN_DELAY = 1500
+// 玩家坦克生成位置
+export const PLAYER_TANK_SPAWN_POSITION = {
+  x: 4 * BLOCK_SIZE,
+  y: 12 * BLOCK_SIZE,
+}
 
 // 坦克的配色方案
 // 共有4种配色方案: 黄色方案, 绿色方案, 银色方案, 红色方案

@@ -4,6 +4,7 @@ import flickers from 'reducers/flickers'
 import player from 'reducers/player'
 import map from 'reducers/map'
 import bullets from 'reducers/bullets'
+import tanks from 'reducers/tanks'
 import * as A from 'utils/actions'
 
 function time(state = 0, action) {
@@ -21,4 +22,5 @@ export default combineReducers({
   time,
   explosions,
   flickers,
+  tanks,
 })

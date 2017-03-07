@@ -1,6 +1,18 @@
 import { between, testCollide, testCollide2 } from 'utils/common'
 import { BLOCK_SIZE, FIELD_BLOCK_SIZE, ITEM_SIZE_MAP } from 'utils/constants'
 
+// 选取玩家的坦克对象. 如果玩家当前没有坦克, 则返回null
+export const playerTank = (state) => {
+  const { tankId, active } = player(state).toObject()
+  if (active) {
+    return tanks(state).get(tankId)
+  } else {
+    return null
+  }
+}
+
+export const tanks = state => state.get('tanks')
+
 export const time = state => state.get('time')
 
 export const player = state => state.get('player')
