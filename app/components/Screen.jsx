@@ -13,6 +13,7 @@ import ForestLayer from 'components/ForestLayer'
 import Eagle from 'components/Eagle'
 import Explosion from 'components/Explosion'
 import Flicker from 'components/Flicker'
+import { Items } from 'components/Items'
 
 function mapStateToProps(state) {
   return {
@@ -67,6 +68,7 @@ export default class Screen extends React.Component {
       <g role="screen">
         <g role="board" transform={`translate(${BLOCK_SIZE},${BLOCK_SIZE})`}>
           <rect width={13 * BLOCK_SIZE} height={13 * BLOCK_SIZE} fill="#000000" />
+          <Items x={0} y={0} name="shovel" />
           <RiverLayer rivers={rivers} />
           <SteelLayer steels={steels} />
           <BrickLayer bricks={bricks} />
