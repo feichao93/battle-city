@@ -1,8 +1,13 @@
 import React from 'react'
 import registerTick from 'hocs/registerTick'
+import delayedDispatch from 'hocs/delayedDispatch'
+import { TANK_SPAWN_DELAY } from 'utils/constants'
 
-@registerTick(120, 120, 120, 120)
-export default class Flicker extends React.Component {
+const interval = TANK_SPAWN_DELAY / 12
+
+@delayedDispatch(TANK_SPAWN_DELAY)
+@registerTick(interval, interval, interval, interval)
+export default class Flicker extends React.PureComponent {
   static propTypes = {
     x: React.PropTypes.number.isRequired,
     y: React.PropTypes.number.isRequired,

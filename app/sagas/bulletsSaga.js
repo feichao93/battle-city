@@ -189,7 +189,7 @@ export default function* bulletsSaga() {
       x: b.x - 6,
       y: b.y - 6,
       explosionType: 'bullet',
-      explosionId: nextExplosionId++, // eslint-disable-line no-plusplus
+      explosionId: nextExplosionId++,
     })).toArray()
   })
 }

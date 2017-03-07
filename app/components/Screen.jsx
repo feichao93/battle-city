@@ -20,6 +20,7 @@ function mapStateToProps(state) {
     bullets: selectors.bullets(state),
     map: selectors.map(state),
     explosions: selectors.explosions(state),
+    flickers: selectors.flickers(state),
   }
 }
 
@@ -31,18 +32,37 @@ export default class Screen extends React.Component {
     //   y: React.PropTypes.number.isRequired,
     //   direction: React.PropTypes.string.isRequired,
     //   moving: React.PropTypes.bool.isRequired,
+    //   active: React.PropTypes.bool.isRequired,
     // }).isRequired,
     // todo
     player: React.PropTypes.any.isRequired,
     bullets: React.PropTypes.any.isRequired,
     map: React.PropTypes.any.isRequired,
     explosions: React.PropTypes.any.isRequired,
+    flickers: React.PropTypes.any.isRequired,
+  }
+
+  renderPlayerTank() {
+    const { active, direction, x, y, moving } = this.props.player.toObject()
+    if (active) {
+      return (
+        <Tank
+          direction={direction}
+          x={x}
+          y={y}
+          level={0}
+          color="yellow"
+          moving={moving}
+        />
+      )
+    } else {
+      return null
+    }
   }
 
   render() {
-    const { player, bullets, map, explosions } = this.props
+    const { bullets, map, explosions, flickers } = this.props
     const { bricks, steels, rivers, snows, forests } = map.toObject()
-    const { direction, x, y, moving } = player.toObject()
     return (
       <g role="screen">
         <g role="board" transform={`translate(${BLOCK_SIZE},${BLOCK_SIZE})`}>
@@ -56,17 +76,9 @@ export default class Screen extends React.Component {
               <Bullet key={i} direction={b.direction} x={b.x} y={b.y} />
             ).toArray()}
           </g>
-          <Tank
-            direction={direction}
-            x={x}
-            y={y}
-            level={0}
-            color="yellow"
-            moving={moving}
-          />
+          {this.renderPlayerTank()}
           <ForestLayer forests={forests} />
           <Eagle x={6 * BLOCK_SIZE} y={12 * BLOCK_SIZE} />
-          <Flicker x={2 * BLOCK_SIZE} y={12 * BLOCK_SIZE} />
           <g role="explosion-layer">
             {explosions.map(exp =>
               <Explosion
@@ -76,6 +88,19 @@ export default class Screen extends React.Component {
                 delayedAction={{
                   type: A.REMOVE_EXPLOSION,
                   explosionId: exp.explosionId,
+                }}
+              />
+            ).toArray()}
+          </g>
+          <g role="flicker-layer">
+            {flickers.map(flicker =>
+              <Flicker
+                key={flicker.flickerId}
+                x={flicker.x}
+                y={flicker.y}
+                delayedAction={{
+                  type: A.REMOVE_FLICKER,
+                  flickerId: flicker.flickerId,
                 }}
               />
             ).toArray()}
