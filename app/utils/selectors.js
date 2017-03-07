@@ -7,7 +7,14 @@ export const player = state => state.get('player')
 
 export const bullets = state => state.get('bullets')
 
-export const canFire = (state, targetOwner) => !(bullets(state).has(targetOwner))
+export const canFire = (state, targetOwner) => {
+  if (targetOwner === 'player') {
+    if (!player(state).get('active')) {
+      return false
+    }
+  }
+  return !bullets(state).has(targetOwner)
+}
 
 export const map = state => state.get('map')
 map.bricks = state => map(state).get('bricks')
@@ -41,3 +48,5 @@ export const canMove = (state, movedPlayer, threshhold = -0.01) => {
 }
 
 export const explosions = state => state.get('explosions')
+
+export const flickers = state => state.get('flickers')

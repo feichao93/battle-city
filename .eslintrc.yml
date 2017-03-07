@@ -46,3 +46,4 @@ rules:
   yoda: off
   no-underscore-dangle: off
   no-bitwise: off
+  no-plusplus: off

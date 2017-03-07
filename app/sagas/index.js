@@ -3,6 +3,7 @@ import { fork, take, put } from 'redux-saga/effects'
 import fireController from 'sagas/fireController'
 import directionController from 'sagas/directionController'
 import bulletsSaga from 'sagas/bulletsSaga'
+import gameManager from 'sagas/gameManager'
 import * as A from 'utils/actions'
 
 const tickChannel = eventChannel((emit) => {
@@ -22,6 +23,12 @@ const tickChannel = eventChannel((emit) => {
   }
 })
 
+function* handleTick() {
+  while (true) {
+    yield put(yield take(tickChannel))
+  }
+}
+
 export default function* rootSaga() {
   console.debug('root saga started')
   // 注意各个saga的启动顺序, 这将影响到后续action的put顺序
@@ -30,9 +37,7 @@ export default function* rootSaga() {
   yield fork(directionController)
   yield fork(fireController)
 
-  yield fork(function* handleTick() {
-    while (true) {
-      yield put(yield take(tickChannel))
-    }
-  })
+  yield fork(handleTick)
+
+  yield fork(gameManager)
 }
