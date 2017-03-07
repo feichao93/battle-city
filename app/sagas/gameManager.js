@@ -1,32 +1,36 @@
 import { delay } from 'redux-saga'
-import { put, fork, take } from 'redux-saga/effects'
+import { put, fork, take, join } from 'redux-saga/effects'
 import * as A from 'utils/actions'
-import { UP, TANK_SPAWN_DELAY, PLAYER_TANK_SPAWN_POSITION } from 'utils/constants'
+import {
+  UP,
+  TANK_SPAWN_DELAY,
+  PLAYER1_TANK_SPAWN_POSITION,
+  PLAYER2_TANK_SPAWN_POSITION,
+  SIDE,
+} from 'utils/constants'
 
 let nextFlickerId = 1
 let nextTankId = 1
 
-function* spawnPlayerTank() {
+function* spawnTank({ x, y }) {
   yield put({
     type: A.SPAWN_FLICKER,
     flickerId: nextFlickerId++,
-    x: PLAYER_TANK_SPAWN_POSITION.x,
-    y: PLAYER_TANK_SPAWN_POSITION.y,
+    x,
+    y,
   })
   yield delay(TANK_SPAWN_DELAY)
   const tankId = nextTankId
   nextTankId++
   yield put({
     type: A.SPAWN_TANK,
+    side: SIDE.PLAYER,
     tankId,
-    x: PLAYER_TANK_SPAWN_POSITION.x,
-    y: PLAYER_TANK_SPAWN_POSITION.y,
+    x,
+    y,
     direction: UP,
   })
-  yield put({
-    type: A.ACTIVATE_PLAYER,
-    tankId,
-  })
+  return tankId
 }
 
 function* watchEagle() {
@@ -41,7 +45,31 @@ function* watchEagle() {
 export default function* gameManager() {
   yield put({ type: A.LOAD_STAGE, name: 'test' })
 
-  yield fork(spawnPlayerTank)
+  yield put({
+    type: A.CREATE_PLAYER,
+    playerName: 'player-1',
+    lives: 3,
+  })
+  yield put({
+    type: A.CREATE_PLAYER,
+    playerName: 'player-2',
+    lives: 3,
+  })
+
+  const task1 = yield fork(spawnTank, PLAYER1_TANK_SPAWN_POSITION)
+  const task2 = yield fork(spawnTank, PLAYER2_TANK_SPAWN_POSITION)
+  const [tankId1, tankId2] = yield join([task1, task2])
+
+  yield put({
+    type: A.ACTIVATE_PLAYER,
+    playerName: 'player-1',
+    tankId: tankId1,
+  })
+  yield put({
+    type: A.ACTIVATE_PLAYER,
+    playerName: 'player-2',
+    tankId: tankId2,
+  })
   // todo 生成AI
   yield fork(watchEagle)
 }

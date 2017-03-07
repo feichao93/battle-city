@@ -2,39 +2,30 @@ import { between, testCollide, testCollide2 } from 'utils/common'
 import { BLOCK_SIZE, FIELD_BLOCK_SIZE, ITEM_SIZE_MAP } from 'utils/constants'
 
 // 选取玩家的坦克对象. 如果玩家当前没有坦克, 则返回null
-export const playerTank = (state) => {
-  const { tankId, active } = player(state).toObject()
-  if (active) {
-    return tanks(state).get(tankId)
-  } else {
+export const playerTank = (state, playerName) => {
+  const { active, tankId } = state.getIn(['players', playerName])
+  if (!active) {
     return null
   }
+  return tanks(state).get(tankId)
 }
 
 export const tanks = state => state.get('tanks')
 
 export const time = state => state.get('time')
 
-export const player = state => state.get('player')
-
 export const bullets = state => state.get('bullets')
 
-export const canFire = (state, targetOwner) => {
-  if (targetOwner === 'player') {
-    if (!player(state).get('active')) {
-      return false
-    }
-  }
-  return !bullets(state).has(targetOwner)
-}
+/** @deprecated refactor need to test bullets count exceeds tank's limit */
+export const canFire = (state, playerName) => !bullets(state).has(playerName)
 
 export const map = state => state.get('map')
 map.bricks = state => map(state).get('bricks')
 map.steels = state => map(state).get('steels')
 map.eagle = state => map(state).get('eagle')
 
-export const canMove = (state, movedPlayer, threshhold = -0.01) => {
-  const { x, y } = movedPlayer.toObject()
+export const canMove = (state, tank, threshhold = -0.01) => {
+  const { x, y } = tank.toObject()
   if (!between(0, x, BLOCK_SIZE * (FIELD_BLOCK_SIZE - 1))
     || !between(0, y, BLOCK_SIZE * (FIELD_BLOCK_SIZE - 1))) {
     return false

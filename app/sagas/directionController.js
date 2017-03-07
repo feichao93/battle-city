@@ -1,31 +1,20 @@
 import * as R from 'ramda'
-import Mousetrap from 'mousetrap'
 import { take, put, select } from 'redux-saga/effects'
-import { UP, DOWN, LEFT, RIGHT, DIRECTION_MAP } from 'utils/constants'
+import { DIRECTION_MAP } from 'utils/constants'
 import * as selectors from 'utils/selectors'
 import * as A from 'utils/actions'
-import * as _ from 'lodash'
 
-// todo 目前该saga只能控制player-tank的移动
-// 还需要完善 以支持AI tank和player-2 tank的移动
-export default function* directionController() {
-  const pressed = []
-  let moving = false
-
-  bindKeyWithDirection('w', UP)
-  bindKeyWithDirection('a', LEFT)
-  bindKeyWithDirection('s', DOWN)
-  bindKeyWithDirection('d', RIGHT)
-
+export default function* directionController(playerName, getControlInfo) {
   while (true) {
     const { delta } = yield take(A.TICK)
     const speed = 48 / 1000
-    const tank = yield select(selectors.playerTank)
+    const tank = yield select(selectors.playerTank, playerName)
     if (tank == null) {
       continue
     }
-    if (pressed.length > 0) {
-      const direction = _.last(pressed)
+    // { direction: null | UP }
+    const { direction } = getControlInfo()
+    if (direction != null) {
       // todo 尝试同时往多个方向移动 (例如玩家按住右键和下键, 坦克不能往下移动时, 尝试往右移动)
       if (direction !== tank.get('direction')) {
         // 坦克进行转向时, 需要对坐标进行处理
@@ -66,28 +55,15 @@ export default function* directionController() {
             tankId: tank.tankId,
             tank: movedTank,
           })
-          if (!moving) {
+          if (!tank.get('moving')) {
             yield put({ type: A.START_MOVE, tankId: tank.tankId })
-            moving = true
           }
         }
       }
     } else {
-      if (moving) {
+      if (tank.get('moving')) {
         yield put({ type: A.STOP_MOVE, tankId: tank.tankId })
-        moving = false
       }
     }
-  }
-
-  function bindKeyWithDirection(key, direction) {
-    Mousetrap.bind(key, () => {
-      if (!pressed.includes(direction)) {
-        pressed.push(direction)
-      }
-    }, 'keydown')
-    Mousetrap.bind(key, () => {
-      _.pull(pressed, direction)
-    }, 'keyup')
   }
 }

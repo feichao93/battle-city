@@ -16,7 +16,6 @@ import Flicker from 'components/Flicker'
 
 function mapStateToProps(state) {
   return {
-    player: selectors.player(state),
     bullets: selectors.bullets(state),
     map: selectors.map(state),
     explosions: selectors.explosions(state),
@@ -84,10 +83,6 @@ export default class Screen extends React.Component {
                 key={exp.explosionId}
                 x={exp.x}
                 y={exp.y}
-                delayedAction={{
-                  type: A.REMOVE_EXPLOSION,
-                  explosionId: exp.explosionId,
-                }}
               />
             ).toArray()}
           </g>
@@ -97,10 +92,6 @@ export default class Screen extends React.Component {
                 key={flicker.flickerId}
                 x={flicker.x}
                 y={flicker.y}
-                delayedAction={{
-                  type: A.REMOVE_FLICKER,
-                  flickerId: flicker.flickerId,
-                }}
               />
             ).toArray()}
           </g>
