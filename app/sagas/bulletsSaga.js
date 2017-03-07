@@ -4,6 +4,7 @@ import { takeEvery } from 'redux-saga'
 import { put, select } from 'redux-saga/effects'
 import {
   BULLET_SIZE,
+  BLOCK_SIZE,
   DIRECTION_MAP,
   ITEM_SIZE_MAP,
   FIELD_SIZE,
@@ -11,6 +12,7 @@ import {
   UP,
   DOWN,
 } from 'utils/constants'
+import { testCollide2 } from 'utils/common'
 import * as A from 'utils/actions'
 import * as selectors from 'utils/selectors'
 
@@ -150,8 +152,31 @@ function* destroyBricks(collidedBullets) {
   }
 }
 
+function* filterBulletsCollidedWithEagle(bullets) {
+  // 判断是否和eagle相撞
+  const eagle = yield select(selectors.map.eagle)
+  const eagleBox = {
+    x: eagle.get('x'),
+    y: eagle.get('y'),
+    width: BLOCK_SIZE,
+    height: BLOCK_SIZE,
+  }
+  return bullets.filter(bullet => testCollide2(eagleBox, {
+    x: bullet.x,
+    y: bullet.y,
+    width: BULLET_SIZE,
+    height: BULLET_SIZE,
+  }))
+}
+
 function* afterUpdate() {
   const bullets = yield select(selectors.bullets)
+
+  const set0 = yield* filterBulletsCollidedWithEagle(bullets)
+  if (!set0.isEmpty()) {
+    yield put({ type: A.DESTROY_BULLETS, bullets: set0 })
+    yield put({ type: A.DESTROY_EAGLE })
+  }
   // todo 判断是否有和其他坦克相撞
   // todo 判断是否有和其他子弹相撞
 

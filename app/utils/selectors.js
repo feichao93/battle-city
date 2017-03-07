@@ -1,4 +1,4 @@
-import { between, testCollide } from 'utils/common'
+import { between, testCollide, testCollide2 } from 'utils/common'
 import { BLOCK_SIZE, FIELD_BLOCK_SIZE, ITEM_SIZE_MAP } from 'utils/constants'
 
 export const time = state => state.get('time')
@@ -19,6 +19,7 @@ export const canFire = (state, targetOwner) => {
 export const map = state => state.get('map')
 map.bricks = state => map(state).get('bricks')
 map.steels = state => map(state).get('steels')
+map.eagle = state => map(state).get('eagle')
 
 export const canMove = (state, movedPlayer, threshhold = -0.01) => {
   const { x, y } = movedPlayer.toObject()
@@ -27,12 +28,21 @@ export const canMove = (state, movedPlayer, threshhold = -0.01) => {
     return false
   }
 
-  const { bricks, steels, rivers } = map(state).toObject()
+  const { bricks, steels, rivers, eagle } = map(state).toObject()
   const target = {
     x,
     y,
     width: BLOCK_SIZE,
     height: BLOCK_SIZE,
+  }
+  const eagleBox = {
+    x: eagle.get('x'),
+    y: eagle.get('y'),
+    width: BLOCK_SIZE,
+    height: BLOCK_SIZE,
+  }
+  if (testCollide2(eagleBox, target, -0.01)) {
+    return false
   }
   if (testCollide(target, ITEM_SIZE_MAP.BRICK, bricks, threshhold)) {
     return false

@@ -62,7 +62,7 @@ export default class Screen extends React.Component {
 
   render() {
     const { bullets, map, explosions, flickers } = this.props
-    const { bricks, steels, rivers, snows, forests } = map.toObject()
+    const { bricks, steels, rivers, snows, forests, eagle } = map.toObject()
     return (
       <g role="screen">
         <g role="board" transform={`translate(${BLOCK_SIZE},${BLOCK_SIZE})`}>
@@ -78,7 +78,11 @@ export default class Screen extends React.Component {
           </g>
           {this.renderPlayerTank()}
           <ForestLayer forests={forests} />
-          <Eagle x={6 * BLOCK_SIZE} y={12 * BLOCK_SIZE} />
+          <Eagle
+            x={eagle.get('x')}
+            y={eagle.get('y')}
+            broken={eagle.get('broken')}
+          />
           <g role="explosion-layer">
             {explosions.map(exp =>
               <Explosion

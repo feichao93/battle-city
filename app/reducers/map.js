@@ -1,5 +1,5 @@
 import { Map, Repeat } from 'immutable'
-import { FIELD_BLOCK_SIZE, N_MAP } from 'utils/constants'
+import { FIELD_BLOCK_SIZE, N_MAP, BLOCK_SIZE } from 'utils/constants'
 import * as A from 'utils/actions'
 import testStage from 'stages/stage-test.json'
 
@@ -8,6 +8,11 @@ const configs = Map({
 })
 
 const emptyMap = Map({
+  eagle: Map({
+    x: 6 * BLOCK_SIZE,
+    y: 12 * BLOCK_SIZE,
+    broken: false,
+  }),
   bricks: Repeat(false, N_MAP.BRICK ** 2).toList(),
   steels: Repeat(false, N_MAP.STEEL ** 2).toList(),
   rivers: Repeat(false, N_MAP.RIVER ** 2).toList(),
@@ -22,6 +27,8 @@ export default function mapReducer(state = mapInitialState, action) {
   if (action.type === A.LOAD_STAGE) {
     const { name } = action
     return parseStageConfig(configs.get(name))
+  } else if (action.type === A.DESTROY_EAGLE) {
+    return state.setIn(['eagle', 'broken'], true)
   } else if (action.type === A.DESTROY_BRICKS) {
     return state.update('bricks', bricks => (
       bricks.map((set, t) => (action.ts.has(t) ? false : set)))
@@ -112,6 +119,11 @@ function parseStageConfig(config) {
   }
 
   return Map({
+    eagle: Map({ // TODO eagle的位置应该由配置文件来指定
+      x: 6 * BLOCK_SIZE,
+      y: 12 * BLOCK_SIZE,
+      broken: false,
+    }),
     bricks: Repeat(false, N_MAP.BRICK ** 2)
       .map((set, index) => bricks.has(index)).toList(),
     steels: Repeat(false, N_MAP.STEEL ** 2)
