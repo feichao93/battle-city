@@ -49,7 +49,7 @@ export default function* directionController(playerName, getControlInfo) {
         const movedTank = tank.update(xy, incdec === 'inc'
           ? R.add(distance)
           : R.subtract(R.__, distance))
-        if (yield select(selectors.canMove, movedTank)) {
+        if (yield select(selectors.canTankMove, movedTank)) {
           yield put({
             type: A.MOVE,
             tankId: tank.tankId,
