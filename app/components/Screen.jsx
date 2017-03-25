@@ -17,11 +17,11 @@ import { Items } from 'components/Items'
 
 function mapStateToProps(state) {
   return {
-    player: selectors.player(state),
     bullets: selectors.bullets(state),
     map: selectors.map(state),
     explosions: selectors.explosions(state),
     flickers: selectors.flickers(state),
+    tanks: selectors.tanks(state),
   }
 }
 
@@ -36,34 +36,16 @@ export default class Screen extends React.Component {
     //   active: React.PropTypes.bool.isRequired,
     // }).isRequired,
     // todo
-    player: React.PropTypes.any.isRequired,
     bullets: React.PropTypes.any.isRequired,
     map: React.PropTypes.any.isRequired,
     explosions: React.PropTypes.any.isRequired,
     flickers: React.PropTypes.any.isRequired,
-  }
-
-  renderPlayerTank() {
-    const { active, direction, x, y, moving } = this.props.player.toObject()
-    if (active) {
-      return (
-        <Tank
-          direction={direction}
-          x={x}
-          y={y}
-          level={0}
-          color="yellow"
-          moving={moving}
-        />
-      )
-    } else {
-      return null
-    }
+    tanks: React.PropTypes.any.isRequired,
   }
 
   render() {
-    const { bullets, map, explosions, flickers } = this.props
-    const { bricks, steels, rivers, snows, forests } = map.toObject()
+    const { bullets, map, explosions, flickers, tanks } = this.props
+    const { bricks, steels, rivers, snows, forests, eagle } = map.toObject()
     return (
       <g role="screen">
         <g role="board" transform={`translate(${BLOCK_SIZE},${BLOCK_SIZE})`}>
@@ -73,24 +55,36 @@ export default class Screen extends React.Component {
           <SteelLayer steels={steels} />
           <BrickLayer bricks={bricks} />
           <SnowLayer snows={snows} />
-          <g role="bullets">
+          <g role="bullet-layer">
             {bullets.map((b, i) =>
               <Bullet key={i} direction={b.direction} x={b.x} y={b.y} />
             ).toArray()}
           </g>
-          {this.renderPlayerTank()}
+          <g role="tank-layer">
+            {tanks.map(tank =>
+              <Tank
+                key={tank.tankId}
+                x={tank.x}
+                y={tank.y}
+                direction={tank.direction}
+                level={0}
+                color={tank.color}
+                moving={tank.moving}
+              />
+            ).toArray()}
+          </g>
           <ForestLayer forests={forests} />
-          <Eagle x={6 * BLOCK_SIZE} y={12 * BLOCK_SIZE} />
+          <Eagle
+            x={eagle.get('x')}
+            y={eagle.get('y')}
+            broken={eagle.get('broken')}
+          />
           <g role="explosion-layer">
             {explosions.map(exp =>
               <Explosion
                 key={exp.explosionId}
                 x={exp.x}
                 y={exp.y}
-                delayedAction={{
-                  type: A.REMOVE_EXPLOSION,
-                  explosionId: exp.explosionId,
-                }}
               />
             ).toArray()}
           </g>
@@ -100,10 +94,6 @@ export default class Screen extends React.Component {
                 key={flicker.flickerId}
                 x={flicker.x}
                 y={flicker.y}
-                delayedAction={{
-                  type: A.REMOVE_FLICKER,
-                  flickerId: flicker.flickerId,
-                }}
               />
             ).toArray()}
           </g>

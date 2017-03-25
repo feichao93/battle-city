@@ -1,9 +1,10 @@
 import { combineReducers } from 'redux-immutable'
 import explosions from 'reducers/explosions'
 import flickers from 'reducers/flickers'
-import player from 'reducers/player'
+import players from 'reducers/players'
 import map from 'reducers/map'
 import bullets from 'reducers/bullets'
+import tanks from 'reducers/tanks'
 import * as A from 'utils/actions'
 
 function time(state = 0, action) {
@@ -15,10 +16,11 @@ function time(state = 0, action) {
 }
 
 export default combineReducers({
-  player,
+  players,
   bullets,
   map,
   time,
   explosions,
   flickers,
+  tanks,
 })

@@ -1,39 +1,31 @@
-import Mousetrap from 'mousetrap'
 import { take, put, select } from 'redux-saga/effects'
 import { calculateBulletStartPosition } from 'utils/common'
+import { SIDE } from 'utils/constants'
 import * as A from 'utils/actions'
 import * as selectors from 'utils/selectors'
 
-const bulletSpeed = 80 / 1000
-const interval = 200
-
-export default function* fireController() {
-  let pressing = false
-  let pressed = false
-  Mousetrap.bind('j', () => {
-    pressing = true
-    pressed = true
-  }, 'keydown')
-  Mousetrap.bind('j', () => (pressing = false), 'keyup')
-
-  let countDown = interval
+export default function* fireController(playerName, shouldFire) {
+  let countDown = 0
   while (true) {
     const { delta } = yield take(A.TICK)
     if (countDown > 0) {
       countDown -= delta
     } else {
-      if ((pressing || pressed) && (yield select(selectors.canFire, 'player'))) {
-        const player = yield select(selectors.player)
-        const { x, y, direction } = player.toObject()
+      if (shouldFire() && (yield select(selectors.canFire, playerName))) {
+        const tank = yield select(selectors.playerTank, playerName)
+        if (tank == null) {
+          continue
+        }
+        const { x, y, direction, bulletSpeed, bulletInterval } = tank.toObject()
         yield put(Object.assign({
           type: A.ADD_BULLET,
+          side: SIDE.PLAYER,
           direction,
-          owner: 'player',
+          owner: playerName,
           speed: bulletSpeed,
         }, calculateBulletStartPosition(x, y, direction)))
-        countDown = interval
+        countDown = bulletInterval
       }
     }
-    pressed = false
   }
 }

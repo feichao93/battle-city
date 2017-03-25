@@ -1,7 +1,6 @@
 import React from 'react'
 import { Bitmap } from 'components/elements'
 import registerTick from 'hocs/registerTick'
-import delayedDispatch from 'hocs/delayedDispatch'
 
 const schema = {
   ' ': 'none',
@@ -65,7 +64,6 @@ const dataArray = [
   ],
 ]
 
-@delayedDispatch(200)
 @registerTick(66, 66, 9999)
 export default class Explosion extends React.PureComponent {
   static propTypes = {
