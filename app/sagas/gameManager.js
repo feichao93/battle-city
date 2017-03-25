@@ -1,13 +1,7 @@
 import { delay } from 'redux-saga'
-import { put, fork, take, join } from 'redux-saga/effects'
+import { put, fork, take, call } from 'redux-saga/effects'
 import * as A from 'utils/actions'
-import {
-  UP,
-  TANK_SPAWN_DELAY,
-  PLAYER1_TANK_SPAWN_POSITION,
-  PLAYER2_TANK_SPAWN_POSITION,
-  SIDE,
-} from 'utils/constants'
+import { UP, TANK_SPAWN_DELAY, SIDE, BLOCK_SIZE } from 'utils/constants'
 
 let nextFlickerId = 1
 let nextTankId = 1
@@ -56,9 +50,10 @@ export default function* gameManager() {
     lives: 3,
   })
 
-  const task1 = yield fork(spawnTank, PLAYER1_TANK_SPAWN_POSITION)
-  const task2 = yield fork(spawnTank, PLAYER2_TANK_SPAWN_POSITION)
-  const [tankId1, tankId2] = yield join([task1, task2])
+  const [tankId1, tankId2] = yield [
+    call(spawnTank, { x: 4 * BLOCK_SIZE, y: 12 * BLOCK_SIZE }),
+    call(spawnTank, { x: 8 * BLOCK_SIZE, y: 12 * BLOCK_SIZE }),
+  ]
 
   yield put({
     type: A.ACTIVATE_PLAYER,

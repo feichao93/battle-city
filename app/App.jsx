@@ -4,11 +4,6 @@ import { Tank } from 'components/tanks'
 import { BLOCK_SIZE } from 'utils/constants'
 import Screen from 'components/Screen'
 
-function mapStateToProps(state) {
-  return state.toObject()
-}
-
-@connect(mapStateToProps)
 export default class App extends React.Component {
   static propTypes = {}
 

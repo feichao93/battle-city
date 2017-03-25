@@ -4,7 +4,6 @@ import { BLOCK_SIZE } from 'utils/constants'
 import { Tank } from 'components/tanks'
 import Bullet from 'components/Bullet'
 import * as selectors from 'utils/selectors'
-import * as A from 'utils/actions'
 import BrickLayer from 'components/BrickLayer'
 import SteelLayer from 'components/SteelLayer'
 import RiverLayer from 'components/RiverLayer'
@@ -13,7 +12,6 @@ import ForestLayer from 'components/ForestLayer'
 import Eagle from 'components/Eagle'
 import Explosion from 'components/Explosion'
 import Flicker from 'components/Flicker'
-import { Items } from 'components/Items'
 
 function mapStateToProps(state) {
   return {

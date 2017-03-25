@@ -1,4 +1,4 @@
-import { combineReducers } from 'redux-immutable'
+import { combineReducers } from 'redux'
 import explosions from 'reducers/explosions'
 import flickers from 'reducers/flickers'
 import players from 'reducers/players'

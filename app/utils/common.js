@@ -1,4 +1,4 @@
-import { UP, DOWN, LEFT, RIGHT, BLOCK_SIZE } from 'utils/constants'
+import { UP, DOWN, LEFT, RIGHT, BLOCK_SIZE, FIELD_SIZE } from 'utils/constants'
 
 // 根据坦克的位置计算子弹的生成位置
 // 参数x,y,direction为坦克的位置和方向
@@ -24,7 +24,33 @@ export function getRowCol(t, N) {
   return [Math.floor(t / N), t % N]
 }
 
+// 用来判断subject和object是否相撞
+// subject: { x: number, y: number, width: number, height: number }
+// object: { x: number, y: number, width: number, height: number }
 export function testCollide(subject, object, threshhold = 0) {
   return between(subject.x - object.width, object.x, subject.x + subject.width, threshhold)
     && between(subject.y - object.height, object.y, subject.y + subject.height, threshhold)
+}
+
+// 输入itemSize和box. item对应brick/steel/river, box对应bullet/tank
+// 生成器将yield满足条件<row行col列的item与box相撞>的[row, col]二元组
+// itemSize: number
+// box: { x: number, y: number, width: number, height: number }
+export function* iterRowsAndCols(itemSize, box) {
+  const col1 = Math.floor(box.x / itemSize)
+  const col2 = Math.floor((box.x + box.width) / itemSize)
+  const row1 = Math.floor(box.y / itemSize)
+  const row2 = Math.floor((box.y + box.height) / itemSize)
+  for (let row = row1; row <= row2; row += 1) {
+    for (let col = col1; col <= col2; col += 1) {
+      yield [row, col]
+    }
+  }
+}
+
+// 判断box是否在战场内
+// box: { x: number, y: number, width: number, height: number }
+export function isInField(box) {
+  return between(0, box.x, FIELD_SIZE - box.width)
+    && between(0, box.y, FIELD_SIZE - box.height)
 }

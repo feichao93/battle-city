@@ -6,19 +6,32 @@ import {
   BLOCK_SIZE,
   DIRECTION_MAP,
   ITEM_SIZE_MAP,
-  FIELD_SIZE,
   N_MAP,
   UP,
   DOWN,
   SIDE,
 } from 'utils/constants'
-import { testCollide } from 'utils/common'
+import { testCollide, isInField } from 'utils/common'
 import * as A from 'utils/actions'
 import * as selectors from 'utils/selectors'
 
 function isBulletInField(bullet) {
-  return 0 <= bullet.x && bullet.x + BULLET_SIZE < FIELD_SIZE
-    && 0 <= bullet.y && bullet.y + BULLET_SIZE < FIELD_SIZE
+  return isInField({
+    x: bullet.x,
+    y: bullet.y,
+    width: BULLET_SIZE,
+    height: BULLET_SIZE,
+  })
+}
+
+function makeExplosionFromBullet(bullet) {
+  return put({
+    type: A.SPAWN_EXPLOSION,
+    x: bullet.x - 6,
+    y: bullet.y - 6,
+    explosionType: 'bullet',
+    explosionId: nextExplosionId++,
+  })
 }
 
 function* handleTick() {
@@ -45,6 +58,7 @@ function* handleBulletsCollidedWithBricks(context) {
   const N = N_MAP.BRICK
   const itemSize = ITEM_SIZE_MAP.BRICK
 
+  // todo 用iterRowsAndCols来优化下面的代码
   bulletLoop: for (const bullet of bullets.values()) {
     const col1 = Math.floor(bullet.x / itemSize)
     const col2 = Math.floor((bullet.x + BULLET_SIZE) / itemSize)
@@ -240,8 +254,8 @@ function* handleBulletsCollidedWithBullets(context) {
       const object = {
         x: other.x,
         y: other.y,
-        width: other.width,
-        height: other.height,
+        width: BULLET_SIZE,
+        height: BULLET_SIZE,
       }
       if (testCollide(subject, object)) {
         context.noExpBulletOwners.add(bullet.owner)
@@ -325,14 +339,6 @@ export default function* bulletsSaga() {
   yield fork(handleAfterTick)
 
   yield fork(function* handleDestroyBullets() {
-    const makeExplosionFromBullet = bullet => put({
-      type: A.SPAWN_EXPLOSION,
-      x: bullet.x - 6,
-      y: bullet.y - 6,
-      explosionType: 'bullet',
-      explosionId: nextExplosionId++,
-    })
-
     while (true) {
       const { bullets, spawnExplosion } = yield take(A.DESTROY_BULLETS)
       if (spawnExplosion) {

@@ -1,6 +1,7 @@
 import * as R from 'ramda'
 import { take, put, select } from 'redux-saga/effects'
 import { DIRECTION_MAP } from 'utils/constants'
+import canTankMove from 'utils/canTankMove'
 import * as selectors from 'utils/selectors'
 import * as A from 'utils/actions'
 
@@ -28,8 +29,8 @@ export default function* directionController(playerName, getControlInfo) {
         const n = tank.get(xy) / 8
         const useFloor = turned.set(xy, Math.floor(n) * 8)
         const useCeil = turned.set(xy, Math.ceil(n) * 8)
-        const canMoveWhenUseFloor = yield select(selectors.canTankMove, useFloor)
-        const canMoveWhenUseCeil = yield select(selectors.canTankMove, useCeil)
+        const canMoveWhenUseFloor = yield select(canTankMove, useFloor)
+        const canMoveWhenUseCeil = yield select(canTankMove, useCeil)
         let movedTank
         if (!canMoveWhenUseFloor) {
           movedTank = useCeil
@@ -49,7 +50,7 @@ export default function* directionController(playerName, getControlInfo) {
         const movedTank = tank.update(xy, incdec === 'inc'
           ? R.add(distance)
           : R.subtract(R.__, distance))
-        if (yield select(selectors.canTankMove, movedTank)) {
+        if (yield select(canTankMove, movedTank)) {
           yield put({
             type: A.MOVE,
             tankId: tank.tankId,

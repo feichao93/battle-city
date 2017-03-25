@@ -46,8 +46,9 @@ export default function* rootSaga() {
   yield fork(bulletsSaga)
   yield fork(autoRemoveEffects)
 
-  yield fork(gameManager)
-
+  // 生成两个键盘的控制器, 对应现实生活的游戏控制器
   yield fork(playerController, 'player-1', CONTROL_CONFIG.player1)
   yield fork(playerController, 'player-2', CONTROL_CONFIG.player2)
+
+  yield fork(gameManager)
 }

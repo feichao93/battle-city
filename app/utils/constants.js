@@ -10,16 +10,6 @@ export const FIELD_SIZE = BLOCK_SIZE * FIELD_BLOCK_SIZE
 export const BULLET_SIZE = 3
 // 坦克生成的延迟
 export const TANK_SPAWN_DELAY = 1500
-// 玩家1坦克生成位置
-export const PLAYER1_TANK_SPAWN_POSITION = {
-  x: 4 * BLOCK_SIZE,
-  y: 12 * BLOCK_SIZE,
-}
-// 玩家2坦克生成位置
-export const PLAYER2_TANK_SPAWN_POSITION = {
-  x: 8 * BLOCK_SIZE,
-  y: 12 * BLOCK_SIZE,
-}
 
 // 标记坦克/子弹是哪一方的
 export const SIDE = {
