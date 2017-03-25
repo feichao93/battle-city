@@ -1,4 +1,4 @@
-import { FIELD_SIZE, UP, DOWN, LEFT, RIGHT, BLOCK_SIZE } from 'utils/constants'
+import { UP, DOWN, LEFT, RIGHT, BLOCK_SIZE } from 'utils/constants'
 
 // 根据坦克的位置计算子弹的生成位置
 // 参数x,y,direction为坦克的位置和方向
@@ -24,31 +24,7 @@ export function getRowCol(t, N) {
   return [Math.floor(t / N), t % N]
 }
 
-/** @deprecated */
-export function filterCollide(target, itemSize, itemList, threshhold) {
-  const { x, y, width, height } = target
-  const left = x / itemSize - 1
-  const right = (x + width) / itemSize
-  const top = y / itemSize - 1
-  const bottom = (y + height) / itemSize
-  const N = FIELD_SIZE / itemSize
-  return itemList.toMap().filter((set, t) => {
-    if (set) {
-      const [row, col] = getRowCol(t, N)
-      return between(left, col, right, threshhold)
-        && between(top, row, bottom, threshhold)
-    } else {
-      return false
-    }
-  })
-}
-
-/** @deprecated */
-export function testCollide(target, itemSize, itemList, threshhold) {
-  return filterCollide(target, itemSize, itemList, threshhold).count() > 0
-}
-
-export function testCollide2(subject, object, threshhold = 0) {
+export function testCollide(subject, object, threshhold = 0) {
   return between(subject.x - object.width, object.x, subject.x + subject.width, threshhold)
     && between(subject.y - object.height, object.y, subject.y + subject.height, threshhold)
 }

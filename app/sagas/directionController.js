@@ -15,7 +15,7 @@ export default function* directionController(playerName, getControlInfo) {
     // { direction: null | UP }
     const { direction } = getControlInfo()
     if (direction != null) {
-      // todo 尝试同时往多个方向移动 (例如玩家按住右键和下键, 坦克不能往下移动时, 尝试往右移动)
+      // xxx 尝试同时往多个方向移动 (例如玩家按住右键和下键, 坦克不能往下移动时, 尝试往右移动)
       if (direction !== tank.get('direction')) {
         // 坦克进行转向时, 需要对坐标进行处理
         // 如果转向UP/DOWN, 则将x坐标转换到最近的8的倍数
@@ -28,8 +28,8 @@ export default function* directionController(playerName, getControlInfo) {
         const n = tank.get(xy) / 8
         const useFloor = turned.set(xy, Math.floor(n) * 8)
         const useCeil = turned.set(xy, Math.ceil(n) * 8)
-        const canMoveWhenUseFloor = yield select(selectors.canMove, useFloor)
-        const canMoveWhenUseCeil = yield select(selectors.canMove, useCeil)
+        const canMoveWhenUseFloor = yield select(selectors.canTankMove, useFloor)
+        const canMoveWhenUseCeil = yield select(selectors.canTankMove, useCeil)
         let movedTank
         if (!canMoveWhenUseFloor) {
           movedTank = useCeil

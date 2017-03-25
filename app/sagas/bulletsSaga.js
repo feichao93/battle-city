@@ -12,7 +12,7 @@ import {
   DOWN,
   SIDE,
 } from 'utils/constants'
-import { testCollide2 } from 'utils/common'
+import { testCollide } from 'utils/common'
 import * as A from 'utils/actions'
 import * as selectors from 'utils/selectors'
 
@@ -171,7 +171,7 @@ function* filterBulletsCollidedWithEagle(bullets) {
     width: BLOCK_SIZE,
     height: BLOCK_SIZE,
   }
-  return bullets.filter(bullet => testCollide2(eagleBox, {
+  return bullets.filter(bullet => testCollide(eagleBox, {
     x: bullet.x,
     y: bullet.y,
     width: BULLET_SIZE,
@@ -202,7 +202,7 @@ function* handleBulletsCollidedWithTanks(context) {
         width: BLOCK_SIZE,
         height: BLOCK_SIZE,
       }
-      if (testCollide2(subject, object, -0.02)) {
+      if (testCollide(subject, object, -0.02)) {
         if (bullet.side === SIDE.PLAYER && tank.side === SIDE.PLAYER) {
           // todo 暂时对坦克不进行处理
           // 不发生子弹爆炸
@@ -243,7 +243,7 @@ function* handleBulletsCollidedWithBullets(context) {
         width: other.width,
         height: other.height,
       }
-      if (testCollide2(subject, object)) {
+      if (testCollide(subject, object)) {
         context.noExpBulletOwners.add(bullet.owner)
       }
     }

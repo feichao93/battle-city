@@ -1,5 +1,7 @@
 // 一块的大小对应16个像素
 export const BLOCK_SIZE = 16
+// 坦克的大小
+export const TANK_SIZE = BLOCK_SIZE
 // 战场的大小 (13block * 13block)
 export const FIELD_BLOCK_SIZE = 13
 // 战场的大小 (208pixel * 208pixel)
