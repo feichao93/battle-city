@@ -12,7 +12,7 @@ import {
   SIDE,
   STEEL_POWER,
 } from 'utils/constants'
-import { testCollide, isInField } from 'utils/common'
+import { testCollide, isInField, getNextId } from 'utils/common'
 import * as A from 'utils/actions'
 import * as selectors from 'utils/selectors'
 
@@ -31,7 +31,7 @@ function makeExplosionFromBullet(bullet) {
     x: bullet.x - 6,
     y: bullet.y - 6,
     explosionType: 'bullet',
-    explosionId: nextExplosionId++,
+    explosionId: getNextId('explosion'),
   })
 }
 
@@ -340,8 +340,6 @@ function* handleAfterTick() {
     }
   }
 }
-
-let nextExplosionId = 1 // todo 将这些局部变量放到统一的文件内
 
 export default function* bulletsSaga() {
   yield fork(handleTick)

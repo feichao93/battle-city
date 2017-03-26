@@ -54,3 +54,15 @@ export function isInField(box) {
   return between(0, box.x, FIELD_SIZE - box.width)
     && between(0, box.y, FIELD_SIZE - box.height)
 }
+
+const nextIdMap = new Map()
+export function getNextId(tag = '') {
+  if (nextIdMap.has(tag)) {
+    const nextId = nextIdMap.get(tag)
+    nextIdMap.set(tag, nextId + 1)
+    return nextId
+  } else {
+    nextIdMap.set(tag, 2)
+    return 1
+  }
+}

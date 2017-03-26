@@ -1,6 +1,5 @@
 import { take, put, select } from 'redux-saga/effects'
-import { calculateBulletStartPosition } from 'utils/common'
-import getNextId from 'utils/getNextId'
+import { calculateBulletStartPosition, getNextId } from 'utils/common'
 import * as A from 'utils/actions'
 import * as selectors from 'utils/selectors'
 

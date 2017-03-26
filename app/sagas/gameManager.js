@@ -2,20 +2,17 @@ import { delay } from 'redux-saga'
 import { put, fork, take, call } from 'redux-saga/effects'
 import * as A from 'utils/actions'
 import { UP, TANK_SPAWN_DELAY, SIDE, BLOCK_SIZE } from 'utils/constants'
-
-let nextFlickerId = 1
-let nextTankId = 1
+import { getNextId } from 'utils/common'
 
 function* spawnTank({ x, y }) {
   yield put({
     type: A.SPAWN_FLICKER,
-    flickerId: nextFlickerId++,
+    flickerId: getNextId('flicker'),
     x,
     y,
   })
   yield delay(TANK_SPAWN_DELAY)
-  const tankId = nextTankId
-  nextTankId++
+  const tankId = getNextId('tank')
   yield put({
     type: A.SPAWN_TANK,
     side: SIDE.PLAYER,
