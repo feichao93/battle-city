@@ -1,4 +1,15 @@
-import { UP, DOWN, LEFT, RIGHT, BLOCK_SIZE, FIELD_SIZE } from 'utils/constants'
+import {
+  UP,
+  DOWN,
+  LEFT,
+  RIGHT,
+  BLOCK_SIZE,
+  FIELD_SIZE,
+  BULLET_SIZE,
+  TANK_SIZE,
+} from 'utils/constants'
+import BulletRecord from 'types/BulletRecord'
+import TankRecord from 'types/TankRecord'
 
 // 根据坦克的位置计算子弹的生成位置
 // 参数x,y,direction为坦克的位置和方向
@@ -64,5 +75,26 @@ export function getNextId(tag = '') {
   } else {
     nextIdMap.set(tag, 2)
     return 1
+  }
+}
+
+// 将BulletRecord/TankRecord转换为Box类型对象
+export function asBox(item) {
+  if (item instanceof BulletRecord) {
+    return {
+      x: item.x,
+      y: item.y,
+      width: BULLET_SIZE,
+      height: BULLET_SIZE,
+    }
+  } else if (item instanceof TankRecord) {
+    return {
+      x: item.x,
+      y: item.y,
+      width: TANK_SIZE,
+      height: TANK_SIZE,
+    }
+  } else {
+    throw new Error('Cannot convert to type Box')
   }
 }

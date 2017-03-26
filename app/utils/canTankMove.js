@@ -1,5 +1,5 @@
-import { isInField, testCollide, iterRowsAndCols } from 'utils/common'
-import { BLOCK_SIZE, TANK_SIZE, ITEM_SIZE_MAP, N_MAP } from 'utils/constants'
+import { asBox, isInField, iterRowsAndCols, testCollide } from 'utils/common'
+import { BLOCK_SIZE, ITEM_SIZE_MAP, N_MAP } from 'utils/constants'
 import * as selectors from 'utils/selectors'
 
 function isTankCollidedWithEagle(eagle, tankTarget, threshhold) {
@@ -78,12 +78,7 @@ function isTankCollidedWithOtherTanks(tanks, tank, tankTarget, threshhold) {
     if (tank.tankId === otherTank.tankId) {
       continue
     }
-    const subject = {
-      x: otherTank.x,
-      y: otherTank.y,
-      width: TANK_SIZE,
-      height: TANK_SIZE,
-    }
+    const subject = asBox(otherTank)
     if (testCollide(subject, tankTarget, threshhold)) {
       return true
     }
@@ -92,36 +87,30 @@ function isTankCollidedWithOtherTanks(tanks, tank, tankTarget, threshhold) {
 }
 
 export default function canTankMove(state, tank, threshhold = -0.01) {
-  // tank碰撞object
-  const tankTarget = {
-    x: tank.x,
-    y: tank.y,
-    width: TANK_SIZE,
-    height: TANK_SIZE,
-  }
+  const tankBox = asBox(tank)
 
   // 判断是否位于战场内
-  if (!isInField(tankTarget)) {
+  if (!isInField(tankBox)) {
     return false
   }
 
   // 判断是否与地形相碰撞
   const { bricks, steels, rivers, eagle } = selectors.map(state).toObject()
-  if (isTankCollidedWithEagle(eagle, tankTarget, threshhold)) {
+  if (isTankCollidedWithEagle(eagle, tankBox, threshhold)) {
     return false
   }
-  if (isTankCollidedWithBricks(bricks, tankTarget, threshhold)) {
+  if (isTankCollidedWithBricks(bricks, tankBox, threshhold)) {
     return false
   }
-  if (isTankCollidedWithSteels(steels, tankTarget, threshhold)) {
+  if (isTankCollidedWithSteels(steels, tankBox, threshhold)) {
     return false
   }
-  if (isTankCollidedWithRivers(rivers, tankTarget, threshhold)) {
+  if (isTankCollidedWithRivers(rivers, tankBox, threshhold)) {
     return false
   }
 
   // 判断是否与其他坦克相碰撞
-  if (isTankCollidedWithOtherTanks(selectors.tanks(state), tank, tankTarget, threshhold)) {
+  if (isTankCollidedWithOtherTanks(selectors.tanks(state), tank, tankBox, threshhold)) {
     return false
   }
 

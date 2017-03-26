@@ -1,8 +1,7 @@
 import * as R from 'ramda'
-import { is, Set as ISet } from 'immutable'
+import { Set as ISet } from 'immutable'
 import { put, select, fork, take } from 'redux-saga/effects'
 import {
-  BULLET_SIZE,
   BLOCK_SIZE,
   DIRECTION_MAP,
   ITEM_SIZE_MAP,
@@ -12,17 +11,12 @@ import {
   SIDE,
   STEEL_POWER,
 } from 'utils/constants'
-import { testCollide, isInField, getNextId } from 'utils/common'
+import { testCollide, isInField, getNextId, iterRowsAndCols, asBox } from 'utils/common'
 import * as A from 'utils/actions'
 import * as selectors from 'utils/selectors'
 
 function isBulletInField(bullet) {
-  return isInField({
-    x: bullet.x,
-    y: bullet.y,
-    width: BULLET_SIZE,
-    height: BULLET_SIZE,
-  })
+  return isInField(asBox(bullet))
 }
 
 function makeExplosionFromBullet(bullet) {
@@ -56,54 +50,35 @@ function* handleBulletsCollidedWithBricks(context) {
   const bullets = yield select(selectors.bullets)
   const bricks = yield select(selectors.map.bricks)
 
-  const N = N_MAP.BRICK
-  const itemSize = ITEM_SIZE_MAP.BRICK
-
-  // todo 用iterRowsAndCols来优化下面的代码
-  bulletLoop: for (const bullet of bullets.values()) {
-    const col1 = Math.floor(bullet.x / itemSize)
-    const col2 = Math.floor((bullet.x + BULLET_SIZE) / itemSize)
-    const row1 = Math.floor(bullet.y / itemSize)
-    const row2 = Math.floor((bullet.y + BULLET_SIZE) / itemSize)
-    for (let row = row1; row <= row2; row += 1) {
-      for (let col = col1; col <= col2; col += 1) {
-        const t = row * N + col
-        if (bricks.get(t)) {
-          context.expBulletIdSet.add(bullet.bulletId)
-          continue bulletLoop
-        }
+  bullets.forEach((bullet) => {
+    for (const [row, col] of iterRowsAndCols(ITEM_SIZE_MAP.BRICK, asBox(bullet))) {
+      const t = row * N_MAP.BRICK + col
+      if (bricks.get(t)) {
+        context.expBulletIdSet.add(bullet.bulletId)
+        return
       }
     }
-  }
+  })
 }
 
 function* handleBulletsCollidedWithSteels(context) {
   const bullets = yield select(selectors.bullets)
   const steels = yield select(selectors.map.steels)
 
-  const N = N_MAP.STEEL
-  const itemSize = ITEM_SIZE_MAP.STEEL
-
-  bulletLoop:for (const bullet of bullets.values()) {
-    const col1 = Math.floor(bullet.x / itemSize)
-    const col2 = Math.floor((bullet.x + BULLET_SIZE) / itemSize)
-    const row1 = Math.floor(bullet.y / itemSize)
-    const row2 = Math.floor((bullet.y + BULLET_SIZE) / itemSize)
-    for (let row = row1; row <= row2; row += 1) {
-      for (let col = col1; col <= col2; col += 1) {
-        const t = row * N + col
-        if (steels.get(t)) {
-          context.expBulletIdSet.add(bullet.bulletId)
-          continue bulletLoop
-        }
+  bullets.forEach((bullet) => {
+    for (const [row, col] of iterRowsAndCols(ITEM_SIZE_MAP.STEEL, asBox(bullet))) {
+      const t = row * N_MAP.STEEL + col
+      if (steels.get(t)) {
+        context.expBulletIdSet.add(bullet.bulletId)
+        return
       }
     }
-  }
+  })
 }
 
 const BULLET_EXPLOSION_SPREAD = 4
 function spreadBullet(bullet) {
-  const object = { x: bullet.x, y: bullet.y, width: BULLET_SIZE, height: BULLET_SIZE }
+  const object = asBox(bullet)
   if (bullet.direction === UP || bullet.direction === DOWN) {
     object.x -= BULLET_EXPLOSION_SPREAD
     object.width += 2 * BULLET_EXPLOSION_SPREAD
@@ -117,23 +92,12 @@ function spreadBullet(bullet) {
 function* destroySteels(collidedBullets) {
   const steels = yield select(selectors.map.steels)
   const steelsNeedToDestroy = []
-  const itemSize = ITEM_SIZE_MAP.STEEL
-  const N = N_MAP.STEEL
-
   collidedBullets.forEach((bullet) => {
     if (bullet.power >= STEEL_POWER) {
-      const { x, y, width, height } = spreadBullet(bullet)
-
-      const col1 = Math.floor(x / itemSize)
-      const col2 = Math.floor((x + width) / itemSize)
-      const row1 = Math.floor(y / itemSize)
-      const row2 = Math.floor((y + height) / itemSize)
-      for (let row = row1; row <= row2; row += 1) {
-        for (let col = col1; col <= col2; col += 1) {
-          const t = row * N + col
-          if (steels.get(t)) {
-            steelsNeedToDestroy.push(t)
-          }
+      for (const [row, col] of iterRowsAndCols(ITEM_SIZE_MAP.STEEL, spreadBullet(bullet))) {
+        const t = row * N_MAP.STEEL + col
+        if (steels.get(t)) {
+          steelsNeedToDestroy.push(t)
         }
       }
     }
@@ -150,22 +114,12 @@ function* destroySteels(collidedBullets) {
 function* destroyBricks(collidedBullets) {
   const bricks = yield select(selectors.map.bricks)
   const bricksNeedToDestroy = []
-  const itemSize = ITEM_SIZE_MAP.BRICK
-  const N = N_MAP.BRICK
 
   collidedBullets.forEach((bullet) => {
-    const { x, y, width, height } = spreadBullet(bullet)
-
-    const col1 = Math.floor(x / itemSize)
-    const col2 = Math.floor((x + width) / itemSize)
-    const row1 = Math.floor(y / itemSize)
-    const row2 = Math.floor((y + height) / itemSize)
-    for (let row = row1; row <= row2; row += 1) {
-      for (let col = col1; col <= col2; col += 1) {
-        const t = row * N + col
-        if (bricks.get(t)) {
-          bricksNeedToDestroy.push(t)
-        }
+    for (const [row, col] of iterRowsAndCols(ITEM_SIZE_MAP.BRICK, spreadBullet(bullet))) {
+      const t = row * N_MAP.BRICK + col
+      if (bricks.get(t)) {
+        bricksNeedToDestroy.push(t)
       }
     }
   })
@@ -187,12 +141,7 @@ function* filterBulletsCollidedWithEagle(bullets) {
     width: BLOCK_SIZE,
     height: BLOCK_SIZE,
   }
-  return bullets.filter(bullet => testCollide(eagleBox, {
-    x: bullet.x,
-    y: bullet.y,
-    width: BULLET_SIZE,
-    height: BULLET_SIZE,
-  }))
+  return bullets.filter(bullet => testCollide(eagleBox, asBox(bullet)))
 }
 
 function* handleBulletsCollidedWithTanks(context) {
@@ -205,12 +154,6 @@ function* handleBulletsCollidedWithTanks(context) {
   // 4. AI的子弹达到AI-tank: 不发生任何事件
   const tanks = yield select(selectors.tanks)
   for (const bullet of bullets.values()) {
-    const object = {
-      x: bullet.x,
-      y: bullet.y,
-      width: BULLET_SIZE,
-      height: BULLET_SIZE,
-    }
     for (const tank of tanks.values()) {
       if (tank.tankId === bullet.tankId) {
         // 如果是自己发射的子弹, 则不需要进行处理
@@ -222,7 +165,7 @@ function* handleBulletsCollidedWithTanks(context) {
         width: BLOCK_SIZE,
         height: BLOCK_SIZE,
       }
-      if (testCollide(subject, object, -0.02)) {
+      if (testCollide(subject, asBox(bullet), -0.02)) {
         const bulletSide = yield select(selectors.sideOfBullet, bullet.bulletId)
         const tankSide = tank.side
 
@@ -250,22 +193,12 @@ function* handleBulletsCollidedWithTanks(context) {
 function* handleBulletsCollidedWithBullets(context) {
   const bullets = yield select(selectors.bullets)
   for (const bullet of bullets.values()) {
-    const subject = {
-      x: bullet.x,
-      y: bullet.y,
-      width: BULLET_SIZE,
-      height: BULLET_SIZE,
-    }
+    const subject = asBox(bullet)
     for (const other of bullets.values()) {
-      if (is(bullet, other)) {
+      if (bullet.bulletId === other.bulletId) {
         continue
       }
-      const object = {
-        x: other.x,
-        y: other.y,
-        width: BULLET_SIZE,
-        height: BULLET_SIZE,
-      }
+      const object = asBox(other)
       if (testCollide(subject, object)) {
         context.noExpBulletIdSet.add(bullet.bulletId)
       }
