@@ -10,6 +10,7 @@ import {
   UP,
   DOWN,
   SIDE,
+  STEEL_POWER,
 } from 'utils/constants'
 import { testCollide, isInField } from 'utils/common'
 import * as A from 'utils/actions'
@@ -68,7 +69,7 @@ function* handleBulletsCollidedWithBricks(context) {
       for (let col = col1; col <= col2; col += 1) {
         const t = row * N + col
         if (bricks.get(t)) {
-          context.expBulletOwners.add(bullet.owner)
+          context.expBulletIdSet.add(bullet.bulletId)
           continue bulletLoop
         }
       }
@@ -92,7 +93,7 @@ function* handleBulletsCollidedWithSteels(context) {
       for (let col = col1; col <= col2; col += 1) {
         const t = row * N + col
         if (steels.get(t)) {
-          context.expBulletOwners.add(bullet.owner)
+          context.expBulletIdSet.add(bullet.bulletId)
           continue bulletLoop
         }
       }
@@ -120,18 +121,19 @@ function* destroySteels(collidedBullets) {
   const N = N_MAP.STEEL
 
   collidedBullets.forEach((bullet) => {
-    // if (bullet.power >= 3) todo bullet必须满足一定条件才能摧毁steel
-    const { x, y, width, height } = spreadBullet(bullet)
+    if (bullet.power >= STEEL_POWER) {
+      const { x, y, width, height } = spreadBullet(bullet)
 
-    const col1 = Math.floor(x / itemSize)
-    const col2 = Math.floor((x + width) / itemSize)
-    const row1 = Math.floor(y / itemSize)
-    const row2 = Math.floor((y + height) / itemSize)
-    for (let row = row1; row <= row2; row += 1) {
-      for (let col = col1; col <= col2; col += 1) {
-        const t = row * N + col
-        if (steels.get(t)) {
-          steelsNeedToDestroy.push(t)
+      const col1 = Math.floor(x / itemSize)
+      const col2 = Math.floor((x + width) / itemSize)
+      const row1 = Math.floor(y / itemSize)
+      const row2 = Math.floor((y + height) / itemSize)
+      for (let row = row1; row <= row2; row += 1) {
+        for (let col = col1; col <= col2; col += 1) {
+          const t = row * N + col
+          if (steels.get(t)) {
+            steelsNeedToDestroy.push(t)
+          }
         }
       }
     }
@@ -210,6 +212,10 @@ function* handleBulletsCollidedWithTanks(context) {
       height: BULLET_SIZE,
     }
     for (const tank of tanks.values()) {
+      if (tank.tankId === bullet.tankId) {
+        // 如果是自己发射的子弹, 则不需要进行处理
+        continue
+      }
       const subject = {
         x: tank.x,
         y: tank.y,
@@ -217,19 +223,22 @@ function* handleBulletsCollidedWithTanks(context) {
         height: BLOCK_SIZE,
       }
       if (testCollide(subject, object, -0.02)) {
-        if (bullet.side === SIDE.PLAYER && tank.side === SIDE.PLAYER) {
+        const bulletSide = yield select(selectors.sideOfBullet, bullet.bulletId)
+        const tankSide = tank.side
+
+        if (bulletSide === SIDE.PLAYER && tankSide === SIDE.PLAYER) {
           // todo 暂时对坦克不进行处理
           // 不发生子弹爆炸
-          context.expBulletOwners.add(bullet.owner)
-        } else if (bullet.side === SIDE.PLAYER && tank.side === SIDE.AI) {
+          context.expBulletIdSet.add(bullet.bulletId)
+        } else if (bulletSide === SIDE.PLAYER && tankSide === SIDE.AI) {
           context.hurtedTankIds.add(tank.tankId)
-          context.expBulletOwners.add(bullet.owner)
-        } else if (bullet.side === SIDE.AI && tank.side === SIDE.PLAYER) {
+          context.expBulletIdSet.add(bullet.bulletId)
+        } else if (bulletSide === SIDE.AI && tankSide === SIDE.PLAYER) {
           context.hurtedTankIds.add(tank.tankId)
-          context.expBulletOwners.add(bullet.owner)
-        } else if (bullet.side === SIDE.AI && tank.side === SIDE.AI) {
+          context.expBulletIdSet.add(bullet.bulletId)
+        } else if (bulletSide === SIDE.AI && tankSide === SIDE.AI) {
           // 坦克什么事也不发生
-          context.noExpBulletOwners.add(bullet.owner)
+          context.noExpBulletIdSet.add(bullet.bulletId)
         } else {
           throw new Error('Error side status')
         }
@@ -258,7 +267,7 @@ function* handleBulletsCollidedWithBullets(context) {
         height: BULLET_SIZE,
       }
       if (testCollide(subject, object)) {
-        context.noExpBulletOwners.add(bullet.owner)
+        context.noExpBulletIdSet.add(bullet.bulletId)
       }
     }
   }
@@ -284,10 +293,10 @@ function* handleAfterTick() {
     // 新建一个统计对象(context), 用来存放这一个tick中的统计信息
     // 注意这里的Set是ES2015的原生Set
     const context = {
-      // 将要爆炸的子弹的owners
-      expBulletOwners: new Set(),
-      // 不需要爆炸的子弹的owners
-      noExpBulletOwners: new Set(),
+      // 将要爆炸的子弹的id集合
+      expBulletIdSet: new Set(),
+      // 不需要爆炸的子弹的id集合
+      noExpBulletIdSet: new Set(),
       // 受到伤害的坦克 (假设一个tick中一架坦克最多受到一点伤害)
       hurtedTankIds: new Set(),
     }
@@ -298,7 +307,7 @@ function* handleAfterTick() {
     yield* handleBulletsCollidedWithSteels(context)
 
     // 产生爆炸效果的的子弹
-    const expBullets = bullets.filter(bullet => context.expBulletOwners.has(bullet.owner))
+    const expBullets = bullets.filter(bullet => context.expBulletIdSet.has(bullet.bulletId))
     if (!expBullets.isEmpty()) {
       yield put({
         type: A.DESTROY_BULLETS,
@@ -311,8 +320,8 @@ function* handleAfterTick() {
     }
 
     // 不产生爆炸, 直接消失的子弹
-    const noExpBullets = bullets.filter(bullet => context.noExpBulletOwners.has(bullet.owner))
-    if (context.noExpBulletOwners.size > 0) {
+    const noExpBullets = bullets.filter(bullet => context.noExpBulletIdSet.has(bullet.bulletId))
+    if (context.noExpBulletIdSet.size > 0) {
       yield put({
         type: A.DESTROY_BULLETS,
         bullets: noExpBullets,

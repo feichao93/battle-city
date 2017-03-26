@@ -10,10 +10,10 @@ export const TICK = 'TICK'
 // { type: AFTER_TICK, delta: <seconds-elapsed-since-last-tick> }
 export const AFTER_TICK = 'AFTER_TICK'
 
-// { type: ADD_BULLET, direction, speed, x, y, owner }
+// { type: ADD_BULLET, direction, speed, x, y, power?, tankId }
 export const ADD_BULLET = 'ADD_BULLET'
 
-// { type: DESTROY_BULLETS, owner, spawnExplosion: true|false }
+// { type: DESTROY_BULLETS, bullets, spawnExplosion: boolean }
 export const DESTROY_BULLETS = 'DESTROY_BULLETS'
 
 export const DESTROY_STEELS = 'DESTROY_STEELS'

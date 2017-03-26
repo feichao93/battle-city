@@ -1,14 +1,18 @@
 import { Record } from 'immutable'
-import { SIDE } from 'utils/constants'
 
 const BulletRecord = Record({
+  bulletId: 0,
+  // 子弹的方向
   direction: null,
-  side: SIDE.PLAYER,
+  // 子弹的速度
   speed: 0,
+  // 子弹的位置
   x: 0,
   y: 0,
-  // todo 目前每个坦克只能发射一个子弹, 所以现在可以使用子弹的owner来唯一标识子弹
-  owner: null,
+  // 子弹的强度. 子弹的强度达到一定数值之后可以摧毁steels
+  power: 1,
+  // 发射子弹的坦克id
+  tankId: -1,
 })
 
 export default BulletRecord
