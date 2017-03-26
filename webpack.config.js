@@ -26,7 +26,7 @@ const productionPlugins = [
 module.exports = {
   context: __dirname,
   target: 'web',
-  devtool: "source-map",
+  devtool: isProduction ? false : 'source-map',
 
   entry: [
     'react-hot-loader/patch',
