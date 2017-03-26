@@ -1,4 +1,5 @@
 import { combineReducers } from 'redux'
+import game from 'reducers/game'
 import explosions from 'reducers/explosions'
 import flickers from 'reducers/flickers'
 import players from 'reducers/players'
@@ -16,6 +17,7 @@ function time(state = 0, action) {
 }
 
 export default combineReducers({
+  game,
   players,
   bullets,
   map,
