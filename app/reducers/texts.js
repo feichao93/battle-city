@@ -1,8 +1,7 @@
 import { Map, Set } from 'immutable'
 import TextRecord from 'types/TextRecord'
 import * as A from 'utils/actions'
-import { DIRECTION_MAP } from 'utils/constants'
-import { inc, dec } from 'utils/common'
+import { getDirectionInfo } from 'utils/common'
 
 export default function textsReducer(state = Map(), action) {
   if (action.type === A.SET_TEXT) {
@@ -12,8 +11,8 @@ export default function textsReducer(state = Map(), action) {
     const set = Set(textIds)
     return state.map((t, textId) => {
       if (set.has(textId)) {
-        const [xy, incdec] = DIRECTION_MAP[direction]
-        return t.update(xy, (incdec === 'inc' ? inc : dec)(distance))
+        const { xy, updater } = getDirectionInfo(direction)
+        return t.update(xy, updater(distance))
       } else {
         return t
       }

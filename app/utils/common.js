@@ -101,3 +101,22 @@ export function asBox(item) {
 
 export const inc = amount => x => x + amount
 export const dec = amount => x => x - amount
+
+export function getDirectionInfo(direction, flipxy = false) {
+  let result
+  if (direction === UP) {
+    result = { xy: 'y', updater: dec }
+  } else if (direction === DOWN) {
+    result = { xy: 'y', updater: inc }
+  } else if (direction === LEFT) {
+    result = { xy: 'x', updater: dec }
+  } else if (direction === RIGHT) {
+    result = { xy: 'x', updater: inc }
+  } else {
+    throw new Error('Invalid direction')
+  }
+  if (flipxy) {
+    result.xy = result.xy === 'x' ? 'y' : 'x'
+  }
+  return result
+}

@@ -101,13 +101,25 @@ export default function* gameManager() {
     lives: 3,
   })
 
-  const [tankId1] = yield [
+  yield put({
+    type: A.CREATE_PLAYER,
+    playerName: 'AI',
+    lives: 3,
+  })
+
+  const [tankId1, tankId2] = yield [
     call(spawnTank, { x: 4 * BLOCK_SIZE, y: 12 * BLOCK_SIZE }),
+    call(spawnTank, { x: 0, y: 0 }),
   ]
   yield put({
     type: A.ACTIVATE_PLAYER,
     playerName: 'player-1',
     tankId: tankId1,
+  })
+  yield put({
+    type: A.ACTIVATE_PLAYER,
+    playerName: 'AI',
+    tankId: tankId2,
   })
 
   // todo 生成AI

@@ -51,13 +51,6 @@ export const DOWN = 'DOWN'
 export const RIGHT = 'RIGHT'
 export const LEFT = 'LEFT'
 
-export const DIRECTION_MAP = {
-  [UP]: ['y', 'dec'],
-  [DOWN]: ['y', 'inc'],
-  [LEFT]: ['x', 'dec'],
-  [RIGHT]: ['x', 'inc'],
-}
-
 export const ITEM_SIZE_MAP = {
   BRICK: 4,
   STEEL: 8,

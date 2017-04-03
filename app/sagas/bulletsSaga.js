@@ -1,17 +1,14 @@
-import * as R from 'ramda'
-import { Set as ISet, Map } from 'immutable'
-import { put, select, fork, take } from 'redux-saga/effects'
+import { Map, Set as ISet } from 'immutable'
+import { fork, put, select, take } from 'redux-saga/effects'
+import { BLOCK_SIZE, DOWN, ITEM_SIZE_MAP, N_MAP, SIDE, STEEL_POWER, UP } from 'utils/constants'
 import {
-  BLOCK_SIZE,
-  DIRECTION_MAP,
-  ITEM_SIZE_MAP,
-  N_MAP,
-  UP,
-  DOWN,
-  SIDE,
-  STEEL_POWER,
-} from 'utils/constants'
-import { testCollide, isInField, getNextId, iterRowsAndCols, asBox } from 'utils/common'
+  asBox,
+  getDirectionInfo,
+  getNextId,
+  isInField,
+  iterRowsAndCols,
+  testCollide
+} from 'utils/common'
 import * as A from 'utils/actions'
 import * as selectors from 'utils/selectors'
 
@@ -39,8 +36,8 @@ function* handleTick() {
     const updatedBullets = bullets.map((bullet) => {
       const { direction, speed } = bullet
       const distance = speed * delta
-      const [xy, incdec] = DIRECTION_MAP[direction]
-      return bullet.update(xy, incdec === 'inc' ? R.add(distance) : R.subtract(R.__, distance))
+      const { xy, updater } = getDirectionInfo(direction)
+      return bullet.update(xy, updater(distance))
     })
     yield put({ type: A.UPDATE_BULLETS, updatedBullets })
   }
