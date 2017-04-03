@@ -13,6 +13,8 @@ export default function players(state = Map(), action) {
     return state.set(action.playerName, PlayerRecord(action))
   } else if (action.type === A.REMOVE_PLAYER) {
     return state.delete(action.playerName)
+  } else if (action.type === A.DEACTIVATE_ALL_PLAYERS) {
+    return state.map(p => p.set('active', false))
   } else {
     return state
   }

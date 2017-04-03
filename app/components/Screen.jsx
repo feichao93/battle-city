@@ -4,6 +4,7 @@ import _ from 'lodash'
 import { BLOCK_SIZE } from 'utils/constants'
 import { Tank } from 'components/tanks'
 import Bullet from 'components/Bullet'
+import GameoverOverlay from 'components/GameoverOverlay'
 import EnemyCountIndicator from 'components/EnemyCountIndicator'
 import BrickLayer from 'components/BrickLayer'
 import SteelLayer from 'components/SteelLayer'
@@ -13,6 +14,7 @@ import ForestLayer from 'components/ForestLayer'
 import Eagle from 'components/Eagle'
 import Explosion from 'components/Explosion'
 import Flicker from 'components/Flicker'
+import TextLayer from 'components/TextLayer'
 
 @connect(_.identity)
 export default class Screen extends React.Component {
@@ -23,11 +25,12 @@ export default class Screen extends React.Component {
     flickers: React.PropTypes.any.isRequired,
     tanks: React.PropTypes.any.isRequired,
     game: React.PropTypes.any.isRequired,
+    texts: React.PropTypes.any.isRequired,
   }
 
   render() {
-    const { bullets, map, explosions, flickers, tanks, game } = this.props
-    const { remainingEnemyCount } = game.toObject()
+    const { bullets, map, explosions, flickers, tanks, game, texts } = this.props
+    const { remainingEnemyCount, overlay } = game.toObject()
     const { bricks, steels, rivers, snows, forests, eagle } = map.toObject()
     return (
       <g role="screen">
@@ -82,6 +85,8 @@ export default class Screen extends React.Component {
             ).toArray()}
           </g>
         </g>
+        {overlay === 'gameover' ? <GameoverOverlay /> : null}
+        <TextLayer texts={texts} />
       </g>
     )
   }

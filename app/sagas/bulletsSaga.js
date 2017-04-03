@@ -1,5 +1,5 @@
 import * as R from 'ramda'
-import { Set as ISet } from 'immutable'
+import { Set as ISet, Map } from 'immutable'
 import { put, select, fork, take } from 'redux-saga/effects'
 import {
   BLOCK_SIZE,
@@ -135,13 +135,17 @@ function* destroyBricks(collidedBullets) {
 function* filterBulletsCollidedWithEagle(bullets) {
   // 判断是否和eagle相撞
   const eagle = yield select(selectors.map.eagle)
-  const eagleBox = {
-    x: eagle.get('x'),
-    y: eagle.get('y'),
-    width: BLOCK_SIZE,
-    height: BLOCK_SIZE,
+  if (eagle.get('broken')) {
+    return Map()
+  } else {
+    const eagleBox = {
+      x: eagle.get('x'),
+      y: eagle.get('y'),
+      width: BLOCK_SIZE,
+      height: BLOCK_SIZE,
+    }
+    return bullets.filter(bullet => testCollide(eagleBox, asBox(bullet)))
   }
-  return bullets.filter(bullet => testCollide(eagleBox, asBox(bullet)))
 }
 
 function* handleBulletsCollidedWithTanks(context) {
@@ -219,8 +223,7 @@ function* handleAfterTick() {
         spawnExplosion: true,
       })
       yield put({ type: A.DESTROY_EAGLE })
-      // DESTROY_EAGLE被dispatch之后将会触发游戏失败的流程, 所以这里直接return即可
-      return
+      // DESTROY_EAGLE被dispatch之后将会触发游戏失败的流程
     }
 
     // 新建一个统计对象(context), 用来存放这一个tick中的统计信息

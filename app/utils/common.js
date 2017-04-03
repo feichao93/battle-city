@@ -98,3 +98,6 @@ export function asBox(item) {
     throw new Error('Cannot convert to type Box')
   }
 }
+
+export const inc = amount => x => x + amount
+export const dec = amount => x => x - amount
