@@ -25,8 +25,12 @@ const tickChannel = eventChannel((emit) => {
 })
 
 function* autoRemoveEffects() {
-  yield takeEvery(A.SPAWN_EXPLOSION, function* removeExplosion({ explosionId }) {
-    yield delay(200)
+  yield takeEvery(A.SPAWN_EXPLOSION, function* removeExplosion({ explosionId, explosionType }) {
+    if (explosionType === 'bullet') {
+      yield delay(200)
+    } else if (explosionType === 'tank') {
+      yield delay(500)
+    }
     yield put({ type: A.REMOVE_EXPLOSION, explosionId })
   })
   yield takeEvery(A.SPAWN_FLICKER, function* removeFlicker({ flickerId }) {

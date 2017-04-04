@@ -70,6 +70,7 @@ export default class Screen extends React.Component {
             {explosions.map(exp =>
               <Explosion
                 key={exp.explosionId}
+                explosionType={exp.explosionType}
                 x={exp.x}
                 y={exp.y}
               />
