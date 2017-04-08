@@ -30,7 +30,7 @@ module.exports = {
 
   entry: [
     'react-hot-loader/patch',
-    __dirname + "/app/main.jsx"
+    __dirname + "/app/main.tsx"
   ],
 
   output: {
@@ -43,29 +43,24 @@ module.exports = {
       path.resolve(__dirname, 'app'),
       'node_modules',
     ],
-    extensions: ['.js', '.jsx'],
+    extensions: ['.js', '.jsx', '.ts', '.tsx'],
   },
 
   module: {
     rules: [
+      // {
+      //   test: /\.js$/,
+      //   use: ['source-map-loader'],
+      //   enforce: 'pre',
+      // },
       {
-        test: '/.json$/',
-        use: ['json-loader'],
+        test: /\.(tsx?)|(jsx?)$/,
+        use: ['awesome-typescript-loader'],
+        exclude: /node_modules/,
       },
       {
-        test: /\.(jsx?)$/,
-        use: ['react-hot-loader/webpack', {
-          loader: 'babel-loader',
-          options: {
-            plugins: [
-              'transform-decorators-legacy',
-              'transform-es2015-modules-commonjs',
-              'babel-plugin-transform-react-jsx',
-            ],
-            presets: ['stage-2'],
-          },
-        }],
-        exclude: /node_modules/,
+        test: /\.json$/,
+        use: ['json-loader'],
       },
       {
         test: /\.css$/,
