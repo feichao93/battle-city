@@ -4,7 +4,7 @@ import * as A from 'utils/actions'
 import { UP, TANK_SPAWN_DELAY, SIDE, BLOCK_SIZE } from 'utils/constants'
 import { getNextId } from 'utils/common'
 
-function* spawnTank({ x, y }) {
+function* spawnTank({ x, y, side }) {
   yield put({
     type: A.SPAWN_FLICKER,
     flickerId: getNextId('flicker'),
@@ -15,7 +15,7 @@ function* spawnTank({ x, y }) {
   const tankId = getNextId('tank')
   yield put({
     type: A.SPAWN_TANK,
-    side: SIDE.PLAYER,
+    side,
     tankId,
     x,
     y,
@@ -108,8 +108,8 @@ export default function* gameManager() {
   })
 
   const [tankId1, tankId2] = yield [
-    call(spawnTank, { x: 4 * BLOCK_SIZE, y: 12 * BLOCK_SIZE }),
-    call(spawnTank, { x: 0, y: 0 }),
+    call(spawnTank, { x: 4 * BLOCK_SIZE, y: 12 * BLOCK_SIZE, side: SIDE.PLAYER }),
+    call(spawnTank, { x: 0, y: 0, side: SIDE.AI }),
   ]
   yield put({
     type: A.ACTIVATE_PLAYER,
@@ -121,6 +121,4 @@ export default function* gameManager() {
     playerName: 'AI',
     tankId: tankId2,
   })
-
-  // todo 生成AI
 }

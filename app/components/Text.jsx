@@ -273,6 +273,23 @@ const chars = {
       d="M1,0 h7 v2 h-1 v1 h-1 v1 h-1 v1 h-1 v1 h4 v1 h-7 v-2 h1 v-1 h1 v-1 h1 v-1 h1 v-1 h-4 v-1"
     />
   ),
+  /* eslint-disable quote-props */
+  ['\u2160'.toLowerCase()]: ({ fill }) => (
+    <path
+      role="character-roman-numeral-one"
+      fill={fill}
+      d="M2,0 h4 v1 h-1 v5 h1 v1 h-4 v-1 h1 v-5 h-1 v-1"
+    />
+  ),
+  // eslint-disable-next-line quote-props
+  ['\u2161'.toLowerCase()]: ({ fill }) => (
+    <g role="character-roman-numeral-two" fill={fill}>
+      <rect x={2} y={0} width={5} height={1} />
+      <rect x={3} y={1} width={1} height={5} />
+      <rect x={5} y={1} width={1} height={5} />
+      <rect x={2} y={6} width={5} height={1} />
+    </g>
+  ),
 }
 
 export default class Text extends React.PureComponent {

@@ -3,9 +3,9 @@ import { connect } from 'react-redux'
 import _ from 'lodash'
 import { BLOCK_SIZE } from 'utils/constants'
 import { Tank } from 'components/tanks'
+import HUD from 'components/HUD'
 import Bullet from 'components/Bullet'
 import GameoverOverlay from 'components/GameoverOverlay'
-import EnemyCountIndicator from 'components/EnemyCountIndicator'
 import BrickLayer from 'components/BrickLayer'
 import SteelLayer from 'components/SteelLayer'
 import RiverLayer from 'components/RiverLayer'
@@ -30,11 +30,11 @@ export default class Screen extends React.Component {
 
   render() {
     const { bullets, map, explosions, flickers, tanks, game, texts } = this.props
-    const { remainingEnemyCount, overlay } = game.toObject()
+    const { overlay } = game.toObject()
     const { bricks, steels, rivers, snows, forests, eagle } = map.toObject()
     return (
       <g role="screen">
-        <EnemyCountIndicator count={remainingEnemyCount} />
+        <HUD />
         <g role="battle-field" transform={`translate(${BLOCK_SIZE},${BLOCK_SIZE})`}>
           <rect width={13 * BLOCK_SIZE} height={13 * BLOCK_SIZE} fill="#000000" />
           <RiverLayer rivers={rivers} />

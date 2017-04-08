@@ -1,4 +1,4 @@
-import { Map, Set as ISet } from 'immutable'
+import { Map as IMap, Set as ISet } from 'immutable'
 import { fork, put, select, take } from 'redux-saga/effects'
 import { BLOCK_SIZE, DOWN, ITEM_SIZE_MAP, N_MAP, SIDE, STEEL_POWER, UP } from 'utils/constants'
 import {
@@ -22,6 +22,16 @@ function makeExplosionFromBullet(bullet) {
     x: bullet.x - 6,
     y: bullet.y - 6,
     explosionType: 'bullet',
+    explosionId: getNextId('explosion'),
+  })
+}
+
+function makeExplosionFromTank(tank) {
+  return put({
+    type: A.SPAWN_EXPLOSION,
+    x: tank.x - 6,
+    y: tank.y - 6,
+    explosionType: 'tank',
     explosionId: getNextId('explosion'),
   })
 }
@@ -108,6 +118,18 @@ function* destroySteels(collidedBullets) {
   }
 }
 
+function* destroyTanks(tankIdSet) {
+  const tanks = yield select(selectors.tanks)
+  // 移除tank
+  yield* tankIdSet.map(tankId => put({
+    type: A.REMOVE_TANK,
+    tankId,
+  }))
+  // 产生坦克爆炸效果
+  yield* tankIdSet.map(tankId => tanks.get(tankId))
+    .map(makeExplosionFromTank)
+}
+
 function* destroyBricks(collidedBullets) {
   const bricks = yield select(selectors.map.bricks)
   const bricksNeedToDestroy = []
@@ -133,7 +155,7 @@ function* filterBulletsCollidedWithEagle(bullets) {
   // 判断是否和eagle相撞
   const eagle = yield select(selectors.map.eagle)
   if (eagle.get('broken')) {
-    return Map()
+    return IMap()
   } else {
     const eagleBox = {
       x: eagle.get('x'),
@@ -175,10 +197,12 @@ function* handleBulletsCollidedWithTanks(context) {
           // 不发生子弹爆炸
           context.expBulletIdSet.add(bullet.bulletId)
         } else if (bulletSide === SIDE.PLAYER && tankSide === SIDE.AI) {
-          context.hurtedTankIds.add(tank.tankId)
+          const oldHurt = context.tankHurtMap.get(tank.tankId) || 0
+          context.tankHurtMap.set(tank.tankId, oldHurt + 1)
           context.expBulletIdSet.add(bullet.bulletId)
         } else if (bulletSide === SIDE.AI && tankSide === SIDE.PLAYER) {
-          context.hurtedTankIds.add(tank.tankId)
+          const oldHurt = context.tankHurtMap.get(tank.tankId) || 0
+          context.tankHurtMap.set(tank.tankId, oldHurt + 1)
           context.expBulletIdSet.add(bullet.bulletId)
         } else if (bulletSide === SIDE.AI && tankSide === SIDE.AI) {
           // 坦克什么事也不发生
@@ -230,8 +254,8 @@ function* handleAfterTick() {
       expBulletIdSet: new Set(),
       // 不需要爆炸的子弹的id集合
       noExpBulletIdSet: new Set(),
-      // 受到伤害的坦克 (假设一个tick中一架坦克最多受到一点伤害)
-      hurtedTankIds: new Set(),
+      // 坦克受伤Map. tankId到收到伤害的映射
+      tankHurtMap: new Map(),
     }
 
     yield* handleBulletsCollidedWithTanks(context)
@@ -248,8 +272,15 @@ function* handleAfterTick() {
         spawnExplosion: true,
       })
 
+      // 产生爆炸效果的子弹才会破坏附近的brickWall和steelWall
       yield* destroyBricks(expBullets)
       yield* destroySteels(expBullets)
+    }
+
+    // 坦克伤害结算 todo 假设目前tank被击中之后将直接爆炸
+    if (context.tankHurtMap.size !== 0) {
+      const tankIdSet = ISet(context.tankHurtMap.keys())
+      yield destroyTanks(tankIdSet)
     }
 
     // 不产生爆炸, 直接消失的子弹

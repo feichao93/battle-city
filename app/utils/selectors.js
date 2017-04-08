@@ -7,6 +7,10 @@ export const playerTank = (state, playerName) => {
   return tanks(state).get(tankId)
 }
 
+export const players = state => state.players
+
+export const game = state => state.game
+
 export const tanks = state => state.tanks
 
 export const time = state => state.time
