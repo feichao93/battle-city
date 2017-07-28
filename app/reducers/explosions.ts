@@ -1,7 +1,5 @@
 import { Map } from 'immutable'
-import { Action } from 'utils/actions'
 import ExplosionRecord from 'types/ExplosionRecord'
-import { ExplosionId, ExplosionType } from 'types'
 
 export type ExplosionsMap = Map<ExplosionId, ExplosionRecord>
 

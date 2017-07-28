@@ -1,8 +1,7 @@
 import { take, put, select } from 'redux-saga/effects'
 import { calculateBulletStartPosition, getNextId } from 'utils/common'
-import * as A from 'utils/actions'
 import * as selectors from 'utils/selectors'
-import { TickAction, State, TankRecord } from 'types'
+import { State, TankRecord } from 'types'
 
 export default function* fireController(playerName: string, shouldFire: () => boolean) {
   // countDown用来记录player距离下一次可以发射子弹的时间. countDown大于0的时候玩家不能发射子弹
@@ -10,7 +9,7 @@ export default function* fireController(playerName: string, shouldFire: () => bo
   // countDown与坦克的bulletInterval属性相关, 和bulletLimit无关
   let countDown = 0
   while (true) {
-    const { delta }: TickAction = yield take('TICK')
+    const { delta }: Action.TickAction = yield take('TICK')
     if (countDown > 0) {
       countDown -= delta
     } else {

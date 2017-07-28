@@ -5,6 +5,7 @@
     "noImplicitAny": true,
     "module": "commonjs",
     "moduleResolution": "node",
+    "noStrictGenericChecks": true,
     "target": "es6",
     "jsx": "react",
     "allowJs": true,

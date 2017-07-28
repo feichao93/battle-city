@@ -6,7 +6,6 @@ import { AppContainer } from 'react-hot-loader'
 import { Provider } from 'react-redux'
 import store from 'utils/store'
 import App from './App'
-import { Action as MyAction } from 'types'
 
 ReactDOM.render(
   <AppContainer>
@@ -40,8 +39,4 @@ declare module 'react' {
   interface SVGProps<T> {
     role?: string
   }
-}
-
-declare module 'redux' {
-  type Action = MyAction
 }

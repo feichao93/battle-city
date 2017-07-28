@@ -1,5 +1,4 @@
 import { Record } from 'immutable'
-import { TextId } from 'types'
 
 type Base = {
   textId: TextId,

@@ -1,11 +1,13 @@
 import { List } from 'immutable'
 import { delay, Channel } from 'redux-saga'
 import { fork, select, take, race, call } from 'redux-saga/effects'
-import { DOWN, FIELD_SIZE, ITEM_SIZE_MAP, LEFT, N_MAP, RIGHT, TANK_SIZE, UP } from 'utils/constants'
+import { DOWN, FIELD_SIZE, ITEM_SIZE_MAP, LEFT, N_MAP, RIGHT, TANK_SIZE, UP, BLOCK_SIZE } from 'utils/constants'
 import { asBox, getDirectionInfo, iterRowsAndCols } from 'utils/common'
 import * as A from 'utils/actions'
 import * as selectors from 'utils/selectors'
-import { State, TankRecord, Direction } from 'types'
+import { State, TankRecord } from 'types'
+
+const log = console.log
 
 // 内联的AI. 用于测试开发
 export default function* inlineAI($$postMessage: any, inputChannel: Channel<any>) {
@@ -24,81 +26,183 @@ export default function* inlineAI($$postMessage: any, inputChannel: Channel<any>
   }
 }
 
-function* ai($$postMessage: any, inputChannel: Channel<any>) {
+/** AI是否可以破坏该障碍物 */
+function canDestroy(barrierType: BarrierType) {
+  return barrierType === 'brick'
+}
+
+interface PriorityMap {
+  up: number,
+  down: number,
+  left: number,
+  right: number
+}
+
+interface BarrierInfoEntry {
+  type: BarrierType
+  length: number
+}
+
+interface BarrierInfo {
+  up: BarrierInfoEntry
+  down: BarrierInfoEntry
+  left: BarrierInfoEntry
+  right: BarrierInfoEntry
+}
+
+type BarrierType = 'border' | 'steel' | 'river' | 'brick'
+
+function* ai($$postMessage: (message: AICommand) => void, inputChannel: Channel<any>) {
   while (true) {
+    console.groupEnd()
+    console.group('ai')
     yield race({
       timeout: call(delay, 1000),
       event: take(inputChannel),
     })
-    console.debug('='.repeat(20))
     let tank: TankRecord = yield select(selectors.playerTank, 'AI')
     if (tank == null) {
       continue
     }
 
-    // eagle: Map<{ x, y }>
+    // 计算ai-tank与eagle的相对位置
     const { map: { eagle } }: State = yield select()
-    const dx = eagle.x - tank.x
-    const dy = eagle.y - tank.y
-    let horizontal: Direction = null
-    let vertical: Direction = null
-    if (dx > 1) {
-      horizontal = 'right'
-    } else if (dx < -1) {
-      horizontal = 'left'
-    }
-    if (dy > 1) {
-      vertical = 'down'
-    } else if (dy < -1) {
-      vertical = 'up'
-    }
-    const directions: Direction[] = []
-    if (tank.direction === 'up' || tank.direction === 'down') {
-      vertical && directions.push(vertical)
-      horizontal && directions.push(horizontal)
-    } else {
-      horizontal && directions.push(horizontal)
-      vertical && directions.push(vertical)
+    const dy2eagle = eagle.y - tank.y
+    const dx2eagle = eagle.x - tank.x
+
+    log('dx2eagle:', dx2eagle)
+    log('dy2eagle:', dy2eagle)
+
+    // barrierInfo
+    const binfo = {
+      down: {},
+      up: {},
+      left: {},
+      right: {},
+    } as BarrierInfo
+
+    const priorityMap: PriorityMap = {
+      up: 2,
+      down: 2,
+      left: 2,
+      right: 2,
     }
 
-    // 先尝试一个方向, 如果该方向行不通的话, 进行转弯尝试另一个方向
-    for (const direction of directions) {
-      if (tank.direction !== direction) {
-        $$postMessage({ type: 'turn', direction })
-        yield delay(0)
-      }
-      tank = tank.set('direction', direction)
-      const [itemType, aheadLength]: [string, number] = yield* lookAhead(tank)
-      console.debug('use-direction:', direction)
-      console.log(itemType, aheadLength)
-      if (itemType === 'border' || itemType === 'river') {
-        // 前方是边界或river
-        if (aheadLength < 1) { // 距离很小 转弯
-          continue
-        } else { // 继续前行
-          $$postMessage({ type: 'forward', forwardLength: aheadLength })
-        }
-      } else if (itemType === 'brick') {
-        if (aheadLength < 16) {
-          // 发现前方是brick, 且距离较近, 发射子弹
-          $$postMessage({ type: 'fire' })
-        } else { // 距离较远, 先尝试接近
-          $$postMessage({ type: 'forward', forwardLength: aheadLength })
-        }
-      } else { // steel
-        if (aheadLength < 1) {
-          continue // 转弯
-        } else {
-          $$postMessage({ type: 'forward', forwardLength: aheadLength })
-        }
-      }
-      break
+    // 计算往下走的优先级
+    if (dy2eagle > 6 * BLOCK_SIZE) {
+      priorityMap.down += 3
+    } else if (dy2eagle > 4 * BLOCK_SIZE) {
+      priorityMap.down += 2
     }
+    const downLookAhead = lookAhead(yield select(), tank.set('direction', 'down'))
+    binfo.down.type = downLookAhead[0]
+    binfo.down.length = downLookAhead[1]
+    if (binfo.down.length < 2 * BLOCK_SIZE && !canDestroy(binfo.down.type)) {
+      priorityMap.down = 1
+    }
+    if (binfo.down.length === 0 && !canDestroy(binfo.down.type)) {
+      priorityMap.down = 0
+    }
+
+    // 计算往上走的优先级
+    if (dy2eagle < -6 * BLOCK_SIZE) {
+      priorityMap.up += 3
+    } else if (dy2eagle < -4 * BLOCK_SIZE) {
+      priorityMap.up += 2
+    }
+    const upLookAhead = lookAhead(yield select(), tank.set('direction', 'up'))
+    binfo.up.type = upLookAhead[0]
+    binfo.up.length = upLookAhead[1]
+    if (binfo.up.length < 2 * BLOCK_SIZE && !canDestroy(binfo.up.type)) {
+      priorityMap.up = 1
+    }
+    if (binfo.up.length === 0 && !canDestroy(binfo.up.type)) {
+      priorityMap.up = 0
+    }
+
+    // 计算往左走的优先级
+    if (dx2eagle > 6 * BLOCK_SIZE) {
+      priorityMap.left += 3
+    } else if (dx2eagle > 4 * BLOCK_SIZE) {
+      priorityMap.left += 2
+    }
+    const leftLookAhead = lookAhead(yield select(), tank.set('direction', 'left'))
+    binfo.left.type = leftLookAhead[0]
+    binfo.left.length = leftLookAhead[1]
+    if (binfo.left.length < 2 * BLOCK_SIZE && !canDestroy(binfo.left.type)) {
+      priorityMap.left = 1
+    }
+    if (binfo.left.length === 0 && !canDestroy(binfo.left.type)) {
+      priorityMap.left = 0
+    }
+
+    // 计算往右走的优先级
+    if (dx2eagle < -6 * BLOCK_SIZE) {
+      priorityMap.right += 3
+    } else if (dx2eagle < -4 * BLOCK_SIZE) {
+      priorityMap.right += 2
+    }
+    const rightLookAhead = lookAhead(yield select(), tank.set('direction', 'right'))
+    binfo.right.type = rightLookAhead[0]
+    binfo.right.length = rightLookAhead[1]
+    if (binfo.right.length < 2 * BLOCK_SIZE && !canDestroy(binfo.right.type)) {
+      priorityMap.right = 1
+    }
+    if (binfo.right.length === 0 && !canDestroy(binfo.right.type)) {
+      priorityMap.right = 1
+    }
+
+    // 计算ai-tank与最近的human-tank的相对位置
+    const { tanks }: State = yield select()
+    const { minDistance, nearestHumanTank } = tanks.reduce((reduction, next) => {
+      if (next.side === 'user') {
+        const distance = Math.abs(next.x - tank.x) + Math.abs(next.y - tank.y)
+        if (distance < reduction.minDistance) {
+          return { minDistance: distance, nearestHumanTank: next }
+        }
+      }
+      return reduction
+    }, { minDistance: Infinity, nearestHumanTank: null as TankRecord })
+    // todo what-if nearestHumanTank == null
+    const dx2NearestHumanTank = tank.x - nearestHumanTank.x
+    const dy2NearestHumanTank = tank.y - nearestHumanTank.y
+
+    const nextDirection = getRandomDirection(priorityMap)
+
+    console.table(binfo)
+    log('priority-map', priorityMap)
+    log('next-direction', nextDirection)
+    debugger
+
+    if (tank.direction !== nextDirection) {
+      $$postMessage({ type: 'turn', direction: nextDirection })
+      tank = tank.set('direction', nextDirection)
+    }
+    // todo 暂时走3个block
+    $$postMessage({ type: 'forward', forwardLength: 3 * BLOCK_SIZE })
+    // $$postMessage({ type: 'fire', forwardLength: 3 * BLOCK_SIZE })
   }
 }
 
-function* lookAhead(tank: TankRecord) {
-  const { map: { bricks, steels, rivers } }: State = yield select()
+function getRandomDirection({ up, down, left, right }: PriorityMap): Direction {
+  const total = up + down + left + right
+  let n = Math.random() * total
+  n -= up
+  if (n < 0) {
+    return 'up'
+  }
+  n -= down
+  if (n < 0) {
+    return 'down'
+  }
+  n -= left
+  if (n < 0) {
+    return 'left'
+  }
+  return 'right'
+}
+
+function lookAhead({ map: { bricks, steels, rivers } }: State, tank: TankRecord): [BarrierType, number] {
   const brickAheadLength = getAheadBrickLength(bricks, tank)
   const steelAheadLength = getAheadSteelLength(steels, tank)
   const riverAheadLength = getAheadRiverLength(rivers, tank)
@@ -187,4 +291,3 @@ function getAheadRiverLength(rivers: List<boolean>, tank: TankRecord) {
     step++
   }
 }
-

@@ -3,10 +3,8 @@ import { fork, put, select, take } from 'redux-saga/effects'
 import { getDirectionInfo, spawnTank } from 'utils/common'
 import directionController from 'sagas/directionController'
 import fireController from 'sagas/fireController'
-import * as A from 'utils/actions'
 import * as selectors from 'utils/selectors'
 import inlineAI from './inlineAI'
-import { Direction, DestroyBulletsAction, Action } from 'types'
 const Worker = require('worker-loader!ai/worker')
 
 // 处理worker发送过来的message
@@ -27,7 +25,7 @@ function* handleReceiveMessages(channel: Channel<{}>, notifyAI: Function) {
   })
   yield fork(function* notifyWhenBulletComplete() {
     while (true) {
-      const { bullets }: DestroyBulletsAction = yield take('DESTROY_BULLETS')
+      const { bullets }: Action.DestroyBulletsAction = yield take('DESTROY_BULLETS')
       const tank = yield select(selectors.playerTank, 'AI')
       if (tank != null) {
         if (bullets.some(b => (b.tankId === tank.tankId))) {

@@ -1,8 +1,6 @@
-/* eslint-disable react/no-multi-comp */
 import * as React from 'react'
 import { Bitmap } from 'components/elements'
 import registerTick from 'hocs/registerTick'
-import { ExplosionType } from 'types'
 
 const schema = {
   ' ': 'none',

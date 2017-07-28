@@ -3,7 +3,7 @@ import * as selectors from 'utils/selectors'
 import * as _ from 'lodash'
 import directionController from 'sagas/directionController'
 import fireController from 'sagas/fireController'
-import { UserControllerConfig, Direction, TankRecord, Input, ActivatePlayerAction } from 'types'
+import { UserControllerConfig, TankRecord } from 'types'
 const Mousetrap = require('mousetrap')
 
 // 一个userController实例对应一个人类玩家(用户)的控制器(键盘或是手柄).
@@ -78,7 +78,7 @@ export default function* userController(playerName: string, config: UserControll
   }
 
   while (true) {
-    const action: ActivatePlayerAction = yield take('ACTIVATE_PLAYER')
+    const action: Action.ActivatePlayerAction = yield take('ACTIVATE_PLAYER')
     if (action.playerName === playerName) {
       yield [
         directionController(playerName, getUserPlayerInput),

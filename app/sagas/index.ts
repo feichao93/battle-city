@@ -5,7 +5,6 @@ import bulletsSaga from 'sagas/bulletsSaga'
 import gameManager from 'sagas/gameManager'
 import workerSaga from 'sagas/workerSaga'
 import { CONTROL_CONFIG, TANK_SPAWN_DELAY } from 'utils/constants'
-import { Action, SpawnExplosionAction, SpawnFlickerAction } from 'types'
 
 const tickChannel = eventChannel<Action>((emit) => {
   let lastTime = performance.now()
@@ -25,7 +24,7 @@ const tickChannel = eventChannel<Action>((emit) => {
 })
 
 function* autoRemoveEffects() {
-  yield takeEvery('SPAWN_EXPLOSION', function* removeExplosion({ explosionId, explosionType }: SpawnExplosionAction) {
+  yield takeEvery('SPAWN_EXPLOSION', function* removeExplosion({ explosionId, explosionType }: Action.SpawnExplosionAction) {
     if (explosionType === 'bullet') {
       yield delay(200)
     } else if (explosionType === 'tank') {
@@ -33,7 +32,7 @@ function* autoRemoveEffects() {
     }
     yield put({ type: 'REMOVE_EXPLOSION', explosionId })
   })
-  yield takeEvery('SPAWN_FLICKER', function* removeFlicker({ flickerId }: SpawnFlickerAction) {
+  yield takeEvery('SPAWN_FLICKER', function* removeFlicker({ flickerId }: Action.SpawnFlickerAction) {
     yield delay(TANK_SPAWN_DELAY)
     yield put({ type: 'REMOVE_FLICKER', flickerId })
   })

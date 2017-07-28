@@ -1,5 +1,4 @@
 import { Record } from 'immutable'
-import { FlickerId } from 'types'
 
 type Base = {
   flickerId: FlickerId,

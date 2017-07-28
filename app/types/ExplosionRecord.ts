@@ -1,5 +1,4 @@
 import { Record } from 'immutable'
-import { ExplosionId, ExplosionType } from 'types'
 
 type Base = {
   explosionId: ExplosionId,

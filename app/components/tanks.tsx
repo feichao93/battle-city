@@ -3,7 +3,6 @@ import * as _ from 'lodash'
 import { Bitmap, Pixel } from 'components/elements'
 import registerTick from 'hocs/registerTick'
 import { BLOCK_SIZE, TANK_COLOR_SCHEMES } from 'utils/constants'
-import { Direction } from 'types'
 
 type P = {
   x: number,

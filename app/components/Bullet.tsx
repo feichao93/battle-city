@@ -1,6 +1,5 @@
 import * as React from 'react'
 import { Pixel } from 'components/elements'
-import { Direction } from 'types'
 
 const fill = '#ADADAD'
 

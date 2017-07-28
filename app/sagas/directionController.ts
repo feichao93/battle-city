@@ -2,11 +2,11 @@ import { put, select, take } from 'redux-saga/effects'
 import { getDirectionInfo } from 'utils/common'
 import canTankMove from 'utils/canTankMove'
 import * as selectors from 'utils/selectors'
-import { TickAction, Input, TankRecord } from 'types'
+import { Input, TankRecord } from 'types'
 
 export default function* directionController(playerName: string, getPlayerInput: Function) {
   while (true) {
-    const { delta }: TickAction = yield take('TICK')
+    const { delta }: Action.TickAction = yield take('TICK')
     const input: Input = yield* getPlayerInput(delta)
     if (input == null) {
       const tank: TankRecord = yield select(selectors.playerTank, playerName)

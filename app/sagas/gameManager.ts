@@ -1,10 +1,9 @@
 import { delay } from 'redux-saga'
 import { select, put, fork, take, call } from 'redux-saga/effects'
-import * as A from 'utils/actions'
 import * as selectors from 'utils/selectors'
 import { UP, BLOCK_SIZE } from 'utils/constants'
 import { getNextId, spawnTank } from 'utils/common'
-import { TextId, Direction, TickAction, TankRecord, State } from 'types'
+import { TankRecord, State } from 'types'
 
 function* animateTexts(textIds: TextId[], { direction, distance: totalDistance, duration }:
   { direction: Direction, distance: number, duration: number }) {
@@ -12,7 +11,7 @@ function* animateTexts(textIds: TextId[], { direction, distance: totalDistance, 
   // 累计移动的距离
   let animatedDistance = 0
   while (true) {
-    const { delta }: TickAction = yield take('TICK')
+    const { delta }: Action.TickAction = yield take('TICK')
     // 本次TICK中可以移动的距离
     const len = delta * speed
     const distance = len + animatedDistance < totalDistance ? len : totalDistance - animatedDistance

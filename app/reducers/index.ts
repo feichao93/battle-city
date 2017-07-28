@@ -7,7 +7,6 @@ import flickers, { FlickersMap } from 'reducers/flickers'
 import map, { MapRecord } from 'reducers/map'
 import tanks, { TanksMap } from 'reducers/tanks'
 import texts, { TextsMap } from 'reducers/texts'
-import { Action } from 'utils/actions'
 
 export type State = {
   game: GameRecord,

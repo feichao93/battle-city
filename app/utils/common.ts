@@ -11,7 +11,7 @@ import {
   TANK_SPAWN_DELAY,
   UP,
 } from 'utils/constants'
-import { Direction, BulletRecord, TankRecord, Side } from 'types'
+import { BulletRecord, TankRecord } from 'types'
 
 // 根据坦克的位置计算子弹的生成位置
 // 参数x,y,direction为坦克的位置和方向

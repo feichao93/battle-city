@@ -1,5 +1,5 @@
 import { Map } from 'immutable'
-import { Action, TankId, TankRecord } from 'types'
+import { TankRecord } from 'types'
 
 export type TanksMap = Map<TankId, TankRecord>
 

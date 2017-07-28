@@ -12,17 +12,9 @@ import {
 import * as selectors from 'utils/selectors'
 import {
   BulletRecord,
-  SpawnExplosionAction,
   TankRecord,
-  Action,
-  TickAction,
   BulletsMap,
   State,
-  BulletId,
-  TankId,
-  SteelIndex,
-  BrickIndex,
-  Side,
 } from 'types'
 
 type Context = {
@@ -45,7 +37,7 @@ function makeExplosionFromBullet(bullet: BulletRecord): PutEffect<Action> {
     y: bullet.y - 6,
     explosionType: 'bullet',
     explosionId: getNextId('explosion'),
-  })
+  } as Action.SpawnExplosionAction)
 }
 
 function makeExplosionFromTank(tank: TankRecord): PutEffect<Action> {
@@ -55,12 +47,12 @@ function makeExplosionFromTank(tank: TankRecord): PutEffect<Action> {
     y: tank.y - 6,
     explosionType: 'tank',
     explosionId: getNextId('explosion'),
-  })
+  } as Action.SpawnExplosionAction)
 }
 
 function* handleTick() {
   while (true) {
-    const { delta }: TickAction = yield take('TICK')
+    const { delta }: Action.TickAction = yield take('TICK')
     const { bullets }: State = yield select()
     if (bullets.isEmpty()) {
       continue

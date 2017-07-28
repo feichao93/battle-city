@@ -1,5 +1,4 @@
 import { Map, Record } from 'immutable'
-import { Action } from 'utils/actions'
 
 type Base = {
   overlay: string,

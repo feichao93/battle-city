@@ -1,5 +1,5 @@
 import { Map, List, Repeat, Record } from 'immutable'
-import { StageConfig, Action } from 'types'
+import { StageConfig } from 'types'
 import { FIELD_BLOCK_SIZE, N_MAP, BLOCK_SIZE } from 'utils/constants'
 
 const testStage: StageConfig = require('stages/stage-test.json')
