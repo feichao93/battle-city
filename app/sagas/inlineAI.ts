@@ -48,30 +48,18 @@ interface TankEnv {
 type BarrierType = 'border' | 'steel' | 'river' | 'brick'
 
 // 内联的AI. 用于测试开发
-export default function* inlineAI($$postMessage: (command: AICommand) => void, inputChannel: Channel<any>) {
-  yield fork(controller, $$postMessage, inputChannel)
+// todo 转向与开火的概率有点问题, 需要仔细check一下
+export default function* inlineAI(playerName: string,
+                                  postMessage: (command: AICommand) => void,
+                                  noteChannel: Channel<any>) {
   while (true) {
-    yield take(['REMOVE_TANK', 'LOAD_STAGE'])
-    const tank = yield select(selectors.playerTank, 'AI')
-    // 选取AI的坦克, 如果坦克为null, 则生成新的坦克
-    if (tank == null) {
-      const { game }: State = yield select()
-      if (game.get('remainingEnemyCount') > 0) {
-        yield delay(2000)
-        $$postMessage({ type: 'spawn-tank', x: 10 * 16, y: 0 })
-      }
-    }
-  }
-}
-
-function* controller($$postMessage: (message: AICommand) => void, inputChannel: Channel<any>) {
-  while (true) {
-    console.group('turn & forward')
-    yield race({
-      timeout: call(delay, 5000),
-      event: take(inputChannel),
+    console.groupCollapsed(`AI ${playerName}`)
+    const raceResult = yield race({
+      timeout: call(delay, 2000),
+      note: take(noteChannel),
     })
-    let tank: TankRecord = yield select(selectors.playerTank, 'AI')
+    console.log(raceResult)
+    let tank: TankRecord = yield select(selectors.playerTank, playerName)
     if (tank == null) {
       console.groupEnd()
       continue
@@ -93,7 +81,7 @@ function* controller($$postMessage: (message: AICommand) => void, inputChannel: 
     // debugger
 
     if (tank.direction !== nextDirection) {
-      $$postMessage({ type: 'turn', direction: nextDirection })
+      postMessage({ type: 'turn', direction: nextDirection })
       tank = tank.set('direction', nextDirection)
       // 等待足够长的时间, 保证turn命令已经被处理
       yield delay(100)
@@ -101,11 +89,11 @@ function* controller($$postMessage: (message: AICommand) => void, inputChannel: 
 
     if (shouldFire(tank, env)) {
       log('command fire!')
-      $$postMessage({ type: 'fire' })
+      postMessage({ type: 'fire' })
     }
 
     log('forward-length:', env.barrierInfo[tank.direction].length)
-    $$postMessage({
+    postMessage({
       type: 'forward',
       // todo tank应该更加偏向于走到下一个 *路口*
       // forwardLength: Math.max(BLOCK_SIZE, env.barrierInfo[tank.direction].length),

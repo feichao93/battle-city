@@ -3,7 +3,7 @@ import { fork, take, put } from 'redux-saga/effects'
 import humanController from 'sagas/humanController'
 import bulletsSaga from 'sagas/bulletsSaga'
 import gameManager from 'sagas/gameManager'
-import workerSaga from 'sagas/workerSaga'
+import AIMasterSaga from 'sagas/AISaga'
 import { CONTROL_CONFIG, TANK_SPAWN_DELAY } from 'utils/constants'
 
 const tickChannel = eventChannel<Action>((emit) => {
@@ -50,11 +50,11 @@ export default function* rootSaga() {
   yield fork(bulletsSaga)
   yield fork(autoRemoveEffects)
 
-  // 生成两个键盘的控制器, 对应现实生活的游戏控制器
+  // 生成两个humanController, 对应现实生活的游戏控制器
   yield fork(humanController, 'player-1', CONTROL_CONFIG.player1)
   yield fork(humanController, 'player-2', CONTROL_CONFIG.player2)
 
-  yield fork(workerSaga)
+  yield fork(AIMasterSaga)
 
   yield fork(gameManager)
 }

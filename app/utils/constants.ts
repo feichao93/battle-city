@@ -1,21 +1,23 @@
-// 一块的大小对应16个像素
+/** 一块的大小对应16个像素 */
 export const BLOCK_SIZE = 16
-// 坦克的大小
+/** 坦克的大小 */
 export const TANK_SIZE = BLOCK_SIZE
-// 战场的大小 (13block * 13block)
+/** 战场的大小 (13block * 13block) */
 export const FIELD_BLOCK_SIZE = 13
-// 战场的大小 (208pixel * 208pixel)
+/** 战场的大小 (208pixel * 208pixel) */
 export const FIELD_SIZE = BLOCK_SIZE * FIELD_BLOCK_SIZE
-// 子弹的大小
+/** 子弹的大小 */
 export const BULLET_SIZE = 3
-// 坦克生成的延迟
+/** 坦克生成的延迟 */
 export const TANK_SPAWN_DELAY = 1500
-// 摧毁steel的最低子弹power值
+/** 摧毁steel的最低子弹power值 */
 export const STEEL_POWER = 3
 
-// 坦克的配色方案
-// 共有4种配色方案: 黄色方案, 绿色方案, 银色方案, 红色方案
-// 每种配色方案包括三个具体的颜色值, a对应浅色, b对应一般颜色, c对应深色
+/**
+ * 坦克的配色方案
+ * 共有4种配色方案: 黄色方案, 绿色方案, 银色方案, 红色方案
+ * 每种配色方案包括三个具体的颜色值, a对应浅色, b对应一般颜色, c对应深色
+ */
 type Schema = { [color: string]: { a: string, b: string, c: string } }
 export const TANK_COLOR_SCHEMES: Schema = {
   yellow: {
@@ -40,12 +42,7 @@ export const TANK_COLOR_SCHEMES: Schema = {
   },
 }
 
-// 坦克/子弹 方向
-export const UP = 'UP'
-export const DOWN = 'DOWN'
-export const RIGHT = 'RIGHT'
-export const LEFT = 'LEFT'
-
+/** 物体的大小(边长) */
 export const ITEM_SIZE_MAP = {
   BRICK: 4,
   STEEL: 8,
@@ -54,6 +51,7 @@ export const ITEM_SIZE_MAP = {
   FOREST: BLOCK_SIZE,
 }
 
+/** 物体铺满地图一整行所需要的数量 */
 export const N_MAP = {
   BRICK: FIELD_SIZE / ITEM_SIZE_MAP.BRICK,
   STEEL: FIELD_SIZE / ITEM_SIZE_MAP.STEEL,

@@ -62,8 +62,13 @@ declare global {
 
   type AICommand = AICommand.AICommand
 
+  // todo
+  /** Note 包含了一些游戏逻辑向AI逻辑发送的消息/通知 */
+  type Note = string
+
+  /** AICommand 包含了一些AI逻辑向游戏逻辑发送的操作命令 */
   namespace AICommand {
-    type AICommand = Forward | Fire | Turn | SpawnTank
+    type AICommand = Forward | Fire | Turn
 
     interface Forward {
       type: 'forward'
@@ -77,12 +82,6 @@ declare global {
     interface Turn {
       type: 'turn'
       direction: Direction
-    }
-
-    interface SpawnTank {
-      type: 'spawn-tank'
-      x: number
-      y: number
     }
   }
 }

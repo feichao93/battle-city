@@ -1,22 +1,11 @@
 import { delay } from 'redux-saga'
 import { put } from 'redux-saga/effects'
-import {
-  BLOCK_SIZE,
-  BULLET_SIZE,
-  DOWN,
-  FIELD_SIZE,
-  LEFT,
-  RIGHT,
-  TANK_SIZE,
-  TANK_SPAWN_DELAY,
-  UP,
-} from 'utils/constants'
+import { BLOCK_SIZE, BULLET_SIZE, FIELD_SIZE, TANK_SIZE, TANK_SPAWN_DELAY, } from 'utils/constants'
 import { BulletRecord, TankRecord } from 'types'
 
 // 根据坦克的位置计算子弹的生成位置
 // 参数x,y,direction为坦克的位置和方向
-export function calculateBulletStartPosition({ x, y, direction }:
-  { x: number, y: number, direction: Direction }) {
+export function calculateBulletStartPosition({ x, y, direction }: { x: number, y: number, direction: Direction }) {
   if (direction === 'up') {
     return { x: x + 6, y: y - 3 }
   } else if (direction === 'down') {
@@ -38,9 +27,7 @@ export function getRowCol(t: number, N: number) {
   return [Math.floor(t / N), t % N]
 }
 
-// 用来判断subject和object是否相撞
-// subject: { x: number, y: number, width: number, height: number }
-// object: { x: number, y: number, width: number, height: number }
+/** 用来判断subject和object是否相撞 */
 export function testCollide(subject: Box, object: Box, threshhold = 0) {
   return between(subject.x - object.width, object.x, subject.x + subject.width, threshhold)
     && between(subject.y - object.height, object.y, subject.y + subject.height, threshhold)
@@ -71,6 +58,7 @@ export function isInField(box: Box) {
 }
 
 const nextIdMap = new Map()
+
 export function getNextId(tag = '') {
   if (nextIdMap.has(tag)) {
     const nextId = nextIdMap.get(tag)

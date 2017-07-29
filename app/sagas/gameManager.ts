@@ -1,9 +1,9 @@
 import { delay } from 'redux-saga'
-import { select, put, fork, take, call } from 'redux-saga/effects'
+import { fork, put, select, take } from 'redux-saga/effects'
 import * as selectors from 'utils/selectors'
-import { UP, BLOCK_SIZE } from 'utils/constants'
+import { BLOCK_SIZE } from 'utils/constants'
 import { getNextId, spawnTank } from 'utils/common'
-import { TankRecord, State } from 'types'
+import { State, TankRecord } from 'types'
 
 function* animateTexts(textIds: TextId[], { direction, distance: totalDistance, duration }:
   { direction: Direction, distance: number, duration: number }) {
@@ -107,12 +107,6 @@ function* playerSaga(playerName: string) {
 export default function* gameManager() {
   yield fork(watchGameover)
   yield fork(playerSaga, 'player-1')
-
-  yield put({
-    type: 'CREATE_PLAYER',
-    playerName: 'AI',
-    lives: Infinity,
-  })
 
   yield put({ type: 'LOAD_STAGE', name: 'test' })
 }
