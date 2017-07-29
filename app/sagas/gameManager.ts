@@ -62,7 +62,7 @@ function* animateGameover() {
 
 function* watchGameover() {
   while (true) {
-    yield take(['DESTROY_EAGLE', 'ALL_USERS_DEAD'])
+    yield take(['DESTROY_EAGLE', 'ALL_HUMAN_DEAD'])
     // 首先暂停所有的玩家的操作
     yield put({ type: 'DEACTIVATE_ALL_PLAYERS' })
     // 进行游戏结束动画
@@ -88,7 +88,7 @@ function* playerSaga(playerName: string) {
         const tankId = yield* spawnTank({
           x: 4 * BLOCK_SIZE,
           y: 12 * BLOCK_SIZE,
-          side: 'user',
+          side: 'human',
         })
         yield put({
           type: 'ACTIVATE_PLAYER',
@@ -96,7 +96,7 @@ function* playerSaga(playerName: string) {
           tankId,
         })
       } else {
-        yield put({ type: 'ALL_USERS_DEAD' })
+        yield put({ type: 'ALL_HUMAN_DEAD' })
       }
     }
   }

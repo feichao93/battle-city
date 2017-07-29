@@ -1,17 +1,18 @@
-import { take, fork, select, SelectEffect } from 'redux-saga/effects'
+import { fork, select, take } from 'redux-saga/effects'
 import * as selectors from 'utils/selectors'
 import * as _ from 'lodash'
 import directionController from 'sagas/directionController'
 import fireController from 'sagas/fireController'
-import { UserControllerConfig, TankRecord } from 'types'
+import { HumanControllerConfig, TankRecord } from 'types'
+
 const Mousetrap = require('mousetrap')
 
-// 一个userController实例对应一个人类玩家(用户)的控制器(键盘或是手柄).
+// 一个humanController实例对应一个人类玩家(用户)的控制器(键盘或是手柄).
 // 参数playerName用来指定人类玩家的玩家名称, config为该玩家的操作配置.
-// userController启动后, 会监听ACTIVATE_PLAYER action.
-// 如果action与参数playerName相对应, 则该userController将启动
+// humanController启动后, 会监听ACTIVATE_PLAYER action.
+// 如果action与参数playerName相对应, 则该humanController将启动
 // fireController与directionController, 从而控制人类玩家的坦克
-export default function* userController(playerName: string, config: UserControllerConfig) {
+export default function* humanController(playerName: string, config: HumanControllerConfig) {
   let firePressing = false // 用来记录当前玩家是否按下了fire键
   let firePressed = false // 用来记录上一个tick内 玩家是否按下过fire键
   Mousetrap.bind(config.fire, () => {
@@ -62,7 +63,7 @@ export default function* userController(playerName: string, config: UserControll
   bindKeyWithDirection(config.right, 'right')
 
   // 调用该函数来获取当前用户的移动操作(坦克级别)
-  function* getUserPlayerInput() {
+  function* getHumanPlayerInput() {
     const tank: TankRecord = yield select(selectors.playerTank, playerName)
     if (tank != null) {
       const { direction } = getDirectionControlInfo()
@@ -81,7 +82,7 @@ export default function* userController(playerName: string, config: UserControll
     const action: Action.ActivatePlayerAction = yield take('ACTIVATE_PLAYER')
     if (action.playerName === playerName) {
       yield [
-        directionController(playerName, getUserPlayerInput),
+        directionController(playerName, getHumanPlayerInput),
         fireController(playerName, shouldFire),
       ]
     }

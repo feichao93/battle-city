@@ -4,7 +4,7 @@ const TankRecord = Record({
   tankId: 0,
   x: 0,
   y: 0,
-  side: 'user' as Side,
+  side: 'human' as Side,
   direction: null as Direction,
   moving: false,
   level: 0,

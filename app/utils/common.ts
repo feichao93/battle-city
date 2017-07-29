@@ -145,3 +145,18 @@ export function* spawnTank({ x, y, side }: { x: number, y: number, side: Side })
   })
   return tankId
 }
+
+export function reverseDirection(direction: Direction): Direction {
+  if (direction === 'up') {
+    return 'down'
+  }
+  if (direction === 'down') {
+    return 'up'
+  }
+  if (direction === 'left') {
+    return 'right'
+  }
+  if (direction === 'right') {
+    return 'left'
+  }
+}

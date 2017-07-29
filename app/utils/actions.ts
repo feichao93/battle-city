@@ -12,7 +12,7 @@ declare global {
       | RemoveOverlayAction | Simple<'DECREMENT_ENEMY_COUNT'> | DecrementPlayerLiveAction
       | ActivatePlayerAction | CreatePlayerAction | RemovePlayerAction | Simple<'DEACTIVATE_ALL_PLAYERS'>
       | SpawnExplosionAction | RemoveExplosionAction | SetTextAction | UpdateTextPositionAction
-      | Simple<'DESTROY_EAGLE'> | Simple<'ALL_USERS_DEAD'> | SpawnTankAction | StartMoveAction
+      | Simple<'DESTROY_EAGLE'> | Simple<'ALL_HUMAN_DEAD'> | SpawnTankAction | StartMoveAction
       | RemoveTankAction | StopMoveAction | RemoveTextAction | RemoveFlickerAction | SpawnFlickerAction
 
     export type ActionType = Action['type']

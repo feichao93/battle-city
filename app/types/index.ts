@@ -15,7 +15,7 @@ export { BulletsMap } from 'reducers/bullets'
 export { TextsMap } from 'reducers/texts'
 export { TanksMap } from 'reducers/tanks'
 
-export interface UserControllerConfig {
+export interface HumanControllerConfig {
   fire: string,
   up: string,
   down: string,
@@ -58,8 +58,7 @@ declare global {
 
   type ExplosionType = 'bullet' | 'tank'
   type ExplosionId = number
-  // todo user ==> human
-  type Side = 'user' | 'ai'
+  type Side = 'human' | 'ai'
 
   type AICommand = AICommand.AICommand
 

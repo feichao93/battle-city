@@ -203,15 +203,15 @@ function* handleBulletsCollidedWithTanks(context: Context) {
         const bulletSide = tanks.find(t => (t.tankId === bullet.tankId)).side
         const tankSide = tank.side
 
-        if (bulletSide === 'user' && tankSide === 'user') {
+        if (bulletSide === 'human' && tankSide === 'human') {
           // todo 暂时对坦克不进行处理
           // 不发生子弹爆炸
           context.expBulletIdSet.add(bullet.bulletId)
-        } else if (bulletSide === 'user' && tankSide === 'ai') {
+        } else if (bulletSide === 'human' && tankSide === 'ai') {
           const oldHurt = context.tankHurtMap.get(tank.tankId) || 0
           context.tankHurtMap.set(tank.tankId, oldHurt + 1)
           context.expBulletIdSet.add(bullet.bulletId)
-        } else if (bulletSide === 'ai' && tankSide === 'user') {
+        } else if (bulletSide === 'ai' && tankSide === 'human') {
           const oldHurt = context.tankHurtMap.get(tank.tankId) || 0
           context.tankHurtMap.set(tank.tankId, oldHurt + 1)
           context.expBulletIdSet.add(bullet.bulletId)

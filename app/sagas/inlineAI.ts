@@ -2,7 +2,7 @@ import { List } from 'immutable'
 import { Channel, delay } from 'redux-saga'
 import { call, fork, race, select, take } from 'redux-saga/effects'
 import { BLOCK_SIZE, FIELD_SIZE, ITEM_SIZE_MAP, N_MAP, TANK_SIZE } from 'utils/constants'
-import { asBox, getDirectionInfo, iterRowsAndCols } from 'utils/common'
+import { asBox, getDirectionInfo, iterRowsAndCols, reverseDirection } from 'utils/common'
 import * as selectors from 'utils/selectors'
 import { State, TankRecord } from 'types'
 
@@ -10,38 +10,6 @@ const log = console.log
 // const table = console.table
 // const log: any = () => 0
 const table: any = () => 0
-
-function reverseDirection(direction: Direction): Direction {
-  if (direction === 'up') {
-    return 'down'
-  }
-  if (direction === 'down') {
-    return 'up'
-  }
-  if (direction === 'left') {
-    return 'right'
-  }
-  if (direction === 'right') {
-    return 'left'
-  }
-}
-
-// 内联的AI. 用于测试开发
-export default function* inlineAI($$postMessage: any, inputChannel: Channel<any>) {
-  yield fork(controller, $$postMessage, inputChannel)
-  while (true) {
-    yield take(['REMOVE_TANK', 'LOAD_STAGE'])
-    const tank = yield select(selectors.playerTank, 'AI')
-    // 选取AI的坦克, 如果坦克为null, 则生成新的坦克
-    if (tank == null) {
-      const { game }: State = yield select()
-      if (game.get('remainingEnemyCount') > 0) {
-        yield delay(2000)
-        $$postMessage({ type: 'spawn-tank', x: 10 * 16, y: 0 })
-      }
-    }
-  }
-}
 
 /** AI是否可以破坏该障碍物 */
 function canDestroy(barrierType: BarrierType) {
@@ -78,6 +46,75 @@ interface TankEnv {
 }
 
 type BarrierType = 'border' | 'steel' | 'river' | 'brick'
+
+// 内联的AI. 用于测试开发
+export default function* inlineAI($$postMessage: (command: AICommand) => void, inputChannel: Channel<any>) {
+  yield fork(controller, $$postMessage, inputChannel)
+  while (true) {
+    yield take(['REMOVE_TANK', 'LOAD_STAGE'])
+    const tank = yield select(selectors.playerTank, 'AI')
+    // 选取AI的坦克, 如果坦克为null, 则生成新的坦克
+    if (tank == null) {
+      const { game }: State = yield select()
+      if (game.get('remainingEnemyCount') > 0) {
+        yield delay(2000)
+        $$postMessage({ type: 'spawn-tank', x: 10 * 16, y: 0 })
+      }
+    }
+  }
+}
+
+function* controller($$postMessage: (message: AICommand) => void, inputChannel: Channel<any>) {
+  while (true) {
+    console.group('turn & forward')
+    yield race({
+      timeout: call(delay, 5000),
+      event: take(inputChannel),
+    })
+    let tank: TankRecord = yield select(selectors.playerTank, 'AI')
+    if (tank == null) {
+      console.groupEnd()
+      continue
+    }
+
+    const env = getEnv(yield select(), tank)
+    const priorityMap = calculatePriorityMap(env)
+
+    // 降低回头的优先级
+    const reverse = reverseDirection(tank.direction)
+    priorityMap[reverse] = Math.min(priorityMap[reverse], 1)
+
+    const nextDirection = getRandomDirection(priorityMap)
+
+    log('binfo', env.barrierInfo)
+    log('pos', env.tankPosition)
+    log('priority-map', priorityMap)
+    log('next-direction', nextDirection)
+    // debugger
+
+    if (tank.direction !== nextDirection) {
+      $$postMessage({ type: 'turn', direction: nextDirection })
+      tank = tank.set('direction', nextDirection)
+      // 等待足够长的时间, 保证turn命令已经被处理
+      yield delay(100)
+    }
+
+    if (shouldFire(tank, env)) {
+      log('command fire!')
+      $$postMessage({ type: 'fire' })
+    }
+
+    log('forward-length:', env.barrierInfo[tank.direction].length)
+    $$postMessage({
+      type: 'forward',
+      // todo tank应该更加偏向于走到下一个 *路口*
+      // forwardLength: Math.max(BLOCK_SIZE, env.barrierInfo[tank.direction].length),
+      forwardLength: env.barrierInfo[tank.direction].length,
+    })
+    // $$postMessage({ type: 'fire', forwardLength: 3 * BLOCK_SIZE })
+    console.groupEnd()
+  }
+}
 
 function calculatePriorityMap({ tankPosition: pos, barrierInfo: binfo }: TankEnv): PriorityMap {
   const priorityMap: PriorityMap = {
@@ -157,7 +194,7 @@ function getEnv(state: State, tank: TankRecord): TankEnv {
 
   // 计算ai-tank与最近的human-tank的相对位置
   const { nearestHumanTank } = tanks.reduce((reduction, next) => {
-    if (next.side === 'user') {
+    if (next.side === 'human') {
       const distance = Math.abs(next.x - tank.x) + Math.abs(next.y - tank.y)
       if (distance < reduction.minDistance) {
         return { minDistance: distance, nearestHumanTank: next }
@@ -254,58 +291,6 @@ function shouldFire(tank: TankRecord, { barrierInfo, tankPosition }: TankEnv) {
   }
 
   return false
-}
-
-function* controller($$postMessage: (message: AICommand) => void, inputChannel: Channel<any>) {
-  while (true) {
-    console.group('turn & forward')
-    yield race({
-      timeout: call(delay, 1000),
-      event: take(inputChannel),
-    })
-    let tank: TankRecord = yield select(selectors.playerTank, 'AI')
-    if (tank == null) {
-      console.groupEnd()
-      continue
-    }
-
-    const env = getEnv(yield select(), tank)
-    const priorityMap = calculatePriorityMap(env)
-
-    // 降低回头的优先级
-    const reverse = reverseDirection(tank.direction)
-    priorityMap[reverse] = Math.min(priorityMap[reverse], 1)
-
-    const nextDirection = getRandomDirection(priorityMap)
-
-    log('binfo', env.barrierInfo)
-    log('pos', env.tankPosition)
-    log('priority-map', priorityMap)
-    log('next-direction', nextDirection)
-    // debugger
-
-    if (tank.direction !== nextDirection) {
-      $$postMessage({ type: 'turn', direction: nextDirection })
-      tank = tank.set('direction', nextDirection)
-      // 等待足够长的时间, 保证turn命令已经被处理
-      yield delay(100)
-    }
-
-    if (shouldFire(tank, env)) {
-      log('command fire!')
-      $$postMessage({ type: 'fire' })
-    }
-
-    log('forward-length:', env.barrierInfo[tank.direction].length)
-    $$postMessage({
-      type: 'forward',
-      // todo tank应该更加偏向于走到下一个 *路口*
-      // forwardLength: Math.max(BLOCK_SIZE, env.barrierInfo[tank.direction].length),
-      forwardLength: env.barrierInfo[tank.direction].length,
-    })
-    // $$postMessage({ type: 'fire', forwardLength: 3 * BLOCK_SIZE })
-    console.groupEnd()
-  }
 }
 
 function getRandomDirection({ up, down, left, right }: PriorityMap): Direction {
