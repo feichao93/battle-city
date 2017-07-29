@@ -5,10 +5,11 @@ import directionController from 'sagas/directionController'
 import fireController from 'sagas/fireController'
 import * as selectors from 'utils/selectors'
 import inlineAI from './inlineAI'
+
 const Worker = require('worker-loader!ai/worker')
 
 // 处理worker发送过来的message
-function* handleReceiveMessages(channel: Channel<{}>, notifyAI: Function) {
+function* handleReceiveMessages(channel: Channel<AICommand>, notifyAI: Function) {
   let fire = false
   let nextDirection: Direction = null
   let forwardLength = 0
@@ -37,22 +38,22 @@ function* handleReceiveMessages(channel: Channel<{}>, notifyAI: Function) {
   })
 
   while (true) {
-    const message = yield take(channel)
-    console.debug('[saga] receive:', message)
-    if (message.type === 'forward') {
+    const command: AICommand = yield take(channel)
+    // console.log('[saga] receive:', command)
+    if (command.type === 'forward') {
       const tank = yield select(selectors.playerTank, 'AI')
       if (tank == null) {
         continue
       }
       const { xy } = getDirectionInfo(tank.direction)
       startPos = tank.get(xy)
-      forwardLength = message.forwardLength
-    } else if (message.type === 'fire') {
+      forwardLength = command.forwardLength
+    } else if (command.type === 'fire') {
       fire = true
-    } else if (message.type === 'turn') {
-      nextDirection = message.direction
-    } else if (message.type === 'spawn-tank') {
-      const { x, y } = message
+    } else if (command.type === 'turn') {
+      nextDirection = command.direction
+    } else if (command.type === 'spawn-tank') {
+      const { x, y } = command
       yield put({ type: 'DECREMENT_ENEMY_COUNT' })
       // todo 检查x,y是否被占用
       const tankId = yield* spawnTank({ x, y, side: 'ai' })
@@ -71,6 +72,7 @@ function* handleReceiveMessages(channel: Channel<{}>, notifyAI: Function) {
     if (tank == null) {
       return null
     }
+    // fixme 转向的时候会将当前前进的信息清除, 导致转向命令和前进命令不能共存
     if (nextDirection && tank.direction !== nextDirection) {
       const direction = nextDirection
       nextDirection = null
@@ -111,7 +113,7 @@ export default function* workerSaga() {
   const inputChannel = makeChannel()
   const worker = new Worker()
 
-  const channel = eventChannel((emmiter) => {
+  const channel = eventChannel<AICommand>((emmiter) => {
     // injectDebugUtils(emmiter)
     window.$$postMessage = emmiter
     worker.addEventListener('message', listener)

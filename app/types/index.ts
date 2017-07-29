@@ -39,6 +39,11 @@ declare global {
     y: number
   }
 
+  interface Vector {
+    dx: number
+    dy: number
+  }
+
   type Direction = 'up' | 'down' | 'left' | 'right'
 
   type TankId = number
@@ -59,7 +64,7 @@ declare global {
   type AICommand = AICommand.AICommand
 
   namespace AICommand {
-    type AICommand = Forward | Fire | Turn
+    type AICommand = Forward | Fire | Turn | SpawnTank
 
     interface Forward {
       type: 'forward'
@@ -73,6 +78,12 @@ declare global {
     interface Turn {
       type: 'turn'
       direction: Direction
+    }
+
+    interface SpawnTank {
+      type: 'spawn-tank'
+      x: number
+      y: number
     }
   }
 }
