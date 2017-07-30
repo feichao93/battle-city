@@ -44,6 +44,8 @@ declare global {
     dy: number
   }
 
+  type Overlay = '' | 'gameover' | 'statistics'
+
   type Direction = 'up' | 'down' | 'left' | 'right'
 
   type TankId = number

@@ -1,23 +1,17 @@
-import { Map, Record } from 'immutable'
-
-type Base = {
-  overlay: string,
-  remainingEnemyCount: number,
-}
+import { Record } from 'immutable'
 
 export const GameRecord = Record({
-  overlay: '', // gameover | <empty-string>
+  overlay: '' as Overlay,
   // status: 'idle', // idle | on | gameover | win
   remainingEnemyCount: 20,
   // currentStageIndex: 0,
 }, 'GameRecord')
 
-export type GameRecord = Record.Instance<{
-  overlay: string,
-  remainingEnemyCount: number,
-}> & Readonly<Base>
+const record = GameRecord()
 
-export default function game(state = GameRecord(), action: Action) {
+export type GameRecord = typeof record
+
+export default function game(state = record, action: Action) {
   if (action.type === 'SHOW_OVERLAY') {
     return state.set('overlay', action.overlay)
   } else if (action.type === 'REMOVE_OVERLAY') {

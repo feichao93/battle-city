@@ -5,8 +5,13 @@ import { BLOCK_SIZE } from 'utils/constants'
 import { getNextId, spawnTank } from 'utils/common'
 import { State, TankRecord } from 'types'
 
-function* animateTexts(textIds: TextId[], { direction, distance: totalDistance, duration }:
-  { direction: Direction, distance: number, duration: number }) {
+type Animation = {
+  direction: Direction
+  distance: number
+  duration: number
+}
+
+function* animateTexts(textIds: TextId[], { direction, distance: totalDistance, duration }: Animation) {
   const speed = totalDistance / duration
   // 累计移动的距离
   let animatedDistance = 0
@@ -57,7 +62,6 @@ function* animateGameover() {
   yield put({ type: 'REMOVE_TEXT', textId: textId1 })
   yield put({ type: 'REMOVE_TEXT', textId: textId2 })
   yield put({ type: 'SHOW_OVERLAY', overlay: 'gameover' })
-  console.debug('GAMEOVER')
 }
 
 function* watchGameover() {
@@ -102,6 +106,12 @@ function* playerSaga(playerName: string) {
   }
 }
 
+function* stageStatistics() {
+  yield put({ type: 'SHOW_OVERLAY', overlay: 'statistics' })
+  yield delay(5000)
+  yield put({ type: 'REMOVE_OVERLAY', overlay: 'statistics' })
+}
+
 // 该saga用来管理游戏进度
 // 例如当前处于第几关, 当前得分
 export default function* gameManager() {
@@ -109,4 +119,10 @@ export default function* gameManager() {
   yield fork(playerSaga, 'player-1')
 
   yield put({ type: 'LOAD_STAGE', name: 'test' })
+
+  yield take('CLEAR_STAGE')
+
+  yield* stageStatistics()
+
+  yield put({ type: 'LOAD_STAEG', name: 'test' })
 }

@@ -191,7 +191,10 @@ export default function* AIMasterSaga() {
         playerName,
         tankId,
       })
-    } // else 人类玩家获得了胜利, 游戏应该进入下一关
+    } else {
+      // todo 在这里判断stage清空 不好
+      yield put({ type: 'CLEAR_STAGE' })
+    }
   }
 }
 

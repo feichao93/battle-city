@@ -6,6 +6,7 @@ import { Tank } from 'components/tanks'
 import HUD from 'components/HUD'
 import Bullet from 'components/Bullet'
 import GameoverOverlay from 'components/GameoverOverlay'
+import StatisticsOverlay from 'components/StatisticsOverlay'
 import BrickLayer from 'components/BrickLayer'
 import SteelLayer from 'components/SteelLayer'
 import RiverLayer from 'components/RiverLayer'
@@ -17,10 +18,10 @@ import Flicker from 'components/Flicker'
 import TextLayer from 'components/TextLayer'
 import { State } from 'types'
 
-class Screen extends React.Component<State, {}> {
+class Screen extends React.Component<State> {
   render() {
     const { bullets, map, explosions, flickers, tanks, game, texts } = this.props
-    const { overlay } = game.toObject()
+    const overlay = game.get('overlay')
     const { bricks, steels, rivers, snows, forests, eagle } = map.toObject()
     return (
       <g role="screen">
@@ -77,6 +78,7 @@ class Screen extends React.Component<State, {}> {
           </g>
         </g>
         {overlay === 'gameover' ? <GameoverOverlay /> : null}
+        {overlay === 'statistics' ? <StatisticsOverlay /> : null}
         <TextLayer texts={texts} />
       </g>
     )

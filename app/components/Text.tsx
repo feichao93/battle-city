@@ -268,7 +268,16 @@ const chars: Chars = {
       d="M1,0 h7 v2 h-1 v1 h-1 v1 h-1 v1 h-1 v1 h4 v1 h-7 v-2 h1 v-1 h1 v-1 h1 v-1 h1 v-1 h-4 v-1"
     />
   ),
-  /* eslint-disable quote-props */
+  '-': ({ fill }) => (
+    <rect
+      role="character-dash"
+      fill={fill}
+      x="1"
+      y="3"
+      width="6"
+      height="2"
+    />
+  ),
   ['\u2160'.toLowerCase()]: ({ fill }) => (
     <path
       role="character-roman-numeral-one"
@@ -276,7 +285,6 @@ const chars: Chars = {
       d="M2,0 h4 v1 h-1 v5 h1 v1 h-4 v-1 h1 v-5 h-1 v-1"
     />
   ),
-  // eslint-disable-next-line quote-props
   ['\u2161'.toLowerCase()]: ({ fill }) => (
     <g role="character-roman-numeral-two" fill={fill}>
       <rect x={2} y={0} width={5} height={1} />
@@ -284,6 +292,13 @@ const chars: Chars = {
       <rect x={5} y={1} width={1} height={5} />
       <rect x={2} y={6} width={5} height={1} />
     </g>
+  ),
+  ['\u2190'.toLowerCase()]: ({ fill }) => (
+    <path
+      role="character-leftwards-arrow"
+      fill={fill}
+      d="M1,3 h1 v-1 h1 v-1 h1 v-1 h1 v2 h3 v3 h-3 v2 h-1 v-1 h-1 v-1 h-1 v-1 h-1 v-1"
+    />
   ),
 }
 
