@@ -15,5 +15,8 @@
     "X  BF X  BF X  X  X  X  X  BF X  BF X  ",
     "X  BF X  BF X  B8 Bc B4 X  BF X  BF X  ",
     "X  X  X  X  X  Ba EE B5 X  X  X  X  X  "
+  ],
+  "enemyLevels": [
+    "20*basic"
   ]
 }

@@ -114,22 +114,18 @@ export function getDirectionInfo(direction: Direction, flipxy = false) {
   return result
 }
 
-export function* spawnTank({ x, y, side }: { x: number, y: number, side: Side }) {
+export function* spawnTank(tank: TankRecord) {
   yield put({
     type: 'SPAWN_FLICKER',
     flickerId: getNextId('flicker'),
-    x,
-    y,
+    x: tank.x,
+    y: tank.y,
   })
   yield delay(TANK_SPAWN_DELAY)
   const tankId = getNextId('tank')
   yield put({
     type: 'SPAWN_TANK',
-    side,
-    tankId,
-    x,
-    y,
-    direction: 'up',
+    tank: tank.set('tankId', tankId),
   })
   return tankId
 }

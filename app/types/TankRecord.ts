@@ -7,7 +7,7 @@ const TankRecord = Record({
   side: 'human' as Side,
   direction: null as Direction,
   moving: false,
-  level: 0,
+  level: 'basic' as TankLevel,
   color: 'green',
   bulletSpeed: 0.12,
   bulletLimit: 2,

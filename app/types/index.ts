@@ -1,7 +1,10 @@
+// 敌人描述, 例如: basic*20, fast*10
+type Enemy = string
 export type StageConfig = {
-  name: string,
-  difficulty: 'easy' | 'normal' | 'hard',
-  map: string[],
+  name: string
+  difficulty: 'easy' | 'normal' | 'hard'
+  map: string[]
+  enemies: Enemy
 }
 
 export { default as TankRecord } from 'types/TankRecord'
@@ -46,10 +49,18 @@ declare global {
 
   type Overlay = '' | 'gameover' | 'statistics'
 
+  // todo 使用enemy-level来标记敌人坦克的类型
+  type TankLevel = 'basic' | 'fast' | 'power' | 'armor'
+
   type Direction = 'up' | 'down' | 'left' | 'right'
 
   type TankId = number
   type BulletId = number
+  /**
+   * 玩家名称.
+   * human-player的名称格式为 'player-x', 而AI-player的名称格式为 'AI-x'
+   * 其实x表示数字1,2,3...
+   */
   type PlayerName = string
   type TextId = number
   type FlickerId = number

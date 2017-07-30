@@ -4,19 +4,48 @@ import { Bitmap, Pixel } from 'components/elements'
 import registerTick from 'hocs/registerTick'
 import { BLOCK_SIZE, TANK_COLOR_SCHEMES } from 'utils/constants'
 
+interface TankComponent {
+  (props: { transform: string, color: string, shape: number }): JSX.Element
+}
+
+function resolveTankComponent(side: Side, level: TankLevel): TankComponent {
+  let component: TankComponent
+  if (side === 'human') {
+    if (level === 'basic') {
+      component = TankHumanBasic
+    } else if (level === 'fast') {
+      component = TankHumanFast
+    } else if (level === 'power') {
+      component = TankHumanPower
+    } else {
+      component = TankHumanArmor
+    }
+  } else {
+    if (level === 'basic') {
+      component = TankAIBasic
+    } else if (level === 'fast') {
+      component = TankAIFast
+    } else if (level === 'power') {
+      component = TankAIPower
+    } else {
+      component = TankAIArmor
+    }
+  }
+  return component
+}
+
 type P = {
-  x: number,
-  y: number,
-  color: string,
-  level: number,
-  direction: Direction,
-  tickIndex?: number,
-  moving: boolean,
+  x: number
+  y: number
+  color: string
+  side: Side
+  level: TankLevel
+  direction: Direction
+  tickIndex?: number
+  moving: boolean
 }
 
 type S = { lastShape: number }
-
-type TankLevelX = (props: { transform: string, color: string, shape: number }) => JSX.Element
 
 class TankClass extends React.Component<P, S> {
   static defaultProps = {
@@ -37,7 +66,7 @@ class TankClass extends React.Component<P, S> {
   }
 
   render() {
-    const { x, y, color, level, direction, tickIndex, moving } = this.props
+    const { x, y, color, side, level, direction, tickIndex, moving } = this.props
     const { lastShape } = this.state
     let rotate
     let dx
@@ -60,17 +89,8 @@ class TankClass extends React.Component<P, S> {
       rotate = 90
     }
     const shape = moving ? tickIndex : lastShape
-    const levelToTank: { [leve: number]: TankLevelX } = {
-      0: TankLevel0,
-      1: TankLevel1,
-      2: TankLevel2,
-      3: TankLevel3,
-      4: TankLevel4,
-      5: TankLevel5,
-      6: TankLevel6,
-      7: TankLevel7,
-    }
-    return React.createElement(levelToTank[level], {
+
+    return React.createElement(resolveTankComponent(side, level), {
       transform: `translate(${dx}, ${dy})rotate(${rotate})`,
       color,
       shape,
@@ -80,7 +100,7 @@ class TankClass extends React.Component<P, S> {
 
 export const Tank: React.ComponentClass<P> = registerTick(80, 80)(TankClass)
 
-const TankLevel0: TankLevelX = ({ transform, color, shape }) => {
+const TankHumanBasic: TankComponent = ({ transform, color, shape }) => {
   const scheme = TANK_COLOR_SCHEMES[color]
   const { a, b, c } = scheme
   return (
@@ -97,14 +117,14 @@ const TankLevel0: TankLevelX = ({ transform, color, shape }) => {
             )}
           </g>
         ) : (
-          <g role="left-tire-shape-1">
-            <Bitmap x={1} y={4} d={['acc']} scheme={scheme} />
-            <Bitmap x={1} y={14} d={['bcc']} scheme={scheme} />
-            {_.range(4).map(i =>
-              <rect key={i} x={1} width={2} y={6 + 2 * i} height={1} fill={c} />
-            )}
-          </g>
-        )}
+            <g role="left-tire-shape-1">
+              <Bitmap x={1} y={4} d={['acc']} scheme={scheme} />
+              <Bitmap x={1} y={14} d={['bcc']} scheme={scheme} />
+              {_.range(4).map(i =>
+                <rect key={i} x={1} width={2} y={6 + 2 * i} height={1} fill={c} />
+              )}
+            </g>
+          )}
       </g>
 
 
@@ -119,12 +139,12 @@ const TankLevel0: TankLevelX = ({ transform, color, shape }) => {
             )}
           </g>
         ) : (
-          <g role="right-tire-shape-1">
-            {_.range(5).map(i =>
-              <rect key={i} x={12} width={2} y={5 + 2 * i} height={1} fill={b} />
-            )}
-          </g>
-        )}
+            <g role="right-tire-shape-1">
+              {_.range(5).map(i =>
+                <rect key={i} x={12} width={2} y={5 + 2 * i} height={1} fill={b} />
+              )}
+            </g>
+          )}
       </g>
 
       <g role="tank-body">
@@ -143,7 +163,7 @@ const TankLevel0: TankLevelX = ({ transform, color, shape }) => {
   )
 }
 
-const TankLevel1: TankLevelX = ({ transform, color, shape }) => {
+const TankHumanFast: TankComponent = ({ transform, color, shape }) => {
   const scheme = TANK_COLOR_SCHEMES[color]
   const { a, b, c } = scheme
   return (
@@ -162,14 +182,14 @@ const TankLevel1: TankLevelX = ({ transform, color, shape }) => {
             )}
           </g>
         ) : (
-          <g role="left-tire-shape-1">
-            <Bitmap x={1} y={4} d={['bcc']} scheme={scheme} />
-            <Bitmap x={1} y={15} d={['abb']} scheme={scheme} />
-            {_.range(5).map(i =>
-              <rect key={i} x={1} width={2} y={6 + 2 * i} height={1} fill={c} />
-            )}
-          </g>
-        )}
+            <g role="left-tire-shape-1">
+              <Bitmap x={1} y={4} d={['bcc']} scheme={scheme} />
+              <Bitmap x={1} y={15} d={['abb']} scheme={scheme} />
+              {_.range(5).map(i =>
+                <rect key={i} x={1} width={2} y={6 + 2 * i} height={1} fill={c} />
+              )}
+            </g>
+          )}
       </g>
 
 
@@ -183,13 +203,13 @@ const TankLevel1: TankLevelX = ({ transform, color, shape }) => {
             )}
           </g>
         ) : (
-          <g role="right-tire-shape-1">
-            {_.range(6).map(i =>
-              <rect key={i} x={12} width={2} y={5 + 2 * i} height={1} fill={b} />
-            )}
-            <Pixel x={11} y={15} fill={b} />
-          </g>
-        )}
+            <g role="right-tire-shape-1">
+              {_.range(6).map(i =>
+                <rect key={i} x={12} width={2} y={5 + 2 * i} height={1} fill={b} />
+              )}
+              <Pixel x={11} y={15} fill={b} />
+            </g>
+          )}
       </g>
 
       <g role="tank-body">
@@ -205,7 +225,7 @@ const TankLevel1: TankLevelX = ({ transform, color, shape }) => {
   )
 }
 
-const TankLevel2: TankLevelX = ({ transform, color, shape }) => {
+const TankHumanPower: TankComponent = ({ transform, color, shape }) => {
   const scheme = TANK_COLOR_SCHEMES[color]
   const { a, b, c } = scheme
   return (
@@ -221,13 +241,13 @@ const TankLevel2: TankLevelX = ({ transform, color, shape }) => {
             )}
           </g>
         ) : (
-          <g role="left-tire-shape-1">
-            <Bitmap x={1} y={3} d={['aaa']} scheme={scheme} />
-            {_.range(5).map(i =>
-              <rect key={i} x={1} width={1} y={4 + 2 * i} height={1} fill={c} />
-            )}
-          </g>
-        )}
+            <g role="left-tire-shape-1">
+              <Bitmap x={1} y={3} d={['aaa']} scheme={scheme} />
+              {_.range(5).map(i =>
+                <rect key={i} x={1} width={1} y={4 + 2 * i} height={1} fill={c} />
+              )}
+            </g>
+          )}
       </g>
 
 
@@ -241,13 +261,13 @@ const TankLevel2: TankLevelX = ({ transform, color, shape }) => {
             )}
           </g>
         ) : (
-          <g role="right-tire-shape-1">
-            <Bitmap x={11} y={3} d={['ab']} scheme={scheme} />
-            {_.range(6).map(i =>
-              <rect key={i} x={13} width={1} y={3 + 2 * i} height={1} fill={b} />
-            )}
-          </g>
-        )}
+            <g role="right-tire-shape-1">
+              <Bitmap x={11} y={3} d={['ab']} scheme={scheme} />
+              {_.range(6).map(i =>
+                <rect key={i} x={13} width={1} y={3 + 2 * i} height={1} fill={b} />
+              )}
+            </g>
+          )}
       </g>
 
       <g role="tank-body">
@@ -269,7 +289,7 @@ const TankLevel2: TankLevelX = ({ transform, color, shape }) => {
   )
 }
 
-const TankLevel3: TankLevelX = ({ transform, color, shape }) => {
+const TankHumanArmor: TankComponent = ({ transform, color, shape }) => {
   const scheme = TANK_COLOR_SCHEMES[color]
   const { a, b, c } = scheme
   return (
@@ -330,7 +350,7 @@ const TankLevel3: TankLevelX = ({ transform, color, shape }) => {
   )
 }
 
-const TankLevel4: TankLevelX = ({ transform, color, shape }) => {
+const TankAIBasic: TankComponent = ({ transform, color, shape }) => {
   const scheme = TANK_COLOR_SCHEMES[color]
   const { a, b, c } = scheme
   return (
@@ -389,7 +409,7 @@ const TankLevel4: TankLevelX = ({ transform, color, shape }) => {
   )
 }
 
-const TankLevel5: TankLevelX = ({ transform, color, shape }) => {
+const TankAIFast: TankComponent = ({ transform, color, shape }) => {
   const scheme = TANK_COLOR_SCHEMES[color]
   const { a, b, c } = scheme
   return (
@@ -453,7 +473,7 @@ const TankLevel5: TankLevelX = ({ transform, color, shape }) => {
   )
 }
 
-const TankLevel6: TankLevelX = ({ transform, color, shape }) => {
+const TankAIPower: TankComponent = ({ transform, color, shape }) => {
   const scheme = TANK_COLOR_SCHEMES[color]
   const { a, b, c } = scheme
   return (
@@ -514,7 +534,7 @@ const TankLevel6: TankLevelX = ({ transform, color, shape }) => {
   )
 }
 
-const TankLevel7: TankLevelX = ({ transform, color, shape }) => {
+const TankAIArmor: TankComponent = ({ transform, color, shape }) => {
   const scheme = TANK_COLOR_SCHEMES[color]
   const { a, b, c } = scheme
   return (

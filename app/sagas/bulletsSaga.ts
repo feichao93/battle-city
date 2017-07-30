@@ -9,19 +9,38 @@ import {
   iterRowsAndCols,
   testCollide
 } from 'utils/common'
-import { BulletRecord, BulletsMap, State, TankRecord, } from 'types'
+import { BulletRecord, BulletsMap, State, TankRecord } from 'types'
+
+type HurtCount = number
+type TargetTankId = TankId
+type SourceTankId = TankId
 
 type Context = {
   /** 将要爆炸的子弹的id集合 */
   expBulletIdSet: Set<BulletId>,
   /** 不需要爆炸的子弹的id集合 */
   noExpBulletIdSet: Set<BulletId>,
-  /** 坦克受伤Map. tankId到收到伤害的映射 */
-  tankHurtMap: Map<TankId, number>,
+  /** 坦克受伤统计Map */
+  tankHurtMap: Map<TargetTankId, Map<SourceTankId, HurtCount>>
 }
 
 function isBulletInField(bullet: BulletRecord) {
   return isInField(asBox(bullet))
+}
+
+function sum(iterable: Iterable<number>) {
+  let result = 0
+  for (const item of iterable) {
+    result += item
+  }
+  return result
+}
+
+function getOrDefault<K, V>(map: Map<K, V>, key: K, getValue: () => V) {
+  if (!map.has(key)) {
+    map.set(key, getValue())
+  }
+  return map.get(key)
 }
 
 function makeExplosionFromBullet(bullet: BulletRecord): PutEffect<Action> {
@@ -202,12 +221,16 @@ function* handleBulletsCollidedWithTanks(context: Context) {
           // 不发生子弹爆炸
           context.expBulletIdSet.add(bullet.bulletId)
         } else if (bulletSide === 'human' && tankSide === 'ai') {
-          const oldHurt = context.tankHurtMap.get(tank.tankId) || 0
-          context.tankHurtMap.set(tank.tankId, oldHurt + 1)
+          const hurtSubMap = getOrDefault(context.tankHurtMap, tank.tankId, () => new Map())
+          const oldHurt = hurtSubMap.get(tank.tankId) || 0
+          hurtSubMap.set(bullet.tankId, oldHurt + 1)
+
           context.expBulletIdSet.add(bullet.bulletId)
         } else if (bulletSide === 'ai' && tankSide === 'human') {
-          const oldHurt = context.tankHurtMap.get(tank.tankId) || 0
-          context.tankHurtMap.set(tank.tankId, oldHurt + 1)
+          const hurtSubMap = getOrDefault(context.tankHurtMap, tank.tankId, () => new Map())
+          const oldHurt = hurtSubMap.get(tank.tankId) || 0
+          hurtSubMap.set(bullet.tankId, oldHurt + 1)
+
           context.expBulletIdSet.add(bullet.bulletId)
         } else if (bulletSide === 'ai' && tankSide === 'ai') {
           // 坦克什么事也不发生
@@ -239,7 +262,7 @@ function* handleBulletsCollidedWithBullets(context: Context) {
 function* handleAfterTick() {
   while (true) {
     yield take('AFTER_TICK')
-    const { bullets }: State = yield select()
+    const { bullets, players, tanks }: State = yield select()
 
     const bulletsCollidedWithEagle = yield* filterBulletsCollidedWithEagle(bullets)
     if (!bulletsCollidedWithEagle.isEmpty()) {
@@ -280,9 +303,21 @@ function* handleAfterTick() {
     }
 
     // 坦克伤害结算 todo 假设目前tank被击中之后将直接爆炸
-    if (context.tankHurtMap.size !== 0) {
-      const tankIdSet = ISet(context.tankHurtMap.keys())
-      yield destroyTanks(tankIdSet)
+    for (const [targetTankId, hurtMap] of context.tankHurtMap.entries()) {
+      // todo 目前不考虑具体的伤害值, 认为一旦承受伤害, tank就会死亡
+      // const totalHurt = sum(hurtMap.values())
+      const sourceTankId = hurtMap.values().next().value
+      yield put<Action>({
+        type: 'KILL',
+        targetTank: tanks.get(targetTankId),
+        sourceTank: tanks.get(sourceTankId),
+        targetPlayer: players.find(ply => ply.tankId === targetTankId),
+        sourcePlayer: players.find(ply => ply.tankId === sourceTankId),
+      })
+    }
+    // 移除坦克 & 产生爆炸效果
+    if (context.tankHurtMap.size > 0) {
+      yield destroyTanks(ISet(context.tankHurtMap.keys()))
     }
 
     // 不产生爆炸, 直接消失的子弹

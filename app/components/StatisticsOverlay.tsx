@@ -56,7 +56,8 @@ export default class StatisticsOverlay extends React.PureComponent {
             x={8 * B}
             y={7.7 * B}
             color="silver"
-            level={4}
+            side="ai"
+            level="basic"
             direction="up"
             moving={false}
           />
@@ -70,7 +71,8 @@ export default class StatisticsOverlay extends React.PureComponent {
             x={8 * B}
             y={9.2 * B}
             color="silver"
-            level={5}
+            side="ai"
+            level="fast"
             direction="up"
             moving={false}
           />
@@ -84,7 +86,8 @@ export default class StatisticsOverlay extends React.PureComponent {
             x={8 * B}
             y={10.7 * B}
             color="silver"
-            level={6}
+            side="ai"
+            level="power"
             direction="up"
             moving={false}
           />
@@ -98,7 +101,8 @@ export default class StatisticsOverlay extends React.PureComponent {
             x={8 * B}
             y={12.2 * B}
             color="silver"
-            level={7}
+            side="ai"
+            level="armor"
             direction="up"
             moving={false}
           />

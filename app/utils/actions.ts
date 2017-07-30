@@ -1,19 +1,22 @@
 import { Map, Set } from 'immutable'
+import PlayerRecord from 'types/PlayerRecord'
 import TankRecord from 'types/TankRecord'
 import BulletRecord from 'types/BulletRecord'
 
 declare global {
   type Action = Action.Action
+  type ActionType = Action.ActionType
 
   namespace Action {
     export type Action = MoveAction | StartMoveAction | TickAction | AfterTickAction
       | AddBulletAction | DestroyBulletsAction | DestroySteelsAction | DestroyBricksAction
       | UpdaetBulletsAction | LoadStageAction | Simple<'GAMEOVER'> | ShowOverlayAction
-      | RemoveOverlayAction | Simple<'DECREMENT_ENEMY_COUNT'> | DecrementPlayerLiveAction
+      | RemoveOverlayAction | Simple<'DECREMENT_REMAINING_ENEMY_COUNT'> | DecrementPlayerLiveAction
       | ActivatePlayerAction | CreatePlayerAction | RemovePlayerAction | Simple<'DEACTIVATE_ALL_PLAYERS'>
       | SpawnExplosionAction | RemoveExplosionAction | SetTextAction | UpdateTextPositionAction
       | Simple<'DESTROY_EAGLE'> | Simple<'ALL_HUMAN_DEAD'> | SpawnTankAction | StartMoveAction
       | RemoveTankAction | StopMoveAction | RemoveTextAction | RemoveFlickerAction | SpawnFlickerAction
+      | KillAction
 
     export type ActionType = Action['type']
 
@@ -21,6 +24,14 @@ declare global {
       type: 'MOVE',
       tankId: TankId,
       tank: TankRecord,
+    }
+
+    export type KillAction = {
+      type: 'KILL'
+      targetTank: TankRecord
+      sourceTank: TankRecord
+      targetPlayer: PlayerRecord
+      sourcePlayer: PlayerRecord
     }
 
     export type StartMoveAction = {
@@ -107,11 +118,7 @@ declare global {
 
     export type SpawnTankAction = {
       type: 'SPAWN_TANK',
-      side: Side,
-      tankId: TankId,
-      x: number,
-      y: number,
-      direction: Direction,
+      tank: TankRecord
     }
 
     export type RemoveTankAction = {

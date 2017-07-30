@@ -4,33 +4,20 @@ import { FIELD_BLOCK_SIZE, N_MAP, BLOCK_SIZE } from 'utils/constants'
 
 const testStage: StageConfig = require('stages/stage-test.json')
 
-const configs: { [name: string]: StageConfig } = {
+const stageConfigs: { [name: string]: StageConfig } = {
   test: testStage,
 }
 
-type EagleBase = {
-  x: number,
-  y: number,
-  broken: boolean,
-}
-export type EagleRecord = Record.Instance<EagleBase> & Readonly<EagleBase>
 export const EagleRecord = Record({
   x: 6 * BLOCK_SIZE,
   y: 12 * BLOCK_SIZE,
   broken: false,
 })
+const eagleRecord = EagleRecord()
+export type EagleRecord = typeof eagleRecord
 
-type MapBase = {
-  eagle: EagleRecord,
-  bricks: List<boolean>,
-  steels: List<boolean>,
-  rivers: List<boolean>,
-  snows: List<boolean>,
-  forests: List<boolean>,
-}
-export type MapRecord = Record.Instance<MapBase> & Readonly<MapBase>
 export const MapRecord = Record({
-  eagle: EagleRecord(),
+  eagle: eagleRecord,
   bricks: Repeat(false, N_MAP.BRICK ** 2).toList(),
   steels: Repeat(false, N_MAP.STEEL ** 2).toList(),
   rivers: Repeat(false, N_MAP.RIVER ** 2).toList(),
@@ -38,11 +25,14 @@ export const MapRecord = Record({
   forests: Repeat(false, N_MAP.FOREST ** 2).toList(),
 })
 
+const mapRecord = MapRecord()
+export type MapRecord = typeof mapRecord
+
 // todo eagle的坐标也应该从json文件中导入
-export default function mapReducer(state = MapRecord(), action: Action) {
+export default function mapReducer(state = mapRecord, action: Action) {
   if (action.type === 'LOAD_STAGE') {
     const { name } = action
-    return parseStageConfig(configs[name])
+    return parseStageMap(stageConfigs[name].map)
   } else if (action.type === 'DESTROY_EAGLE') {
     return state.setIn(['eagle', 'broken'], true)
   } else if (action.type === 'DESTROY_BRICKS') {
@@ -66,8 +56,7 @@ export default function mapReducer(state = MapRecord(), action: Action) {
 // 钢块 steel  T<n>
 // 老鹰 eagle  E
 // todo 优化代码
-function parseStageConfig(config: StageConfig) {
-  const map = config.map
+function parseStageMap(map: string[]) {
   const bricks = new Set()
   const steels = new Set()
   const rivers = new Set()

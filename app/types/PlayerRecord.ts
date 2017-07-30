@@ -1,7 +1,7 @@
 import { Record } from 'immutable'
 
 const PlayerRecord = Record({
-  playerName: null as string,
+  playerName: null as PlayerName,
   tankId: 0,
   lives: 0,
   score: 0,

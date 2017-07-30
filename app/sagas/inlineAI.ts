@@ -53,11 +53,11 @@ export default function* inlineAI(playerName: string,
                                   postMessage: (command: AICommand) => void,
                                   noteChannel: Channel<any>) {
   while (true) {
-    console.groupCollapsed(`AI ${playerName}`)
     const raceResult = yield race({
       timeout: call(delay, 2000),
       note: take(noteChannel),
     })
+    console.groupCollapsed(`AI ${playerName}`)
     console.log(raceResult)
     let tank: TankRecord = yield select(selectors.playerTank, playerName)
     if (tank == null) {

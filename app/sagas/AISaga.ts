@@ -6,6 +6,7 @@ import fireController from 'sagas/fireController'
 import * as selectors from 'utils/selectors'
 import inlineAI from 'sagas/inlineAI'
 import { State } from 'reducers/index'
+import TankRecord from 'types/TankRecord'
 
 const EmptyWorker = require('worker-loader!ai/emptyWorker')
 
@@ -155,20 +156,17 @@ export default function* AIMasterSaga() {
 
   let nextAIPlayerIndex = 0
   while (true) {
-    const action: Action = yield take(['REMOVE_TANK', 'LOAD_STAGE'])
+    const actionTypes: ActionType[] = ['KILL', 'LOAD_STAGE']
+    const action: Action = yield take(actionTypes)
     if (action.type === 'LOAD_STAGE') {
-      yield all([addAI(), addAI()])
-    } else if (action.type === 'REMOVE_TANK') {
-      // todo 通过判断REMOVE_TANK action来判断坦克是否被击毁 不好
-      for (const [playerName, task] of Object.entries(taskMap)) {
-        const aiTank = yield select(selectors.playerTank, playerName)
-        // 说明该ai-player的坦克被击毁了
-        if (aiTank == null) {
-          task.cancel()
-          delete taskMap[playerName]
-          yield* addAI()
-        }
-      }
+      yield* addAI()
+      yield* addAI()
+    } else if (action.type === 'KILL' && action.targetTank.side === 'ai') {
+      // ai-player的坦克被击毁了
+      const task = taskMap[action.targetPlayer.playerName]
+      task.cancel()
+      delete taskMap[action.targetPlayer.playerName]
+      yield* addAI()
     }
   }
 
@@ -182,8 +180,8 @@ export default function* AIMasterSaga() {
         lives: Infinity,
       })
       const { x, y } = yield select(selectors.availableSpawnPosition)
-      yield put({ type: 'DECREMENT_ENEMY_COUNT' })
-      const tankId = yield* spawnTank({ x, y, side: 'ai' })
+      yield put({ type: 'DECREMENT_REMAINING_ENEMY_COUNT' })
+      const tankId = yield* spawnTank(TankRecord({ x, y, side: 'ai' }))
       taskMap[playerName] = yield spawn(AIWorkerSaga, playerName, EmptyWorker)
 
       yield put<Action.ActivatePlayerAction>({
@@ -196,41 +194,4 @@ export default function* AIMasterSaga() {
       yield put({ type: 'CLEAR_STAGE' })
     }
   }
-}
-
-declare global {
-  interface Window {
-    go: any
-    fire: any
-    idle: any
-    $$postMessage: any
-  }
-}
-
-function injectDebugUtils(emmiter: any) {
-  // todo 下面三个函数用来在命令行中测试
-  window.go = (x: number, y: number) => emmiter({ type: 'move', x, y })
-  window.fire = () => emmiter({ type: 'fire' })
-  window.idle = () => emmiter({ type: 'idle' })
-  setTimeout(() => {
-    const arena = document.querySelector('[role=battle-field]')
-    arena.addEventListener('click', (event: MouseEvent) => {
-      const rect = arena.getBoundingClientRect()
-      const x = event.clientX - rect.left
-      const y = event.clientY - rect.top
-      const flr = (xxx: number) => Math.floor(xxx / 8) * 8
-      window.go(flr(x - 4), flr(y - 4))
-    })
-    let firing = false
-    arena.addEventListener('contextmenu', (event) => {
-      event.preventDefault()
-      if (firing) {
-        window.idle()
-        firing = true
-      } else {
-        window.fire()
-        firing = false
-      }
-    })
-  }, 100)
 }

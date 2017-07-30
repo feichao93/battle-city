@@ -49,7 +49,8 @@ class Screen extends React.Component<State> {
                 x={tank.x}
                 y={tank.y}
                 direction={tank.direction}
-                level={0}
+                side={tank.side}
+                level={tank.level}
                 color={tank.color}
                 moving={tank.moving}
               />

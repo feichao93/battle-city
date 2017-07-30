@@ -74,7 +74,7 @@ function* watchGameover() {
   }
 }
 
-function* playerSaga(playerName: string) {
+function* humanPlayerSaga(playerName: string) {
   yield put({
     type: 'CREATE_PLAYER',
     playerName,
@@ -82,26 +82,28 @@ function* playerSaga(playerName: string) {
   })
 
   while (true) {
-    yield take(['REMOVE_TANK', 'LOAD_STAGE'])
-    const tank: TankRecord = yield select(selectors.playerTank, playerName)
-    if (tank == null) {
-      const { players }: State = yield select()
-      const player = players.get(playerName)
-      if (player.lives > 0) {
-        yield put({ type: 'DECREMENT_PLAYER_LIVE', playerName })
-        const tankId = yield* spawnTank({
-          x: 4 * BLOCK_SIZE,
-          y: 12 * BLOCK_SIZE,
-          side: 'human',
-        })
-        yield put({
-          type: 'ACTIVATE_PLAYER',
-          playerName: 'player-1',
-          tankId,
-        })
-      } else {
-        yield put({ type: 'ALL_HUMAN_DEAD' })
-      }
+    yield take((action: Action) => (
+      action.type === 'LOAD_STAGE'
+      || action.type === 'KILL' && action.targetPlayer.playerName === 'player-1'
+    ))
+    const { players }: State = yield select()
+    const player = players.get(playerName)
+    if (player.lives > 0) {
+      // todo 是否可以等待一会儿 再开始生成坦克
+      yield put({ type: 'DECREMENT_PLAYER_LIVE', playerName })
+      const tankId = yield* spawnTank(TankRecord({
+        x: 4 * BLOCK_SIZE,
+        y: 12 * BLOCK_SIZE,
+        side: 'human',
+        level: 'basic',
+      }))
+      yield put({
+        type: 'ACTIVATE_PLAYER',
+        playerName: 'player-1',
+        tankId,
+      })
+    } else {
+      yield put({ type: 'ALL_HUMAN_DEAD' })
     }
   }
 }
@@ -116,7 +118,7 @@ function* stageStatistics() {
 // 例如当前处于第几关, 当前得分
 export default function* gameManager() {
   yield fork(watchGameover)
-  yield fork(playerSaga, 'player-1')
+  yield fork(humanPlayerSaga, 'player-1')
 
   yield put({ type: 'LOAD_STAGE', name: 'test' })
 
