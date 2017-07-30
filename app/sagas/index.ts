@@ -1,27 +1,11 @@
-import { takeEvery, delay, eventChannel } from 'redux-saga'
-import { fork, take, put } from 'redux-saga/effects'
+import { delay, takeEvery } from 'redux-saga'
+import { fork, put, take } from 'redux-saga/effects'
 import humanController from 'sagas/humanController'
 import bulletsSaga from 'sagas/bulletsSaga'
 import gameManager from 'sagas/gameManager'
 import AIMasterSaga from 'sagas/AISaga'
+import tickChannel from 'sagas/tickChannel'
 import { CONTROL_CONFIG, TANK_SPAWN_DELAY } from 'utils/constants'
-
-const tickChannel = eventChannel<Action>((emit) => {
-  let lastTime = performance.now()
-  let requestId = requestAnimationFrame(emitTick)
-
-  function emitTick() {
-    const now = performance.now()
-    emit({ type: 'TICK', delta: now - lastTime })
-    emit({ type: 'AFTER_TICK', delta: now - lastTime })
-    lastTime = now
-    requestId = requestAnimationFrame(emitTick)
-  }
-
-  return () => {
-    cancelAnimationFrame(requestId)
-  }
-})
 
 function* autoRemoveEffects() {
   yield takeEvery('SPAWN_EXPLOSION', function* removeExplosion({ explosionId, explosionType }: Action.SpawnExplosionAction) {

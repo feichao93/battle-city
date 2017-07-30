@@ -7,7 +7,16 @@ const isProduction = process.env.NODE_ENV === 'production'
 
 const commonPlugins = [
   new HtmlWebpackPlugin({
+    title: 'battle-city',
+    filename: 'index.html',
     template: path.resolve(__dirname, 'app/index.tmpl.html'),
+    chunks: ['main'],
+  }),
+  new HtmlWebpackPlugin({
+    title: 'stories',
+    filename: 'stories.html',
+    template: path.resolve(__dirname, 'app/index.tmpl.html'),
+    chunks: ['stories'],
   }),
 ]
 
@@ -24,10 +33,13 @@ module.exports = {
   target: 'web',
   devtool: isProduction ? false : 'source-map',
 
-  entry: [
-    'react-hot-loader/patch',
-    __dirname + "/app/main.tsx"
-  ],
+  entry: {
+    main: [
+      'react-hot-loader/patch',
+      __dirname + "/app/main.tsx"
+    ],
+    stories: path.resolve(__dirname, 'app/stories.tsx'),
+  },
 
   output: {
     path: path.resolve(__dirname, 'build', packageInfo.version),

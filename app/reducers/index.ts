@@ -20,7 +20,7 @@ export type State = {
   texts: TextsMap,
 }
 
-function time(state = 0, action: Action) {
+export function time(state = 0, action: Action) {
   if (action.type === 'TICK') {
     return state + action.delta
   } else {
