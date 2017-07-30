@@ -16,11 +16,7 @@ const devPlugins = [
 ]
 
 const productionPlugins = [
-  new webpack.DefinePlugin({
-    'process.env': {
-      NODE_ENV: JSON.stringify('production'),
-    },
-  }),
+  new webpack.EnvironmentPlugin({ NODE_ENV: 'development' }),
 ]
 
 module.exports = {
@@ -48,33 +44,15 @@ module.exports = {
 
   module: {
     rules: [
-      // {
-      //   test: /\.js$/,
-      //   use: ['source-map-loader'],
-      //   enforce: 'pre',
-      // },
       {
-        test: /\.(tsx?)|(jsx?)$/,
+        test: /\.tsx?$/,
         use: ['awesome-typescript-loader'],
         exclude: /node_modules/,
-      },
-      {
-        test: /\.json$/,
-        use: ['json-loader'],
       },
       {
         test: /\.css$/,
         use: ['style-loader', 'css-loader'],
       },
-      {
-        test: /\.styl$/,
-        use: ['style-loader?sourceMap', 'css-loader', 'stylus-loader'],
-      },
-      // {
-      //   test: /\.jsx?$/,
-      //   use: ['eslint-loader'],
-      //   exclude: /node_modules/,
-      // },
     ],
   },
 
