@@ -120,11 +120,11 @@ export default function* gameManager() {
   yield fork(watchGameover)
   yield fork(humanPlayerSaga, 'player-1')
 
-  yield put({ type: 'LOAD_STAGE', name: 'test' })
+  yield put({ type: 'LOAD_STAGE', name: '1' })
 
   yield take('CLEAR_STAGE')
 
   yield* stageStatistics()
 
-  yield put({ type: 'LOAD_STAEG', name: 'test' })
+  yield put({ type: 'LOAD_STAEG', name: '2' })
 }

@@ -29,7 +29,7 @@ export default class StatisticsOverlay extends React.PureComponent {
             fill="#feac4e"
           />
           <Text
-            content="STAGE  test"
+            content="STAGE  1"
             x={6.5 * B}
             y={4.5 * B}
             fill="#ffffff"

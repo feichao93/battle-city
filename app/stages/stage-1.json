@@ -1,5 +1,5 @@
 {
-  "name": "test",
+  "name": "1",
   "difficulty": "easy",
   "map": [
     "X  X  X  X  X  X  X  X  X  X  X  X  X  ",
@@ -16,7 +16,8 @@
     "X  BF X  BF X  B8 Bc B4 X  BF X  BF X  ",
     "X  X  X  X  X  Ba EE B5 X  X  X  X  X  "
   ],
-  "enemyLevels": [
-    "20*basic"
+  "enemies": [
+    "18*basic",
+    "2*fast"
   ]
 }
