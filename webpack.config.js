@@ -1,11 +1,14 @@
 const path = require('path')
 const webpack = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const ExtractTextPlugin = require('extract-text-webpack-plugin')
 const packageInfo = require('./package.json')
 
 const isProduction = process.env.NODE_ENV === 'production'
 
 const commonPlugins = [
+  new webpack.EnvironmentPlugin({ NODE_ENV: 'development' }),
+  new ExtractTextPlugin('styles.css'),
   new HtmlWebpackPlugin({
     title: 'battle-city',
     filename: 'index.html',
@@ -24,9 +27,7 @@ const devPlugins = [
   new webpack.HotModuleReplacementPlugin(),
 ]
 
-const productionPlugins = [
-  new webpack.EnvironmentPlugin({ NODE_ENV: 'development' }),
-]
+const productionPlugins = []
 
 module.exports = {
   context: __dirname,
@@ -36,7 +37,7 @@ module.exports = {
   entry: {
     main: [
       'react-hot-loader/patch',
-      __dirname + "/app/main.tsx"
+      __dirname + '/app/main.tsx'
     ],
     stories: path.resolve(__dirname, 'app/stories.tsx'),
   },
@@ -63,7 +64,10 @@ module.exports = {
       },
       {
         test: /\.css$/,
-        use: ['style-loader', 'css-loader'],
+        use: ExtractTextPlugin.extract({
+          fallback: 'style-loader',
+          use: 'css-loader',
+        })
       },
     ],
   },
