@@ -47,6 +47,8 @@ declare global {
     dy: number
   }
 
+  type PowerUpName = 'tank' | 'star' | 'grenade' | 'timer' | 'helmet' | 'shovel'
+
   type Overlay = '' | 'gameover' | 'statistics'
 
   // todo 使用enemy-level来标记敌人坦克的类型

@@ -70,7 +70,7 @@ type P = {
   tickIndex?: number,
 }
 
-class BulletExplosionClass extends React.PureComponent<P, {}> {
+export class BulletExplosionClass extends React.PureComponent<P> {
   render() {
     const { x, y, tickIndex } = this.props
     return (
@@ -157,13 +157,7 @@ const tankExplosionDataArray = [
   ],
 ]
 
-class TankExplosionClass extends React.PureComponent<P, {}> {
-  static propTypes = {
-    x: React.PropTypes.number.isRequired,
-    y: React.PropTypes.number.isRequired,
-    tickIndex: React.PropTypes.number.isRequired,
-  }
-
+export class TankExplosionClass extends React.PureComponent<P> {
   render() {
     const { x, y, tickIndex } = this.props
     return (
@@ -179,7 +173,7 @@ class TankExplosionClass extends React.PureComponent<P, {}> {
 
 const TankExplosion: React.ComponentClass<P> = registerTick(200, 9999)(TankExplosionClass)
 
-export default class Explosion extends React.PureComponent<{ explosionType: ExplosionType } & P, {}> {
+export default class Explosion extends React.PureComponent<{ explosionType: ExplosionType } & P> {
   render() {
     const { explosionType, ...otherProps } = this.props
     if (explosionType === 'bullet') {

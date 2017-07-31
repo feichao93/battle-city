@@ -1,6 +1,7 @@
 import { eventChannel } from 'redux-saga'
+import { put, take } from 'redux-saga/effects'
 
-export default eventChannel<Action>((emit) => {
+const tickChannel = eventChannel<Action>((emit) => {
   let lastTime = performance.now()
   let requestId = requestAnimationFrame(emitTick)
 
@@ -16,3 +17,9 @@ export default eventChannel<Action>((emit) => {
     cancelAnimationFrame(requestId)
   }
 })
+
+export default function* tickEmitter() {
+  while (true) {
+    yield put(yield take(tickChannel))
+  }
+}

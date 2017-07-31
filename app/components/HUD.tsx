@@ -54,7 +54,7 @@ class HUD extends React.PureComponent<Props, {}> {
           <PlayerTankThumbnail x={0} y={0.5 * BLOCK_SIZE} />
           <Text
             x={0.5 * BLOCK_SIZE}
-            y={BLOCK_SIZE}
+            y={0.5 * BLOCK_SIZE}
             content={String(player2.lives)}
             fill="#000000"
           />

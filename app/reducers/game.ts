@@ -16,14 +16,14 @@ export const GameRecord = Record({
   killInfo: Map<PlayerName, Map<TankLevel, KillCount>>(),
 }, 'GameRecord')
 
-const record = GameRecord()
+const gameRecord = GameRecord()
 
-export type GameRecord = typeof record
+export type GameRecord = typeof gameRecord
 
 const inc = (x: number) => x + 1
 const dec = (x: number) => x - 1
 
-export default function game(state = record, action: Action) {
+export default function game(state = gameRecord, action: Action) {
   if (action.type === 'SHOW_OVERLAY') {
     return state.set('overlay', action.overlay)
   } else if (action.type === 'LOAD_STAGE') {

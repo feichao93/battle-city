@@ -300,6 +300,13 @@ const chars: Chars = {
       d="M1,3 h1 v-1 h1 v-1 h1 v-1 h1 v2 h3 v3 h-3 v2 h-1 v-1 h-1 v-1 h-1 v-1 h-1 v-1"
     />
   ),
+  ['\u2192'.toLowerCase()]: ({ fill }) => (
+    <path
+      role="character-rightwards-arrow"
+      fill={fill}
+      d="M1,2 h3 v-2 h1 v1 h1 v1 h1 v1 h1 v1 h-1 v1 h-1 v1 h-1 v1 h-1 v-2 h-3 v-3"
+    />
+  ),
 }
 
 type Props = {

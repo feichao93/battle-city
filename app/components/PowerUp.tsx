@@ -1,16 +1,16 @@
 import * as React from 'react'
 import { Bitmap } from 'components/elements'
 import registerTick from 'hocs/registerTick'
-import { fromJS, Map } from 'immutable'
 
-const itemColor = {
+const colorSchema = {
   ' ': 'none',
   w: '#FFFFFF',
   g: '#ADADAD',
   b: '#00424A',
 }
-const itemArray: { [name: string]: string[] } = {
-  chariot: [
+
+const powerUpDataArray = {
+  tank: [
     ' wwwwwwwwwwwwwg ',
     'w             wb',
     'w bbbbbbbbbbbbwb',
@@ -21,7 +21,7 @@ const itemArray: { [name: string]: string[] } = {
     'w bggwwwwgggb wb',
     'w b w w w wbg wb',
     'w bbb       bbwb',
-    ''
+    '' // todo 这里还没完成
   ],
   star: [
     ' wwwwwwwwwwwwwg ',
@@ -42,7 +42,7 @@ const itemArray: { [name: string]: string[] } = {
     'gwwwwwwwwwwwwwgb',
     ' bbbbbbbbbbbbbb '
   ],
-  bomb: [
+  grenade: [
     ' wwwwwwwwwwwwwg ',
     'w             wb',
     'w bbbwwwgg bbbwb',
@@ -60,7 +60,7 @@ const itemArray: { [name: string]: string[] } = {
     ' bbbbbbbbbbbbbb ',
     '                '
   ],
-  clock: [
+  timer: [
     ' wwwwwwwwwwwwwg ',
     'w             wb',
     'w bbbbwgwg bbbwb',
@@ -115,41 +115,44 @@ const itemArray: { [name: string]: string[] } = {
     ' bbbbbbbbbbbbbb ',
     '                '
   ],
-  pistol: [
-    ' wwwwwwwwwwwwwg ',
-    'w             wb',
-    'w bbbbbbbbwbbbwb',
-    'w bwbbbbbbbbbbwb',
-    'w gwwwwwwwg bbwb',
-    'w wggggggggg bwb',
-    'w  ggbbbbbbg bwb',
-    'w b  ggwggggg wb',
-    'w bbb g  gwbg wb',
-    'w bbbb gggwbg wb',
-    'w bbbbb  gbbg wb',
-    'w bbbbbbbgggg wb',
-    'w bbbbbbb    bwb',
-    'gwwwwwwwwwwwwwgb',
-    ' bbbbbbbbbbbbbb ',
-    '                '
-  ]
+  // todo pistol是高级物品, 目前先暂时不实现相关功能
+  // pistol: [
+  //   ' wwwwwwwwwwwwwg ',
+  //   'w             wb',
+  //   'w bbbbbbbbwbbbwb',
+  //   'w bwbbbbbbbbbbwb',
+  //   'w gwwwwwwwg bbwb',
+  //   'w wggggggggg bwb',
+  //   'w  ggbbbbbbg bwb',
+  //   'w b  ggwggggg wb',
+  //   'w bbb g  gwbg wb',
+  //   'w bbbb gggwbg wb',
+  //   'w bbbbb  gbbg wb',
+  //   'w bbbbbbbgggg wb',
+  //   'w bbbbbbb    bwb',
+  //   'gwwwwwwwwwwwwwgb',
+  //   ' bbbbbbbbbbbbbb ',
+  //   '                '
+  // ]
 }
 
 type P = {
   x: number,
   y: number,
-  name: string,
+  name: PowerUpName,
   tickIndex?: number,
 }
 
-class ItemsClass extends React.Component<P, {}> {
+export class PowerUpBase extends React.PureComponent<P> {
   render() {
     const { x, y, name, tickIndex } = this.props
     return (
       tickIndex === 0 ?
-        <Bitmap x={x} y={y} d={itemArray[name]} scheme={itemColor} /> : null
+        <Bitmap x={x} y={y} d={powerUpDataArray[name]} scheme={colorSchema} /> : null
     )
   }
 }
 
-export const Items: React.ComponentClass<P> = registerTick(400, 800)(ItemsClass)
+const PowerUp: React.ComponentClass<P> = registerTick(400, 800)(PowerUpBase)
+
+export default PowerUp

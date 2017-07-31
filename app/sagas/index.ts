@@ -1,10 +1,10 @@
 import { delay, takeEvery } from 'redux-saga'
-import { fork, put, take } from 'redux-saga/effects'
+import { fork, put } from 'redux-saga/effects'
 import humanController from 'sagas/humanController'
 import bulletsSaga from 'sagas/bulletsSaga'
 import gameManager from 'sagas/gameManager'
 import AIMasterSaga from 'sagas/AISaga'
-import tickChannel from 'sagas/tickChannel'
+import tickEmitter from 'sagas/tickEmitter'
 import { CONTROL_CONFIG, TANK_SPAWN_DELAY } from 'utils/constants'
 
 function* autoRemoveEffects() {
@@ -24,11 +24,7 @@ function* autoRemoveEffects() {
 
 export default function* rootSaga() {
   console.debug('root saga started')
-  yield fork(function* handleTick() {
-    while (true) {
-      yield put(yield take(tickChannel))
-    }
-  })
+  yield fork(tickEmitter)
 
   // 注意各个saga的启动顺序, 这将影响到后续action的put顺序
   yield fork(bulletsSaga)
