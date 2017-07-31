@@ -24,12 +24,6 @@ type P = {
   shape: number,
 }
 export default class River extends React.PureComponent<P, {}> {
-  static propTypes = {
-    x: React.PropTypes.number.isRequired,
-    y: React.PropTypes.number.isRequired,
-    shape: React.PropTypes.number.isRequired,
-  }
-
   render() {
     const { x, y, shape } = this.props
     return (

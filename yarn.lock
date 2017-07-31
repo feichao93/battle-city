@@ -3395,10 +3395,6 @@ react-hot-loader@^3.0.0-beta.6:
     redbox-react "^1.3.6"
     source-map "^0.4.4"
 
-react-immutable-proptypes@^2.1.0:
-  version "2.1.0"
-  resolved "http://registry.npm.taobao.org/react-immutable-proptypes/download/react-immutable-proptypes-2.1.0.tgz#023d6f39bb15c97c071e9e60d00d136eac5fa0b4"
-
 react-proxy@^3.0.0-alpha.0:
   version "3.0.0-alpha.1"
   resolved "http://registry.npm.taobao.org/react-proxy/download/react-proxy-3.0.0-alpha.1.tgz#4400426bcfa80caa6724c7755695315209fa4b07"

@@ -1,5 +1,5 @@
-import { delay, takeEvery } from 'redux-saga'
-import { fork, put } from 'redux-saga/effects'
+import { delay } from 'redux-saga'
+import { fork, put, takeEvery } from 'redux-saga/effects'
 import humanController from 'sagas/humanController'
 import bulletsSaga from 'sagas/bulletsSaga'
 import gameManager from 'sagas/gameManager'

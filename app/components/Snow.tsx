@@ -34,11 +34,6 @@ type P = {
   y: number,
 }
 export default class Snow extends React.PureComponent<P, {}> {
-  static propTypes = {
-    x: React.PropTypes.number.isRequired,
-    y: React.PropTypes.number.isRequired,
-  }
-
   render() {
     const { x, y } = this.props
     return (

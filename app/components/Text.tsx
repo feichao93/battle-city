@@ -317,13 +317,6 @@ type Props = {
 }
 
 export default class Text extends React.PureComponent<Props, {}> {
-  static propTypes = {
-    content: React.PropTypes.string.isRequired,
-    x: React.PropTypes.number.isRequired,
-    y: React.PropTypes.number.isRequired,
-    fill: React.PropTypes.string.isRequired,
-  }
-
   render() {
     const { content, x, y, fill } = this.props
     return (
