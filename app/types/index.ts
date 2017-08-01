@@ -11,6 +11,7 @@ export { default as TankRecord } from 'types/TankRecord'
 export { default as FlickerRecord } from 'types/FlickerRecord'
 export { default as TextRecord } from 'types/TextRecord'
 export { default as BulletRecord } from 'types/BulletRecord'
+export { default as PlayerRecord } from 'types/PlayerRecord'
 export { EagleRecord } from "reducers/map";
 export { State } from 'reducers/index'
 export { PlayersMap } from 'reducers/players'

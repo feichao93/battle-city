@@ -302,23 +302,26 @@ function* handleAfterTick() {
       yield* destroySteels(expBullets)
     }
 
+    const kills: PutEffect<Action.KillAction>[] = []
     // 坦克伤害结算 todo 假设目前tank被击中之后将直接爆炸
     for (const [targetTankId, hurtMap] of context.tankHurtMap.entries()) {
       // todo 目前不考虑具体的伤害值, 认为一旦承受伤害, tank就会死亡
       // const totalHurt = sum(hurtMap.values())
       const sourceTankId = hurtMap.values().next().value
-      yield put<Action>({
+      kills.push(put<Action.KillAction>({
         type: 'KILL',
         targetTank: tanks.get(targetTankId),
         sourceTank: tanks.get(sourceTankId),
         targetPlayer: players.find(ply => ply.tankId === targetTankId),
         sourcePlayer: players.find(ply => ply.tankId === sourceTankId),
-      })
+      }))
     }
     // 移除坦克 & 产生爆炸效果
     if (context.tankHurtMap.size > 0) {
       yield destroyTanks(ISet(context.tankHurtMap.keys()))
     }
+    // notice KillAction是在destroyTanks之后被dispatch的; 此时地图上的坦克已经被去除了
+    yield* kills
 
     // 不产生爆炸, 直接消失的子弹
     const noExpBullets = bullets.filter(bullet => context.noExpBulletIdSet.has(bullet.bulletId))

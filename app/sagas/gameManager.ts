@@ -1,9 +1,8 @@
 import { delay } from 'redux-saga'
-import { fork, put, select, take } from 'redux-saga/effects'
-import * as selectors from 'utils/selectors'
+import { put, take } from 'redux-saga/effects'
 import { BLOCK_SIZE } from 'utils/constants'
-import { getNextId, spawnTank } from 'utils/common'
-import { State, TankRecord } from 'types'
+import { getNextId } from 'utils/common'
+import stageSaga from 'sagas/stageSaga'
 
 type Animation = {
   direction: Direction
@@ -64,67 +63,31 @@ function* animateGameover() {
   yield put({ type: 'SHOW_OVERLAY', overlay: 'gameover' })
 }
 
-function* watchGameover() {
-  while (true) {
-    yield take(['DESTROY_EAGLE', 'ALL_HUMAN_DEAD'])
-    // 首先暂停所有的玩家的操作
-    yield put({ type: 'DEACTIVATE_ALL_PLAYERS' })
-    // 进行游戏结束动画
-    yield* animateGameover()
-  }
+interface StageResult {
+  status: 'clear' | 'fail'
+  reason?: string
 }
 
-function* humanPlayerSaga(playerName: string) {
-  yield put({
-    type: 'CREATE_PLAYER',
-    playerName,
-    lives: 3,
-  })
+/**
+ *  game-saga负责管理整体游戏进度
+ *  负责管理游戏开始界面, 游戏结束界面, 游戏暂停
+ *  game-stage调用stage-saga来运行不同的关卡
+ *  并根据stage-saga返回的结果选择继续下一个关卡, 或是选择游戏结束
+ */
+export default function* gameManager() {
+  // yield fork(watchGameover)
 
-  while (true) {
-    yield take((action: Action) => (
-      action.type === 'LOAD_STAGE'
-      || action.type === 'KILL' && action.targetPlayer.playerName === 'player-1'
-    ))
-    const { players }: State = yield select()
-    const player = players.get(playerName)
-    if (player.lives > 0) {
-      // todo 是否可以等待一会儿 再开始生成坦克
-      yield put({ type: 'DECREMENT_PLAYER_LIVE', playerName })
-      const tankId = yield* spawnTank(TankRecord({
-        x: 4 * BLOCK_SIZE,
-        y: 12 * BLOCK_SIZE,
-        side: 'human',
-        level: 'basic',
-      }))
-      yield put({
-        type: 'ACTIVATE_PLAYER',
-        playerName: 'player-1',
-        tankId,
-      })
+  const stages = ['1', '2', '3']
+  for (const stageName of stages) {
+    const stageResult: StageResult = yield* stageSaga(stageName)
+    if (stageResult.status === 'clear') {
+      // continue to next stage
     } else {
-      yield put({ type: 'ALL_HUMAN_DEAD' })
+      console.log(`gameover, reason: ${stageResult.reason}`)
+      yield* animateGameover()
     }
   }
-}
 
-function* stageStatistics() {
-  yield put({ type: 'SHOW_OVERLAY', overlay: 'statistics' })
-  yield delay(5000)
-  yield put({ type: 'REMOVE_OVERLAY', overlay: 'statistics' })
-}
-
-// 该saga用来管理游戏进度
-// 例如当前处于第几关, 当前得分
-export default function* gameManager() {
-  yield fork(watchGameover)
-  yield fork(humanPlayerSaga, 'player-1')
-
-  yield put({ type: 'LOAD_STAGE', name: '1' })
-
-  yield take('CLEAR_STAGE')
-
-  yield* stageStatistics()
-
-  yield put({ type: 'LOAD_STAEG', name: '2' })
+  // clear all stages
+  // yield* animateClearance()
 }

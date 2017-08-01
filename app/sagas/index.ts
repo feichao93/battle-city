@@ -6,6 +6,7 @@ import gameManager from 'sagas/gameManager'
 import AIMasterSaga from 'sagas/AISaga'
 import tickEmitter from 'sagas/tickEmitter'
 import { CONTROL_CONFIG, TANK_SPAWN_DELAY } from 'utils/constants'
+import humanPlayerSaga from 'sagas/humanPlayerSaga'
 
 function* autoRemoveEffects() {
   yield takeEvery('SPAWN_EXPLOSION', function* removeExplosion({ explosionId, explosionType }: Action.SpawnExplosionAction) {
@@ -35,6 +36,9 @@ export default function* rootSaga() {
   yield fork(humanController, 'player-2', CONTROL_CONFIG.player2)
 
   yield fork(AIMasterSaga)
+
+  yield fork(humanPlayerSaga, 'player-1')
+  // yield fork(humanPlayerSaga, 'player-2')
 
   yield fork(gameManager)
 }

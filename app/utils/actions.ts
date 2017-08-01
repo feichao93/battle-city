@@ -8,15 +8,42 @@ declare global {
   type ActionType = Action.ActionType
 
   namespace Action {
-    export type Action = MoveAction | StartMoveAction | TickAction | AfterTickAction
-      | AddBulletAction | DestroyBulletsAction | DestroySteelsAction | DestroyBricksAction
-      | UpdaetBulletsAction | LoadStageAction | Simple<'GAMEOVER'> | ShowOverlayAction
-      | RemoveOverlayAction | Simple<'DECREMENT_REMAINING_ENEMY_COUNT'> | DecrementPlayerLiveAction
-      | ActivatePlayerAction | CreatePlayerAction | RemovePlayerAction | Simple<'DEACTIVATE_ALL_PLAYERS'>
-      | SpawnExplosionAction | RemoveExplosionAction | SetTextAction | UpdateTextPositionAction
-      | Simple<'DESTROY_EAGLE'> | Simple<'ALL_HUMAN_DEAD'> | SpawnTankAction | StartMoveAction
-      | RemoveTankAction | StopMoveAction | RemoveTextAction | RemoveFlickerAction | SpawnFlickerAction
+    export type Action =
+      MoveAction
+      | StartMoveAction
+      | TickAction
+      | AfterTickAction
+      | AddBulletAction
+      | DestroyBulletsAction
+      | DestroySteelsAction
+      | DestroyBricksAction
+      | UpdaetBulletsAction
+      | LoadStageAction
+      | Simple<'CLEAR_STAGE'>
+      | Simple<'GAMEOVER'>
+      | ShowOverlayAction
+      | RemoveOverlayAction
+      | Simple<'DECREMENT_REMAINING_ENEMY_COUNT'>
+      | DecrementPlayerLiveAction
+      | ActivatePlayerAction
+      | CreatePlayerAction
+      | RemovePlayerAction
+      | Simple<'DEACTIVATE_ALL_PLAYERS'>
+      | SpawnExplosionAction
+      | RemoveExplosionAction
+      | SetTextAction
+      | UpdateTextPositionAction
+      | Simple<'DESTROY_EAGLE'>
+      | Simple<'ALL_HUMAN_DEAD'>
+      | SpawnTankAction
+      | StartMoveAction
+      | RemoveTankAction
+      | StopMoveAction
+      | RemoveTextAction
+      | RemoveFlickerAction
+      | SpawnFlickerAction
       | KillAction
+      | IncKillCount
 
     export type ActionType = Action['type']
 
@@ -32,6 +59,12 @@ declare global {
       sourceTank: TankRecord
       targetPlayer: PlayerRecord
       sourcePlayer: PlayerRecord
+    }
+
+    export type IncKillCount = {
+      type: 'INC_KILL_COUNT'
+      playerName: PlayerName
+      level: TankLevel
     }
 
     export type StartMoveAction = {
@@ -134,8 +167,7 @@ declare global {
 
     export type CreatePlayerAction = {
       type: 'CREATE_PLAYER',
-      playerName: PlayerName,
-      lives: number,
+      player: PlayerRecord,
     }
 
     export type RemovePlayerAction = {

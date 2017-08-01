@@ -11,7 +11,7 @@ export default function players(state = Map() as PlayersMap, action: Action) {
       tankId,
     })
   } else if (action.type === 'CREATE_PLAYER') {
-    return state.set(action.playerName, PlayerRecord(action))
+    return state.set(action.player.playerName, action.player)
   } else if (action.type === 'REMOVE_PLAYER') {
     return state.delete(action.playerName)
   } else if (action.type === 'DEACTIVATE_ALL_PLAYERS') {

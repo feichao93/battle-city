@@ -10,8 +10,6 @@ export const GameRecord = Record({
   currentStage: null as string,
   // 当前关卡剩余的enemy数量
   remainingEnemyCount: defaultRemainingEnemyCount,
-  // 当前活跃的enemy的数量
-  activeEnemyCount: 0,
   // 当前关卡的击杀信息  Map<playerName, Map<EnemyLevel, killCount>>
   killInfo: Map<PlayerName, Map<TankLevel, KillCount>>(),
 }, 'GameRecord')
@@ -29,21 +27,14 @@ export default function game(state = gameRecord, action: Action) {
   } else if (action.type === 'LOAD_STAGE') {
     return state.set('currentStage', action.name)
       .set('remainingEnemyCount', defaultRemainingEnemyCount)
+      .set('killInfo', Map())
   } else if (action.type === 'REMOVE_OVERLAY') {
     return state.set('overlay', null)
   } else if (action.type === 'DECREMENT_REMAINING_ENEMY_COUNT') {
     return state.update('remainingEnemyCount', dec)
-  } else if (action.type === 'KILL') {
-    const { sourcePlayer, targetPlayer, targetTank } = action
-    if (sourcePlayer.playerName.startsWith('player')) {
-      const nextState = state.update('killInfo', killInfo => killInfo.update(
-        // todo 目前暂时只用basic
-        sourcePlayer.playerName, Map(), m => m.update('basic', 0, inc)))
-      console.log(nextState)
-      return nextState
-    } else {
-      return state
-    }
+  } else if (action.type === 'INC_KILL_COUNT') {
+    const { playerName, level } = action
+    return state.updateIn(['killInfo', playerName, level], x => (x == null ? 1 : x + 1))
   } else {
     return state
   }
