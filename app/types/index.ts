@@ -1,12 +1,3 @@
-// 敌人描述, 例如: basic*20, fast*10
-type Enemy = string
-export type StageConfig = {
-  name: string
-  difficulty: 'easy' | 'normal' | 'hard'
-  map: string[]
-  enemies: Enemy
-}
-
 export { default as TankRecord } from 'types/TankRecord'
 export { default as FlickerRecord } from 'types/FlickerRecord'
 export { default as TextRecord } from 'types/TextRecord'
@@ -48,12 +39,20 @@ declare global {
     dy: number
   }
 
+  interface StageConfig {
+    name: string
+    difficulty: 'easy' | 'normal' | 'hard'
+    map: string[]
+    /** 敌人描述, 例如: 20*basic, 10*fast */
+    enemies: string[]
+  }
+
   type PowerUpName = 'tank' | 'star' | 'grenade' | 'timer' | 'helmet' | 'shovel'
 
   type Overlay = '' | 'gameover' | 'statistics'
 
-  // todo 使用enemy-level来标记敌人坦克的类型
   type TankLevel = 'basic' | 'fast' | 'power' | 'armor'
+  type TankColor = 'green' | 'yellow' | 'silver' | 'red'
 
   type Direction = 'up' | 'down' | 'left' | 'right'
 

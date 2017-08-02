@@ -10,7 +10,7 @@ import { EagleRecord, MapRecord } from 'reducers/map'
 // 钢块 steel  T<n>
 // 老鹰 eagle  E
 // todo 优化代码
-export default function parseStageMap(map: string[]) {
+export default function parseStageMap(map: StageConfig['map']) {
   const bricks = new Set()
   const steels = new Set()
   const rivers = new Set()

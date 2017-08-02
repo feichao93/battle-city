@@ -171,8 +171,8 @@ export default function* AIMasterSaga() {
   }
 
   function* addAI() {
-    const { game: { remainingEnemyCount } }: State = yield select()
-    if (remainingEnemyCount > 0) {
+    const { game: { remainingEnemies } }: State = yield select()
+    if (!remainingEnemies.isEmpty()) {
       const playerName = `AI-${nextAIPlayerIndex++}`
       yield put<Action>({
         type: 'CREATE_PLAYER',
@@ -183,8 +183,14 @@ export default function* AIMasterSaga() {
         }),
       })
       const { x, y } = yield select(selectors.availableSpawnPosition)
-      yield put({ type: 'DECREMENT_REMAINING_ENEMY_COUNT' })
-      const tankId = yield* spawnTank(TankRecord({ x, y, side: 'ai' }))
+      yield put<Action>({ type: 'REMOVE_FIRST_REMAINING_ENEMY' })
+      const tankId = yield* spawnTank(TankRecord({
+        x,
+        y,
+        side: 'ai',
+        color: 'silver',
+        level: remainingEnemies.first(),
+      }))
       taskMap[playerName] = yield spawn(AIWorkerSaga, playerName, EmptyWorker)
 
       yield put<Action.ActivatePlayerAction>({

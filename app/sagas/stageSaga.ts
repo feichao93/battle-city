@@ -3,10 +3,10 @@ import { put, select, take } from 'redux-saga/effects'
 import { State } from 'reducers/index'
 
 function* statistics() {
-  yield put({ type: 'SHOW_OVERLAY', overlay: 'statistics' })
+  yield put<Action>({ type: 'SHOW_OVERLAY', overlay: 'statistics' })
   // todo 在这里添加statistics的动画
   yield delay(5000)
-  yield put({ type: 'REMOVE_OVERLAY', overlay: 'statistics' })
+  yield put<Action>({ type: 'REMOVE_OVERLAY', overlay: 'statistics' })
 }
 
 /**
@@ -20,7 +20,7 @@ export default function* stageSaga(stageName: string) {
 
   while (true) {
     const { sourcePlayer, targetTank }: Action.KillAction = yield take('KILL')
-    const { players, game: { remainingEnemyCount }, tanks }: State = yield select()
+    const { players, game: { remainingEnemies }, tanks }: State = yield select()
 
     if (sourcePlayer.side === 'human') { // human击杀ai
       // 对human player的击杀信息进行统计
@@ -30,14 +30,13 @@ export default function* stageSaga(stageName: string) {
         level: targetTank.level,
       })
 
-      if (remainingEnemyCount === 0
-        && tanks.filter(t => t.side === 'ai').size === 0) {
+      if (remainingEnemies.isEmpty()
+        && tanks.filter(t => t.side === 'ai').isEmpty()) {
         // 剩余enemy数量为0, 且场上已经没有ai tank了
         yield* statistics()
         return { status: 'clear' }
       }
     } else { // ai击杀human
-
       if (!players.some(ply => ply.side === 'human' && ply.lives > 0)) {
         // 所有的human player都挂了
         yield* statistics()
