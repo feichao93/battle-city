@@ -58,6 +58,8 @@ declare global {
 
   type TankId = number
   type BulletId = number
+  type KillCount = number
+
   /**
    * 玩家名称.
    * human-player的名称格式为 'player-x', 而AI-player的名称格式为 'AI-x'

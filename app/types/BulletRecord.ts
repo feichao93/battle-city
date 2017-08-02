@@ -3,7 +3,7 @@ import { Record } from 'immutable'
 const BulletRecord = Record({
   bulletId: 0 as BulletId,
   // 子弹的方向
-  direction: null as Direction,
+  direction: 'up' as Direction,
   // 子弹的速度
   speed: 0,
   // 子弹的位置

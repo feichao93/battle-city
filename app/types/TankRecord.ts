@@ -5,7 +5,7 @@ const TankRecord = Record({
   x: 0,
   y: 0,
   side: 'human' as Side,
-  direction: null as Direction,
+  direction: 'up' as Direction,
   moving: false,
   level: 'basic' as TankLevel,
   color: 'green' as TankColor,

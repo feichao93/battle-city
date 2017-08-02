@@ -6,6 +6,8 @@ export type TanksMap = Map<TankId, TankRecord>
 export default function tanks(state = Map() as TanksMap, action: Action) {
   if (action.type === 'SPAWN_TANK') {
     return state.set(action.tank.tankId, TankRecord(action.tank))
+  } else if (action.type === 'LOAD_STAGE') {
+    return state.clear()
   } else if (action.type === 'MOVE') {
     return state.set(action.tankId, action.tank)
   } else if (action.type === 'START_MOVE') {

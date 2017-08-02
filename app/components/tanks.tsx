@@ -42,7 +42,7 @@ type P = {
   level: TankLevel
   direction: Direction
   tickIndex?: number
-  moving: boolean
+  moving?: boolean
 }
 
 type S = { lastShape: number }

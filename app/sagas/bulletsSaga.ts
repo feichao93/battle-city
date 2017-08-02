@@ -307,7 +307,7 @@ function* handleAfterTick() {
     for (const [targetTankId, hurtMap] of context.tankHurtMap.entries()) {
       // todo 目前不考虑具体的伤害值, 认为一旦承受伤害, tank就会死亡
       // const totalHurt = sum(hurtMap.values())
-      const sourceTankId = hurtMap.values().next().value
+      const sourceTankId = hurtMap.keys().next().value
       kills.push(put<Action.KillAction>({
         type: 'KILL',
         targetTank: tanks.get(targetTankId),

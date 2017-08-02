@@ -1,11 +1,45 @@
+import { Map } from 'immutable'
 import { delay } from 'redux-saga'
 import { put, select, take } from 'redux-saga/effects'
 import { State } from 'reducers/index'
 
+const tankLevels: TankLevel[] = ['basic', 'fast', 'power', 'armor']
+
 function* statistics() {
   yield put<Action>({ type: 'SHOW_OVERLAY', overlay: 'statistics' })
-  // todo 在这里添加statistics的动画
-  yield delay(5000)
+
+  const { game: { killInfo } }: State = yield select()
+
+  const player1KillInfo = killInfo.get('player-1', Map<TankLevel, KillCount>())
+
+  // todo 目前只考虑player-1的信息
+
+  yield delay(500)
+
+  for (const tankLevel of tankLevels) {
+    const { game: { transientKillInfo } }: State = yield select()
+
+    yield delay(250)
+    const levelKillCount = player1KillInfo.get(tankLevel, 0)
+    if (levelKillCount === 0) {
+      yield put<Action>({
+        type: 'UPDATE_TRANSIENT_KILL_INFO',
+        info: transientKillInfo.setIn(['player-1', tankLevel], 0),
+      })
+    } else {
+      for (let count = 1; count <= levelKillCount; count += 1) {
+        yield put<Action>({
+          type: 'UPDATE_TRANSIENT_KILL_INFO',
+          info: transientKillInfo.setIn(['player-1', tankLevel], count),
+        })
+        yield delay(160)
+      }
+    }
+    yield delay(300)
+  }
+  yield put<Action>({ type: 'SHOW_TOTAL_KILL_COUNT' })
+  yield delay(3000)
+
   yield put<Action>({ type: 'REMOVE_OVERLAY', overlay: 'statistics' })
 }
 
@@ -13,7 +47,7 @@ function* statistics() {
  * stage-saga的一个实例对应一个关卡
  * 在关卡开始时, 一个stage-saga实例将会启动, 负责关卡地图生成
  * 在关卡过程中, 该saga负责统计该关卡中的战斗信息
- * 当玩家清空关卡时stage-saga退出, 并向game-返回该关卡相关信息
+ * 当玩家清空关卡时stage-saga退出, 并向game-saga返回该关卡相关信息
  */
 export default function* stageSaga(stageName: string) {
   yield put<Action>({ type: 'LOAD_STAGE', name: stageName })
@@ -33,12 +67,14 @@ export default function* stageSaga(stageName: string) {
       if (remainingEnemies.isEmpty()
         && tanks.filter(t => t.side === 'ai').isEmpty()) {
         // 剩余enemy数量为0, 且场上已经没有ai tank了
+        yield delay(6000)
         yield* statistics()
         return { status: 'clear' }
       }
     } else { // ai击杀human
       if (!players.some(ply => ply.side === 'human' && ply.lives > 0)) {
         // 所有的human player都挂了
+        yield delay(6000)
         yield* statistics()
         return { status: 'fail', reason: 'all-human-dead' }
       }
