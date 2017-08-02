@@ -6,9 +6,9 @@ import { asBox, getDirectionInfo, iterRowsAndCols, reverseDirection } from 'util
 import * as selectors from 'utils/selectors'
 import { State, TankRecord } from 'types'
 
-const log = console.log
+// const log = console.log
 // const table = console.table
-// const log: any = () => 0
+const log: any = () => 0
 const table: any = () => 0
 
 /** AI是否可以破坏该障碍物 */
@@ -57,11 +57,11 @@ export default function* inlineAI(playerName: string,
       timeout: call(delay, 2000),
       note: take(noteChannel),
     })
-    console.groupCollapsed(`AI ${playerName}`)
-    console.log(raceResult)
+    // console.groupCollapsed(`AI ${playerName}`)
+    // console.log(raceResult)
     let tank: TankRecord = yield select(selectors.playerTank, playerName)
     if (tank == null) {
-      console.groupEnd()
+      // console.groupEnd()
       continue
     }
 
@@ -78,7 +78,6 @@ export default function* inlineAI(playerName: string,
     log('pos', env.tankPosition)
     log('priority-map', priorityMap)
     log('next-direction', nextDirection)
-    // debugger
 
     if (tank.direction !== nextDirection) {
       postMessage({ type: 'turn', direction: nextDirection })
@@ -100,7 +99,7 @@ export default function* inlineAI(playerName: string,
       forwardLength: env.barrierInfo[tank.direction].length,
     })
     // $$postMessage({ type: 'fire', forwardLength: 3 * BLOCK_SIZE })
-    console.groupEnd()
+    // console.groupEnd()
   }
 }
 

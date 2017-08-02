@@ -37,7 +37,7 @@ export default function* rootSaga() {
 
   yield fork(AIMasterSaga)
 
-  yield fork(humanPlayerSaga, 'player-1')
+  yield fork(humanPlayerSaga, 'player-1', 'yellow')
   // yield fork(humanPlayerSaga, 'player-2')
 
   yield fork(gameManager)

@@ -52,7 +52,7 @@ declare global {
   type Overlay = '' | 'gameover' | 'statistics'
 
   type TankLevel = 'basic' | 'fast' | 'power' | 'armor'
-  type TankColor = 'green' | 'yellow' | 'silver' | 'red'
+  type TankColor = 'green' | 'yellow' | 'silver' | 'red' | 'auto'
 
   type Direction = 'up' | 'down' | 'left' | 'right'
 

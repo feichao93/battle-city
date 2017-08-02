@@ -5,6 +5,7 @@ import Text from 'components/Text'
 import { Tank } from 'components/tanks'
 import { BLOCK_SIZE as B } from 'utils/constants'
 import { State } from 'reducers/index'
+import { TankRecord } from 'types'
 
 type P = {
   stageName: string
@@ -58,10 +59,10 @@ class StatisticsOverlay extends React.PureComponent<P> {
           <Text content={`STAGE  ${stageName}`} x={6.5 * B} y={4.5 * B} fill="#ffffff" />
 
           {/* 中间的4辆坦克 & 白线 */}
-          <Tank x={8 * B} y={7.7 * B} color="silver" side="ai" level="basic" direction="up" />
-          <Tank x={8 * B} y={9.2 * B} color="silver" side="ai" level="fast" direction="up" />
-          <Tank x={8 * B} y={10.7 * B} color="silver" side="ai" level="power" direction="up" />
-          <Tank x={8 * B} y={12.2 * B} color="silver" side="ai" level="armor" direction="up" />
+          <Tank tank={TankRecord({ x: 8 * B, y: 7.7 * B, side: 'ai', level: 'basic' })} />
+          <Tank tank={TankRecord({ x: 8 * B, y: 9.2 * B, side: 'ai', level: 'fast' })} />
+          <Tank tank={TankRecord({ x: 8 * B, y: 10.7 * B, side: 'ai', level: 'power' })} />
+          <Tank tank={TankRecord({ x: 8 * B, y: 12.2 * B, side: 'ai', level: 'armor' })} />
           <rect x={6.5 * B} y={13.3 * B} width={4 * B} height={2} fill="white" />
 
           {/* player-1的击杀统计 */}

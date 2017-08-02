@@ -1,4 +1,4 @@
-import { Map, Record, List } from 'immutable'
+import { Map, Record, Repeat } from 'immutable'
 import parseStageEnemies from 'utils/parseStageEnemies'
 import stageConfigs from 'stages'
 
@@ -17,12 +17,14 @@ const emptyTransientKillInfo = Map({
   }),
 }) as Map<PlayerName, Map<TankLevel, KillCount>>
 
+const defaultRemainingEnemies = Repeat('basic' as TankLevel, 20).toList()
+
 export const GameRecord = Record({
   overlay: '' as Overlay,
   /** 当前的关卡名 */
   currentStage: null as string,
   /** 当前关卡剩余的敌人的类型列表 */
-  remainingEnemies: List<TankLevel>(),
+  remainingEnemies: defaultRemainingEnemies,
   /** 当前关卡的击杀信息 */
   killInfo: Map<PlayerName, Map<TankLevel, KillCount>>(),
   /** 当前关卡的击杀信息, 用于进行动画播放 */

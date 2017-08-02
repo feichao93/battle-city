@@ -8,10 +8,12 @@ const TankRecord = Record({
   direction: 'up' as Direction,
   moving: false,
   level: 'basic' as TankLevel,
-  color: 'green' as TankColor,
+  color: 'auto' as TankColor,
   bulletSpeed: 0.12,
   bulletLimit: 2,
   bulletInterval: 200,
+  hp: 1,
+  withPowerUp: false,
 })
 
 const record = TankRecord()

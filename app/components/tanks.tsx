@@ -1,11 +1,39 @@
 import * as React from 'react'
 import * as _ from 'lodash'
+import { connect } from 'react-redux'
 import { Bitmap, Pixel } from 'components/elements'
-import registerTick from 'hocs/registerTick'
 import { BLOCK_SIZE, TANK_COLOR_SCHEMES } from 'utils/constants'
+import { TankRecord } from 'types'
+import { State } from 'reducers'
 
 interface TankComponent {
   (props: { transform: string, color: string, shape: number }): JSX.Element
+}
+
+type TankColorConfig = [TankColor, number][]
+
+function resolveTankColorConfig(tank: TankRecord): TankColorConfig {
+  if (tank.color !== 'auto') {
+    return [[tank.color, Infinity]]
+  }
+  if (tank.withPowerUp) {
+    return [['red', 300], ['silver', 300]]
+  }
+  if (tank.level === 'basic') {
+    return [['silver', Infinity]]
+  } else if (tank.level === 'fast') {
+    return [['silver', Infinity]]
+  } else if (tank.level === 'power') {
+    return [['silver', Infinity]]
+  } else {
+    const map: { [key: number]: TankColorConfig } = {
+      1: [['silver', Infinity]],
+      2: [['green', 100], ['yellow', 100]],
+      3: [['silver', 100], ['yellow', 100]],
+      4: [['green', 100], ['silver', 100]],
+    }
+    return map[tank.hp]
+  }
 }
 
 function resolveTankComponent(side: Side, level: TankLevel): TankComponent {
@@ -34,71 +62,89 @@ function resolveTankComponent(side: Side, level: TankLevel): TankComponent {
   return component
 }
 
-type P = {
-  x: number
-  y: number
-  color: string
-  side: Side
-  level: TankLevel
-  direction: Direction
-  tickIndex?: number
-  moving?: boolean
+
+const tireShapeConfig: [number, number][] = [[0, 80], [1, 80]]
+
+const add = (x: number, y: number) => x + y
+
+function calculate<T>(config: [T, number][], startTime: number, time: number): T {
+  const sum = config.map(item => item[1]).reduce(add)
+  let t = (time - startTime) % sum
+  let index = 0
+  while (config[index][1] < t) {
+    t -= config[index][1]
+    index += 1
+  }
+  return config[index][0]
 }
 
-type S = { lastShape: number }
 
-class TankClass extends React.Component<P, S> {
-  static defaultProps = {
-    moving: false,
+function calculateTankTransform(tank: TankRecord) {
+  let rotate
+  let dx
+  let dy
+  if (tank.direction === 'up') {
+    dx = tank.x
+    dy = tank.y
+    rotate = 0
+  } else if (tank.direction === 'down') {
+    dx = tank.x + BLOCK_SIZE - 1
+    dy = tank.y + BLOCK_SIZE
+    rotate = 180
+  } else if (tank.direction === 'left') {
+    dx = tank.x
+    dy = tank.y + BLOCK_SIZE - 1
+    rotate = -90
+  } else { // RIGHT
+    dx = tank.x + BLOCK_SIZE
+    dy = tank.y
+    rotate = 90
   }
+
+  return `translate(${dx}, ${dy})rotate(${rotate})`
+}
+
+type P = {
+  tank: TankRecord
+  time: number
+}
+
+type S = { lastTireShape: number }
+
+class TankClassBase extends React.Component<P, S> {
+  private startTime: number
 
   constructor(props: P) {
     super(props)
+    this.startTime = props.time
     this.state = {
-      lastShape: 0,
+      lastTireShape: 0,
     }
   }
 
   componentWillReceiveProps(nextProps: P) {
-    if (this.props.moving && !nextProps.moving) {
-      this.setState({ lastShape: this.props.tickIndex })
+    if (this.props.tank.moving && !nextProps.tank.moving) {
+      this.setState({
+        lastTireShape: calculate(tireShapeConfig, this.startTime, nextProps.time),
+      })
     }
   }
 
   render() {
-    const { x, y, color, side, level, direction, tickIndex, moving } = this.props
-    const { lastShape } = this.state
-    let rotate
-    let dx
-    let dy
-    if (direction === 'up') {
-      dx = x
-      dy = y
-      rotate = 0
-    } else if (direction === 'down') {
-      dx = x + BLOCK_SIZE - 1
-      dy = y + BLOCK_SIZE
-      rotate = 180
-    } else if (direction === 'left') {
-      dx = x
-      dy = y + BLOCK_SIZE - 1
-      rotate = -90
-    } else { // RIGHT
-      dx = x + BLOCK_SIZE
-      dy = y
-      rotate = 90
-    }
-    const shape = moving ? tickIndex : lastShape
+    const { tank, time } = this.props
+    const { lastTireShape } = this.state
 
-    return React.createElement(resolveTankComponent(side, level), {
-      transform: `translate(${dx}, ${dy})rotate(${rotate})`,
-      color,
-      shape,
+    return React.createElement(resolveTankComponent(tank.side, tank.level), {
+      transform: calculateTankTransform(tank),
+      color: calculate(resolveTankColorConfig(tank), this.startTime, time),
+      shape: tank.moving ? calculate(tireShapeConfig, this.startTime, time) : lastTireShape,
     })
   }
 }
 
-export const Tank: React.ComponentClass<P> = registerTick(80, 80)(TankClass)
+const mapStateToProps = ({ time }: State, { tank }: { tank: TankRecord }) => ({ time, tank })
+
+export const Tank = connect(mapStateToProps)(TankClassBase)
 
 const TankHumanBasic: TankComponent = ({ transform, color, shape }) => {
   const scheme = TANK_COLOR_SCHEMES[color]
@@ -117,14 +163,14 @@ const TankHumanBasic: TankComponent = ({ transform, color, shape }) => {
             )}
           </g>
         ) : (
-            <g role="left-tire-shape-1">
-              <Bitmap x={1} y={4} d={['acc']} scheme={scheme} />
-              <Bitmap x={1} y={14} d={['bcc']} scheme={scheme} />
-              {_.range(4).map(i =>
-                <rect key={i} x={1} width={2} y={6 + 2 * i} height={1} fill={c} />
-              )}
-            </g>
-          )}
+          <g role="left-tire-shape-1">
+            <Bitmap x={1} y={4} d={['acc']} scheme={scheme} />
+            <Bitmap x={1} y={14} d={['bcc']} scheme={scheme} />
+            {_.range(4).map(i =>
+              <rect key={i} x={1} width={2} y={6 + 2 * i} height={1} fill={c} />
+            )}
+          </g>
+        )}
       </g>
 
 
@@ -139,12 +185,12 @@ const TankHumanBasic: TankComponent = ({ transform, color, shape }) => {
             )}
           </g>
         ) : (
-            <g role="right-tire-shape-1">
-              {_.range(5).map(i =>
-                <rect key={i} x={12} width={2} y={5 + 2 * i} height={1} fill={b} />
-              )}
-            </g>
-          )}
+          <g role="right-tire-shape-1">
+            {_.range(5).map(i =>
+              <rect key={i} x={12} width={2} y={5 + 2 * i} height={1} fill={b} />
+            )}
+          </g>
+        )}
       </g>
 
       <g role="tank-body">
@@ -182,14 +228,14 @@ const TankHumanFast: TankComponent = ({ transform, color, shape }) => {
             )}
           </g>
         ) : (
-            <g role="left-tire-shape-1">
-              <Bitmap x={1} y={4} d={['bcc']} scheme={scheme} />
-              <Bitmap x={1} y={15} d={['abb']} scheme={scheme} />
-              {_.range(5).map(i =>
-                <rect key={i} x={1} width={2} y={6 + 2 * i} height={1} fill={c} />
-              )}
-            </g>
-          )}
+          <g role="left-tire-shape-1">
+            <Bitmap x={1} y={4} d={['bcc']} scheme={scheme} />
+            <Bitmap x={1} y={15} d={['abb']} scheme={scheme} />
+            {_.range(5).map(i =>
+              <rect key={i} x={1} width={2} y={6 + 2 * i} height={1} fill={c} />
+            )}
+          </g>
+        )}
       </g>
 
 
@@ -203,13 +249,13 @@ const TankHumanFast: TankComponent = ({ transform, color, shape }) => {
             )}
           </g>
         ) : (
-            <g role="right-tire-shape-1">
-              {_.range(6).map(i =>
-                <rect key={i} x={12} width={2} y={5 + 2 * i} height={1} fill={b} />
-              )}
-              <Pixel x={11} y={15} fill={b} />
-            </g>
-          )}
+          <g role="right-tire-shape-1">
+            {_.range(6).map(i =>
+              <rect key={i} x={12} width={2} y={5 + 2 * i} height={1} fill={b} />
+            )}
+            <Pixel x={11} y={15} fill={b} />
+          </g>
+        )}
       </g>
 
       <g role="tank-body">
@@ -241,13 +287,13 @@ const TankHumanPower: TankComponent = ({ transform, color, shape }) => {
             )}
           </g>
         ) : (
-            <g role="left-tire-shape-1">
-              <Bitmap x={1} y={3} d={['aaa']} scheme={scheme} />
-              {_.range(5).map(i =>
-                <rect key={i} x={1} width={1} y={4 + 2 * i} height={1} fill={c} />
-              )}
-            </g>
-          )}
+          <g role="left-tire-shape-1">
+            <Bitmap x={1} y={3} d={['aaa']} scheme={scheme} />
+            {_.range(5).map(i =>
+              <rect key={i} x={1} width={1} y={4 + 2 * i} height={1} fill={c} />
+            )}
+          </g>
+        )}
       </g>
 
 
@@ -261,13 +307,13 @@ const TankHumanPower: TankComponent = ({ transform, color, shape }) => {
             )}
           </g>
         ) : (
-            <g role="right-tire-shape-1">
-              <Bitmap x={11} y={3} d={['ab']} scheme={scheme} />
-              {_.range(6).map(i =>
-                <rect key={i} x={13} width={1} y={3 + 2 * i} height={1} fill={b} />
-              )}
-            </g>
-          )}
+          <g role="right-tire-shape-1">
+            <Bitmap x={11} y={3} d={['ab']} scheme={scheme} />
+            {_.range(6).map(i =>
+              <rect key={i} x={13} width={1} y={3 + 2 * i} height={1} fill={b} />
+            )}
+          </g>
+        )}
       </g>
 
       <g role="tank-body">

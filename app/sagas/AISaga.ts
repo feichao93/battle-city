@@ -188,7 +188,6 @@ export default function* AIMasterSaga() {
         x,
         y,
         side: 'ai',
-        color: 'silver',
         level: remainingEnemies.first(),
       }))
       taskMap[playerName] = yield spawn(AIWorkerSaga, playerName, EmptyWorker)

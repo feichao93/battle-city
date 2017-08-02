@@ -5,7 +5,7 @@ import { spawnTank } from 'utils/common'
 import { State } from 'reducers/index'
 import PlayerRecord from 'types/PlayerRecord'
 
-export default function* humanPlayerSaga(playerName: string) {
+export default function* humanPlayerSaga(playerName: string, tankColor: TankColor) {
   yield put<Action>({
     type: 'CREATE_PLAYER',
     player: PlayerRecord({
@@ -29,6 +29,7 @@ export default function* humanPlayerSaga(playerName: string) {
         x: 4 * BLOCK_SIZE,
         y: 12 * BLOCK_SIZE,
         side: 'human',
+        color: tankColor,
         level: 'basic',
       }))
       yield put({
