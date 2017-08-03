@@ -40,6 +40,7 @@ declare global {
       | RemoveTextAction
       | RemoveFlickerAction
       | SpawnFlickerAction
+      | HurtAction
       | KillAction
       | IncKillCount
       | UpdateTransientKillInfo
@@ -51,6 +52,12 @@ declare global {
       type: 'MOVE',
       tankId: TankId,
       tank: TankRecord,
+    }
+
+    export type HurtAction = {
+      type: 'HURT'
+      targetTank: TankRecord
+      hurt: number
     }
 
     export type KillAction = {

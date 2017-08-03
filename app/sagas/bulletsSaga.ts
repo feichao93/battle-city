@@ -143,6 +143,7 @@ function* destroySteels(collidedBullets: BulletsMap) {
   }
 }
 
+/** 从地图上移除坦克, 并产生坦克爆炸效果 */
 function* destroyTanks(tankIdSet: ISet<TankId>) {
   const { tanks }: State = yield select()
   // 移除tank
@@ -303,22 +304,29 @@ function* handleAfterTick() {
     }
 
     const kills: PutEffect<Action.KillAction>[] = []
-    // 坦克伤害结算 todo 假设目前tank被击中之后将直接爆炸
+    const destroyedTankIdSet = new Set<TargetTankId>()
+    // 坦克伤害结算
     for (const [targetTankId, hurtMap] of context.tankHurtMap.entries()) {
-      // todo 目前不考虑具体的伤害值, 认为一旦承受伤害, tank就会死亡
-      // const totalHurt = sum(hurtMap.values())
-      const sourceTankId = hurtMap.keys().next().value
-      kills.push(put<Action.KillAction>({
-        type: 'KILL',
-        targetTank: tanks.get(targetTankId),
-        sourceTank: tanks.get(sourceTankId),
-        targetPlayer: players.find(ply => ply.tankId === targetTankId),
-        sourcePlayer: players.find(ply => ply.tankId === sourceTankId),
-      }))
+      const hurt = sum(hurtMap.values())
+      const targetTank = tanks.get(targetTankId)
+      if (hurt >= targetTank.hp) {
+        // 击杀了目标坦克
+        const sourceTankId = hurtMap.keys().next().value
+        kills.push(put<Action.KillAction>({
+          type: 'KILL',
+          targetTank,
+          sourceTank: tanks.get(sourceTankId),
+          targetPlayer: players.find(ply => ply.tankId === targetTankId),
+          sourcePlayer: players.find(ply => ply.tankId === sourceTankId),
+        }))
+        destroyedTankIdSet.add(targetTankId)
+      } else {
+        yield put<Action>({ type: 'HURT', targetTank, hurt })
+      }
     }
     // 移除坦克 & 产生爆炸效果
-    if (context.tankHurtMap.size > 0) {
-      yield destroyTanks(ISet(context.tankHurtMap.keys()))
+    if (destroyedTankIdSet.size > 0) {
+      yield destroyTanks(ISet(destroyedTankIdSet))
     }
     // notice KillAction是在destroyTanks之后被dispatch的; 此时地图上的坦克已经被去除了
     yield* kills

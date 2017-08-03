@@ -184,11 +184,14 @@ export default function* AIMasterSaga() {
       })
       const { x, y } = yield select(selectors.availableSpawnPosition)
       yield put<Action>({ type: 'REMOVE_FIRST_REMAINING_ENEMY' })
+      const level = remainingEnemies.first()
+      const hp = level === 'armor' ? 4 : 1
       const tankId = yield* spawnTank(TankRecord({
         x,
         y,
         side: 'ai',
-        level: remainingEnemies.first(),
+        level,
+        hp,
       }))
       taskMap[playerName] = yield spawn(AIWorkerSaga, playerName, EmptyWorker)
 
