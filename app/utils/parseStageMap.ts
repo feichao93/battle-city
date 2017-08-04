@@ -4,7 +4,6 @@ import { EagleRecord, MapRecord } from 'reducers/map'
 
 function parseBrickBits(str: string) {
   if (str.length === 1) {
-    debugger
     const short = parseInt(str, 16)
     let long = 0
     if (0b0001 & short) {

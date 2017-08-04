@@ -1,6 +1,6 @@
 {
   "name": "1",
-  "difficulty": "easy",
+  "difficulty": 1,
   "map": [
     "X  X  X  X  X  X  X  X  X  X  X  X  X  ",
     "X  Bf X  Bf X  Bf X  Bf X  Bf X  Bf X  ",

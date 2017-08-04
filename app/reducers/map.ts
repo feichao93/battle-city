@@ -23,7 +23,6 @@ export const MapRecord = Record({
 const mapRecord = MapRecord()
 export type MapRecord = typeof mapRecord
 
-// todo eagle的坐标也应该从json文件中导入
 export default function mapReducer(state = mapRecord, action: Action) {
   if (action.type === 'LOAD_STAGE') {
     const { name } = action
