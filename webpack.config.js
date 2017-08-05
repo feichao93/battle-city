@@ -21,6 +21,12 @@ const commonPlugins = [
     template: path.resolve(__dirname, 'app/index.tmpl.html'),
     chunks: ['stories'],
   }),
+  new HtmlWebpackPlugin({
+    title: 'editor',
+    filename: 'editor.html',
+    template: path.resolve(__dirname, 'app/index.tmpl.html'),
+    chunks: ['editor'],
+  }),
 ]
 
 const devPlugins = [
@@ -40,6 +46,7 @@ module.exports = {
       __dirname + '/app/main.tsx'
     ],
     stories: path.resolve(__dirname, 'app/stories.tsx'),
+    editor: ['react-hot-loader/patch', path.resolve(__dirname, 'app/editor.tsx')],
   },
 
   output: {
@@ -62,6 +69,7 @@ module.exports = {
         use: ['awesome-typescript-loader'],
         exclude: /node_modules/,
       },
+    ].concat(isProduction ? [
       {
         test: /\.css$/,
         use: ExtractTextPlugin.extract({
@@ -69,7 +77,12 @@ module.exports = {
           use: 'css-loader',
         })
       },
-    ],
+    ] : [
+      {
+        test: /\.css$/,
+        use: ['style-loader', 'css-loader'],
+      },
+    ]),
   },
 
   plugins: commonPlugins.concat(isProduction ? productionPlugins : devPlugins),

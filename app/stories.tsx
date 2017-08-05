@@ -4,7 +4,7 @@ import * as ReactDOM from 'react-dom'
 import { Map } from 'immutable'
 import { Provider } from 'react-redux'
 import { applyMiddleware, combineReducers, createStore } from 'redux'
-import createSgaMiddleware from 'redux-saga'
+import createSagaMiddleware from 'redux-saga'
 import players from 'reducers/players'
 import { time } from 'reducers/index'
 import game from 'reducers/game'
@@ -36,7 +36,7 @@ const PowerUp = ({ name }: any) => (
   <PowerUpBase tickIndex={0} name={name} x={0} y={0} />
 )
 
-const simpleSagaMiddleware = createSgaMiddleware()
+const simpleSagaMiddleware = createSagaMiddleware()
 const simpleReducer = combineReducers({ time, players, game })
 const initialState = {
   time: undefined as number,
