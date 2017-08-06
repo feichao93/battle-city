@@ -278,6 +278,18 @@ const chars: Chars = {
       height="2"
     />
   ),
+  '+': ({ fill }) => (
+    <g role="character-plus" fill={fill}>
+      <rect x="1" y="3" width="6" height="2" />
+      <rect x="3" y="1" width="2" height="6" />
+    </g>
+  ),
+  ':': ({ fill }) => (
+    <g role="character-colon">
+      <rect x="2" y="1" width="2" height="2" fill={fill} />
+      <rect x="2" y="5" width="2" height="2" fill={fill} />
+    </g>
+  ),
   ['\u2160'.toLowerCase()]: ({ fill }) => (
     <path
       role="character-roman-numeral-one"
@@ -313,14 +325,19 @@ type Props = {
   content: string,
   x: number,
   y: number,
-  fill: string,
+  fill: string
+  style?: React.CSSProperties
 }
 
 export default class Text extends React.PureComponent<Props, {}> {
+  static support(char: string) {
+    return char in chars
+  }
+
   render() {
-    const { content, x, y, fill } = this.props
+    const { content, x, y, fill, style = {} } = this.props
     return (
-      <g role="text" transform={`translate(${x},${y})`}>
+      <g role="text" transform={`translate(${x},${y})`} style={style}>
         {Array.from(content.toLowerCase()).map((char, i) => {
           const Component = chars[char]
           if (Component != null) {
