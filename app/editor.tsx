@@ -21,6 +21,7 @@ import Forest from 'components/Forest'
 import { Tank } from 'components/tanks'
 import BrickWall from 'components/BrickWall'
 import SteelWall from 'components/SteelWall'
+import TextInput from 'components/TextInput'
 import tickEmitter from 'sagas/tickEmitter'
 import { time } from 'reducers/index'
 import game from 'reducers/game'
@@ -108,6 +109,17 @@ const mapItemRecord = MapItemRecord()
 
 export type MapItemRecord = typeof mapItemRecord
 
+export type PopupType = 'none' | 'alert' | 'confirm'
+
+export const PopupRecord = Record({
+  type: 'none' as PopupType,
+  message: '',
+})
+
+const popupRecord = PopupRecord()
+
+export type PopupRecord = typeof popupRecord
+
 export const EnemyConfigRecord = Record({
   tankLevel: 'basic' as TankLevel,
   count: 0,
@@ -117,15 +129,14 @@ const enemyConfigRecord = EnemyConfigRecord()
 
 export type EnemyConfigRecord = typeof enemyConfigRecord
 
-const log = (...args: any[]) => () => console.log(...args)
-
 const DashLines = () => (
   <g
+    role="dash-lines"
     stroke="steelblue"
     strokeWidth="0.5"
     strokeDasharray="2 2"
   >
-    {Range(1, FBZ).map(x =>
+    {Range(1, FBZ + 1).map(x =>
       <line
         key={x}
         x1={B * x}
@@ -134,7 +145,7 @@ const DashLines = () => (
         y2={15 * B}
       />
     ).toArray()}
-    {Range(1, FBZ).map(y =>
+    {Range(1, FBZ + 1).map(y =>
       <line
         key={y}
         x1={0}
@@ -147,7 +158,7 @@ const DashLines = () => (
 )
 
 const HexBrickWall = ({ x, y, hex }: { x: number, y: number, hex: number }) => (
-  <g>
+  <g role="hex-brick-wall">
     {[[0b0001, 0, 0], [0b0010, 8, 0], [0b0100, 0, 8], [0b1000, 8, 8]].map(([mask, dx, dy], index) =>
       <g
         key={index}
@@ -164,7 +175,7 @@ const HexBrickWall = ({ x, y, hex }: { x: number, y: number, hex: number }) => (
 )
 
 const HexSteelWall = ({ x, y, hex }: { x: number, y: number, hex: number }) => (
-  <g>
+  <g role="hex-steel-wall">
     <SteelWall x={x} y={y} gstyle={{ opacity: (hex & 0b0001) ? 1 : 0.3 }} />
     <SteelWall x={x + 8} y={y} gstyle={{ opacity: (hex & 0b0010) ? 1 : 0.3 }} />
     <SteelWall x={x} y={y + 8} gstyle={{ opacity: (hex & 0b0100) ? 1 : 0.3 }} />
@@ -205,6 +216,7 @@ type TextButtonProps = {
   onClick?: () => void
   selected?: boolean
   textFill?: string
+  selectedTextFill?: string
   disabled?: boolean
 }
 
@@ -216,7 +228,8 @@ const TextButton = ({
   spreadY = 0.125 * B,
   onClick,
   selected,
-  textFill = 'white',
+  textFill = '#ccc',
+  selectedTextFill = '#333',
   disabled = false,
 }: TextButtonProps) => {
   return (
@@ -234,95 +247,35 @@ const TextButton = ({
         x={x}
         y={y}
         content={content}
-        fill={textFill}
+        fill={selected ? selectedTextFill : textFill}
       />
     </g>
   )
 }
 
-type TextInputProps = {
+type TextWithLineWrapProps = {
   x: number
   y: number
+  fill?: string
   maxLength: number
-  value: string
-  onChange: (newValue: string) => void
+  content: string
+  lineSpacing?: number
 }
 
-class TextInput extends React.Component<TextInputProps, { focused: boolean }> {
-  input: HTMLInputElement
-
-  constructor(props: TextInputProps) {
-    super(props)
-    this.state = {
-      focused: false,
-    }
-  }
-
-  componentDidMount() {
-    this.input = document.createElement('input')
-    this.input.type = 'text'
-    this.input.value = this.props.value
-
-    // this styles will make input invisible
-    this.input.style.position = 'absolute'
-    this.input.style.width = '0'
-    this.input.style.border = 'none'
-
-    this.input.addEventListener('blur', this.onBlur)
-    this.input.addEventListener('input', this.onInput)
-
-    document.body.appendChild(this.input)
-  }
-
-  componentWillUnmount() {
-    this.input.removeEventListener('blur', this.onBlur)
-    this.input.removeEventListener('input', this.onInput)
-
-    this.input.remove()
-  }
-
-  onBlur = () => this.setState({ focused: false })
-
-  onInput = () => {
-    const { maxLength } = this.props
-    const rawValue = this.input.value
-    const value = Array.from(rawValue).filter(Text.support).join('').substring(0, maxLength)
-    this.input.value = value
-    this.props.onChange(value)
-  }
-
-  onFocus = () => {
-    this.input.focus()
-    this.setState({ focused: true })
-  }
-
-  render() {
-    const { x, y, maxLength, value } = this.props
-    const { focused } = this.state
-    return (
-      <g onClick={this.onFocus}>
-        <rect
-          x={x - 2}
-          y={y - 2}
-          height={0.5 * B + 4}
-          width={maxLength * 0.5 * B + 4}
-          fill="transparent"
-          stroke="#e91e63"
-          strokeOpacity="0.2"
-          strokeWidth="1"
-        />
-        <Text x={x} y={y} content={value} fill="white" />
-        <rect
-          x={x + value.length * 8}
-          y={y - 1.5}
-          width="1"
-          height="11"
-          fill={focused ? 'orange' : 'transparent'}
-        />
-      </g>
-    )
-  }
-}
+// todo 针对单词进行换行
+const TextWithLineWrap = ({ x, y, fill, maxLength, content, lineSpacing = 0.25 * B }: TextWithLineWrapProps) => (
+  <g role="text-with-line-wrap">
+    {Range(0, Math.ceil(content.length / maxLength)).map(index =>
+      <Text
+        key={index}
+        x={x}
+        y={y + (0.5 * B + lineSpacing) * index}
+        fill={fill}
+        content={content.substring(index * maxLength, (index + 1) * maxLength)}
+      />
+    ).toArray()}
+  </g>
+)
 
 const positionMap = {
   X: B,
@@ -339,8 +292,12 @@ type EditorView = 'map' | 'config'
 class Editor extends React.Component {
   private svg: SVGSVGElement
   private pressed = false
+  private resolveConfirm: (ok: boolean) => void = null
+  private resolveAlert: () => void = null
+
   state = {
     view: 'config' as EditorView,
+    popup: popupRecord,
 
     // map-view
     map: Repeat(mapItemRecord, FBZ ** 2).toList(),
@@ -485,8 +442,30 @@ class Editor extends React.Component {
     console.log('on-load')
   }
 
-  onSave = () => {
+  onSave = async () => {
     const { map, stageName, enemies, difficulty } = this.state
+    const totalEnemyCount = enemies.map(e => e.count).reduce((x: number, y) => x + y)
+
+    // 检查stageName
+    if (stageName === '') {
+      await this.showAlertPopup('stageName is empty.')
+      return
+    }
+    // 检查enemies数量
+    if (totalEnemyCount === 0) {
+      this.showAlertPopup('no enemy')
+      return
+    } else if (totalEnemyCount !== 20 &&
+      !await this.showConfirmPopup('total enemy count is not 20. continue?')) {
+      return
+    }
+
+    // 检查地图
+    const hasEagle = map.some(mapItem => mapItem.type === 'E')
+    if (!hasEagle && !await this.showConfirmPopup('no eagle. continue?')) {
+      return
+    }
+
     const content = JSON.stringify({
       name: stageName.toLowerCase(),
       difficulty,
@@ -494,7 +473,56 @@ class Editor extends React.Component {
       enemies: enemies.filter(e => e.count > 0)
         .map(e => `${e.count}*${e.tankLevel}`),
     }, null, 2)
-    saveAs(new Blob([content], { type: 'text/plain;charset=utf-8' }), 'stage.json')
+    saveAs(new Blob([content], { type: 'text/plain;charset=utf-8' }), `stage-${stageName}.json`)
+  }
+
+  showAlertPopup(message: string) {
+    this.setState({
+      popup: PopupRecord({
+        type: 'alert',
+        message,
+      }),
+    })
+    return new Promise<boolean>(resolve => {
+      this.resolveAlert = resolve
+    })
+  }
+
+  showConfirmPopup(message: string) {
+    this.setState({
+      popup: PopupRecord({
+        type: 'confirm',
+        message,
+      })
+    })
+    return new Promise<boolean>(resolve => {
+      this.resolveConfirm = resolve
+    })
+  }
+
+  onConfirm = () => {
+    this.resolveConfirm(true)
+    this.resolveConfirm = null
+    this.setState({ popup: popupRecord })
+  }
+
+  onCancel = () => {
+    this.resolveConfirm(false)
+    this.resolveConfirm = null
+    this.setState({ popup: popupRecord })
+  }
+
+  onClickOkOfAlert = () => {
+    this.resolveAlert()
+    this.resolveAlert = null
+    this.setState({ popup: popupRecord })
+  }
+
+  onShowHelpInfo = async () => {
+    // todo 添加帮助信息
+    await this.showAlertPopup('help info - 1')
+    await this.showAlertPopup('help info - 2')
+    await this.showAlertPopup('help info - 3')
   }
 
   renderButtonAreas() {
@@ -520,7 +548,7 @@ class Editor extends React.Component {
     const { rivers, steels, bricks, snows, forests, eagle } = parseStageMap(toString(map))
 
     return (
-      <g>
+      <g role="map-view">
         <g role="board">
           <rect width={FBZ * B} height={FBZ * B} fill="#000000" />
           <RiverLayer rivers={rivers} />
@@ -554,8 +582,20 @@ class Editor extends React.Component {
           <Eagle x={B} y={10 * B} broken={false} />
 
           {this.renderButtonAreas()}
-          <Text content="f" fill="red" x={2.25 * B} y={2.75 * B} />
-          <Text content="f" fill="red" x={2.25 * B} y={4.25 * B} />
+          <TextButton
+            content="?"
+            spreadX={0.125 * B}
+            x={2.25 * B}
+            y={2.75 * B}
+            onClick={this.onShowHelpInfo}
+          />
+          <TextButton
+            content="?"
+            spreadX={0.125 * B}
+            x={2.25 * B}
+            y={4.25 * B}
+            onClick={this.onShowHelpInfo}
+          />
         </g>
       </g>
     )
@@ -566,9 +606,9 @@ class Editor extends React.Component {
     const totalEnemyCount = enemies.map(e => e.count).reduce((x: number, y) => x + y)
 
     return (
-      <g>
+      <g role="config-view">
         <DashLines />
-        <Text content="       name:" x={0} y={1 * B} fill="white" />
+        <Text content="name:" x={3.5 * B} y={1 * B} fill="#ccc" />
         <TextInput
           x={6.5 * B}
           y={B}
@@ -577,7 +617,7 @@ class Editor extends React.Component {
           onChange={stageName => this.setState({ stageName })}
         />
 
-        <Text content=" difficulty:" x={0} y={2.5 * B} fill="white" />
+        <Text content="difficulty:" x={0.5 * B} y={2.5 * B} fill="#ccc" />
         <TextButton
           content="-"
           x={6.25 * B}
@@ -585,7 +625,7 @@ class Editor extends React.Component {
           disabled={difficulty === 1}
           onClick={this.onDecDifficulty}
         />
-        <Text content={String(difficulty)} x={7.25 * B} y={2.5 * B} fill="white" />
+        <Text content={String(difficulty)} x={7.25 * B} y={2.5 * B} fill="#ccc" />
         <TextButton
           content="+"
           x={8.25 * B}
@@ -594,7 +634,7 @@ class Editor extends React.Component {
           onClick={this.onIncDifficulty}
         />
 
-        <Text content="    enemies:" x={0} y={4 * B} fill="white" />
+        <Text content="enemies:" x={2 * B} y={4 * B} fill="#ccc" />
         <g role="enemies-config" transform={`translate(${6 * B}, ${4 * B})`}>
           {enemies.map(({ tankLevel, count }, index) => (
             <g key={index} transform={`translate(0, ${1.5 * B * index})`}>
@@ -624,7 +664,7 @@ class Editor extends React.Component {
                 content={String(count).padStart(2, '0')}
                 x={4.5 * B}
                 y={0.25 * B}
-                fill="white"
+                fill="#ccc"
               />
               <TextButton
                 content="+"
@@ -635,15 +675,76 @@ class Editor extends React.Component {
               />
             </g>
           ))}
-          <Text content="total:" x={0.25 * B} y={6 * B} />
+          <Text content="total:" x={0.25 * B} y={6 * B} fill="#ccc" />
           <Text
             content={String(totalEnemyCount).padStart(2, '0')}
             x={4.5 * B}
             y={6 * B}
+            fill="#ccc"
           />
         </g>
       </g>
     )
+  }
+
+  renderPopup() {
+    const { popup } = this.state
+    if (popup.type === 'alert') {
+      return (
+        <g role="popup-alert">
+          <rect x={0} y={0} width={16 * B} height={15 * B} fill="transparent" />
+          <g transform={`translate(${2.5 * B}, ${4.5 * B})`}>
+            <rect x={-0.5 * B} y={-0.5 * B} width={12 * B} height={4 * B} fill="#e91e63" />
+            <TextWithLineWrap
+              x={0}
+              y={0}
+              fill="#333"
+              maxLength={22}
+              content={popup.message}
+            />
+            <TextButton
+              x={9.5 * B}
+              y={2 * B}
+              textFill="#333"
+              content="OK"
+              onClick={this.onClickOkOfAlert}
+            />
+          </g>
+        </g>
+      )
+    } else if (popup.type === 'confirm') {
+      return (
+        <g role="popup-confirm">
+          <rect x={0} y={0} width={16 * B} height={15 * B} fill="transparent" />
+          <g transform={`translate(${2.5 * B}, ${4.5 * B})`}>
+            <rect x={-0.5 * B} y={-0.5 * B} width={12 * B} height={4 * B} fill="#e91e63" />
+            <TextWithLineWrap
+              x={0}
+              y={0}
+              fill="#333"
+              maxLength={22}
+              content={popup.message}
+            />
+            <TextButton
+              x={7.5 * B}
+              y={2 * B}
+              textFill="#333"
+              content="no"
+              onClick={this.onCancel}
+            />
+            <TextButton
+              x={9 * B}
+              y={2 * B}
+              textFill="#333"
+              content="yes"
+              onClick={this.onConfirm}
+            />
+          </g>
+        </g>
+      )
+    } else {
+      return null
+    }
   }
 
   render() {
@@ -653,6 +754,7 @@ class Editor extends React.Component {
       <svg
         ref={node => (this.svg = node)}
         className="svg"
+        style={{ background: '#333' }}
         width={16 * B}
         height={15 * B}
         onMouseDown={this.onMouseDown}
@@ -664,15 +766,18 @@ class Editor extends React.Component {
         {view === 'config' ? this.renderConfigView() : null}
         <g role="menu" transform={`translate(0, ${13 * B})`}>
           <TextButton
-            content="map"
+            content="config"
             x={0.5 * B}
+            y={0.5 * B}
+            selected={view === 'config'}
+            onClick={() => this.onChangeView('config')}
+          />
+          <TextButton
+            content="map"
+            x={4 * B}
             y={0.5 * B}
             selected={view === 'map'}
             onClick={() => this.onChangeView('map')}
-          />
-          <TextButton
-            content="config" x={2.5 * B} y={0.5 * B} selected={view === 'config'}
-            onClick={() => this.onChangeView('config')}
           />
           <TextButton
             content="load"
@@ -687,6 +792,7 @@ class Editor extends React.Component {
             onClick={this.onSave}
           />
         </g>
+        {this.renderPopup()}
       </svg>
     )
   }

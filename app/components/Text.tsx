@@ -285,9 +285,18 @@ const chars: Chars = {
     </g>
   ),
   ':': ({ fill }) => (
-    <g role="character-colon">
-      <rect x="2" y="1" width="2" height="2" fill={fill} />
-      <rect x="2" y="5" width="2" height="2" fill={fill} />
+    <g role="character-colon" fill={fill}>
+      <rect x="2" y="1" width="2" height="2" />
+      <rect x="2" y="5" width="2" height="2" />
+    </g>
+  ),
+  '.': ({ fill }) => (
+    <rect role="character-dot" x="2" y="5" width="2" height="2" fill={fill} />
+  ),
+  '?': ({ fill }) => (
+    <g role="character-question-mark" fill={fill}>
+      <path d="M2,0 h5 v1 h1 v2 h-1 v1 h-1 v1 h-3 v-1 h2 v-1 h1 v-2 h-3 v2 h-2 v-2 h1 v-1" />
+      <rect x="3" y="6" width="3" height="1" />
     </g>
   ),
   ['\u2160'.toLowerCase()]: ({ fill }) => (
