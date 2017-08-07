@@ -26,6 +26,7 @@ import { time } from 'reducers/index'
 import game from 'reducers/game'
 import parseStageMap from 'utils/parseStageMap'
 import { TankRecord } from 'types'
+import { inc, dec } from 'utils/common'
 
 const simpleSagaMiddleware = createSagaMiddleware()
 const simpleReducer = combineReducers({ time, game })
@@ -40,11 +41,32 @@ function nextHex(hex: number) {
     return hex + 1
   }
 }
+
 function prevHex(hex: number) {
   if (hex === 0x1) {
     return 0xf
   } else {
     return hex - 1
+  }
+}
+
+function incTankLevel(record: EnemyConfigRecord) {
+  if (record.tankLevel === 'basic') {
+    return record.set('tankLevel', 'fast')
+  } else if (record.tankLevel === 'fast') {
+    return record.set('tankLevel', 'power')
+  } else {
+    return record.set('tankLevel', 'armor')
+  }
+}
+
+function decTankLevel(record: EnemyConfigRecord) {
+  if (record.tankLevel === 'armor') {
+    return record.set('tankLevel', 'power')
+  } else if (record.tankLevel === 'power') {
+    return record.set('tankLevel', 'fast')
+  } else {
+    return record.set('tankLevel', 'basic')
   }
 }
 
@@ -183,6 +205,7 @@ type TextButtonProps = {
   onClick?: () => void
   selected?: boolean
   textFill?: string
+  disabled?: boolean
 }
 
 const TextButton = ({
@@ -194,18 +217,20 @@ const TextButton = ({
   onClick,
   selected,
   textFill = 'white',
- }: TextButtonProps) => (
+  disabled = false,
+}: TextButtonProps) => {
+  return (
     <g role="text-button">
       <rect
-        className={classNames('text-area', { selected })}
+        className={classNames('text-area', { selected, disabled })}
         x={x - spreadX}
         y={y - spreadY}
         width={content.length * 0.5 * B + 2 * spreadX}
         height={0.5 * B + 2 * spreadY}
-        onClick={onClick}
+        onClick={disabled ? null : onClick}
       />
       <Text
-        style={{ pointerEvents: 'none' }}
+        style={{ pointerEvents: 'none', opacity: disabled ? 0.3 : 1 }}
         x={x}
         y={y}
         content={content}
@@ -213,6 +238,7 @@ const TextButton = ({
       />
     </g>
   )
+}
 
 type TextInputProps = {
   x: number
@@ -250,7 +276,7 @@ class TextInput extends React.Component<TextInputProps, { focused: boolean }> {
 
   componentWillUnmount() {
     this.input.removeEventListener('blur', this.onBlur)
-    this.input.addEventListener('input', this.onInput)
+    this.input.removeEventListener('input', this.onInput)
 
     this.input.remove()
   }
@@ -314,7 +340,7 @@ class Editor extends React.Component {
   private svg: SVGSVGElement
   private pressed = false
   state = {
-    view: 'map' as EditorView,
+    view: 'config' as EditorView,
 
     // map-view
     map: Repeat(mapItemRecord, FBZ ** 2).toList(),
@@ -424,6 +450,36 @@ class Editor extends React.Component {
 
   onChangeView = (view: EditorView) => this.setState({ view })
 
+  onIncDifficulty = () => {
+    const { difficulty } = this.state
+    this.setState({ difficulty: difficulty + 1 })
+  }
+
+  onDecDifficulty = () => {
+    const { difficulty } = this.state
+    this.setState({ difficulty: difficulty - 1 })
+  }
+
+  onIncEnemyLevel = (index: number) => {
+    const { enemies } = this.state
+    this.setState({ enemies: enemies.update(index, incTankLevel) })
+  }
+
+  onDecEnemyLevel = (index: number) => {
+    const { enemies } = this.state
+    this.setState({ enemies: enemies.update(index, decTankLevel) })
+  }
+
+  onIncEnemyCount = (index: number) => {
+    const { enemies } = this.state
+    this.setState({ enemies: enemies.updateIn([index, 'count'], inc(1)) })
+  }
+
+  onDecEnemyCount = (index: number) => {
+    const { enemies } = this.state
+    this.setState({ enemies: enemies.updateIn([index, 'count'], dec(1)) })
+  }
+
   onLoad = () => {
     // todo
     console.log('on-load')
@@ -439,13 +495,6 @@ class Editor extends React.Component {
         .map(e => `${e.count}*${e.tankLevel}`),
     }, null, 2)
     saveAs(new Blob([content], { type: 'text/plain;charset=utf-8' }), 'stage.json')
-  }
-
-  renderRightArrow() {
-    const { itemType } = this.state
-    return (
-      <Text content={'\u2192'} fill="#E91E63" x={0.25 * B} y={0.25 * B + positionMap[itemType]} />
-    )
   }
 
   renderButtonAreas() {
@@ -467,7 +516,7 @@ class Editor extends React.Component {
   }
 
   renderMapView() {
-    const { map, brickHex, steelHex } = this.state
+    const { map, brickHex, steelHex, itemType } = this.state
     const { rivers, steels, bricks, snows, forests, eagle } = parseStageMap(toString(map))
 
     return (
@@ -489,7 +538,12 @@ class Editor extends React.Component {
         </g>
         <DashLines />
         <g role="tools" transform={`translate(${13 * B},0)`}>
-          {this.renderRightArrow()}
+          <Text
+            content={'\u2192'}
+            fill="#E91E63"
+            x={0.25 * B}
+            y={0.25 * B + positionMap[itemType]}
+          />
 
           <rect x={B} y={B} width={B} height={B} fill="black" />
           <HexBrickWall x={B} y={2.5 * B} hex={brickHex} />
@@ -509,6 +563,8 @@ class Editor extends React.Component {
 
   renderConfigView() {
     const { enemies, difficulty, stageName } = this.state
+    const totalEnemyCount = enemies.map(e => e.count).reduce((x: number, y) => x + y)
+
     return (
       <g>
         <DashLines />
@@ -521,25 +577,70 @@ class Editor extends React.Component {
           onChange={stageName => this.setState({ stageName })}
         />
 
-        {/* todo 添加调整difficulty的按钮 */}
         <Text content=" difficulty:" x={0} y={2.5 * B} fill="white" />
-        <Text content="-" x={6.25 * B} y={2.5 * B} fill="white" />
+        <TextButton
+          content="-"
+          x={6.25 * B}
+          y={2.5 * B}
+          disabled={difficulty === 1}
+          onClick={this.onDecDifficulty}
+        />
         <Text content={String(difficulty)} x={7.25 * B} y={2.5 * B} fill="white" />
-        <Text content="+" x={8.25 * B} y={2.5 * B} fill="white" />
+        <TextButton
+          content="+"
+          x={8.25 * B}
+          y={2.5 * B}
+          disabled={difficulty === 4}
+          onClick={this.onIncDifficulty}
+        />
 
-        {/* todo 添加调整enemies的按钮 */}
         <Text content="    enemies:" x={0} y={4 * B} fill="white" />
         <g role="enemies-config" transform={`translate(${6 * B}, ${4 * B})`}>
-          {enemies.map((entry, index) => (
+          {enemies.map(({ tankLevel, count }, index) => (
             <g key={index} transform={`translate(0, ${1.5 * B * index})`}>
-              <Text content={'\u2190'} x={0.25 * B} y={0.25 * B} fill="white" />
-              <Tank tank={TankRecord({ side: 'ai', level: entry.tankLevel, x: B, y: 0 })} />
-              <Text content={'\u2192'} x={2.25 * B} y={0.25 * B} fill="white" />
-              <Text content="-" x={3.75 * B} y={0.25 * B} fill="white" />
-              <Text content={String(entry.count).padStart(2, '0')} x={4.5 * B} y={0.25 * B} fill="white" />
-              <Text content="+" x={5.75 * B} y={0.25 * B} fill="white" />
+              <TextButton
+                content={'\u2190'}
+                x={0.25 * B}
+                y={0.25 * B}
+                disabled={tankLevel === 'basic'}
+                onClick={() => this.onDecEnemyLevel(index)}
+              />
+              <Tank tank={TankRecord({ side: 'ai', level: tankLevel, x: B, y: 0 })} />
+              <TextButton
+                content={'\u2192'}
+                x={2.25 * B}
+                y={0.25 * B}
+                disabled={tankLevel === 'armor'}
+                onClick={() => this.onIncEnemyLevel(index)}
+              />
+              <TextButton
+                content="-"
+                x={3.75 * B}
+                y={0.25 * B}
+                disabled={count === 0}
+                onClick={() => this.onDecEnemyCount(index)}
+              />
+              <Text
+                content={String(count).padStart(2, '0')}
+                x={4.5 * B}
+                y={0.25 * B}
+                fill="white"
+              />
+              <TextButton
+                content="+"
+                x={5.75 * B}
+                y={0.25 * B}
+                disabled={count === 99}
+                onClick={() => this.onIncEnemyCount(index)}
+              />
             </g>
           ))}
+          <Text content="total:" x={0.25 * B} y={6 * B} />
+          <Text
+            content={String(totalEnemyCount).padStart(2, '0')}
+            x={4.5 * B}
+            y={6 * B}
+          />
         </g>
       </g>
     )

@@ -325,17 +325,17 @@ type Props = {
   content: string,
   x: number,
   y: number,
-  fill: string
+  fill?: string
   style?: React.CSSProperties
 }
 
-export default class Text extends React.PureComponent<Props, {}> {
+export default class Text extends React.PureComponent<Props> {
   static support(char: string) {
     return char in chars
   }
 
   render() {
-    const { content, x, y, fill, style = {} } = this.props
+    const { content, x, y, fill = 'white', style = {} } = this.props
     return (
       <g role="text" transform={`translate(${x},${y})`} style={style}>
         {Array.from(content.toLowerCase()).map((char, i) => {
