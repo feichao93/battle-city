@@ -290,6 +290,9 @@ const positionMap = {
 type EditorView = 'map' | 'config'
 
 class Editor extends React.Component {
+  private input: HTMLInputElement
+  private resetButton: HTMLInputElement
+  private form: HTMLFormElement
   private svg: SVGSVGElement
   private pressed = false
   private resolveConfirm: (ok: boolean) => void = null
@@ -314,6 +317,71 @@ class Editor extends React.Component {
       EnemyConfigRecord({ tankLevel: 'power', count: 4 }),
       EnemyConfigRecord({ tankLevel: 'armor', count: 2 }),
     ]),
+  }
+
+  componentDidMount() {
+    this.form = document.createElement('form')
+    this.resetButton = document.createElement('input')
+    this.input = document.createElement('input')
+
+    this.resetButton.type = 'reset'
+    this.input.type = 'file'
+
+    this.form.style.display = 'none'
+
+    this.input.addEventListener('change', this.onLoadFile)
+
+    this.form.appendChild(this.input)
+    this.form.appendChild(this.resetButton)
+    document.body.appendChild(this.form)
+  }
+
+  componentWillUnmount() {
+    this.input.removeEventListener('change', this.onLoadFile)
+    this.form.remove()
+  }
+
+  onLoadFile = () => {
+    const file = this.input.files[0]
+    if (file == null) {
+      return
+    }
+    const fileReader = new FileReader()
+    fileReader.readAsText(file)
+    fileReader.onloadend = () => {
+      try {
+        const stage: StageConfig = JSON.parse(fileReader.result)
+        this.loadStateFromFileContent(stage)
+      } catch (error) {
+        this.showAlertPopup('Failed to open file.')
+      }
+      this.resetButton.click()
+    }
+  }
+
+  async loadStateFromFileContent(stage: StageConfig) {
+    const stageName = stage.name
+    const difficulty = stage.difficulty
+    const enemies = List(stage.enemies.map(line => {
+      const splited = line.split('*')
+      return EnemyConfigRecord({
+        count: Number(splited[0]),
+        tankLevel: splited[1] as TankLevel,
+      })
+    })).setSize(4).map(v => v ? v : enemyConfigRecord)
+    const map = List(stage.map).flatMap(line => {
+      const items = line.trim().split(/ +/)
+      return items.map(item => {
+        const hex = parseInt(item[1], 16)
+        return MapItemRecord({
+          type: item[0] as MapItemType,
+          hex: isNaN(hex) ? 0 : hex,
+        })
+      })
+    })
+    if (await this.showConfirmPopup('This will override current config and map. Continue?')) {
+      this.setState({ stageName, difficulty, enemies, map })
+    }
   }
 
   getT(event: React.MouseEvent<SVGSVGElement>) {
@@ -437,9 +505,8 @@ class Editor extends React.Component {
     this.setState({ enemies: enemies.updateIn([index, 'count'], dec(1)) })
   }
 
-  onLoad = () => {
-    // todo
-    console.log('on-load')
+  onRequestLoad = () => {
+    this.input.click()
   }
 
   onSave = async () => {
@@ -783,7 +850,7 @@ class Editor extends React.Component {
             content="load"
             x={7 * B}
             y={0.5 * B}
-            onClick={this.onLoad}
+            onClick={this.onRequestLoad}
           />
           <TextButton
             content="save"

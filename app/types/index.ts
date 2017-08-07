@@ -41,9 +41,9 @@ declare global {
 
   interface StageConfig {
     name: string
-    difficulty: 'easy' | 'normal' | 'hard'
+    difficulty: number
     map: string[]
-    /** 敌人描述, 例如: 20*basic, 10*fast */
+    /** 敌人描述, 例如: 20\*basic, 10\*fast */
     enemies: string[]
   }
 
