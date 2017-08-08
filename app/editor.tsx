@@ -35,6 +35,9 @@ const simpleReducer = combineReducers({ time, game })
 const simpleStore = createStore(simpleReducer, undefined, applyMiddleware(simpleSagaMiddleware))
 simpleSagaMiddleware.run(tickEmitter)
 
+const totalWidth = 16 * B
+const totalHeight = 15 * B
+
 function nextHex(hex: number) {
   if (hex === 0xf) {
     return 0x1
@@ -129,33 +132,47 @@ const enemyConfigRecord = EnemyConfigRecord()
 
 export type EnemyConfigRecord = typeof enemyConfigRecord
 
-const DashLines = () => (
-  <g
-    role="dash-lines"
-    stroke="steelblue"
-    strokeWidth="0.5"
-    strokeDasharray="2 2"
-  >
-    {Range(1, FBZ + 1).map(x =>
-      <line
-        key={x}
-        x1={B * x}
-        y1={0}
-        x2={B * x}
-        y2={15 * B}
-      />
-    ).toArray()}
-    {Range(1, FBZ + 1).map(y =>
-      <line
-        key={y}
-        x1={0}
-        y1={B * y}
-        x2={16 * B}
-        y2={B * y}
-      />
-    ).toArray()}
-  </g>
-)
+type DashLinesProps = {
+  t?: number
+}
+
+class DashLines extends React.PureComponent<DashLinesProps> {
+  render() {
+    const { t } = this.props
+    const hrow = Math.floor(t / FBZ)
+    const hcol = t % FBZ
+
+    return (
+      <g
+        className="dash-lines"
+        stroke="steelblue"
+        strokeWidth="0.5"
+        strokeDasharray="2 2"
+      >
+        {Range(1, FBZ + 1).map(col =>
+          <line
+            key={col}
+            x1={B * col}
+            y1={0}
+            x2={B * col}
+            y2={totalHeight}
+            strokeOpacity={(hcol === col || hcol === col - 1) ? 1 : 0.3}
+          />
+        ).toArray()}
+        {Range(1, FBZ + 1).map(row =>
+          <line
+            key={row}
+            x1={0}
+            y1={B * row}
+            x2={totalWidth}
+            y2={B * row}
+            strokeOpacity={(hrow === row || hrow === row - 1) ? 1 : 0.3}
+          />
+        ).toArray()}
+      </g>
+    )
+  }
+}
 
 const HexBrickWall = ({ x, y, hex }: { x: number, y: number, hex: number }) => (
   <g role="hex-brick-wall">
@@ -301,6 +318,7 @@ class Editor extends React.Component {
   state = {
     view: 'config' as EditorView,
     popup: popupRecord,
+    t: -1,
 
     // map-view
     map: Repeat(mapItemRecord, FBZ ** 2).toList(),
@@ -438,26 +456,34 @@ class Editor extends React.Component {
   }
 
   onMouseDown = (event: React.MouseEvent<SVGSVGElement>) => {
-    const { view } = this.state
-    if (view === 'map' && this.getT(event) !== -1) {
+    const { view, popup } = this.state
+    if (view === 'map' && popup.type === 'none' && this.getT(event) !== -1) {
       this.pressed = true
     }
   }
 
   onMouseMove = (event: React.MouseEvent<SVGSVGElement>) => {
-    const { view } = this.state
-    if (view === 'map' && this.pressed) {
-      this.setAsCurrentItem(this.getT(event))
+    const { view, popup, t: lastT } = this.state
+    const t = this.getT(event)
+    if (t !== lastT) {
+      this.setState({ t })
+    }
+    if (view === 'map' && popup.type === 'none' && this.pressed) {
+      this.setAsCurrentItem(t)
     }
   }
 
   onMouseUp = (event: React.MouseEvent<SVGSVGElement>) => {
     this.pressed = false
-    this.setAsCurrentItem(this.getT(event))
+    const { view, popup } = this.state
+    if (view === 'map' && popup.type === 'none') {
+      this.setAsCurrentItem(this.getT(event))
+    }
   }
 
   onMouseLeave = () => {
     this.pressed = false
+    this.setState({ t: -1 })
   }
 
   onChangeItemType = (nextItemType: MapItemType) => {
@@ -611,7 +637,7 @@ class Editor extends React.Component {
   }
 
   renderMapView() {
-    const { map, brickHex, steelHex, itemType } = this.state
+    const { map, brickHex, steelHex, itemType, t } = this.state
     const { rivers, steels, bricks, snows, forests, eagle } = parseStageMap(toString(map))
 
     return (
@@ -631,7 +657,7 @@ class Editor extends React.Component {
             : null}
           <ForestLayer forests={forests} />
         </g>
-        <DashLines />
+        <DashLines t={t} />
         <g role="tools" transform={`translate(${13 * B},0)`}>
           <Text
             content={'\u2192'}
@@ -669,12 +695,12 @@ class Editor extends React.Component {
   }
 
   renderConfigView() {
-    const { enemies, difficulty, stageName } = this.state
+    const { enemies, difficulty, stageName, t } = this.state
     const totalEnemyCount = enemies.map(e => e.count).reduce((x: number, y) => x + y)
 
     return (
       <g role="config-view">
-        <DashLines />
+        <DashLines t={t} />
         <Text content="name:" x={3.5 * B} y={1 * B} fill="#ccc" />
         <TextInput
           x={6.5 * B}
@@ -759,7 +785,7 @@ class Editor extends React.Component {
     if (popup.type === 'alert') {
       return (
         <g role="popup-alert">
-          <rect x={0} y={0} width={16 * B} height={15 * B} fill="transparent" />
+          <rect x={0} y={0} width={totalWidth} height={totalHeight} fill="transparent" />
           <g transform={`translate(${2.5 * B}, ${4.5 * B})`}>
             <rect x={-0.5 * B} y={-0.5 * B} width={12 * B} height={4 * B} fill="#e91e63" />
             <TextWithLineWrap
@@ -782,7 +808,7 @@ class Editor extends React.Component {
     } else if (popup.type === 'confirm') {
       return (
         <g role="popup-confirm">
-          <rect x={0} y={0} width={16 * B} height={15 * B} fill="transparent" />
+          <rect x={0} y={0} width={totalWidth} height={totalHeight} fill="transparent" />
           <g transform={`translate(${2.5 * B}, ${4.5 * B})`}>
             <rect x={-0.5 * B} y={-0.5 * B} width={12 * B} height={4 * B} fill="#e91e63" />
             <TextWithLineWrap
@@ -822,8 +848,8 @@ class Editor extends React.Component {
         ref={node => (this.svg = node)}
         className="svg"
         style={{ background: '#333' }}
-        width={16 * B}
-        height={15 * B}
+        width={totalWidth}
+        height={totalHeight}
         onMouseDown={this.onMouseDown}
         onMouseUp={this.onMouseUp}
         onMouseMove={this.onMouseMove}

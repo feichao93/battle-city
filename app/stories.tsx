@@ -98,7 +98,7 @@ class Stories extends React.Component<{}, { stage: string }> {
     const { bricks, steels, rivers, snows, forests, eagle } = parseStageMap(stageConfigs[stage].map).toObject()
 
     return (
-      <div style={{ fontFamily: 'monospace', margin: 8 }}>
+      <div className="stories" style={{ fontFamily: 'monospace', margin: 8 }}>
         <details open>
           <summary>
             <FontLevel1>TANKS</FontLevel1>
