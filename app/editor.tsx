@@ -38,22 +38,6 @@ simpleSagaMiddleware.run(tickEmitter)
 const totalWidth = 16 * B
 const totalHeight = 15 * B
 
-function nextHex(hex: number) {
-  if (hex === 0xf) {
-    return 0x1
-  } else {
-    return hex + 1
-  }
-}
-
-function prevHex(hex: number) {
-  if (hex === 0x1) {
-    return 0xf
-  } else {
-    return hex - 1
-  }
-}
-
 function incTankLevel(record: EnemyConfigRecord) {
   if (record.tankLevel === 'basic') {
     return record.set('tankLevel', 'fast')
@@ -81,7 +65,11 @@ function toString(list: List<MapItemRecord>): StageConfig['map'] {
     for (let col = 0; col < FBZ; col += 1) {
       const { type, hex } = list.get(row * FBZ + col)
       if (type === 'B') {
-        array.push('B' + hex.toString(16))
+        if (hex > 0) {
+          array.push('B' + hex.toString(16))
+        } else {
+          array.push('X')
+        }
       } else if (type === 'E') {
         array.push('E')
       } else if (type === 'R') {
@@ -89,7 +77,11 @@ function toString(list: List<MapItemRecord>): StageConfig['map'] {
       } else if (type === 'S') {
         array.push('S')
       } else if (type === 'T') {
-        array.push('T' + hex.toString(16))
+        if (hex > 0) {
+          array.push('T' + hex.toString(16))
+        } else {
+          array.push('X')
+        }
       } else if (type === 'F') {
         array.push('F')
       } else {
@@ -200,29 +192,40 @@ const HexSteelWall = ({ x, y, hex }: { x: number, y: number, hex: number }) => (
   </g>
 )
 
-type ButtonAreaProps = {
+type AreaButtonProps = {
   x: number
   y: number
   width: number
   height: number
   onClick: () => void
-  onWheel?: (event: React.WheelEvent<SVGRectElement>) => void
   strokeWidth?: number
+  spreadX?: number
+  spreadY?: number
 }
 
-const ButtonArea = ({ x, y, width, height, onClick, onWheel, strokeWidth = 1 }: ButtonAreaProps) => (
-  <rect
-    className="button-area"
-    x={x - 2}
-    y={y - 1}
-    width={width + 4}
-    height={height + 2}
-    onClick={onClick}
-    onWheel={onWheel}
-    stroke="transparent"
-    strokeWidth={strokeWidth}
-  />
-)
+const AreaButton = ({
+  x,
+  y,
+  width,
+  height,
+  onClick,
+  strokeWidth = 1,
+  spreadX = 2,
+  spreadY = 1,
+ }: AreaButtonProps) => {
+  return (
+    <rect
+      className="area-button"
+      x={x - spreadX}
+      y={y - spreadY}
+      width={width + 2 * spreadX}
+      height={height + 2 * spreadY}
+      onClick={onClick}
+      stroke="transparent"
+      strokeWidth={strokeWidth}
+    />
+  )
+}
 
 type TextButtonProps = {
   x: number
@@ -438,23 +441,6 @@ class Editor extends React.Component {
     }
   }
 
-  onChangeHex = (type: MapItemType, sign: number) => {
-    const { brickHex, steelHex } = this.state
-    if (type === 'B') {
-      if (sign > 0) {
-        this.setState({ brickHex: nextHex(brickHex) })
-      } else if (sign < 0) {
-        this.setState({ brickHex: prevHex(brickHex) })
-      }
-    } else if (type === 'T') {
-      if (sign > 0) {
-        this.setState({ steelHex: nextHex(steelHex) })
-      } else if (sign < 0) {
-        this.setState({ steelHex: prevHex(steelHex) })
-      }
-    }
-  }
-
   onMouseDown = (event: React.MouseEvent<SVGSVGElement>) => {
     const { view, popup } = this.state
     if (view === 'map' && popup.type === 'none' && this.getT(event) !== -1) {
@@ -484,19 +470,6 @@ class Editor extends React.Component {
   onMouseLeave = () => {
     this.pressed = false
     this.setState({ t: -1 })
-  }
-
-  onChangeItemType = (nextItemType: MapItemType) => {
-    const { itemType, brickHex, steelHex } = this.state
-    if (nextItemType !== itemType) {
-      this.setState({ itemType: nextItemType })
-    } else {
-      if (nextItemType === 'B') {
-        this.setState({ brickHex: nextHex(brickHex) })
-      } else if (nextItemType === 'T') {
-        this.setState({ steelHex: nextHex(steelHex) })
-      }
-    }
   }
 
   onChangeView = (view: EditorView) => this.setState({ view })
@@ -618,20 +591,78 @@ class Editor extends React.Component {
     await this.showAlertPopup('help info - 3')
   }
 
-  renderButtonAreas() {
+  renderItemSwitchButtons() {
     return (
-      <g role="button-areas">
+      <g role="item-switch-buttons">
         {Object.entries(positionMap).map(([type, y]: [MapItemType, number]) =>
-          <ButtonArea
+          <AreaButton
             key={type}
             x={0.25 * B}
             y={y}
             width={2.5 * B}
             height={B}
-            onClick={() => this.onChangeItemType(type)}
-            onWheel={event => this.onChangeHex(type, Math.sign(event.deltaY))}
+            onClick={() => this.setState({ itemType: type })}
           />
         )}
+      </g>
+    )
+  }
+
+  renderHexAdjustButtons() {
+    const { itemType, brickHex, steelHex } = this.state
+    let brickHexAdjustButtons: JSX.Element[] = null
+    let steelHexAdjustButtons: JSX.Element[] = null
+
+    if (itemType === 'B') {
+      brickHexAdjustButtons = [0b0001, 0b0010, 0b0100, 0b1000].map(bin =>
+        <AreaButton
+          key={bin}
+          x={B + ((bin & 0b1010) ? 0.5 * B : 0)}
+          y={2.5 * B + ((bin & 0b1100) ? 0.5 * B : 0)}
+          width={0.5 * B}
+          height={0.5 * B}
+          spreadX={0}
+          spreadY={0}
+          onClick={() => this.setState({ brickHex: brickHex ^ bin })}
+        />
+      )
+    }
+    if (itemType === 'T') {
+      steelHexAdjustButtons = [0b0001, 0b0010, 0b0100, 0b1000].map(bin =>
+        <AreaButton
+          key={bin}
+          x={B + ((bin & 0b1010) ? 0.5 * B : 0)}
+          y={4 * B + ((bin & 0b1100) ? 0.5 * B : 0)}
+          width={0.5 * B}
+          height={0.5 * B}
+          spreadX={0}
+          spreadY={0}
+          onClick={() => this.setState({ steelHex: steelHex ^ bin })}
+        />
+      )
+    }
+    return (
+      <g role="hex-adjust-buttons">
+        {brickHexAdjustButtons}
+        {steelHexAdjustButtons}
+        {itemType === 'B' ?
+          <TextButton
+            content="f"
+            spreadX={0.125 * B}
+            x={2.25 * B}
+            y={2.75 * B}
+            onClick={() => this.setState({ itemType: 'B', brickHex: 0xf })}
+          />
+          : null}
+        {itemType === 'T' ?
+          <TextButton
+            content="f"
+            spreadX={0.125 * B}
+            x={2.25 * B}
+            y={4.25 * B}
+            onClick={() => this.setState({ itemType: 'T', steelHex: 0xf })}
+          />
+          : null}
       </g>
     )
   }
@@ -674,21 +705,8 @@ class Editor extends React.Component {
           <Forest x={B} y={8.5 * B} />
           <Eagle x={B} y={10 * B} broken={false} />
 
-          {this.renderButtonAreas()}
-          <TextButton
-            content="?"
-            spreadX={0.125 * B}
-            x={2.25 * B}
-            y={2.75 * B}
-            onClick={this.onShowHelpInfo}
-          />
-          <TextButton
-            content="?"
-            spreadX={0.125 * B}
-            x={2.25 * B}
-            y={4.25 * B}
-            onClick={this.onShowHelpInfo}
-          />
+          {this.renderItemSwitchButtons()}
+          {this.renderHexAdjustButtons()}
         </g>
       </g>
     )
