@@ -4,11 +4,10 @@ import { getDirectionInfo, spawnTank } from 'utils/common'
 import directionController from 'sagas/directionController'
 import fireController from 'sagas/fireController'
 import * as selectors from 'utils/selectors'
-import inlineAI from 'sagas/inlineAI'
 import { State } from 'reducers/index'
 import { TankRecord, PlayerRecord } from 'types'
 
-const EmptyWorker = require('worker-loader!ai/emptyWorker')
+const AIWorker = require('worker-loader!ai/worker')
 
 // 处理worker发送过来的message
 function* handleReceiveMessages(playerName: string, commandChannel: Channel<AICommand>, noteChannel: Channel<Note>) {
@@ -33,7 +32,7 @@ function* handleReceiveMessages(playerName: string, commandChannel: Channel<AICo
       if (tank != null) {
         if (bullets.some(b => (b.tankId === tank.tankId))) {
           console.debug('bullet-completed. notify')
-          noteChannel.put('bullet-complete')
+          noteChannel.put({ type: 'bullet-complete' })
         }
       }
     }
@@ -41,7 +40,6 @@ function* handleReceiveMessages(playerName: string, commandChannel: Channel<AICo
 
   while (true) {
     const command: AICommand = yield take(commandChannel)
-    // console.log('[saga] receive:', command)
     if (command.type === 'forward') {
       const tank = yield select(selectors.playerTank, playerName)
       if (tank == null) {
@@ -54,6 +52,32 @@ function* handleReceiveMessages(playerName: string, commandChannel: Channel<AICo
       fire = true
     } else if (command.type === 'turn') {
       nextDirection = command.direction
+    } else if (command.type === 'query') {
+      if (command.query === 'my-tank') {
+        const tank: TankRecord = yield select(selectors.playerTank, playerName)
+        noteChannel.put({
+          type: 'query-result',
+          result: {
+            type: 'my-tank-info',
+            tank: tank && tank.toObject(),
+          },
+        })
+      } else if (command.query === 'map') {
+        const { map }: State = yield select()
+        noteChannel.put({
+          type: 'query-result',
+          result: { type: 'map-info', map: map.toJS() },
+        })
+      } else if (command.query === 'tanks') {
+        const { tanks }: State = yield select()
+        noteChannel.put({
+          type: 'query-result',
+          result: {
+            type: 'tanks-info',
+            tanks: tanks.map(t => t.toObject()).toArray(),
+          },
+        })
+      }
     } else {
       throw new Error()
     }
@@ -76,7 +100,7 @@ function* handleReceiveMessages(playerName: string, commandChannel: Channel<AICo
       const maxDistance = forwardLength - movedLength
       if (movedLength === forwardLength) {
         forwardLength = 0
-        noteChannel.put('reach')
+        noteChannel.put({ type: 'reach' })
         return null
       } else {
         return {
@@ -90,23 +114,10 @@ function* handleReceiveMessages(playerName: string, commandChannel: Channel<AICo
 }
 
 function* sendMessagesToWorker(worker: Worker, noteChannel: Channel<Note>) {
-  // todo 因为现在用的是inlineAI, 所以下面就不从noteChannel中take了
-  // yield fork(function* sendNote() {
-  //   while (true) {
-  //     const note: Note = yield take(noteChannel)
-  //     worker.postMessage(JSON.stringify(note))
-  //   }
-  // })
-
-  yield fork(function* sendCommonActions() {
+  yield fork(function* sendNote() {
     while (true) {
-      const action = yield take((action: Action) => (
-        action.type !== 'TICK'
-        && action.type !== 'AFTER_TICK'
-        && action.type !== 'MOVE'
-        && action.type !== 'UPDATE_BULLETS')
-      )
-      worker.postMessage(JSON.stringify(action))
+      const note: Note = yield take(noteChannel)
+      worker.postMessage(note)
     }
   })
 }
@@ -130,19 +141,15 @@ function* AIWorkerSaga(playerName: string, WorkerClass: WorkerConstructor) {
   try {
     // noteChannel用来向AI程序发送消息/通知
     const noteChannel = makeChannel<Note>()
-    let postMessage = null
     // commandChannel用来从AI程序获取command
     const commandChannel = eventChannel<AICommand>((emitter) => {
       const listener = (event: MessageEvent) => emitter(event.data)
-      // todo 目前用inlineAi进行测试
-      postMessage = emitter
       worker.addEventListener('message', listener)
       return () => worker.removeEventListener('message', listener)
     })
 
     yield all([
       handleReceiveMessages(playerName, commandChannel, noteChannel),
-      inlineAI(playerName, postMessage, noteChannel),
       sendMessagesToWorker(worker, noteChannel),
     ])
   } finally {
@@ -152,6 +159,7 @@ function* AIWorkerSaga(playerName: string, WorkerClass: WorkerConstructor) {
 
 /** AIMasterSaga用来管理AIWorkerSaga的启动和停止, 并处理和AI程序的数据交互 */
 export default function* AIMasterSaga() {
+  const max = 1
   const taskMap: { [key: string]: Task } = {}
 
   let nextAIPlayerIndex = 0
@@ -159,8 +167,9 @@ export default function* AIMasterSaga() {
     const actionTypes: ActionType[] = ['KILL', 'LOAD_STAGE']
     const action: Action = yield take(actionTypes)
     if (action.type === 'LOAD_STAGE') {
-      yield* addAI()
-      yield* addAI()
+      for (let i = 0; i < max; i += 1) {
+        yield* addAI()
+      }
     } else if (action.type === 'KILL' && action.targetTank.side === 'ai') {
       // ai-player的坦克被击毁了
       const task = taskMap[action.targetPlayer.playerName]
@@ -193,7 +202,7 @@ export default function* AIMasterSaga() {
         level,
         hp,
       }))
-      taskMap[playerName] = yield spawn(AIWorkerSaga, playerName, EmptyWorker)
+      taskMap[playerName] = yield spawn(AIWorkerSaga, playerName, AIWorker)
 
       yield put<Action.ActivatePlayerAction>({
         type: 'ACTIVATE_PLAYER',

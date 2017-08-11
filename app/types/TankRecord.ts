@@ -17,6 +17,10 @@ const TankRecord = Record({
 })
 
 const record = TankRecord()
+const plainTankRecord = record.toObject()
+
 type TankRecord = typeof record
 
 export default TankRecord
+
+export type PlainTankRecord = typeof plainTankRecord

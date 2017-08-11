@@ -1,6 +1,6 @@
 import { Repeat } from 'immutable'
 import { BLOCK_SIZE, FIELD_BLOCK_SIZE, N_MAP } from 'utils/constants'
-import { EagleRecord, MapRecord } from 'reducers/map'
+import { EagleRecord, MapRecord } from 'types'
 
 function parseBrickBits(str: string) {
   if (str.length === 1) {

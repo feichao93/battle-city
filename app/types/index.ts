@@ -1,14 +1,18 @@
-export { default as TankRecord } from 'types/TankRecord'
+export { default as TankRecord, PlainTankRecord } from 'types/TankRecord'
 export { default as FlickerRecord } from 'types/FlickerRecord'
 export { default as TextRecord } from 'types/TextRecord'
 export { default as BulletRecord } from 'types/BulletRecord'
 export { default as PlayerRecord } from 'types/PlayerRecord'
-export { EagleRecord } from "reducers/map";
+export { default as MapRecord, mapRecord, PlainMapRecord } from 'types/MapRecord'
+export { default as EagleRecord, eagleRecord, PlainEagleRecord } from 'types/EagleRecord'
 export { State } from 'reducers/index'
 export { PlayersMap } from 'reducers/players'
 export { BulletsMap } from 'reducers/bullets'
 export { TextsMap } from 'reducers/texts'
 export { TanksMap } from 'reducers/tanks'
+
+import { PlainTankRecord } from 'types/TankRecord'
+import { PlainMapRecord } from 'types/MapRecord'
 
 export interface HumanControllerConfig {
   fire: string,
@@ -79,13 +83,9 @@ declare global {
 
   type AICommand = AICommand.AICommand
 
-  // todo
-  /** Note 包含了一些游戏逻辑向AI逻辑发送的消息/通知 */
-  type Note = string
-
   /** AICommand 包含了一些AI逻辑向游戏逻辑发送的操作命令 */
   namespace AICommand {
-    type AICommand = Forward | Fire | Turn
+    type AICommand = Forward | Fire | Turn | Query
 
     interface Forward {
       type: 'forward'
@@ -99,6 +99,52 @@ declare global {
     interface Turn {
       type: 'turn'
       direction: Direction
+    }
+
+    interface Query {
+      type: 'query'
+      query: 'my-tank' | 'map' | 'tanks'
+    }
+  }
+
+  /** Note 包含了一些游戏逻辑向AI逻辑发送的消息/通知 */
+  type Note = Note.Note
+
+  namespace Note {
+    type Note = BulletComplete | Reach | QueryResultNote
+
+    interface BulletComplete {
+      type: 'bullet-complete'
+    }
+
+    interface Reach {
+      type: 'reach'
+    }
+
+    interface QueryResultNote {
+      type: 'query-result'
+      result: QueryResult
+    }
+  }
+
+  type QueryResult = QueryResult.QueryResult
+
+  namespace QueryResult {
+    type QueryResult = MapInfo | MyTankInfo | TanksInfo
+
+    interface MyTankInfo {
+      type: 'my-tank-info'
+      tank: PlainTankRecord
+    }
+
+    interface MapInfo {
+      type: 'map-info'
+      map: PlainMapRecord
+    }
+
+    interface TanksInfo {
+      type: 'tanks-info'
+      tanks: PlainTankRecord[]
     }
   }
 }
