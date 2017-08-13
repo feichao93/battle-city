@@ -514,7 +514,8 @@ class Editor extends React.Component {
 
     // 检查stageName
     if (stageName === '') {
-      await this.showAlertPopup('stageName is empty.')
+      await this.showAlertPopup('Please enter stage name.')
+      this.setState({ view: 'config' })
       return
     }
     // 检查enemies数量
@@ -585,10 +586,9 @@ class Editor extends React.Component {
   }
 
   onShowHelpInfo = async () => {
-    // todo 添加帮助信息
-    await this.showAlertPopup('help info - 1')
-    await this.showAlertPopup('help info - 2')
-    await this.showAlertPopup('help info - 3')
+    await this.showAlertPopup('1. Choose an item type below.')
+    await this.showAlertPopup('2. Click or pan in the left.')
+    await this.showAlertPopup('3. After selecting Brick or Steel you can change the item shape')
   }
 
   renderItemSwitchButtons() {
@@ -690,6 +690,14 @@ class Editor extends React.Component {
         </g>
         <DashLines t={t} />
         <g role="tools" transform={`translate(${13 * B},0)`}>
+          <TextButton
+            content="?"
+            x={2.25 * B}
+            y={0.25 * B}
+            spreadX={0.05 * B}
+            spreadY={0.05 * B}
+            onClick={this.onShowHelpInfo}
+          />
           <Text
             content={'\u2192'}
             fill="#E91E63"
@@ -815,7 +823,7 @@ class Editor extends React.Component {
             />
             <TextButton
               x={9.5 * B}
-              y={2 * B}
+              y={2.25 * B}
               textFill="#333"
               content="OK"
               onClick={this.onClickOkOfAlert}
