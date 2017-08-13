@@ -11,8 +11,6 @@ type TextInputProps = {
 }
 
 export default class TextInput extends React.Component<TextInputProps, { focused: boolean }> {
-  input: HTMLInputElement
-
   constructor(props: TextInputProps) {
     super(props)
     this.state = {
@@ -20,49 +18,34 @@ export default class TextInput extends React.Component<TextInputProps, { focused
     }
   }
 
-  componentDidMount() {
-    this.input = document.createElement('input')
-    this.input.type = 'text'
-    this.input.value = this.props.value
-
-    // this styles will make input invisible
-    this.input.style.position = 'absolute'
-    this.input.style.width = '0'
-    this.input.style.border = 'none'
-
-    this.input.addEventListener('blur', this.onBlur)
-    this.input.addEventListener('input', this.onInput)
-
-    document.body.appendChild(this.input)
-  }
-
-  componentWillUnmount() {
-    this.input.removeEventListener('blur', this.onBlur)
-    this.input.removeEventListener('input', this.onInput)
-
-    this.input.remove()
-  }
-
-  onBlur = () => this.setState({ focused: false })
-
-  onInput = () => {
-    const { maxLength } = this.props
-    const rawValue = this.input.value
-    const value = Array.from(rawValue).filter(Text.support).join('').substring(0, maxLength)
-    this.input.value = value
-    this.props.onChange(value)
-  }
-
   onFocus = () => {
-    this.input.focus()
     this.setState({ focused: true })
+  }
+
+  onBlur = () => {
+    this.setState({ focused: false })
+  }
+
+  onKeyDown = (event: React.KeyboardEvent<SVGGElement>) => {
+    const { value, onChange, maxLength } = this.props
+    if (event.key === 'Backspace') {
+      onChange(value.slice(0, value.length - 1))
+    } else if (Text.support(event.key)) {
+      onChange((value + event.key).slice(0, maxLength))
+    }
   }
 
   render() {
     const { x, y, maxLength, value } = this.props
     const { focused } = this.state
     return (
-      <g onClick={this.onFocus}>
+      <g
+        tabIndex={1}
+        onFocus={this.onFocus}
+        onBlur={this.onBlur}
+        onKeyDown={this.onKeyDown}
+        style={{ outline: 'none' }}
+      >
         <rect
           x={x - 2}
           y={y - 2}
