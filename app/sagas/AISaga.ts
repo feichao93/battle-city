@@ -9,8 +9,7 @@ import { TankRecord, PlayerRecord } from 'types'
 
 const AIWorker = require('worker-loader!ai/worker')
 
-// 处理worker发送过来的message
-function* handleReceiveMessages(playerName: string, commandChannel: Channel<AICommand>, noteChannel: Channel<Note>) {
+function* handleCommands(playerName: string, commandChannel: Channel<AICommand>, noteChannel: Channel<Note>) {
   let fire = false
   let nextDirection: Direction = null
   let forwardLength = 0
@@ -113,7 +112,7 @@ function* handleReceiveMessages(playerName: string, commandChannel: Channel<AICo
   }
 }
 
-function* sendMessagesToWorker(worker: Worker, noteChannel: Channel<Note>) {
+function* sendNotes(worker: Worker, noteChannel: Channel<Note>) {
   yield fork(function* sendNote() {
     while (true) {
       const note: Note = yield take(noteChannel)
@@ -149,8 +148,8 @@ function* AIWorkerSaga(playerName: string, WorkerClass: WorkerConstructor) {
     })
 
     yield all([
-      handleReceiveMessages(playerName, commandChannel, noteChannel),
-      sendMessagesToWorker(worker, noteChannel),
+      handleCommands(playerName, commandChannel, noteChannel),
+      sendNotes(worker, noteChannel),
     ])
   } finally {
     worker.terminate()
