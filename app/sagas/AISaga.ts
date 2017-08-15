@@ -76,6 +76,23 @@ function* handleCommands(playerName: string, commandChannel: Channel<AICommand>,
             tanks: tanks.map(t => t.toObject()).toArray(),
           },
         })
+      } else if (command.query === 'my-fire-info') {
+        const tank: TankRecord = yield select(selectors.playerTank, playerName)
+        console.assert(tank != null, 'tank is null when query `my-fire-info`')
+        const { cooldowns, bullets }: State = yield select()
+        const cooldown = cooldowns.get(tank.tankId)
+        const bulletCount = bullets.filter(b => b.tankId === tank.tankId).count()
+        const canFire = bulletCount < tank.bulletLimit && cooldown <= 0
+        noteChannel.put({
+          type: 'query-result',
+          result: {
+            type: 'my-fire-info',
+            bulletCount,
+            canFire,
+            cooldown,
+            bulletLimit: tank.bulletLimit,
+          },
+        })
       }
     } else {
       throw new Error()
@@ -163,7 +180,7 @@ export default function* AIMasterSaga() {
 
   let nextAIPlayerIndex = 0
   while (true) {
-    const actionTypes: ActionType[] = ['KILL', 'LOAD_STAGE']
+    const actionTypes: ActionType[] = ['KILL', 'LOAD_STAGE', 'GAMEOVER']
     const action: Action = yield take(actionTypes)
     if (action.type === 'LOAD_STAGE') {
       for (let i = 0; i < max; i += 1) {
@@ -175,6 +192,12 @@ export default function* AIMasterSaga() {
       task.cancel()
       delete taskMap[action.targetPlayer.playerName]
       yield* addAI()
+    } else if (action.type === 'GAMEOVER') {
+      // 游戏结束时, 取消所有的ai-player // todo 这里有bug
+      for (const [playerName, task] of Object.entries(taskMap)) {
+        task.cancel()
+        delete taskMap[playerName]
+      }
     }
   }
 

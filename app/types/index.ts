@@ -38,11 +38,6 @@ declare global {
     y: number
   }
 
-  interface Vector {
-    dx: number
-    dy: number
-  }
-
   interface StageConfig {
     name: string
     difficulty: number
@@ -103,7 +98,8 @@ declare global {
 
     interface Query {
       type: 'query'
-      query: 'my-tank' | 'map' | 'tanks'
+      // todo rename to my-tank-info, map-info, tanks-info
+      query: 'my-tank' | 'map' | 'tanks' | 'my-fire-info'
     }
   }
 
@@ -130,7 +126,7 @@ declare global {
   type QueryResult = QueryResult.QueryResult
 
   namespace QueryResult {
-    type QueryResult = MapInfo | MyTankInfo | TanksInfo
+    type QueryResult = MapInfo | MyTankInfo | TanksInfo | MyFireInfo
 
     interface MyTankInfo {
       type: 'my-tank-info'
@@ -145,6 +141,13 @@ declare global {
     interface TanksInfo {
       type: 'tanks-info'
       tanks: PlainTankRecord[]
+    }
+    interface MyFireInfo {
+      type: 'my-fire-info'
+      canFire: boolean
+      cooldown: number
+      bulletCount: number
+      bulletLimit: number
     }
   }
 }

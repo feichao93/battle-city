@@ -3,6 +3,8 @@ import { MapRecord, TankRecord, TanksMap } from 'types'
 import { BLOCK_SIZE, FIELD_SIZE, ITEM_SIZE_MAP, N_MAP, TANK_SIZE } from 'utils/constants'
 import { asBox, getDirectionInfo, iterRowsAndCols } from 'utils/common'
 
+const logAhead = (...args: any[]) => console.log('[ahead]', ...args)
+
 /** AI是否可以破坏该障碍物 */
 function canDestroy(barrierType: BarrierType) {
   return barrierType === 'brick'
@@ -28,8 +30,8 @@ interface BarrierInfo {
 }
 
 interface TankPosition {
-  eagle: Vector
-  nearestHumanTank: Vector
+  eagle: RelativePosition
+  nearestHumanTank: RelativePosition
 }
 
 interface TankEnv {
@@ -38,6 +40,75 @@ interface TankEnv {
 }
 
 type BarrierType = 'border' | 'steel' | 'river' | 'brick'
+
+export class RelativePosition {
+  readonly subject: Point
+  readonly object: Point
+  readonly dx: number
+  readonly dy: number
+  readonly absdx: number
+  readonly absdy: number
+
+  constructor(subject: Point, object: Point) {
+    this.subject = subject
+    this.object = object
+    this.dx = object.x - subject.x
+    this.dy = object.y - subject.y
+    this.absdx = Math.abs(this.dx)
+    this.absdy = Math.abs(this.dy)
+  }
+
+  getForwardInfo(direction: Direction) {
+    if (direction === 'left') {
+      return {
+        length: -this.dx,
+        offset: this.absdy,
+      }
+    } else if (direction === 'right') {
+      return {
+        length: this.dx,
+        offset: this.absdy,
+      }
+    } else if (direction === 'up') {
+      return {
+        length: -this.dy,
+        offset: this.absdx,
+      }
+    } else { // direction === 'down'
+      return {
+        length: this.dy,
+        offset: this.absdx,
+      }
+    }
+  }
+}
+
+export const FireThreshhold = {
+  eagle(forwardLength: number) {
+    logAhead('eagle:', forwardLength)
+    if (forwardLength < 0) {
+      return 0
+    } else if (forwardLength <= 4 * BLOCK_SIZE) {
+      return 0.8
+    }
+  },
+  humanTank(forwardLength: number) {
+    logAhead('human-tank:', forwardLength)
+    if (forwardLength < 0) {
+      return 0
+    } else if (forwardLength <= 4 * BLOCK_SIZE) {
+      return 0.6
+    }
+  },
+  destroyable(forwardLength: number) {
+    logAhead('destroyable:', forwardLength)
+    // 随着距离增加fire概率减小; 距离0时, 一定fire; 距离10*BLOCK_SIZE时, 不fire
+    return 1 - forwardLength / 10 * BLOCK_SIZE
+  },
+  idle() {
+    return 0
+  },
+}
 
 
 export function calculatePriorityMap({ tankPosition: pos, barrierInfo: binfo }: TankEnv): PriorityMap {
@@ -106,15 +177,10 @@ export function calculatePriorityMap({ tankPosition: pos, barrierInfo: binfo }: 
 // 获取tank的环境信息
 export function getEnv(map: MapRecord, tanks: TanksMap, tank: TankRecord): TankEnv {
   // pos对象用来存放tank与其他物体之间的相对位置
-  const pos = {
-    eagle: {},
-    nearestHumanTank: {},
-  } as TankPosition
-
-  // 计算tank与eagle的相对位置
-  const { eagle } = map
-  pos.eagle.dx = eagle.x - tank.y
-  pos.eagle.dy = eagle.y - tank.y
+  const pos: TankPosition = {
+    eagle: new RelativePosition(tank, map.eagle),
+    nearestHumanTank: null,
+  }
 
   // 计算ai-tank与最近的human-tank的相对位置
   const { nearestHumanTank } = tanks.reduce((reduction, next) => {
@@ -127,10 +193,7 @@ export function getEnv(map: MapRecord, tanks: TanksMap, tank: TankRecord): TankE
     return reduction
   }, { minDistance: Infinity, nearestHumanTank: null as TankRecord })
   if (nearestHumanTank) {
-    pos.nearestHumanTank.dx = tank.x - nearestHumanTank.x
-    pos.nearestHumanTank.dy = tank.y - nearestHumanTank.y
-  } else {
-    pos.nearestHumanTank = null
+    pos.nearestHumanTank = new RelativePosition(tank, nearestHumanTank)
   }
 
   // 障碍物信息
@@ -147,74 +210,43 @@ export function getEnv(map: MapRecord, tanks: TanksMap, tank: TankRecord): TankE
   }
 }
 
-export function shouldFire(tank: TankRecord, { barrierInfo, tankPosition }: TankEnv) {
+/** 根据目前AI-tank的环境信息, 决定AI-tank是否应该开火 */
+export function shouldFire(tank: TankRecord, { barrierInfo, tankPosition: pos }: TankEnv) {
   const random = Math.random()
+  console.log('fire-random:', random)
+
+  // todo 目前部分result的计算是多余的
+  let result = false
 
   const ahead = barrierInfo[tank.direction]
   if (canDestroy(ahead.type)) {
-    // 随着距离增加fire概率减小; 距离0时, 一定fire; 距离10*BLOCK_SIZE时, 不fire
-    const threshhold = 1 - ahead.length / 10 * BLOCK_SIZE
-    if (random < threshhold) {
-      return true
+    if (random < FireThreshhold.destroyable(ahead.length)) {
+      result = true
     }
   }
 
   // 坦克面向eagle且足够接近时, 增加开火概率
-  if (tank.direction === 'left'
-    && tankPosition.eagle.dy <= 4
-    && -4 * BLOCK_SIZE <= tankPosition.eagle.dx && tankPosition.eagle.dx <= 0) {
-    if (random < 0.8) {
-      return true
-    }
-  }
-  if (tank.direction === 'right'
-    && tankPosition.eagle.dy <= 4
-    && 0 <= tankPosition.eagle.dx && tankPosition.eagle.dx <= 4 * BLOCK_SIZE) {
-    if (random < 0.8) {
-      return true
-    }
-  }
-  if (tank.direction === 'down'
-    && tankPosition.eagle.dx <= 4
-    && 0 <= tankPosition.eagle.dy && tankPosition.eagle.dy <= 4 * BLOCK_SIZE) {
-    if (random < 0.8) {
-      return true
+  const eagleForwardInfo = pos.eagle.getForwardInfo(tank.direction)
+  if (eagleForwardInfo.offset <= 8) {
+    if (random < FireThreshhold.eagle(eagleForwardInfo.length)) {
+      result = true
     }
   }
 
   // 坦克面向nearestHumanTank且足够接近时, 增加开火概率
-  if (tankPosition.nearestHumanTank) {
-    if (tank.direction === 'left'
-      && tankPosition.nearestHumanTank.dy <= 4
-      && -4 * BLOCK_SIZE <= tankPosition.nearestHumanTank.dx && tankPosition.nearestHumanTank.dx <= 0) {
-      if (random < 0.6) {
-        return true
-      }
-    }
-    if (tank.direction === 'right'
-      && tankPosition.nearestHumanTank.dy <= 4
-      && 0 <= tankPosition.nearestHumanTank.dx && tankPosition.nearestHumanTank.dx <= 4 * BLOCK_SIZE) {
-      if (random < 0.6) {
-        return true
-      }
-    }
-    if (tank.direction === 'up'
-      && tankPosition.nearestHumanTank.dx <= 4
-      && -4 * BLOCK_SIZE <= tankPosition.nearestHumanTank.dy && tankPosition.nearestHumanTank.dy <= 0) {
-      if (random < 0.6) {
-        return true
-      }
-    }
-    if (tank.direction === 'down'
-      && tankPosition.nearestHumanTank.dx <= 4
-      && 0 <= tankPosition.nearestHumanTank.dy && tankPosition.nearestHumanTank.dy <= 4 * BLOCK_SIZE) {
-      if (random < 0.6) {
-        return true
+  if (pos.nearestHumanTank) {
+    const humanTankForwardInfo = pos.nearestHumanTank.getForwardInfo(tank.direction)
+    if (humanTankForwardInfo.offset <= 8) {
+      if (random < FireThreshhold.humanTank(humanTankForwardInfo.length)) {
+        result = true
       }
     }
   }
 
-  return false
+  if (random < FireThreshhold.idle()) {
+    result = true
+  }
+  return result
 }
 
 export function getRandomDirection({ up, down, left, right }: PriorityMap): Direction {

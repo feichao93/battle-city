@@ -3,10 +3,7 @@ import { reverseDirection } from 'utils/common'
 import { calculatePriorityMap, getEnv, getRandomDirection, shouldFire } from 'ai/AI-utils.ts'
 import GameAIClient from 'ai/GameAIClient'
 
-const log = console.log
-const table = console.table
-// const log: any = () => 0
-// const table: any = () => 0
+const logFire = (...args: any[]) => console.log('[fire]', ...args)
 
 const client = new GameAIClient()
 
@@ -18,21 +15,34 @@ function race<V, T extends { [key: string]: Promise<V> }>(map: T) {
 
 async function main() {
   // todo next-step 分解main循环, 将开火逻辑和行动逻辑分离开来
+  await Promise.all([
+    moveLoop(),
+    fireLoop(),
+  ])
+}
+
+main()
+
+async function moveLoop() {
+  let skipDelayAtFirstTime = true
   while (true) {
-    await race({
-      timeout: delay(2000),
-      bulletComplete: client.noteBulletComplete(),
-      reach: client.noteReach(),
-    })
-    // debugger
-    let tank = await client.queryMyTank()
-    if (tank == null) {
-      continue
+    if (skipDelayAtFirstTime) {
+      skipDelayAtFirstTime = false
+    } else {
+      await race({
+        timeout: delay(1000),
+        reach: client.noteReach(),
+        // bulletComplete: client.noteBulletComplete(),
+      })
     }
+
+    let tank = await client.queryMyTank()
+    console.assert(tank != null, 'tank is null in mvoeLoop!')
     const map = await client.queryMapInfo()
     const tanks = await client.queryTanksInfo()
 
     const env = getEnv(map, tanks, tank)
+
     const priorityMap = calculatePriorityMap(env)
 
     // 降低回头的优先级
@@ -41,11 +51,6 @@ async function main() {
 
     const nextDirection = getRandomDirection(priorityMap)
 
-    // log('binfo', env.barrierInfo)
-    // log('pos', env.tankPosition)
-    // log('priority-map', priorityMap)
-    // log('next-direction', nextDirection)
-
     if (tank.direction !== nextDirection) {
       client.post({ type: 'turn', direction: nextDirection })
       tank = tank.set('direction', nextDirection)
@@ -53,21 +58,43 @@ async function main() {
       await delay(100)
     }
 
-    if (shouldFire(tank, env)) {
-      log('command fire!')
-      client.post({ type: 'fire' })
-    }
-
-    // log('forward-length:', env.barrierInfo[tank.direction].length)
     client.post({
       type: 'forward',
       // todo tank应该更加偏向于走到下一个 *路口*
-      // forwardLength: Math.max(BLOCK_SIZE, env.barrierInfo[tank.direction].length),
       forwardLength: env.barrierInfo[tank.direction].length,
     })
-    // $$postMessage({ type: 'fire', forwardLength: 3 * BLOCK_SIZE })
-    // console.groupEnd()
   }
 }
 
-main()
+async function fireLoop() {
+  let skipDelayAtFirstTime = true
+  while (true) {
+    if (skipDelayAtFirstTime) {
+      skipDelayAtFirstTime = false
+    } else {
+      await race({
+        timeout: delay(300),
+        bulletComplete: client.noteBulletComplete(),
+      })
+    }
+
+    let tank = await client.queryMyTank()
+    console.assert(tank != null, 'tank is null in fireLoop!')
+    const fireInfo = await client.queryMyFireInfo()
+    if (fireInfo.canFire) {
+      //   logFire('can not fire skip...')
+      // } else {
+      // logFire('can fire!')
+
+      const map = await client.queryMapInfo()
+      const tanks = await client.queryTanksInfo()
+
+      const env = getEnv(map, tanks, tank)
+      if (shouldFire(tank, env)) {
+        logFire('fire!')
+        client.post({ type: 'fire' })
+        await delay(500)
+      }
+    }
+  }
+}

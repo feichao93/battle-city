@@ -14,9 +14,10 @@ export default class GameAIClient {
     'my-tank-info': [] as ResolveFn[],
     'map-info': [] as ResolveFn[],
     'tanks-info': [] as ResolveFn[],
+    'my-fire-info': [] as ResolveFn[],
   }
 
-  post = self.postMessage as (msg: AICommand) => void
+  post = self.postMessage.bind(self) as (msg: AICommand) => void
 
   onMessage = (event: MessageEvent) => {
     const d: Note = event.data
@@ -42,6 +43,13 @@ export default class GameAIClient {
         (result: QueryResult.MyTankInfo) => (
           TankRecord(result.tank)
         )))
+    })
+  }
+
+  queryMyFireInfo() {
+    return new Promise<QueryResult.MyFireInfo>(resolve => {
+      this.post({ type: 'query', query: 'my-fire-info' })
+      this.pendingQueries['my-fire-info'].push(resolve)
     })
   }
 
