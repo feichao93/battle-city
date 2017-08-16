@@ -7,6 +7,10 @@ import StatisticsScene from 'components/StatisticsScene'
 import GameTitleScene from 'components/GameTitleScene'
 import { State } from 'types'
 
+const zoomLevel = 2
+const totalWidth = 16 * B
+const totalHeight = 15 * B
+
 class App extends React.PureComponent<{ scene: Scene }> {
   render() {
     const { scene } = this.props
@@ -15,8 +19,9 @@ class App extends React.PureComponent<{ scene: Scene }> {
       <svg
         className="svg"
         style={{ background: '#757575' }}
-        width={16 * B}
-        height={15 * B}
+        width={totalWidth * zoomLevel}
+        height={totalHeight * zoomLevel}
+        viewBox={`0 0 ${totalWidth} ${totalHeight}`}
       >
         {scene === 'game-title' ? <GameTitleScene /> : null}
         {scene === 'game' ? <GameScene /> : null}

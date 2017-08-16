@@ -36,6 +36,7 @@ const simpleReducer = combineReducers({ time, game })
 const simpleStore = createStore(simpleReducer, undefined, applyMiddleware(simpleSagaMiddleware))
 simpleSagaMiddleware.run(tickEmitter)
 
+const zoomLevel = 2
 const totalWidth = 16 * B
 const totalHeight = 15 * B
 
@@ -829,8 +830,9 @@ class Editor extends React.Component {
         ref={node => (this.svg = node)}
         className="svg"
         style={{ background: '#333' }}
-        width={totalWidth}
-        height={totalHeight}
+        width={totalWidth * zoomLevel}
+        height={totalHeight * zoomLevel}
+        viewBox={`0 0 ${totalWidth} ${totalHeight}`}
         onMouseDown={this.onMouseDown}
         onMouseUp={this.onMouseUp}
         onMouseMove={this.onMouseMove}

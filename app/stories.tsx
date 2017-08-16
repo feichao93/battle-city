@@ -19,12 +19,13 @@ import Eagle from 'components/Eagle'
 import Bullet from 'components/Bullet'
 import Flicker from 'components/Flicker'
 import GameoverScene from 'components/GameoverScene'
+import GameTitleScene from 'components/GameTitleScene'
 import StatisticsScene from 'components/StatisticsScene'
 import HUD from 'components/HUD'
 import { PowerUpBase } from 'components/PowerUp'
 import { BulletExplosionClass, TankExplosionClass } from 'components/Explosion'
 import parseStageMap from 'utils/parseStageMap'
-import { BLOCK_SIZE } from 'utils/constants'
+import { BLOCK_SIZE as B, FIELD_BLOCK_SIZE as FBZ } from 'utils/constants'
 import tickEmitter from 'sagas/tickEmitter'
 import stageConfigs from 'stages/index'
 import registerTick from 'hocs/registerTick'
@@ -61,25 +62,31 @@ const Transform = ({ dx = 0, dy = 0, k = 1, children }: any) => (
   </g>
 )
 
-const X8 = ({ width = 128, height = 128, children }: any) => (
-  <svg className="svg" width={width} height={height} style={{ marginRight: 8 }}>
-    <Transform k={8}>
+const X4 = ({ width = 64, height = 64, children }: any) => (
+  <svg className="svg" width={width} height={height} style={{ marginRight: 4 }}>
+    <Transform k={4}>
       {children}
     </Transform>
   </svg>
 )
 
-const X8Tank = ({ tank }: { tank: TankRecord }) => (
-  <X8><Tank tank={tank.merge({ x: 0, y: 0 })} /></X8>
-)
-const X8Text = ({ content }: { content: string }) => (
-  <X8 width={content.length * 64} height={64}>
-    <Text x={0} y={0} fill="#feac4e" content={content} />
-  </X8>
+const Row = ({ children }: { children: JSX.Element[] }) => (
+  <div style={{ display: 'flex' }}>
+    {children}
+  </div>
 )
 
-const FontLevel1 = ({ children }: any) => (
-  <span style={{ fontSize: 30, lineHeight: '50px' }}>{children}</span>
+const X8Tank = ({ tank }: { tank: TankRecord }) => (
+  <X4><Tank tank={tank.merge({ x: 0, y: 0 })} /></X4>
+)
+const X4Text = ({ content }: { content: string }) => (
+  <X4 width={content.length * 32} height={32}>
+    <Text x={0} y={0} fill="#feac4e" content={content} />
+  </X4>
+)
+
+const FontLevel1 = ({ children }: { children: string }) => (
+  <span style={{ fontSize: 28, lineHeight: '40px' }}>{children}</span>
 )
 
 const colors: TankColor[] = ['yellow', 'green', 'silver', 'red']
@@ -105,8 +112,8 @@ class Stories extends React.Component<{}, { stage: string }> {
           </summary>
           {sides.map(side =>
             <div key={side}>
-              <p style={{ fontSize: 20 }}>{side} {levels.join('/')}</p>
-              <div style={{ display: 'flex' }}>
+              <p style={{ fontSize: 20, margin: 0, lineHeight: 1.5 }}>{side} {levels.join('/')}</p>
+              <Row>
                 {[0, 1, 2, 3].map(index =>
                   <X8Tank
                     key={index}
@@ -117,12 +124,12 @@ class Stories extends React.Component<{}, { stage: string }> {
                     })}
                   />
                 )}
-              </div>
+              </Row>
             </div>
           )}
           <div>
-            <p style={{ fontSize: 20 }}>armor tank hp 1/2/3/4</p>
-            <div style={{ display: 'flex' }}>
+            <p style={{ fontSize: 20, margin: 0, lineHeight: 1.5 }}>armor tank hp 1/2/3/4</p>
+            <Row>
               {[1, 2, 3, 4].map(hp =>
                 <X8Tank
                   key={hp}
@@ -133,11 +140,11 @@ class Stories extends React.Component<{}, { stage: string }> {
                   })}
                 />
               )}
-            </div>
+            </Row>
           </div>
           <div>
-            <p style={{ fontSize: 20 }}>tank with power up basic/fast/power/armor</p>
-            <div style={{ display: 'flex' }}>
+            <p style={{ fontSize: 20, margin: 0, lineHeight: 1.5 }}>tank with power up basic/fast/power/armor</p>
+            <Row>
               {levels.map(level =>
                 <X8Tank
                   key={level}
@@ -148,7 +155,7 @@ class Stories extends React.Component<{}, { stage: string }> {
                   })}
                 />
               )}
-            </div>
+            </Row>
           </div>
         </details>
         <details open>
@@ -167,75 +174,63 @@ class Stories extends React.Component<{}, { stage: string }> {
           </summary>
           <svg
             className="svg"
-            width={3 * 13 * BLOCK_SIZE}
-            height={3 * 13 * BLOCK_SIZE}
+            width={FBZ * B * 2}
+            height={FBZ * B * 2}
+            viewBox={`0 0 ${FBZ * B} ${FBZ * B}`}
           >
-            <g transform="scale(3)">
-              <rect width={13 * BLOCK_SIZE} height={13 * BLOCK_SIZE} fill="#000000" />
-              <RiverLayer rivers={rivers} />
-              <SteelLayer steels={steels} />
-              <BrickLayer bricks={bricks} />
-              <SnowLayer snows={snows} />
-              <Eagle
-                x={eagle.x}
-                y={eagle.y}
-                broken={eagle.broken}
-              />
-              <ForestLayer forests={forests} />
-            </g>
+            <rect width={FBZ * B} height={FBZ * B} fill="#000000" />
+            <RiverLayer rivers={rivers} />
+            <SteelLayer steels={steels} />
+            <BrickLayer bricks={bricks} />
+            <SnowLayer snows={snows} />
+            <Eagle
+              x={eagle.x}
+              y={eagle.y}
+              broken={eagle.broken}
+            />
+            <ForestLayer forests={forests} />
           </svg>
         </details>
         <details open>
           <summary>
             <FontLevel1>Texts</FontLevel1>
           </summary>
-          <X8Text content="abcdefg" />
-          <X8Text content="hijklmn" />
-          <X8Text content="opq rst" />
-          <X8Text content="uvw xyz" />
-          <X8Text content={'\u2160 \u2161 \u2190-\u2192'} />
+          <X4Text content="abcdefg" />
+          <X4Text content="hijklmn" />
+          <X4Text content="opq rst" />
+          <X4Text content="uvw xyz" />
+          <X4Text content={'\u2160 \u2161 \u2190-\u2192'} />
+          <X4Text content={':+- .\u00a9?'} />
         </details>
         <details open>
           <summary>
             <FontLevel1>Bullets &amp; Explosions &amp; Flickers</FontLevel1>
           </summary>
-          <X8>
-            <Bullet
-              x={3}
-              y={3}
-              direction="up"
-            />
-            <Bullet
-              x={9}
-              y={3}
-              direction="right"
-            />
-            <Bullet
-              x={9}
-              y={9}
-              direction="down"
-            />
-            <Bullet
-              x={3}
-              y={9}
-              direction="left"
-            />
-          </X8>
-          <X8><BulletExplosion x={0} y={0} /></X8>
-          <X8 width={256} height={256}>
+          <Row>
+            <X4>
+              <Bullet x={3} y={3} direction="up" />
+              <Bullet x={9} y={9} direction="down" />
+            </X4>
+            <X4><Flicker x={0} y={0} /></X4>
+          </Row>
+          <Row>
+            <X4>
+              <Bullet x={3} y={3} direction="left" />
+              <Bullet x={9} y={9} direction="right" />
+            </X4>
+            <X4><BulletExplosion x={0} y={0} /></X4>
+          </Row>
+          <X4 width={128} height={128}>
             <TankExplosion x={0} y={0} />
-          </X8>
-          <X8>
-            <Flicker x={0} y={0} />
-          </X8>
+          </X4>
         </details>
         <details open>
           <summary>
-            <FontLevel1>Scene: gameover</FontLevel1>
+            <FontLevel1>Scene: game-title</FontLevel1>
           </summary>
-          <svg className="svg" width={512} height={512}>
-            <Transform k={2}>
-              <GameoverScene />
+          <svg className="svg" width={256 * 1.5} height={240 * 1.5}>
+            <Transform k={1.5}>
+              <GameTitleScene />
             </Transform>
           </svg>
         </details>
@@ -243,9 +238,19 @@ class Stories extends React.Component<{}, { stage: string }> {
           <summary>
             <FontLevel1>Scene: stage statistics</FontLevel1>
           </summary>
-          <svg className="svg" width={512} height={512}>
-            <Transform k={2}>
+          <svg className="svg" width={256 * 1.5} height={240 * 1.5}>
+            <Transform k={1.5}>
               <StatisticsScene />
+            </Transform>
+          </svg>
+        </details>
+        <details open>
+          <summary>
+            <FontLevel1>Scene: gameover</FontLevel1>
+          </summary>
+          <svg className="svg" width={256 * 1.5} height={240 * 1.5}>
+            <Transform k={1.5}>
+              <GameoverScene />
             </Transform>
           </svg>
         </details>
@@ -253,8 +258,8 @@ class Stories extends React.Component<{}, { stage: string }> {
           <summary>
             <FontLevel1>HUD</FontLevel1>
           </summary>
-          <svg className="svg" width={100} height={540}>
-            <Transform k={4} dx={-232 * 4 + 16} dy={-24 * 4 + 8}>
+          <svg className="svg" width={50} height={270}>
+            <Transform k={2} dx={-232 * 2 + 8} dy={-24 * 2 + 4}>
               <HUD />
             </Transform>
           </svg>
@@ -263,20 +268,19 @@ class Stories extends React.Component<{}, { stage: string }> {
           <summary>
             <FontLevel1>PowerUp</FontLevel1>
           </summary>
-          <div style={{ display: 'flex' }}>
+          <Row>
             {powerUpNames.map(name =>
               <div key={name}>
-                <p style={{ fontSize: 20 }}>{name}</p>
-                <X8><PowerUp name={name} /></X8>
+                <p style={{ fontSize: 20, margin: 0, lineHeight: 1.5 }}>{name}</p>
+                <X4><PowerUp name={name} /></X4>
               </div>
             )}
-          </div>
+          </Row>
         </details>
       </div>
     )
   }
 }
-
 
 ReactDOM.render(
   <Provider store={simpleStore}>
