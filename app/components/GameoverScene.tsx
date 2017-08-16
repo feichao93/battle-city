@@ -1,14 +1,14 @@
 import * as React from 'react'
-import { ITEM_SIZE_MAP, BLOCK_SIZE } from 'utils/constants'
+import { ITEM_SIZE_MAP, BLOCK_SIZE as B } from 'utils/constants'
 import BrickWall from 'components/BrickWall'
 import Text from 'components/Text'
 
-export default class GameoverOverlay extends React.PureComponent<{}, {}> {
+export default class GameoverScene extends React.PureComponent {
   render() {
     const size = ITEM_SIZE_MAP.BRICK
     const scale = 4
     return (
-      <g role="gameover-overlay">
+      <g role="gameover-scene">
         <defs>
           <pattern
             id="pattern-brickwall"
@@ -28,20 +28,20 @@ export default class GameoverOverlay extends React.PureComponent<{}, {}> {
           fill="#000000"
           x={0}
           y={0}
-          width={16 * BLOCK_SIZE}
-          height={16 * BLOCK_SIZE}
+          width={16 * B}
+          height={15 * B}
         />
         <g transform={`scale(${scale})`}>
           <Text
             content="game"
-            x={4 * BLOCK_SIZE / scale}
-            y={4 * BLOCK_SIZE / scale}
+            x={4 * B / scale}
+            y={4 * B / scale}
             fill="url(#pattern-brickwall)"
           />
           <Text
             content="over"
-            x={4 * BLOCK_SIZE / scale}
-            y={7 * BLOCK_SIZE / scale}
+            x={4 * B / scale}
+            y={7 * B / scale}
             fill="url(#pattern-brickwall)"
           />
         </g>

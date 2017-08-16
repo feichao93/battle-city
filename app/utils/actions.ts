@@ -21,8 +21,8 @@ declare global {
       | UpdaetBulletsAction
       | LoadStageAction
       | Simple<'GAMEOVER'>
-      | ShowOverlayAction
-      | RemoveOverlayAction
+      | Simple<'GAMESTART'>
+      | LoadSceneAction
       | Simple<'REMOVE_FIRST_REMAINING_ENEMY'>
       | DecrementPlayerLiveAction
       | ActivatePlayerAction
@@ -220,13 +220,9 @@ declare global {
       playerName: PlayerName,
     }
 
-    export type ShowOverlayAction = {
-      type: 'SHOW_OVERLAY',
-      overlay: Overlay
-    }
-
-    export type RemoveOverlayAction = {
-      type: 'REMOVE_OVERLAY',
+    export type LoadSceneAction = {
+      type: 'LOAD_SCENE',
+      scene: Scene
     }
 
     export type Simple<T> = {

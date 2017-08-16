@@ -1,6 +1,6 @@
 import { Record, Repeat } from 'immutable'
 import { N_MAP } from 'utils/constants'
-import { eagleRecord, PlainEagleRecord } from 'types'
+import { eagleRecord, PlainEagleRecord } from 'types/EagleRecord'
 
 const MapRecord = Record({
   eagle: eagleRecord,

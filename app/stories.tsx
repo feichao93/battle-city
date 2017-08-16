@@ -18,8 +18,8 @@ import Text from 'components/Text'
 import Eagle from 'components/Eagle'
 import Bullet from 'components/Bullet'
 import Flicker from 'components/Flicker'
-import GameoverOverlay from 'components/GameoverOverlay'
-import StatisticsOverlay from 'components/StatisticsOverlay'
+import GameoverScene from 'components/GameoverScene'
+import StatisticsScene from 'components/StatisticsScene'
 import HUD from 'components/HUD'
 import { PowerUpBase } from 'components/PowerUp'
 import { BulletExplosionClass, TankExplosionClass } from 'components/Explosion'
@@ -231,21 +231,21 @@ class Stories extends React.Component<{}, { stage: string }> {
         </details>
         <details open>
           <summary>
-            <FontLevel1>Overlay/Curtain gameover</FontLevel1>
+            <FontLevel1>Scene: gameover</FontLevel1>
           </summary>
           <svg className="svg" width={512} height={512}>
             <Transform k={2}>
-              <GameoverOverlay />
+              <GameoverScene />
             </Transform>
           </svg>
         </details>
         <details open>
           <summary>
-            <FontLevel1>Overlay/Curtain stage statistics</FontLevel1>
+            <FontLevel1>Scene: stage statistics</FontLevel1>
           </summary>
           <svg className="svg" width={512} height={512}>
             <Transform k={2}>
-              <StatisticsOverlay />
+              <StatisticsScene />
             </Transform>
           </svg>
         </details>

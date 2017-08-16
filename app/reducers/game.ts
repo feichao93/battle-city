@@ -20,7 +20,7 @@ const emptyTransientKillInfo = Map({
 const defaultRemainingEnemies = Repeat('basic' as TankLevel, 20).toList()
 
 export const GameRecord = Record({
-  overlay: '' as Overlay,
+  scene: 'game-title' as Scene,
   /** 当前的关卡名 */
   currentStage: null as string,
   /** 当前关卡剩余的敌人的类型列表 */
@@ -38,8 +38,8 @@ const gameRecord = GameRecord()
 export type GameRecord = typeof gameRecord
 
 export default function game(state = gameRecord, action: Action) {
-  if (action.type === 'SHOW_OVERLAY') {
-    return state.set('overlay', action.overlay)
+  if (action.type === 'LOAD_SCENE') {
+    return state.set('scene', action.scene)
   } else if (action.type === 'LOAD_STAGE') {
     return state.merge({
       currentStage: action.name,
@@ -48,8 +48,6 @@ export default function game(state = gameRecord, action: Action) {
       remainingEnemies: parseStageEnemies(stageConfigs[action.name].enemies),
       showTotalKillCount: false,
     })
-  } else if (action.type === 'REMOVE_OVERLAY') {
-    return state.set('overlay', null)
   } else if (action.type === 'REMOVE_FIRST_REMAINING_ENEMY') {
     return state.update('remainingEnemies', enemies => enemies.shift())
   } else if (action.type === 'INC_KILL_COUNT') {

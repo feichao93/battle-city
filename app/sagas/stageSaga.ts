@@ -6,7 +6,7 @@ import { State } from 'reducers/index'
 const tankLevels: TankLevel[] = ['basic', 'fast', 'power', 'armor']
 
 function* statistics() {
-  yield put<Action>({ type: 'SHOW_OVERLAY', overlay: 'statistics' })
+  yield put<Action>({ type: 'LOAD_SCENE', scene: 'statistics' })
 
   const { game: { killInfo } }: State = yield select()
 
@@ -37,10 +37,9 @@ function* statistics() {
     }
     yield delay(300)
   }
+  yield delay(1000)
   yield put<Action>({ type: 'SHOW_TOTAL_KILL_COUNT' })
   yield delay(3000)
-
-  yield put<Action>({ type: 'REMOVE_OVERLAY', overlay: 'statistics' })
 }
 
 /**
@@ -50,6 +49,7 @@ function* statistics() {
  * 当玩家清空关卡时stage-saga退出, 并向game-saga返回该关卡相关信息
  */
 export default function* stageSaga(stageName: string) {
+  yield put<Action>({ type: 'LOAD_SCENE', scene: 'game' })
   yield put<Action>({ type: 'LOAD_STAGE', name: stageName })
 
   while (true) {

@@ -48,7 +48,7 @@ declare global {
 
   type PowerUpName = 'tank' | 'star' | 'grenade' | 'timer' | 'helmet' | 'shovel'
 
-  type Overlay = '' | 'gameover' | 'statistics'
+  type Scene = 'game-title' | 'game' | 'gameover' | 'statistics'
 
   type TankLevel = 'basic' | 'fast' | 'power' | 'armor'
   type TankColor = 'green' | 'yellow' | 'silver' | 'red' | 'auto'

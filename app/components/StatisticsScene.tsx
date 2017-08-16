@@ -14,7 +14,7 @@ type P = {
   showTotalKillCount: boolean
 }
 
-class StatisticsOverlay extends React.PureComponent<P> {
+class StatisticsScene extends React.PureComponent<P> {
   render() {
     const { transientKillInfo, stageName, showTotalKillCount } = this.props
     const player1KillInfo = transientKillInfo.get('player-1')
@@ -45,7 +45,7 @@ class StatisticsOverlay extends React.PureComponent<P> {
     }
 
     return (
-      <g role="statistics-overlay">
+      <g role="statistics-scene">
         <rect
           fill="#000000"
           x={0}
@@ -91,4 +91,4 @@ function mapStateToProps({ game: { transientKillInfo, currentStage, showTotalKil
   }
 }
 
-export default connect(mapStateToProps)(StatisticsOverlay)
+export default connect(mapStateToProps)(StatisticsScene)
