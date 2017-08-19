@@ -1,11 +1,33 @@
-import { put, select, take } from 'redux-saga/effects'
+import { put, fork, select, take } from 'redux-saga/effects'
 import { BLOCK_SIZE } from 'utils/constants'
 import TankRecord from 'types/TankRecord'
-import { spawnTank } from 'utils/common'
+import { spawnTank, testCollide, asBox } from 'utils/common'
+import * as selectors from 'utils/selectors'
 import { State } from 'reducers/index'
 import PlayerRecord from 'types/PlayerRecord'
 
+function* handlePickPowerUps(playerName: string) {
+  while (true) {
+    yield take('AFTER_TICK')
+    const tank: TankRecord = yield select(selectors.playerTank, playerName)
+    // console.assert(tank != null, 'tank is null in handlePickPowerUps')
+    if (tank == null) {
+      continue
+    }
+    const { powerUps }: State = yield select()
+    const powerUp = powerUps.find(p => testCollide(asBox(p), asBox(tank)))
+    if (powerUp) {
+      yield put<Action>({
+        type: 'PICK_POWER_UP',
+        tank,
+        powerUpId: powerUp.powerUpId,
+      })
+    }
+  }
+}
+
 export default function* humanPlayerSaga(playerName: string, tankColor: TankColor) {
+  yield fork(handlePickPowerUps, playerName)
   yield put<Action>({
     type: 'CREATE_PLAYER',
     player: PlayerRecord({
@@ -31,6 +53,10 @@ export default function* humanPlayerSaga(playerName: string, tankColor: TankColo
         side: 'human',
         color: tankColor,
         level: 'basic',
+        // todo 为了调试方便, 强化一下坦克
+        bulletSpeed: 0.2,
+        bulletInterval: 100,
+        bulletLimit: Infinity,
       }))
       yield put({
         type: 'ACTIVATE_PLAYER',

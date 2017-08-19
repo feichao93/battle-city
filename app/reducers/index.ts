@@ -8,6 +8,7 @@ import flickers, { FlickersMap } from 'reducers/flickers'
 import map from 'reducers/map'
 import tanks, { TanksMap } from 'reducers/tanks'
 import texts, { TextsMap } from 'reducers/texts'
+import powerUps, { PowerUpsMap } from 'reducers/powerUps'
 import { MapRecord } from 'types'
 
 export type State = {
@@ -21,6 +22,7 @@ export type State = {
   tanks: TanksMap,
   flickers: FlickersMap,
   texts: TextsMap,
+  powerUps: PowerUpsMap,
 }
 
 export function time(state = 0, action: Action) {
@@ -42,4 +44,5 @@ export default combineReducers<State>({
   flickers,
   tanks,
   texts,
+  powerUps,
 })

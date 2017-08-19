@@ -1,7 +1,5 @@
 import { Map, Set } from 'immutable'
-import PlayerRecord from 'types/PlayerRecord'
-import TankRecord from 'types/TankRecord'
-import BulletRecord from 'types/BulletRecord'
+import { BulletRecord, TankRecord, PlayerRecord, PowerUpRecord } from 'types'
 
 declare global {
   type Action = Action.Action
@@ -46,6 +44,10 @@ declare global {
       | IncKillCount
       | UpdateTransientKillInfo
       | Simple<'SHOW_TOTAL_KILL_COUNT'>
+      | AddPowerUpAction
+      | RemovePowerUpAction
+      | UpdatePowerUpAction
+      | PickPowerUpAction
 
     export type ActionType = Action['type']
 
@@ -223,6 +225,27 @@ declare global {
     export type LoadSceneAction = {
       type: 'LOAD_SCENE',
       scene: Scene
+    }
+
+    export type AddPowerUpAction = {
+      type: 'ADD_POWER_UP',
+      powerUp: PowerUpRecord
+    }
+
+    export type RemovePowerUpAction = {
+      type: 'REMOVE_POWER_UP'
+      powerUpId: PowerUpId
+    }
+
+    export type UpdatePowerUpAction = {
+      type: 'UPDATE_POWER_UP'
+      powerUp: PowerUpRecord
+    }
+
+    export type PickPowerUpAction = {
+      type: 'PICK_POWER_UP',
+      tank: TankRecord,
+      powerUpId: PowerUpId,
     }
 
     export type Simple<T> = {

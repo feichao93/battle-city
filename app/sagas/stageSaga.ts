@@ -1,7 +1,13 @@
-import { Map } from 'immutable'
+import * as _ from 'lodash'
+import { Map, Repeat } from 'immutable'
 import { delay } from 'redux-saga'
-import { put, select, take } from 'redux-saga/effects'
+import { race, fork, put, select, take } from 'redux-saga/effects'
 import { State } from 'reducers/index'
+import * as selectors from 'utils/selectors'
+import { getNextId } from 'utils/common'
+import { PowerUpRecord } from 'types'
+
+const log = console.log
 
 const tankLevels: TankLevel[] = ['basic', 'fast', 'power', 'armor']
 
@@ -42,6 +48,41 @@ function* statistics() {
   yield delay(3000)
 }
 
+function* powerUp(powerUp: PowerUpRecord) {
+  const powerUpBlinkArray = Repeat(250, 150)
+  const pickThisPowerUp = (action: Action) => (
+    action.type === 'PICK_POWER_UP' && action.powerUpId === powerUp.powerUpId
+  )
+  try {
+    yield put<Action>({
+      type: 'ADD_POWER_UP',
+      powerUp,
+    })
+    let visible = true
+    for (const timeout of powerUpBlinkArray) {
+      const result = yield race({
+        timeout: delay(timeout),
+        picked: take(pickThisPowerUp),
+      })
+      if (result.picked) {
+        const action = result.picked as Action.PickPowerUpAction
+        log(`tank ${action.tank.tankId} picked ${powerUp.powerUpName}`)
+        break
+      } // else timeout
+      visible = !visible
+      yield put<Action>({
+        type: 'UPDATE_POWER_UP',
+        powerUp: powerUp.set('visible', visible),
+      })
+    }
+  } finally {
+    yield put<Action>({
+      type: 'REMOVE_POWER_UP',
+      powerUpId: powerUp.powerUpId,
+    })
+  }
+}
+
 /**
  * stage-saga的一个实例对应一个关卡
  * 在关卡开始时, 一个stage-saga实例将会启动, 负责关卡地图生成
@@ -64,9 +105,24 @@ export default function* stageSaga(stageName: string) {
         level: targetTank.level,
       })
 
+      // 处理powerup
+      if (/* todo targetTank.withPowerUp */ true) {
+        const powerUpName = _.sample(['tank', 'star', 'grenade', 'timer', 'helmet', 'shovel'] as PowerUpName[])
+        const validPositions: Point[] = yield select(selectors.validPowerUpSpawnPositions)
+        const position = _.sample(validPositions)
+        yield fork(powerUp, PowerUpRecord({
+          powerUpId: getNextId('power-up'),
+          powerUpName,
+          visible: true,
+          x: position.x,
+          y: position.y,
+        }))
+      }
+
       if (remainingEnemies.isEmpty()
         && tanks.filter(t => t.side === 'ai').isEmpty()) {
         // 剩余enemy数量为0, 且场上已经没有ai tank了
+        // todo 如果场上有powerup, 则delay时间可以适当延长; 如果场上没有power, 则delay时间可以缩短
         yield delay(6000)
         yield* statistics()
         return { status: 'clear' }
@@ -74,7 +130,7 @@ export default function* stageSaga(stageName: string) {
     } else { // ai击杀human
       if (!players.some(ply => ply.side === 'human' && ply.lives > 0)) {
         // 所有的human player都挂了
-        yield delay(6000)
+        yield delay(2000)
         yield* statistics()
         return { status: 'fail', reason: 'all-human-dead' }
       }

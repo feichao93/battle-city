@@ -14,11 +14,12 @@ import Eagle from 'components/Eagle'
 import Explosion from 'components/Explosion'
 import Flicker from 'components/Flicker'
 import TextLayer from 'components/TextLayer'
+import PowerUp from 'components/PowerUp'
 import { State } from 'types'
 
 class GameScene extends React.Component<State> {
   render() {
-    const { bullets, map, explosions, flickers, tanks, texts } = this.props
+    const { bullets, map, explosions, flickers, tanks, texts, powerUps } = this.props
     const { bricks, steels, rivers, snows, forests, eagle } = map.toObject()
     return (
       <g role="game-scene">
@@ -46,6 +47,16 @@ class GameScene extends React.Component<State> {
           </g>
           {/* 因为坦克/子弹可以"穿过"森林, 所以<ForestLayer />需要放在tank-layer和bullet-layer的后面 */}
           <ForestLayer forests={forests} />
+          <g role="power-up-layer">
+            {powerUps.map(p =>
+              <PowerUp
+                key={p.powerUpId}
+                name={p.powerUpName}
+                x={p.x}
+                y={p.y}
+              />
+            ).toArray()}
+          </g>
           <g role="explosion-layer">
             {explosions.map(exp =>
               <Explosion

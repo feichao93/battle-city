@@ -1,7 +1,7 @@
 import { delay } from 'redux-saga'
 import { put } from 'redux-saga/effects'
 import { BLOCK_SIZE, BULLET_SIZE, FIELD_SIZE, TANK_SIZE, TANK_SPAWN_DELAY, } from 'utils/constants'
-import { BulletRecord, TankRecord } from 'types'
+import { BulletRecord, TankRecord, EagleRecord, PowerUpRecord } from 'types'
 
 // 根据坦克的位置计算子弹的生成位置
 // 参数x,y,direction为坦克的位置和方向
@@ -70,8 +70,8 @@ export function getNextId(tag = '') {
   }
 }
 
-// 将BulletRecord/TankRecord转换为Box类型对象
-export function asBox(item: BulletRecord | TankRecord, enlargement = 0): Box {
+// 将BulletRecord/TankRecord/Eagle/PowerUpRecord转换为Box类型对象
+export function asBox(item: BulletRecord | TankRecord | EagleRecord | PowerUpRecord, enlargement = 0): Box {
   if (item instanceof BulletRecord) {
     return {
       x: item.x - BULLET_SIZE / 2 * enlargement,
@@ -85,6 +85,20 @@ export function asBox(item: BulletRecord | TankRecord, enlargement = 0): Box {
       y: item.y - TANK_SIZE / 2 * enlargement,
       width: TANK_SIZE * (1 + enlargement),
       height: TANK_SIZE * (1 + enlargement),
+    }
+  } else if (item instanceof EagleRecord) {
+    return {
+      x: item.x,
+      y: item.y,
+      width: BLOCK_SIZE,
+      height: BLOCK_SIZE,
+    }
+  } else if (item instanceof PowerUpRecord) {
+    return {
+      x: item.x,
+      y: item.y,
+      width: BLOCK_SIZE,
+      height: BLOCK_SIZE,
     }
   } else {
     throw new Error('Cannot convert to type Box')
