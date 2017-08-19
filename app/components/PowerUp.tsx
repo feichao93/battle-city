@@ -18,10 +18,15 @@ const powerUpDataArray = {
     'w bwwwwgggb bbwb',
     'w b    gggb bbwb',
     'w bbbwggbbgb bwb',
+    'w bbwgggggbb bwb',
+    'w bgbg      g wb',
     'w bggwwwwgggb wb',
     'w b w w w wbg wb',
+    'w bb ggggggg bwb',
     'w bbb       bbwb',
-    '' // todo 这里还没完成
+    'gwwwwwwwwwwwwwwg',
+    ' bbbbbbbbbbbbbb ',
+    '                ',
   ],
   star: [
     ' wwwwwwwwwwwwwg ',
@@ -31,7 +36,7 @@ const powerUpDataArray = {
     'w bbbbwwg bbbbwb',
     'w wwwwwggwwww wb',
     'w bgggwgwggg  wb',
-    'w bbgwwwwgg  wbw',
+    'w bbgwwwwgg  wwb',
     'w bbwwggwwg bbwb',
     'w bgwgg ggwg bwb',
     'w bwgg   ggw bwb',
@@ -39,8 +44,7 @@ const powerUpDataArray = {
     'w b  bbbbbb  bwb',
     'gwwwwwwwwwwwwwgb',
     ' bbbbbbbbbbbbbb ',
-    'gwwwwwwwwwwwwwgb',
-    ' bbbbbbbbbbbbbb '
+    '                ',
   ],
   grenade: [
     ' wwwwwwwwwwwwwg ',
@@ -90,7 +94,6 @@ const powerUpDataArray = {
     'w bgggggggg bbwb',
     'w b     gggg bwb',
     'w bbbbbb     bwb',
-    'w bbbbbbbbbbbbwb',
     'w bbbbbbbbbbbbwb',
     'w bbbbbbbbbbbbwb',
     'gwwwwwwwwwwwwwgb',

@@ -33,8 +33,8 @@ import { PlayerRecord, TankRecord } from 'types'
 
 const BulletExplosion = registerTick(500, 500, 1000)(BulletExplosionClass)
 const TankExplosion = registerTick(500, 1000)(TankExplosionClass)
-const PowerUp = ({ name }: any) => (
-  <PowerUpBase tickIndex={0} name={name} x={0} y={0} />
+const PowerUp = ({ name, x, y }: { name: PowerUpName, x: number, y: number }) => (
+  <PowerUpBase tickIndex={0} name={name} x={x} y={y} />
 )
 
 const simpleSagaMiddleware = createSagaMiddleware()
@@ -62,8 +62,8 @@ const Transform = ({ dx = 0, dy = 0, k = 1, children }: any) => (
   </g>
 )
 
-const X4 = ({ width = 64, height = 64, children }: any) => (
-  <svg className="svg" width={width} height={height} style={{ marginRight: 4 }}>
+const X4 = ({ width = 64, height = 64, children, style = {} }: any) => (
+  <svg className="svg" width={width} height={height} style={{ marginRight: 4, ...style }}>
     <Transform k={4}>
       {children}
     </Transform>
@@ -268,14 +268,19 @@ class Stories extends React.Component<{}, { stage: string }> {
           <summary>
             <FontLevel1>PowerUp</FontLevel1>
           </summary>
-          <Row>
-            {powerUpNames.map(name =>
-              <div key={name}>
-                <p style={{ fontSize: 20, margin: 0, lineHeight: 1.5 }}>{name}</p>
-                <X4><PowerUp name={name} /></X4>
-              </div>
+          <p style={{ fontSize: 20, margin: 0, lineHeight: 1.5 }}>
+            tank / star / grenade / timer / helmet / shoval
+          </p>
+          <X4 width={496} height={96} style={{ background: 'black' }}>
+            {powerUpNames.map((name, index) =>
+              <PowerUp
+                key={name}
+                name={name}
+                x={index * 24 + 4}
+                y={4}
+              />
             )}
-          </Row>
+          </X4>
         </details>
       </div>
     )

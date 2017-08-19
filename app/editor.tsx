@@ -362,8 +362,16 @@ class Editor extends React.Component {
   }
 
   getT(event: React.MouseEvent<SVGSVGElement>) {
-    const row = Math.floor((event.clientY - this.svg.clientTop) / B)
-    const col = Math.floor((event.clientX - this.svg.clientLeft) / B)
+    let totalTop = 0
+    let totalLeft = 0
+    let node: Element = this.svg
+    while (node) {
+      totalTop += node.scrollTop + node.clientTop
+      totalLeft += node.scrollLeft + node.clientLeft
+      node = node.parentElement
+    }
+    const row = Math.floor((event.clientY + totalTop - this.svg.clientTop) / zoomLevel / B)
+    const col = Math.floor((event.clientX + totalLeft - this.svg.clientLeft) / zoomLevel / B)
     if (row >= 0 && row < FBZ && col >= 0 && col < FBZ) {
       return row * FBZ + col
     } else {
