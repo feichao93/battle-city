@@ -27,18 +27,18 @@ export const availableSpawnPosition = ({ tanks }: State): Box => {
 }
 
 export const validPowerUpSpawnPositions = ({ map: { bricks, rivers, steels, eagle } }: State): Point[] => {
-  const partSize = 8 // part size of the power-up
+  // notice powerUp的显示大小为16*16, 但是碰撞大小为中间的8*8
   const validPositions: Point[] = []
-  for (let row = 0; row < FBZ - 1; row += 0.5) {
-    for (let col = 0; col < FBZ - 1; col += 0.5) {
+  for (let y = 0; y < (FBZ - 1) * B; y += 0.5 * B) {
+    for (let x = 0; x < (FBZ - 1) * B; x += 0.5 * B) {
       let collideCount = 0
 
       partLoop:
       for (const part of [
-        { x: col * B + 0, y: row * B + 0, width: partSize, height: partSize },
-        { x: col * B + 8, y: row * B + 0, width: partSize, height: partSize },
-        { x: col * B + 0, y: row * B + 8, width: partSize, height: partSize },
-        { x: col * B + 8, y: row * B + 8, width: partSize, height: partSize },
+        { x: x + 4, y: y + 4, width: 4, height: 4 },
+        { x: x + 8, y: y + 4, width: 4, height: 4 },
+        { x: x + 4, y: y + 8, width: 4, height: 4 },
+        { x: x + 8, y: y + 8, width: 4, height: 4 },
       ]) {
         for (const [brow, bcol] of iterRowsAndCols(ITEM_SIZE_MAP.BRICK, part)) {
           if (bricks.get(brow * N_MAP.BRICK + bcol)) {
@@ -64,7 +64,7 @@ export const validPowerUpSpawnPositions = ({ map: { bricks, rivers, steels, eagl
         }
       }
       if (collideCount === 1 || collideCount === 2 || collideCount === 3) {
-        validPositions.push({ x: col * B, y: row * B })
+        validPositions.push({ x, y })
       }
     }
   }

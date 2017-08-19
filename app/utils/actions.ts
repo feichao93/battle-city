@@ -1,5 +1,5 @@
 import { Map, Set } from 'immutable'
-import { BulletRecord, TankRecord, PlayerRecord, PowerUpRecord } from 'types'
+import { BulletRecord, TankRecord, PlayerRecord, PowerUpRecord, MapRecord } from 'types'
 
 declare global {
   type Action = Action.Action
@@ -16,6 +16,7 @@ declare global {
       | DestroyBulletsAction
       | DestroySteelsAction
       | DestroyBricksAction
+      | UpdateMapAction
       | UpdaetBulletsAction
       | LoadStageAction
       | Simple<'GAMEOVER'>
@@ -135,6 +136,11 @@ declare global {
       ts: Set<BrickIndex>,
     }
 
+    export type UpdateMapAction = {
+      type: 'UPDATE_MAP',
+      map: MapRecord,
+    }
+
     export type UpdaetBulletsAction = {
       type: 'UPDATE_BULLETS',
       updatedBullets: Map<BulletId, BulletRecord>,
@@ -245,7 +251,7 @@ declare global {
     export type PickPowerUpAction = {
       type: 'PICK_POWER_UP',
       tank: TankRecord,
-      powerUpId: PowerUpId,
+      powerUp: PowerUpRecord
     }
 
     export type Simple<T> = {

@@ -51,7 +51,7 @@ function* statistics() {
 function* powerUp(powerUp: PowerUpRecord) {
   const powerUpBlinkArray = Repeat(250, 150)
   const pickThisPowerUp = (action: Action) => (
-    action.type === 'PICK_POWER_UP' && action.powerUpId === powerUp.powerUpId
+    action.type === 'PICK_POWER_UP' && action.powerUp.powerUpId === powerUp.powerUpId
   )
   try {
     yield put<Action>({

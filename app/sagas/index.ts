@@ -7,6 +7,7 @@ import AIMasterSaga from 'sagas/AISaga'
 import tickEmitter from 'sagas/tickEmitter'
 import { CONTROL_CONFIG, TANK_SPAWN_DELAY } from 'utils/constants'
 import humanPlayerSaga from 'sagas/humanPlayerSaga'
+import powerUps from 'sagas/powerUps'
 
 function* autoRemoveEffects() {
   yield takeEvery('SPAWN_EXPLOSION', function* removeExplosion({ explosionId, explosionType }: Action.SpawnExplosionAction) {
@@ -27,9 +28,9 @@ export default function* rootSaga() {
   console.debug('root saga started')
   yield fork(tickEmitter)
 
-  // 注意各个saga的启动顺序, 这将影响到后续action的put顺序
   yield fork(bulletsSaga)
   yield fork(autoRemoveEffects)
+  yield fork(powerUps)
 
   // 生成两个humanController, 对应现实生活的游戏控制器
   yield fork(humanController, 'player-1', CONTROL_CONFIG.player1)

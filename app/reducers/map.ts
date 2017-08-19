@@ -16,6 +16,8 @@ export default function mapReducer(state = mapRecord, action: Action) {
     return state.update('steels', steels => (
       steels.map((set, t) => (action.ts.has(t) ? false : set)))
     )
+  } else if (action.type === 'UPDATE_MAP') {
+    return action.map
   } else {
     return state
   }

@@ -88,17 +88,18 @@ export function asBox(item: BulletRecord | TankRecord | EagleRecord | PowerUpRec
     }
   } else if (item instanceof EagleRecord) {
     return {
-      x: item.x,
-      y: item.y,
-      width: BLOCK_SIZE,
-      height: BLOCK_SIZE,
+      x: item.x - BLOCK_SIZE / 2 * enlargement,
+      y: item.y - BLOCK_SIZE / 2 * enlargement,
+      width: BLOCK_SIZE * (1 + enlargement),
+      height: BLOCK_SIZE * (1 + enlargement),
     }
   } else if (item instanceof PowerUpRecord) {
+    console.assert(enlargement === -0.5)
     return {
-      x: item.x,
-      y: item.y,
-      width: BLOCK_SIZE,
-      height: BLOCK_SIZE,
+      x: item.x - BLOCK_SIZE / 2 * enlargement,
+      y: item.y - BLOCK_SIZE / 2 * enlargement,
+      width: BLOCK_SIZE * (1 + enlargement),
+      height: BLOCK_SIZE * (1 + enlargement),
     }
   } else {
     throw new Error('Cannot convert to type Box')

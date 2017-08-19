@@ -10,17 +10,16 @@ function* handlePickPowerUps(playerName: string) {
   while (true) {
     yield take('AFTER_TICK')
     const tank: TankRecord = yield select(selectors.playerTank, playerName)
-    // console.assert(tank != null, 'tank is null in handlePickPowerUps')
     if (tank == null) {
       continue
     }
     const { powerUps }: State = yield select()
-    const powerUp = powerUps.find(p => testCollide(asBox(p), asBox(tank)))
+    const powerUp = powerUps.find(p => testCollide(asBox(p, -0.5), asBox(tank)))
     if (powerUp) {
       yield put<Action>({
         type: 'PICK_POWER_UP',
         tank,
-        powerUpId: powerUp.powerUpId,
+        powerUp,
       })
     }
   }
