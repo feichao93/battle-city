@@ -1,5 +1,5 @@
 import * as _ from 'lodash'
-import { Map, Repeat } from 'immutable'
+import { List, Map, Repeat, Collection } from 'immutable'
 import { delay } from 'redux-saga'
 import { race, fork, put, select, take } from 'redux-saga/effects'
 import { State } from 'reducers/index'
@@ -49,7 +49,7 @@ function* statistics() {
 }
 
 function* powerUp(powerUp: PowerUpRecord) {
-  const powerUpBlinkArray = Repeat(250, 150)
+  const powerUpBlinkArray = Repeat(List([100, 500]), 50).flatten() as Collection<number, number>
   const pickThisPowerUp = (action: Action) => (
     action.type === 'PICK_POWER_UP' && action.powerUp.powerUpId === powerUp.powerUpId
   )
@@ -59,16 +59,15 @@ function* powerUp(powerUp: PowerUpRecord) {
       powerUp,
     })
     let visible = true
-    for (const timeout of powerUpBlinkArray) {
+    for (const timeout of powerUpBlinkArray.values()) {
       const result = yield race({
         timeout: delay(timeout),
         picked: take(pickThisPowerUp),
+        stageChanged: take('LOAD_STAGE'),
       })
-      if (result.picked) {
-        const action = result.picked as Action.PickPowerUpAction
-        log(`tank ${action.tank.tankId} picked ${powerUp.powerUpName}`)
+      if (result.picked || result.stageChanged) {
         break
-      } // else timeout
+      } // else timeout. continue
       visible = !visible
       yield put<Action>({
         type: 'UPDATE_POWER_UP',

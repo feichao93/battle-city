@@ -1,8 +1,11 @@
 import { delay } from 'redux-saga'
-import { cancelled, put, take, select, takeLatest } from 'redux-saga/effects'
+import { put, take, select, takeLatest } from 'redux-saga/effects'
 import { State, MapRecord } from 'types'
 import { N_MAP, ITEM_SIZE_MAP } from 'utils/constants'
 import { iterRowsAndCols, asBox } from 'utils/common'
+import { destroyTanks } from 'sagas/bulletsSaga'
+
+const log = console.log
 
 function convertToBricks(map: MapRecord) {
   const { eagle, steels, bricks } = map
@@ -94,22 +97,51 @@ function* shovel() {
   }
 }
 
+const isShovelPowerUp = (action: Action) => (
+  action.type === 'PICK_POWER_UP'
+  && action.powerUp.powerUpName === 'shovel'
+)
+
 export default function* powerUps() {
-  const isShovelPowerUp = (action: Action) => (
-    action.type === 'PICK_POWER_UP'
-    && action.powerUp.powerUpName === 'shovel'
-  )
   yield takeLatest(isShovelPowerUp, shovel)
 
   while (true) {
     const pickUpAction: Action.PickPowerUpAction = yield take('PICK_POWER_UP')
-    const { tank, powerUp: { powerUpName } } = pickUpAction
+    const { tank, player, powerUp: { powerUpName } } = pickUpAction
     if (powerUpName === 'grenade') {
-      console.log('pick-up grenade killing all enemies...')
+      log(`${player.playerName} pick up 'power-up/grenade'. killing all enemies...`)
+      const { tanks }: State = yield select()
+      yield* destroyTanks(tanks.filter(t => t.side === 'ai').keySeq().toSet())
+    } else if (powerUpName === 'tank') {
+      log(`${player.playerName} pick up 'power-up/tank'. +1 life!`)
+      yield put<Action>({ type: 'ADD_ONE_LIFE', playerName: player.playerName })
     } else if (powerUpName === 'star') {
-      console.log(`pick-up star upgrading tank ${tank.tankId}`)
+      log(`${player.playerName} pick up 'power-up/star'. upgrading...`)
+      yield put<Action>({ type: 'UPGRADE_TANK', tankId: tank.tankId })
+    } else if (powerUpName === 'helmet') {
+      log(`${player.playerName} pick up 'power-up/helmet'. spawing helmet...`)
+      log('TODO helmet')
+      // TODO
+    } else if (powerUpName === 'shovel') {
+      // shovel will be handled by task `takeLatest(isShovelPowerUp, shovel)`
+    } else if (powerUpName === 'timer') {
+      log(`${player.playerName} pick up 'power-up/timer'. freezing enemies...`)
+      const { tanks }: State = yield select()
+
+      // todo 考察一下这个SET_FROZEN_TIMEOUT和directionController中的put的action是否会有冲突
+      yield* tanks.filter(t => t.side === 'ai').map(t => put({
+        type: 'SET_FROZEN_TIMEOUT',
+        tankId: t.tankId,
+        frozenTimeout: 10e3,
+      } as Action.SetFrozenTimeoutAction)).values()
+
+      yield* tanks.filter(t => t.side === 'ai').map(t => put({
+        type: 'SET_COOLDOWN',
+        tankId: t.tankId,
+        cooldown: 10e3,
+      } as Action.SetCooldownAction)).values()
     } else {
-      console.log(`pick-up ${powerUpName}`)
+      throw new Error(`Invalid powerUpName: ${powerUpName}`)
     }
   }
 }

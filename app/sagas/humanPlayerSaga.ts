@@ -13,13 +13,14 @@ function* handlePickPowerUps(playerName: string) {
     if (tank == null) {
       continue
     }
-    const { powerUps }: State = yield select()
+    const { powerUps, players }: State = yield select()
     const powerUp = powerUps.find(p => testCollide(asBox(p, -0.5), asBox(tank)))
     if (powerUp) {
       yield put<Action>({
         type: 'PICK_POWER_UP',
         tank,
         powerUp,
+        player: players.get(playerName),
       })
     }
   }

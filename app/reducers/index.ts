@@ -2,7 +2,6 @@ import { combineReducers } from 'redux'
 import game, { GameRecord } from 'reducers/game'
 import players, { PlayersMap } from 'reducers/players'
 import bullets, { BulletsMap } from 'reducers/bullets'
-import cooldowns, { CooldownsMap } from 'reducers/cooldowns'
 import explosions, { ExplosionsMap } from 'reducers/explosions'
 import flickers, { FlickersMap } from 'reducers/flickers'
 import map from 'reducers/map'
@@ -14,7 +13,6 @@ import { MapRecord } from 'types'
 export type State = {
   game: GameRecord,
   players: PlayersMap,
-  cooldowns: CooldownsMap,
   bullets: BulletsMap,
   explosions: ExplosionsMap,
   map: MapRecord,
@@ -37,7 +35,6 @@ export default combineReducers<State>({
   game,
   players,
   bullets,
-  cooldowns,
   map,
   time,
   explosions,

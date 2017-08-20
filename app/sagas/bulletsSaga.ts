@@ -144,7 +144,7 @@ function* destroySteels(collidedBullets: BulletsMap) {
 }
 
 /** 从地图上移除坦克, 并产生坦克爆炸效果 */
-function* destroyTanks(tankIdSet: ISet<TankId>) {
+export function* destroyTanks(tankIdSet: ISet<TankId>) {
   const { tanks }: State = yield select()
   // 移除tank
   yield* tankIdSet.map(tankId => put({

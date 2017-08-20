@@ -13,6 +13,7 @@ declare global {
       | AfterTickAction
       | AddBulletAction
       | SetCooldownAction
+      | SetFrozenTimeoutAction
       | DestroyBulletsAction
       | DestroySteelsAction
       | DestroyBricksAction
@@ -49,6 +50,8 @@ declare global {
       | RemovePowerUpAction
       | UpdatePowerUpAction
       | PickPowerUpAction
+      | AddOneLifeAction
+      | UpgardeTankAction
 
     export type ActionType = Action['type']
 
@@ -120,6 +123,12 @@ declare global {
       cooldown: number
     }
 
+    export interface SetFrozenTimeoutAction {
+      type: 'SET_FROZEN_TIMEOUT'
+      tankId: TankId
+      frozenTimeout: number
+    }
+
     export type DestroyBulletsAction = {
       type: 'DESTROY_BULLETS',
       bullets: Map<BulletId, BulletRecord>,
@@ -181,6 +190,7 @@ declare global {
       tank: TankRecord
     }
 
+    // fixme 如果该tank的子弹仍存在, 那么移除该tank, 将导致子弹与其他物体相碰撞时出现bug
     export type RemoveTankAction = {
       type: 'REMOVE_TANK',
       tankId: TankId,
@@ -250,8 +260,19 @@ declare global {
 
     export type PickPowerUpAction = {
       type: 'PICK_POWER_UP',
+      player: PlayerRecord
       tank: TankRecord,
       powerUp: PowerUpRecord
+    }
+
+    export type AddOneLifeAction = {
+      type: 'ADD_ONE_LIFE'
+      playerName: PlayerName
+    }
+
+    export type UpgardeTankAction = {
+      type: 'UPGRADE_TANK'
+      tankId: TankId
     }
 
     export type Simple<T> = {
