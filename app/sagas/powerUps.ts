@@ -1,11 +1,9 @@
 import { delay } from 'redux-saga'
-import { put, take, select, takeLatest } from 'redux-saga/effects'
+import { fork, put, take, select, takeEvery, takeLatest } from 'redux-saga/effects'
 import { State, MapRecord } from 'types'
 import { N_MAP, ITEM_SIZE_MAP } from 'utils/constants'
-import { iterRowsAndCols, asBox } from 'utils/common'
+import { iterRowsAndCols, asBox, dec } from 'utils/common'
 import { destroyTanks } from 'sagas/bulletsSaga'
-
-const log = console.log
 
 function convertToBricks(map: MapRecord) {
   const { eagle, steels, bricks } = map
@@ -97,51 +95,76 @@ function* shovel() {
   }
 }
 
-const isShovelPowerUp = (action: Action) => (
+function* timer() {
+  yield put<Action.SetAIFrozenTimeoutAction>({
+    type: 'SET_AI_FROZEN_TIMEOUT',
+    AIFrozenTimeout: 5e3,
+  })
+  while (true) {
+    const { delta }: Action.TickAction = yield take('TICK')
+    const { game: { AIFrozenTimeout } }: State = yield select()
+    if (AIFrozenTimeout === 0) {
+      break
+    }
+    const next = AIFrozenTimeout - delta
+    yield put<Action.SetAIFrozenTimeoutAction>({
+      type: 'SET_AI_FROZEN_TIMEOUT',
+      AIFrozenTimeout: next <= 0 ? 0 : next,
+    })
+  }
+}
+
+function* grenade() {
+  const { tanks }: State = yield select()
+  const tankIdSet = tanks.filter(t => t.side === 'ai')
+    .map(t => t.tankId)
+    .toSet()
+  yield* destroyTanks(tankIdSet)
+}
+
+function* star({ tank }: Action.PickPowerUpAction) {
+  yield put<Action>({ type: 'UPGRADE_TANK', tankId: tank.tankId })
+}
+
+function* tank({ player }: Action.PickPowerUpAction) {
+  yield put<Action>({ type: 'ADD_ONE_LIFE', playerName: player.playerName })
+}
+
+function* helmet({ tank }: Action.PickPowerUpAction) {
+  yield put<Action.SetHelmetDurationAction>({
+    type: 'SET_HELMET_DURATION',
+    tankId: tank.tankId,
+    duration: 6e3,
+  })
+}
+
+const is = (name: PowerUpName) => (action: Action) => (
   action.type === 'PICK_POWER_UP'
-  && action.powerUp.powerUpName === 'shovel'
+  && action.powerUp.powerUpName === name
 )
 
-export default function* powerUps() {
-  yield takeLatest(isShovelPowerUp, shovel)
-
+function* handleHelmetDuration() {
   while (true) {
-    const pickUpAction: Action.PickPowerUpAction = yield take('PICK_POWER_UP')
-    const { tank, player, powerUp: { powerUpName } } = pickUpAction
-    if (powerUpName === 'grenade') {
-      log(`${player.playerName} pick up 'power-up/grenade'. killing all enemies...`)
-      const { tanks }: State = yield select()
-      yield* destroyTanks(tanks.filter(t => t.side === 'ai').keySeq().toSet())
-    } else if (powerUpName === 'tank') {
-      log(`${player.playerName} pick up 'power-up/tank'. +1 life!`)
-      yield put<Action>({ type: 'ADD_ONE_LIFE', playerName: player.playerName })
-    } else if (powerUpName === 'star') {
-      log(`${player.playerName} pick up 'power-up/star'. upgrading...`)
-      yield put<Action>({ type: 'UPGRADE_TANK', tankId: tank.tankId })
-    } else if (powerUpName === 'helmet') {
-      log(`${player.playerName} pick up 'power-up/helmet'. spawing helmet...`)
-      log('TODO helmet')
-      // TODO
-    } else if (powerUpName === 'shovel') {
-      // shovel will be handled by task `takeLatest(isShovelPowerUp, shovel)`
-    } else if (powerUpName === 'timer') {
-      log(`${player.playerName} pick up 'power-up/timer'. freezing enemies...`)
-      const { tanks }: State = yield select()
-
-      // todo 考察一下这个SET_FROZEN_TIMEOUT和directionController中的put的action是否会有冲突
-      yield* tanks.filter(t => t.side === 'ai').map(t => put({
-        type: 'SET_FROZEN_TIMEOUT',
-        tankId: t.tankId,
-        frozenTimeout: 10e3,
-      } as Action.SetFrozenTimeoutAction)).values()
-
-      yield* tanks.filter(t => t.side === 'ai').map(t => put({
-        type: 'SET_COOLDOWN',
-        tankId: t.tankId,
-        cooldown: 10e3,
-      } as Action.SetCooldownAction)).values()
-    } else {
-      throw new Error(`Invalid powerUpName: ${powerUpName}`)
-    }
+    const { delta }: Action.TickAction = yield take('TICK')
+    const { tanks }: State = yield select()
+    yield* tanks.filter(tank => tank.helmetDuration > 0)
+      .map(tank => put({
+        type: 'SET_HELMET_DURATION',
+        tankId: tank.tankId,
+        duration: tank.helmetDuration - delta,
+      } as Action.SetHelmetDurationAction))
+      .values()
   }
+}
+
+export default function* powerUps() {
+  yield takeLatest(is('shovel'), shovel)
+  yield takeLatest(is('timer'), timer)
+
+  yield takeEvery(is('grenade'), grenade)
+  yield takeEvery(is('star'), star)
+  yield takeEvery(is('tank'), tank)
+  yield takeEvery(is('helmet'), helmet)
+
+  yield fork(handleHelmetDuration)
 }

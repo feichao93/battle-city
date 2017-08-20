@@ -13,6 +13,7 @@ import ForestLayer from 'components/ForestLayer'
 import Eagle from 'components/Eagle'
 import Explosion from 'components/Explosion'
 import Flicker from 'components/Flicker'
+import TankHelmet from 'components/TankHelmet'
 import TextLayer from 'components/TextLayer'
 import PowerUp from 'components/PowerUp'
 import { State } from 'types'
@@ -43,6 +44,13 @@ class GameScene extends React.Component<State> {
           <g role="tank-layer">
             {tanks.map(tank =>
               <Tank key={tank.tankId} tank={tank} />
+            ).toArray()}
+          </g>
+          <g role="helmet-layer">
+            {tanks.map(tank =>
+              tank.helmetDuration > 0 ? (
+                <TankHelmet key={tank.tankId} x={tank.x} y={tank.y} />
+              ) : null
             ).toArray()}
           </g>
           {/* 因为坦克/子弹可以"穿过"森林, 所以<ForestLayer />需要放在tank-layer和bullet-layer的后面 */}

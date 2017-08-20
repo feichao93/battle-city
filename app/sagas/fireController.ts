@@ -12,7 +12,8 @@ export default function* fireController(playerName: string, shouldFire: () => bo
     const { delta }: Action.TickAction = yield take('TICK')
     const { bullets: allBullets }: State = yield select()
     const tank: TankRecord = yield select(selectors.playerTank, playerName)
-    if (tank == null) {
+    const { game: { AIFrozenTimeout } }: State = yield select()
+    if (tank == null || tank.side === 'ai' && AIFrozenTimeout > 0) {
       continue
     }
     let nextCooldown = tank.cooldown <= 0 ? 0 : tank.cooldown - delta

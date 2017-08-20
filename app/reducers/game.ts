@@ -31,6 +31,8 @@ export const GameRecord = Record({
   transientKillInfo: emptyTransientKillInfo,
   /** 关卡击杀信息动画, 是否显示total的数量 */
   showTotalKillCount: false,
+  /** AI坦克的冻结时间. 小于等于0表示没有冻结, 大于0表示还需要一段时间解冻 */
+  AIFrozenTimeout: 0,
 }, 'GameRecord')
 
 const gameRecord = GameRecord()
@@ -57,6 +59,8 @@ export default function game(state = gameRecord, action: Action) {
     return state.set('transientKillInfo', action.info)
   } else if (action.type === 'SHOW_TOTAL_KILL_COUNT') {
     return state.set('showTotalKillCount', true)
+  } else if (action.type === 'SET_AI_FROZEN_TIMEOUT') {
+    return state.set('AIFrozenTimeout', action.AIFrozenTimeout)
   } else {
     return state
   }

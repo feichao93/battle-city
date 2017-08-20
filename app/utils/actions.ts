@@ -13,7 +13,9 @@ declare global {
       | AfterTickAction
       | AddBulletAction
       | SetCooldownAction
+      | SetHelmetDurationAction
       | SetFrozenTimeoutAction
+      | SetAIFrozenTimeoutAction
       | DestroyBulletsAction
       | DestroySteelsAction
       | DestroyBricksAction
@@ -117,7 +119,13 @@ declare global {
       tankId: TankId,
     }
 
-    export type SetCooldownAction = {
+    export interface SetHelmetDurationAction {
+      type: 'SET_HELMET_DURATION'
+      tankId: TankId
+      duration: number
+    }
+
+    export interface SetCooldownAction {
       type: 'SET_COOLDOWN'
       tankId: TankId
       cooldown: number
@@ -127,6 +135,11 @@ declare global {
       type: 'SET_FROZEN_TIMEOUT'
       tankId: TankId
       frozenTimeout: number
+    }
+
+    export interface SetAIFrozenTimeoutAction {
+      type: 'SET_AI_FROZEN_TIMEOUT'
+      AIFrozenTimeout: number
     }
 
     export type DestroyBulletsAction = {

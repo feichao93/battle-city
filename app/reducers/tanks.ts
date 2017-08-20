@@ -25,6 +25,9 @@ export default function tanks(state = Map() as TanksMap, action: Action) {
     return state.update(action.tankId, tank =>
       tank.set('frozenTimeout', action.frozenTimeout)
         .set('moving', (tank.frozenTimeout <= 0 && action.frozenTimeout > 0) && tank.moving))
+  } else if (action.type === 'SET_HELMET_DURATION') {
+    return state.update(action.tankId,
+      tank => tank.set('helmetDuration', Math.max(0, action.duration)))
   } else {
     return state
   }
