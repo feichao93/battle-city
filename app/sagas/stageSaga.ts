@@ -49,7 +49,6 @@ function* statistics() {
 }
 
 function* powerUp(powerUp: PowerUpRecord) {
-  const powerUpBlinkArray = Repeat(List([100, 500]), 50).flatten() as Collection<number, number>
   const pickThisPowerUp = (action: Action) => (
     action.type === 'PICK_POWER_UP' && action.powerUp.powerUpId === powerUp.powerUpId
   )
@@ -59,9 +58,9 @@ function* powerUp(powerUp: PowerUpRecord) {
       powerUp,
     })
     let visible = true
-    for (const timeout of powerUpBlinkArray.values()) {
+    for (let i = 0; i < 50; i++) {
       const result = yield race({
-        timeout: delay(timeout),
+        timeout: delay(200),
         picked: take(pickThisPowerUp),
         stageChanged: take('LOAD_STAGE'),
       })

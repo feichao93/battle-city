@@ -54,6 +54,9 @@ function* handleCommands(playerName: string, commandChannel: Channel<AICommand>,
     } else if (command.type === 'query') {
       if (command.query === 'my-tank') {
         const tank: TankRecord = yield select(selectors.playerTank, playerName)
+        if (tank == null) {
+          continue
+        }
         noteChannel.put({
           type: 'query-result',
           result: {
@@ -78,7 +81,9 @@ function* handleCommands(playerName: string, commandChannel: Channel<AICommand>,
         })
       } else if (command.query === 'my-fire-info') {
         const tank: TankRecord = yield select(selectors.playerTank, playerName)
-        console.assert(tank != null, 'tank is null when query `my-fire-info`')
+        if (tank == null) {
+          continue
+        }
         const { bullets }: State = yield select()
         const bulletCount = bullets.filter(b => b.tankId === tank.tankId).count()
         const canFire = bulletCount < tank.bulletLimit && tank.cooldown <= 0

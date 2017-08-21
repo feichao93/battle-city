@@ -20,15 +20,14 @@ type BitMapProps = {
   y: number,
   d: string[],
   scheme: { [key: string]: string },
+  style?: React.CSSProperties
 }
-export class Bitmap extends React.PureComponent<BitMapProps, {}>{
-  static displayName = 'Bitmap'
-
+export class Bitmap extends React.PureComponent<BitMapProps>{
   render() {
-    const { x, y, d, scheme } = this.props
+    const { x, y, d, scheme, style = {} } = this.props
     const cols = d[0].length
     return (
-      <g transform={`translate(${x},${y})`}>
+      <g transform={`translate(${x},${y})`} style={style}>
         {d.map((cs, dy) => Array.from(cs).map((c, dx) =>
           <Pixel
             key={dy * cols + dx}

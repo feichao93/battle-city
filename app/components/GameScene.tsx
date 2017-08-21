@@ -56,13 +56,8 @@ class GameScene extends React.Component<State> {
           {/* 因为坦克/子弹可以"穿过"森林, 所以<ForestLayer />需要放在tank-layer和bullet-layer的后面 */}
           <ForestLayer forests={forests} />
           <g role="power-up-layer">
-            {powerUps.map(p =>
-              <PowerUp
-                key={p.powerUpId}
-                name={p.powerUpName}
-                x={p.x}
-                y={p.y}
-              />
+            {powerUps.map(powerUp =>
+              <PowerUp key={powerUp.powerUpId} powerUp={powerUp} />
             ).toArray()}
           </g>
           <g role="explosion-layer">

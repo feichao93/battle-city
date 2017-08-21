@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Bitmap } from 'components/elements'
-import registerTick from 'hocs/registerTick'
+import { PowerUpRecord } from 'types'
 
 const colorSchema = {
   ' ': 'none',
@@ -140,22 +140,20 @@ const powerUpDataArray = {
 }
 
 type P = {
-  x: number,
-  y: number,
-  name: PowerUpName,
-  tickIndex?: number,
+  powerUp: PowerUpRecord
 }
 
-export class PowerUpBase extends React.PureComponent<P> {
+export default class PowerUp extends React.PureComponent<P> {
   render() {
-    const { x, y, name, tickIndex } = this.props
+    const { powerUp: { visible, x, y, powerUpName } } = this.props
     return (
-      tickIndex === 0 ?
-        <Bitmap x={x} y={y} d={powerUpDataArray[name]} scheme={colorSchema} /> : null
+      <Bitmap
+        style={{ visibility: visible ? 'hidden' : 'visible' }}
+        x={x}
+        y={y}
+        d={powerUpDataArray[powerUpName]}
+        scheme={colorSchema}
+      />
     )
   }
 }
-
-const PowerUp: React.ComponentClass<P> = registerTick(400, 800)(PowerUpBase)
-
-export default PowerUp

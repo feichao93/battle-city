@@ -22,6 +22,8 @@ type Context = {
   noExpBulletIdSet: Set<BulletId>,
   /** 坦克受伤统计Map */
   tankHurtMap: Map<TargetTankId, Map<SourceTankId, HurtCount>>
+  /** 移动冻结的坦克tankId集合 */
+  frozenTankIdSet: Set<TankId>
 }
 
 function isBulletInField(bullet: BulletRecord) {
@@ -218,9 +220,8 @@ function* handleBulletsCollidedWithTanks(context: Context) {
         const tankSide = tank.side
 
         if (bulletSide === 'human' && tankSide === 'human') {
-          // todo 暂时对坦克不进行处理
-          // 不发生子弹爆炸
           context.expBulletIdSet.add(bullet.bulletId)
+          context.frozenTankIdSet.add(tank.tankId)
         } else if (bulletSide === 'human' && tankSide === 'ai') {
           const hurtSubMap = getOrDefault(context.tankHurtMap, tank.tankId, () => new Map())
           const oldHurt = hurtSubMap.get(tank.tankId) || 0
@@ -228,14 +229,17 @@ function* handleBulletsCollidedWithTanks(context: Context) {
 
           context.expBulletIdSet.add(bullet.bulletId)
         } else if (bulletSide === 'ai' && tankSide === 'human') {
-          const hurtSubMap = getOrDefault(context.tankHurtMap, tank.tankId, () => new Map())
-          const oldHurt = hurtSubMap.get(tank.tankId) || 0
-          hurtSubMap.set(bullet.tankId, oldHurt + 1)
-
-          context.expBulletIdSet.add(bullet.bulletId)
+          if (tank.helmetDuration > 0) {
+            context.noExpBulletIdSet.add(bullet.bulletId)
+          } else {
+            const hurtSubMap = getOrDefault(context.tankHurtMap, tank.tankId, () => new Map())
+            const oldHurt = hurtSubMap.get(tank.tankId) || 0
+            hurtSubMap.set(bullet.tankId, oldHurt + 1)
+            context.expBulletIdSet.add(bullet.bulletId)
+          }
         } else if (bulletSide === 'ai' && tankSide === 'ai') {
-          // 坦克什么事也不发生
-          context.noExpBulletIdSet.add(bullet.bulletId)
+          // 子弹会穿过坦克
+          // context.noExpBulletIdSet.add(bullet.bulletId)
         } else {
           throw new Error('Error side status')
         }
@@ -282,6 +286,7 @@ function* handleAfterTick() {
       expBulletIdSet: new Set(),
       noExpBulletIdSet: new Set(),
       tankHurtMap: new Map(),
+      frozenTankIdSet: new Set(),
     }
 
     yield* handleBulletsCollidedWithTanks(context)
@@ -301,6 +306,15 @@ function* handleAfterTick() {
       // 产生爆炸效果的子弹才会破坏附近的brickWall和steelWall
       yield* destroyBricks(expBullets)
       yield* destroySteels(expBullets)
+    }
+
+    // 更新被友军击中的坦克的frozenTimeout
+    for (const tankId of context.frozenTankIdSet) {
+      yield put<Action.SetFrozenTimeoutAction>({
+        type: 'SET_FROZEN_TIMEOUT',
+        tankId,
+        frozenTimeout: 500,
+      })
     }
 
     const kills: PutEffect<Action.KillAction>[] = []
@@ -326,6 +340,7 @@ function* handleAfterTick() {
     }
     // 移除坦克 & 产生爆炸效果
     if (destroyedTankIdSet.size > 0) {
+      // fixme 需要先判断要移除的tank是否仍有子弹在场上
       yield destroyTanks(ISet(destroyedTankIdSet))
     }
     // notice KillAction是在destroyTanks之后被dispatch的; 此时地图上的坦克已经被去除了
