@@ -2,25 +2,26 @@ import { put, select, take } from 'redux-saga/effects'
 import { getDirectionInfo } from 'utils/common'
 import canTankMove from 'utils/canTankMove'
 import * as selectors from 'utils/selectors'
-import { Input, TankRecord } from 'types'
+import { Input, TankRecord, State } from 'types'
 
 export default function* directionController(playerName: string, getPlayerInput: Function) {
   while (true) {
     const { delta }: Action.TickAction = yield take('TICK')
     const input: Input = yield* getPlayerInput(delta)
+    const tank: TankRecord = yield select(selectors.playerTank, playerName)
+    const { game: { AIFrozenTimeout } }: State = yield select()
+    if (tank == null
+      || tank.frozenTimeout > 0
+      || tank.side === 'ai' && AIFrozenTimeout > 0) {
+      continue
+    }
+    let nextFrozenTimeout = tank.frozenTimeout <= 0 ? 0 : tank.frozenTimeout - delta
+
     if (input == null) {
-      const tank: TankRecord = yield select(selectors.playerTank, playerName)
-      if (tank == null) {
-        continue
-      }
       if (tank.moving) {
         yield put({ type: 'STOP_MOVE', tankId: tank.tankId })
       }
     } else if (input.type === 'turn') {
-      const tank = yield select(selectors.playerTank, playerName)
-      if (tank == null) {
-        continue
-      }
       const { direction } = input
       // 坦克进行转向时, 需要对坐标进行处理
       // 如果转向UP/DOWN, 则将x坐标转换到最近的8的倍数
@@ -50,11 +51,7 @@ export default function* directionController(playerName: string, getPlayerInput:
         tank: movedTank,
       })
     } else if (input.type === 'forward') {
-      const tank: TankRecord = yield select(selectors.playerTank, playerName)
-      if (tank == null) {
-        continue
-      }
-      const speed = 48 / 1000 // todo
+      const speed = 40 / 1000 // todo
       const distance = Math.min(delta * speed, input.maxDistance || Infinity)
 
       const { xy, updater } = getDirectionInfo(tank.direction)
@@ -71,6 +68,14 @@ export default function* directionController(playerName: string, getPlayerInput:
       }
     } else {
       throw new Error(`Invalid input: ${input}`)
+    }
+
+    if (tank.frozenTimeout !== nextFrozenTimeout) {
+      yield put<Action.SetFrozenTimeoutAction>({
+        type: 'SET_FROZEN_TIMEOUT',
+        tankId: tank.tankId,
+        frozenTimeout: nextFrozenTimeout,
+      })
     }
   }
 }

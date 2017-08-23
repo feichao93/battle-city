@@ -22,19 +22,19 @@ import GameoverScene from 'components/GameoverScene'
 import GameTitleScene from 'components/GameTitleScene'
 import StatisticsScene from 'components/StatisticsScene'
 import HUD from 'components/HUD'
-import { PowerUpBase } from 'components/PowerUp'
+import { default as PowerUpBase } from 'components/PowerUp'
 import { BulletExplosionClass, TankExplosionClass } from 'components/Explosion'
 import parseStageMap from 'utils/parseStageMap'
 import { BLOCK_SIZE as B, FIELD_BLOCK_SIZE as FBZ } from 'utils/constants'
 import tickEmitter from 'sagas/tickEmitter'
 import stageConfigs from 'stages/index'
 import registerTick from 'hocs/registerTick'
-import { PlayerRecord, TankRecord } from 'types'
+import { PlayerRecord, TankRecord, PowerUpRecord } from 'types'
 
 const BulletExplosion = registerTick(500, 500, 1000)(BulletExplosionClass)
 const TankExplosion = registerTick(500, 1000)(TankExplosionClass)
 const PowerUp = ({ name, x, y }: { name: PowerUpName, x: number, y: number }) => (
-  <PowerUpBase tickIndex={0} name={name} x={x} y={y} />
+  <PowerUpBase powerUp={PowerUpRecord({ powerUpName: name, x, y, visible: true })} />
 )
 
 const simpleSagaMiddleware = createSagaMiddleware()

@@ -9,11 +9,18 @@ const TankRecord = Record({
   moving: false,
   level: 'basic' as TankLevel,
   color: 'auto' as TankColor,
-  bulletSpeed: 0.12,
-  bulletLimit: 2,
-  bulletInterval: 200,
+  bulletSpeed: 0.08,
+  bulletLimit: 1,
+  bulletInterval: 300,
   hp: 1,
   withPowerUp: false,
+
+  // helmetDuration用来记录tank的helmet的剩余的持续时间
+  helmetDuration: 0,
+  // frozenTimeout小于等于0表示可以进行移动, 大于0表示还需要等待frozen毫秒才能进行移动
+  frozenTimeout: 0,
+  // cooldown小于等于0表示可以进行开火, 大于0表示还需要等待cooldown毫秒才能进行开火
+  cooldown: 0,
 })
 
 const record = TankRecord()
