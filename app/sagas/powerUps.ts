@@ -114,12 +114,21 @@ function* timer() {
   }
 }
 
-function* grenade() {
-  const { tanks }: State = yield select()
-  const tankIdSet = tanks.filter(t => t.side === 'ai')
-    .map(t => t.tankId)
-    .toSet()
-  yield* destroyTanks(tankIdSet)
+function* grenade(action: Action.PickPowerUpAction) {
+  const { tanks, players }: State = yield select()
+  const aiTanks = tanks.filter(t => t.side === 'ai')
+  const aiTankIdSet = aiTanks.map(t => t.tankId).toSet()
+
+  yield* destroyTanks(aiTankIdSet)
+
+  // todo 确定需要put KILL?
+  yield* aiTanks.map(targetTank => put<Action.KillAction>({
+    type: 'KILL',
+    sourcePlayer: action.player,
+    sourceTank: action.tank,
+    targetPlayer: players.find(p => p.tankId === targetTank.tankId),
+    targetTank,
+  })).values()
 }
 
 function* star({ tank }: Action.PickPowerUpAction) {

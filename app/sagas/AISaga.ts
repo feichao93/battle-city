@@ -3,6 +3,7 @@ import { all, fork, put, select, spawn, take } from 'redux-saga/effects'
 import { getDirectionInfo, spawnTank } from 'utils/common'
 import directionController from 'sagas/directionController'
 import fireController from 'sagas/fireController'
+import { getNextId } from 'utils/common'
 import * as selectors from 'utils/selectors'
 import { State } from 'reducers/index'
 import { TankRecord, PlayerRecord } from 'types'
@@ -179,23 +180,25 @@ function* AIWorkerSaga(playerName: string, WorkerClass: WorkerConstructor) {
 
 /** AIMasterSaga用来管理AIWorkerSaga的启动和停止, 并处理和AI程序的数据交互 */
 export default function* AIMasterSaga() {
-  const max = 1
+  const max = 2
   const taskMap: { [key: string]: Task } = {}
+  const addAICommandChannel = makeChannel<'add'>()
 
-  let nextAIPlayerIndex = 0
+  yield fork(addAIHandler)
+
   while (true) {
     const actionTypes: ActionType[] = ['KILL', 'LOAD_STAGE', 'GAMEOVER']
     const action: Action = yield take(actionTypes)
     if (action.type === 'LOAD_STAGE') {
-      for (let i = 0; i < max; i += 1) {
-        yield* addAI()
+      for (let i = 0; i < max; i++) {
+        addAICommandChannel.put('add')
       }
     } else if (action.type === 'KILL' && action.targetTank.side === 'ai') {
       // ai-player的坦克被击毁了
       const task = taskMap[action.targetPlayer.playerName]
       task.cancel()
       delete taskMap[action.targetPlayer.playerName]
-      yield* addAI()
+      addAICommandChannel.put('add')
     } else if (action.type === 'GAMEOVER') {
       // 游戏结束时, 取消所有的ai-player // todo 这里有bug
       for (const [playerName, task] of Object.entries(taskMap)) {
@@ -205,36 +208,39 @@ export default function* AIMasterSaga() {
     }
   }
 
-  function* addAI() {
-    const { game: { remainingEnemies } }: State = yield select()
-    if (!remainingEnemies.isEmpty()) {
-      const playerName = `AI-${nextAIPlayerIndex++}`
-      yield put<Action>({
-        type: 'CREATE_PLAYER',
-        player: PlayerRecord({
-          playerName,
-          lives: Infinity,
+  function* addAIHandler() {
+    while (true) {
+      yield take(addAICommandChannel)
+      const { game: { remainingEnemies } }: State = yield select()
+      if (!remainingEnemies.isEmpty()) {
+        const playerName = `AI-${getNextId('AI-player')}`
+        yield put<Action>({
+          type: 'CREATE_PLAYER',
+          player: PlayerRecord({
+            playerName,
+            lives: Infinity,
+            side: 'ai',
+          }),
+        })
+        const { x, y } = yield select(selectors.availableSpawnPosition)
+        yield put<Action>({ type: 'REMOVE_FIRST_REMAINING_ENEMY' })
+        const level = remainingEnemies.first()
+        const hp = level === 'armor' ? 4 : 1
+        const tankId = yield* spawnTank(TankRecord({
+          x,
+          y,
           side: 'ai',
-        }),
-      })
-      const { x, y } = yield select(selectors.availableSpawnPosition)
-      yield put<Action>({ type: 'REMOVE_FIRST_REMAINING_ENEMY' })
-      const level = remainingEnemies.first()
-      const hp = level === 'armor' ? 4 : 1
-      const tankId = yield* spawnTank(TankRecord({
-        x,
-        y,
-        side: 'ai',
-        level,
-        hp,
-      }))
-      taskMap[playerName] = yield spawn(AIWorkerSaga, playerName, AIWorker)
+          level,
+          hp,
+        }))
+        taskMap[playerName] = yield spawn(AIWorkerSaga, playerName, AIWorker)
 
-      yield put<Action.ActivatePlayerAction>({
-        type: 'ACTIVATE_PLAYER',
-        playerName,
-        tankId,
-      })
+        yield put<Action.ActivatePlayerAction>({
+          type: 'ACTIVATE_PLAYER',
+          playerName,
+          tankId,
+        })
+      }
     }
   }
 }
