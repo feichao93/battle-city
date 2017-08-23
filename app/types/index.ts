@@ -100,8 +100,7 @@ declare global {
 
     interface Query {
       type: 'query'
-      // todo rename to my-tank-info, map-info, tanks-info
-      query: 'my-tank' | 'map' | 'tanks' | 'my-fire-info'
+      query: 'my-tank-info' | 'map-info' | 'active-tanks-info' | 'my-fire-info'
     }
   }
 
@@ -128,7 +127,7 @@ declare global {
   type QueryResult = QueryResult.QueryResult
 
   namespace QueryResult {
-    type QueryResult = MapInfo | MyTankInfo | TanksInfo | MyFireInfo
+    type QueryResult = MapInfo | MyTankInfo | ActiveTanksInfo | MyFireInfo
 
     interface MyTankInfo {
       type: 'my-tank-info'
@@ -140,8 +139,8 @@ declare global {
       map: PlainMapRecord
     }
 
-    interface TanksInfo {
-      type: 'tanks-info'
+    interface ActiveTanksInfo {
+      type: 'active-tanks-info'
       tanks: PlainTankRecord[]
     }
     interface MyFireInfo {

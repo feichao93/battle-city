@@ -138,8 +138,8 @@ function* destroySteels(collidedBullets: BulletsMap) {
   })
 
   if (steelsNeedToDestroy.length > 0) {
-    yield put({
-      type: 'DESTROY_STEELS',
+    yield put<Action.RemoveSteelsAction>({
+      type: 'REMOVE_STEELS',
       ts: ISet(steelsNeedToDestroy),
     })
   }
@@ -172,8 +172,8 @@ function* destroyBricks(collidedBullets: BulletsMap) {
   })
 
   if (bricksNeedToDestroy.length > 0) {
-    yield put({
-      type: 'DESTROY_BRICKS',
+    yield put<Action.RemoveBricksAction>({
+      type: 'REMOVE_BRICKS',
       ts: ISet(bricksNeedToDestroy),
     })
   }
@@ -197,6 +197,7 @@ function* filterBulletsCollidedWithEagle(bullets: BulletsMap) {
 
 function* handleBulletsCollidedWithTanks(context: Context) {
   const { bullets, tanks }: State = yield select()
+  const activeTanks = tanks.filter(t => t.active)
 
   // 子弹与坦克碰撞的规则
   // 1. player的子弹打到player-tank: player-tank将会停滞若干时间
@@ -204,7 +205,7 @@ function* handleBulletsCollidedWithTanks(context: Context) {
   // 3. AI的子弹打到player-tank: player-tank扣血/死亡
   // 4. AI的子弹达到AI-tank: 不发生任何事件
   for (const bullet of bullets.values()) {
-    for (const tank of tanks.values()) {
+    for (const tank of activeTanks.values()) {
       if (tank.tankId === bullet.tankId) {
         // 如果是自己发射的子弹, 则不需要进行处理
         continue
@@ -216,7 +217,7 @@ function* handleBulletsCollidedWithTanks(context: Context) {
         height: BLOCK_SIZE,
       }
       if (testCollide(subject, asBox(bullet), -0.02)) {
-        const bulletSide = tanks.find(t => (t.tankId === bullet.tankId)).side
+        const bulletSide = activeTanks.find(t => (t.tankId === bullet.tankId)).side
         const tankSide = tank.side
 
         if (bulletSide === 'human' && tankSide === 'human') {
@@ -268,6 +269,7 @@ function* handleAfterTick() {
   while (true) {
     yield take('AFTER_TICK')
     const { bullets, players, tanks }: State = yield select()
+    const activeTanks = tanks.filter(t => t.active)
 
     const bulletsCollidedWithEagle = yield* filterBulletsCollidedWithEagle(bullets)
     if (!bulletsCollidedWithEagle.isEmpty()) {
@@ -322,16 +324,17 @@ function* handleAfterTick() {
     // 坦克伤害结算
     for (const [targetTankId, hurtMap] of context.tankHurtMap.entries()) {
       const hurt = sum(hurtMap.values())
-      const targetTank = tanks.get(targetTankId)
+      const targetTank = activeTanks.get(targetTankId)
       if (hurt >= targetTank.hp) {
         // 击杀了目标坦克
         const sourceTankId = hurtMap.keys().next().value
         kills.push(put<Action.KillAction>({
           type: 'KILL',
           targetTank,
+          // 注意这里用tanks, 因为sourceTank在这个时候可能已经挂了
           sourceTank: tanks.get(sourceTankId),
-          targetPlayer: players.find(ply => ply.tankId === targetTankId),
-          sourcePlayer: players.find(ply => ply.tankId === sourceTankId),
+          targetPlayer: players.find(p => p.activeTankId === targetTankId),
+          sourcePlayer: players.find(p => p.activeTankId === sourceTankId),
         }))
         destroyedTankIdSet.add(targetTankId)
       } else {

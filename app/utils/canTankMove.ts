@@ -74,9 +74,9 @@ function isTankCollidedWithRivers(rivers: List<boolean>, tankTarget: Box, thresh
   return false
 }
 
-function isTankCollidedWithOtherTanks(tanks: TanksMap, tank: TankRecord, tankTarget: Box, threshhold: number) {
+function isTankCollidedWithOtherTanks(activeTanks: TanksMap, tank: TankRecord, tankTarget: Box, threshhold: number) {
   // 判断坦克与其他坦克是否相撞
-  for (const otherTank of tanks.values()) {
+  for (const otherTank of activeTanks.values()) {
     if (tank.tankId === otherTank.tankId) {
       continue
     }
@@ -111,7 +111,8 @@ export default function canTankMove({ tanks, map: { bricks, steels, rivers, eagl
   }
 
   // 判断是否与其他坦克相碰撞
-  if (isTankCollidedWithOtherTanks(tanks, tank, tankBox, threshhold)) {
+  const activeTanks = tanks.filter(t => t.active)
+  if (isTankCollidedWithOtherTanks(activeTanks, tank, tankBox, threshhold)) {
     return false
   }
 

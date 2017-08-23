@@ -117,8 +117,8 @@ export default function* stageSaga(stageName: string) {
         }))
       }
 
-      if (remainingEnemies.isEmpty()
-        && tanks.filter(t => t.side === 'ai').isEmpty()) {
+      const activeAITanks = tanks.filter(t => (t.active && t.side === 'ai'))
+      if (remainingEnemies.isEmpty() && activeAITanks.isEmpty()) {
         // 剩余enemy数量为0, 且场上已经没有ai tank了
         // todo 如果场上有powerup, 则delay时间可以适当延长; 如果场上没有power, 则delay时间可以缩短
         yield delay(6000)

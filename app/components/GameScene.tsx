@@ -22,6 +22,8 @@ class GameScene extends React.Component<State> {
   render() {
     const { bullets, map, explosions, flickers, tanks, texts, powerUps } = this.props
     const { bricks, steels, rivers, snows, forests, eagle } = map.toObject()
+    const activeTanks = tanks.filter(t => t.active)
+
     return (
       <g role="game-scene">
         <HUD />
@@ -42,12 +44,12 @@ class GameScene extends React.Component<State> {
             ).toArray()}
           </g>
           <g role="tank-layer">
-            {tanks.map(tank =>
+            {activeTanks.map(tank =>
               <Tank key={tank.tankId} tank={tank} />
             ).toArray()}
           </g>
           <g role="helmet-layer">
-            {tanks.map(tank =>
+            {activeTanks.map(tank =>
               tank.helmetDuration > 0 ? (
                 <TankHelmet key={tank.tankId} x={tank.x} y={tank.y} />
               ) : null

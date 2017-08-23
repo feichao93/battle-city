@@ -7,11 +7,6 @@ interface P {
   tickIndex: number
 }
 
-const colors = [
-  'red',
-  'green',
-]
-
 class TankHelmet extends React.PureComponent<P> {
   render() {
     const { x, y, tickIndex } = this.props

@@ -7,10 +7,9 @@ export type PlayersMap = Map<PlayerName, PlayerRecord>
 export default function players(state = Map() as PlayersMap, action: Action) {
   if (action.type === 'ACTIVATE_PLAYER') {
     const { playerName, tankId } = action
-    return state.mergeIn([playerName], {
-      active: true,
-      tankId,
-    })
+    return state.update(playerName, player =>
+      player.set('activeTankId', tankId)
+        .set('active', true))
   } else if (action.type === 'CREATE_PLAYER') {
     return state.set(action.player.playerName, action.player)
   } else if (action.type === 'REMOVE_PLAYER') {

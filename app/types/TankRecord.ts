@@ -1,6 +1,7 @@
 import { Record } from 'immutable'
 
 const TankRecord = Record({
+  active: true,
   tankId: 0,
   x: 0,
   y: 0,
