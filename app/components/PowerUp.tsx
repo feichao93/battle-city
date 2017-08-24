@@ -148,7 +148,7 @@ export default class PowerUp extends React.PureComponent<P> {
     const { powerUp: { visible, x, y, powerUpName } } = this.props
     return (
       <Bitmap
-        style={{ visibility: visible ? 'hidden' : 'visible' }}
+        style={{ visibility: visible ? 'visible' : 'hidden' }}
         x={x}
         y={y}
         d={powerUpDataArray[powerUpName]}

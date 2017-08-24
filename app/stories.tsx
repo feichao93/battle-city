@@ -22,6 +22,7 @@ import GameoverScene from 'components/GameoverScene'
 import GameTitleScene from 'components/GameTitleScene'
 import StatisticsScene from 'components/StatisticsScene'
 import HUD from 'components/HUD'
+import Score from 'components/Score'
 import { default as PowerUpBase } from 'components/PowerUp'
 import { BulletExplosionClass, TankExplosionClass } from 'components/Explosion'
 import parseStageMap from 'utils/parseStageMap'
@@ -281,6 +282,18 @@ class Stories extends React.Component<{}, { stage: string }> {
               />
             )}
           </X4>
+        </details>
+        <details open>
+          <summary>
+            <FontLevel1>Scores</FontLevel1>
+          </summary>
+          <Row>
+            <X4><Score score={100} /></X4>
+            <X4><Score score={200} /></X4>
+            <X4><Score score={300} /></X4>
+            <X4><Score score={400} /></X4>
+            <X4><Score score={500} /></X4>
+          </Row>
         </details>
       </div>
     )
