@@ -1,7 +1,7 @@
 import * as React from 'react'
 
 interface P {
-  score: 100 | 200 | 300 | 400 | 500
+  score: number
   x?: number
   y?: number
 }
@@ -68,11 +68,13 @@ export default class Score extends React.PureComponent<P> {
       Num = Three
     } else if (score === 400) {
       Num = Four
-    } else {
+    } else if (score === 500) {
       Num = Five
+    } else {
+      throw new Error(`Invalid score: ${score}`)
     }
     return (
-      <g transform={`translate(${x},${y})`}>
+      <g transform={`translate(${x},${y})`} fill="white">
         <Num x={1} y={4} />
         <Zero x={6} y={4} />
         <Zero x={11} y={4} />

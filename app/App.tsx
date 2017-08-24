@@ -5,6 +5,7 @@ import GameScene from 'components/GameScene'
 import GameoverScene from 'components/GameoverScene'
 import StatisticsScene from 'components/StatisticsScene'
 import GameTitleScene from 'components/GameTitleScene'
+import Inspector from 'components/Inspector'
 import { State } from 'types'
 
 const zoomLevel = 2
@@ -16,18 +17,21 @@ class App extends React.PureComponent<{ scene: Scene }> {
     const { scene } = this.props
 
     return (
-      <svg
-        className="svg"
-        style={{ background: '#757575' }}
-        width={totalWidth * zoomLevel}
-        height={totalHeight * zoomLevel}
-        viewBox={`0 0 ${totalWidth} ${totalHeight}`}
-      >
-        {scene === 'game-title' ? <GameTitleScene /> : null}
-        {scene === 'game' ? <GameScene /> : null}
-        {scene === 'gameover' ? <GameoverScene /> : null}
-        {scene === 'statistics' ? <StatisticsScene /> : null}
-      </svg>
+      <div style={{ display: 'flex' }}>
+        <svg
+          className="svg"
+          style={{ background: '#757575' }}
+          width={totalWidth * zoomLevel}
+          height={totalHeight * zoomLevel}
+          viewBox={`0 0 ${totalWidth} ${totalHeight}`}
+        >
+          {scene === 'game-title' ? <GameTitleScene /> : null}
+          {scene === 'game' ? <GameScene /> : null}
+          {scene === 'gameover' ? <GameoverScene /> : null}
+          {scene === 'statistics' ? <StatisticsScene /> : null}
+        </svg>
+        <Inspector />
+      </div>
     )
   }
 }

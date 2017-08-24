@@ -16,11 +16,12 @@ import Flicker from 'components/Flicker'
 import TankHelmet from 'components/TankHelmet'
 import TextLayer from 'components/TextLayer'
 import PowerUp from 'components/PowerUp'
+import Score from 'components/Score'
 import { State } from 'types'
 
 class GameScene extends React.Component<State> {
   render() {
-    const { bullets, map, explosions, flickers, tanks, texts, powerUps } = this.props
+    const { bullets, map, explosions, flickers, tanks, texts, powerUps, scores } = this.props
     const { bricks, steels, rivers, snows, forests, eagle } = map.toObject()
     const activeTanks = tanks.filter(t => t.active)
 
@@ -78,6 +79,16 @@ class GameScene extends React.Component<State> {
                 key={flicker.flickerId}
                 x={flicker.x}
                 y={flicker.y}
+              />
+            ).toArray()}
+          </g>
+          <g role="score-layer">
+            {scores.map(s =>
+              <Score
+                key={s.scoreId}
+                score={s.score}
+                x={s.x}
+                y={s.y}
               />
             ).toArray()}
           </g>

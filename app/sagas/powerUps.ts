@@ -1,8 +1,8 @@
 import { delay } from 'redux-saga'
 import { fork, put, take, select, takeEvery, takeLatest } from 'redux-saga/effects'
-import { State, MapRecord } from 'types'
+import { State, MapRecord, ScoreRecord } from 'types'
 import { N_MAP, ITEM_SIZE_MAP } from 'utils/constants'
-import { iterRowsAndCols, asBox, dec } from 'utils/common'
+import { iterRowsAndCols, asBox, getNextId } from 'utils/common'
 import { destroyTanks } from 'sagas/bulletsSaga'
 
 function convertToBricks(map: MapRecord) {
@@ -166,7 +166,27 @@ function* handleHelmetDuration() {
   }
 }
 
+function* pickScore(action: Action.PickPowerUpAction) {
+  const { powerUp: { x, y } } = action
+  const scoreId = getNextId('score')
+  yield put<Action.AddScoreAction>({
+    type: 'ADD_SCORE',
+    score: ScoreRecord({
+      scoreId,
+      score: 500,
+      x,
+      y,
+    }),
+  })
+  yield delay(500)
+  yield put<Action.RemoveScoreAction>({
+    type: 'REMOVE_SCORE',
+    scoreId,
+  })
+}
+
 export default function* powerUps() {
+  yield takeEvery('PICK_POWER_UP', pickScore)
   yield takeLatest(is('shovel'), shovel)
   yield takeLatest(is('timer'), timer)
 

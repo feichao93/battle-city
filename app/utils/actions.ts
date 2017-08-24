@@ -1,5 +1,5 @@
 import { Map, Set } from 'immutable'
-import { BulletRecord, TankRecord, PlayerRecord, PowerUpRecord, MapRecord } from 'types'
+import { BulletRecord, TankRecord, PlayerRecord, PowerUpRecord, MapRecord, ScoreRecord } from 'types'
 
 declare global {
   type Action = Action.Action
@@ -52,6 +52,8 @@ declare global {
       | RemovePowerUpAction
       | UpdatePowerUpAction
       | PickPowerUpAction
+      | AddScoreAction
+      | RemoveScoreAction
       | AddOneLifeAction
       | UpgardeTankAction
 
@@ -276,6 +278,16 @@ declare global {
       player: PlayerRecord
       tank: TankRecord,
       powerUp: PowerUpRecord
+    }
+
+    export interface AddScoreAction {
+      type: 'ADD_SCORE'
+      score: ScoreRecord
+    }
+
+    export interface RemoveScoreAction {
+      type: 'REMOVE_SCORE'
+      scoreId: ScoreId
     }
 
     export type AddOneLifeAction = {
