@@ -9,7 +9,7 @@ import {
   iterRowsAndCols,
   testCollide
 } from 'utils/common'
-import { BulletRecord, BulletsMap, State, TankRecord } from 'types'
+import { BulletRecord, BulletsMap, State, TankRecord, ScoreRecord } from 'types'
 
 type HurtCount = number
 type TargetTankId = TankId
@@ -53,6 +53,25 @@ function makeExplosionFromBullet(bullet: BulletRecord): PutEffect<Action> {
     explosionType: 'bullet',
     explosionId: getNextId('explosion'),
   } as Action.SpawnExplosionAction)
+}
+
+function makeScoreFromTank(tank: TankRecord): PutEffect<Action> {
+  const scoreMap = {
+    basic: 100,
+    fast: 200,
+    power: 300,
+    armor: 400,
+  }
+  return put({
+    type: 'ADD_SCORE',
+    score: ScoreRecord({
+      score: scoreMap[tank.level],
+      scoreId: getNextId('score'),
+      // todo 调整score位置
+      x: tank.x + 12,
+      y: tank.y - 12,
+    }),
+  } as Action.AddScoreAction)
 }
 
 function makeExplosionFromTank(tank: TankRecord): PutEffect<Action> {
@@ -268,8 +287,8 @@ function* handleBulletsCollidedWithBullets(context: Context) {
 function* handleAfterTick() {
   while (true) {
     yield take('AFTER_TICK')
-    const { bullets, players, tanks }: State = yield select()
-    const activeTanks = tanks.filter(t => t.active)
+    const { bullets, players, tanks: allTanks }: State = yield select()
+    const activeTanks = allTanks.filter(t => t.active)
 
     const bulletsCollidedWithEagle = yield* filterBulletsCollidedWithEagle(bullets)
     if (!bulletsCollidedWithEagle.isEmpty()) {
@@ -331,8 +350,8 @@ function* handleAfterTick() {
         kills.push(put<Action.KillAction>({
           type: 'KILL',
           targetTank,
-          // 注意这里用tanks, 因为sourceTank在这个时候可能已经挂了
-          sourceTank: tanks.get(sourceTankId),
+          // 注意这里用allTanks, 因为sourceTank在这个时候可能已经挂了
+          sourceTank: allTanks.get(sourceTankId),
           targetPlayer: players.find(p => p.activeTankId === targetTankId),
           sourcePlayer: players.find(p => p.activeTankId === sourceTankId),
         }))
@@ -341,10 +360,17 @@ function* handleAfterTick() {
         yield put<Action>({ type: 'HURT', targetTank, hurt })
       }
     }
-    // 移除坦克 & 产生爆炸效果
     if (destroyedTankIdSet.size > 0) {
-      // fixme 需要先判断要移除的tank是否仍有子弹在场上
-      yield destroyTanks(ISet(destroyedTankIdSet))
+      // 移除坦克 & 产生爆炸效果
+      yield* destroyTanks(ISet(destroyedTankIdSet))
+
+      // 显示击杀得分
+      const destroyedAITanks = ISet(destroyedTankIdSet)
+        .map(tankId => allTanks.get(tankId))
+        .filter(tank => tank.side === 'ai')
+      if (destroyedAITanks.size > 0) {
+        yield* destroyedAITanks.map(makeScoreFromTank)
+      }
     }
     // notice KillAction是在destroyTanks之后被dispatch的; 此时地图上的坦克已经被去除了
     yield* kills
@@ -377,9 +403,9 @@ export default function* bulletsSaga() {
 
   yield fork(function* handleDestroyBullets() {
     while (true) {
-      const { bullets, spawnExplosion } = yield take('DESTROY_BULLETS')
+      const { bullets, spawnExplosion }: Action.DestroyBulletsAction = yield take('DESTROY_BULLETS')
       if (spawnExplosion) {
-        yield* bullets.toArray().map(makeExplosionFromBullet)
+        yield* bullets.map(makeExplosionFromBullet).values()
       }
     }
   })
