@@ -196,8 +196,8 @@ function* filterBulletsCollidedWithEagle(bullets: BulletsMap) {
 }
 
 function* handleBulletsCollidedWithTanks(context: Context) {
-  const { bullets, tanks }: State = yield select()
-  const activeTanks = tanks.filter(t => t.active)
+  const { bullets, tanks: allTanks }: State = yield select()
+  const activeTanks = allTanks.filter(t => t.active)
 
   // 子弹与坦克碰撞的规则
   // 1. player的子弹打到player-tank: player-tank将会停滞若干时间
@@ -217,7 +217,7 @@ function* handleBulletsCollidedWithTanks(context: Context) {
         height: BLOCK_SIZE,
       }
       if (testCollide(subject, asBox(bullet), -0.02)) {
-        const bulletSide = activeTanks.find(t => (t.tankId === bullet.tankId)).side
+        const bulletSide = allTanks.find(t => (t.tankId === bullet.tankId)).side
         const tankSide = tank.side
 
         if (bulletSide === 'human' && tankSide === 'human') {

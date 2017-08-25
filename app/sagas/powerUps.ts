@@ -136,7 +136,7 @@ function* star({ tank }: Action.PickPowerUpAction) {
 }
 
 function* tank({ player }: Action.PickPowerUpAction) {
-  yield put<Action>({ type: 'ADD_ONE_LIFE', playerName: player.playerName })
+  yield put<Action>({ type: 'INCREMENT_PLAYER_LIFE', playerName: player.playerName })
 }
 
 function* helmet({ tank }: Action.PickPowerUpAction) {

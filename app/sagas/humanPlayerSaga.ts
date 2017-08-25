@@ -1,3 +1,4 @@
+import { delay } from 'redux-saga'
 import { put, fork, select, take } from 'redux-saga/effects'
 import { BLOCK_SIZE } from 'utils/constants'
 import TankRecord from 'types/TankRecord'
@@ -45,8 +46,8 @@ export default function* humanPlayerSaga(playerName: string, tankColor: TankColo
     const { players }: State = yield select()
     const player = players.get(playerName)
     if (player.lives > 0) {
-      // todo 是否可以等待一会儿 再开始生成坦克
-      yield put({ type: 'DECREMENT_PLAYER_LIVE', playerName })
+      yield delay(500)
+      yield put({ type: 'DECREMENT_PLAYER_LIFE', playerName })
       const tankId = yield* spawnTank(TankRecord({
         x: 4 * BLOCK_SIZE,
         y: 12 * BLOCK_SIZE,

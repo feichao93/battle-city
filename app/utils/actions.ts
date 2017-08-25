@@ -26,7 +26,8 @@ declare global {
       | Simple<'GAMESTART'>
       | LoadSceneAction
       | Simple<'REMOVE_FIRST_REMAINING_ENEMY'>
-      | DecrementPlayerLiveAction
+      | IncrementPlayerLifeAction
+      | DecrementPlayerLifeAction
       | ActivatePlayerAction
       | CreatePlayerAction
       | RemovePlayerAction
@@ -54,7 +55,6 @@ declare global {
       | PickPowerUpAction
       | AddScoreAction
       | RemoveScoreAction
-      | AddOneLifeAction
       | UpgardeTankAction
 
     export type ActionType = Action['type']
@@ -205,7 +205,6 @@ declare global {
       tank: TankRecord
     }
 
-    // fixme 如果该tank的子弹仍存在, 那么移除该tank, 将导致子弹与其他物体相碰撞时出现bug
     export type RemoveTankAction = {
       type: 'REMOVE_TANK',
       tankId: TankId,
@@ -248,8 +247,8 @@ declare global {
       distance: number,
     }
 
-    export type DecrementPlayerLiveAction = {
-      type: 'DECREMENT_PLAYER_LIVE',
+    export type DecrementPlayerLifeAction = {
+      type: 'DECREMENT_PLAYER_LIFE',
       playerName: PlayerName,
     }
 
@@ -290,8 +289,8 @@ declare global {
       scoreId: ScoreId
     }
 
-    export type AddOneLifeAction = {
-      type: 'ADD_ONE_LIFE'
+    export type IncrementPlayerLifeAction = {
+      type: 'INCREMENT_PLAYER_LIFE'
       playerName: PlayerName
     }
 

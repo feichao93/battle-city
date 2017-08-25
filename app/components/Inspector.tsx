@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { connect } from 'react-redux'
 import * as _ from 'lodash'
-import { State, TanksMap, ScoresMap, TankRecord } from 'types'
+import { State, TanksMap, ScoresMap, TankRecord, PlayersMap, PlayerRecord } from 'types'
 
 function roundTank(t: TankRecord) {
   return t.update('x', Math.round)
@@ -9,12 +9,13 @@ function roundTank(t: TankRecord) {
     .update('cooldown', Math.round)
 }
 
-type View = 'scores' | 'tanks'
+type View = 'scores' | 'tanks' | 'players'
 
 interface S {
   view: View
   allScores: ScoresMap
   allTanks: TanksMap
+  allPlayers: PlayersMap
 }
 
 class Inspector extends React.PureComponent<State, S>{
@@ -22,14 +23,16 @@ class Inspector extends React.PureComponent<State, S>{
     view: 'scores' as View,
     allScores: this.props.scores,
     allTanks: this.props.tanks.map(roundTank),
+    allPlayers: this.props.players,
   }
 
   componentWillReceiveProps(nextProps: State) {
-    const { scores, tanks } = this.props
-    const { allScores, allTanks } = this.state
+    const { scores, tanks, players } = this.props
+    const { allScores, allTanks, allPlayers } = this.state
     this.setState({
       allScores: allScores.merge(scores),
       allTanks: allTanks.merge(tanks.map(roundTank)),
+      allPlayers: allPlayers.merge(players),
     })
   }
 
@@ -41,6 +44,26 @@ class Inspector extends React.PureComponent<State, S>{
         w.props = this.props
       }).call(this, window)
     debugger
+  }
+
+  renderPlayersView() {
+    const { players } = this.props
+    const { allPlayers } = this.state
+    return (
+      <div role="players-view">
+        {allPlayers.isEmpty() ? <p> EMPTY PLAYERS </p> : null}
+        {allPlayers.map(p =>
+          <pre
+            key={p.playerName}
+            style={{
+              textDecoration: players.has(p.playerName) ? 'none' : 'line-through',
+            }}
+          >
+            {JSON.stringify(p, null, 2)}
+          </pre>
+        ).toArray()}
+      </div>
+    )
   }
 
   renderTanksView() {
@@ -105,12 +128,19 @@ class Inspector extends React.PureComponent<State, S>{
           >
             Tanks
           </button>
+          <button
+            style={{ color: view === 'players' ? 'green' : 'inherit' }}
+            onClick={() => this.setState({ view: 'players' })}
+          >
+            Players
+          </button>
           <button onClick={this.debugger}>
             debugger
             </button>
         </div>
         {view === 'scores' ? this.renderScoresView() : null}
         {view === 'tanks' ? this.renderTanksView() : null}
+        {view === 'players' ? this.renderPlayersView() : null}
       </div>
     )
   }

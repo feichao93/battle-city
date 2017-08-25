@@ -194,16 +194,19 @@ export default function* AIMasterSaga() {
         addAICommandChannel.put('add')
       }
     } else if (action.type === 'KILL' && action.targetTank.side === 'ai') {
+      const { targetPlayer: { playerName } } = action
       // ai-player的坦克被击毁了
-      const task = taskMap[action.targetPlayer.playerName]
+      const task = taskMap[playerName]
       task.cancel()
       delete taskMap[action.targetPlayer.playerName]
+      yield put<Action>({ type: 'REMOVE_PLAYER', playerName })
       addAICommandChannel.put('add')
     } else if (action.type === 'GAMEOVER') {
       // 游戏结束时, 取消所有的ai-player // todo 这里有bug
       for (const [playerName, task] of Object.entries(taskMap)) {
         task.cancel()
         delete taskMap[playerName]
+        yield put<Action>({ type: 'REMOVE_PLAYER', playerName })
       }
     }
   }
