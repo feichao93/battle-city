@@ -1,5 +1,6 @@
 import { Map } from 'immutable'
 import { TankRecord } from 'types'
+import { incTankLevel } from 'utils/common'
 
 export type TanksMap = Map<TankId, TankRecord>
 
@@ -18,6 +19,9 @@ export default function tanks(state = Map() as TanksMap, action: Action) {
     return state.setIn([action.tankId, 'moving'], true)
   } else if (action.type === 'STOP_MOVE') {
     return state.setIn([action.tankId, 'moving'], false)
+  } else if (action.type === 'UPGRADE_TANK') {
+    // todo 当tank.level已经是armor 该怎么办?
+    return state.update(action.tankId, incTankLevel)
   } else if (action.type === 'REMOVE_TANK') {
     // 不能在关卡进行过程中移除tank, 因为tank的子弹可能正在飞行
     // 防御式编程: tank设置为inactive的时候重置一些状态

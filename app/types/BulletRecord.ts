@@ -9,7 +9,10 @@ const BulletRecord = Record({
   // 子弹的位置
   x: 0,
   y: 0,
-  // 子弹的强度. 子弹的强度达到一定数值之后可以摧毁steels
+  /**
+   * 子弹的强度 默认强度为1
+   * 强度大于等于2的子弹一下子可以破坏两倍的brick-wall
+   * 强度为3的子弹可以破坏steel-wall */
   power: 1,
   // 发射子弹的坦克id
   tankId: -1 as TankId,

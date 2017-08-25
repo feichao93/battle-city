@@ -3,7 +3,8 @@ import { reverseDirection } from 'utils/common'
 import { calculatePriorityMap, getEnv, getRandomDirection, shouldFire } from 'ai/AI-utils.ts'
 import GameAIClient from 'ai/GameAIClient'
 
-const logFire = (...args: any[]) => console.log('[fire]', ...args)
+// const logFire = (...args: any[]) => console.log('[fire]', ...args)
+const logFire = (...args: any[]) => 0
 
 const client = new GameAIClient()
 
@@ -14,7 +15,6 @@ function race<V, T extends { [key: string]: Promise<V> }>(map: T) {
 }
 
 async function main() {
-  // todo next-step 分解main循环, 将开火逻辑和行动逻辑分离开来
   await Promise.all([
     moveLoop(),
     fireLoop(),

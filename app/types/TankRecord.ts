@@ -10,9 +10,6 @@ const TankRecord = Record({
   moving: false,
   level: 'basic' as TankLevel,
   color: 'auto' as TankColor,
-  bulletSpeed: 0.08,
-  bulletLimit: 1,
-  bulletInterval: 300,
   hp: 1,
   withPowerUp: false,
 

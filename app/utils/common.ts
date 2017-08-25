@@ -1,6 +1,14 @@
 import { delay } from 'redux-saga'
 import { put } from 'redux-saga/effects'
-import { BLOCK_SIZE, BULLET_SIZE, FIELD_SIZE, TANK_SIZE, TANK_SPAWN_DELAY, } from 'utils/constants'
+import {
+  BLOCK_SIZE,
+  BULLET_SIZE,
+  FIELD_SIZE,
+  TANK_SIZE,
+  TANK_SPAWN_DELAY,
+  TANK_MOVE_SPEED_UNIT,
+  BULLET_MOVE_SPEED_UNIT,
+} from 'utils/constants'
 import { BulletRecord, TankRecord, EagleRecord, PowerUpRecord } from 'types'
 
 // 根据坦克的位置计算子弹的生成位置
@@ -157,5 +165,68 @@ export function reverseDirection(direction: Direction): Direction {
   }
   if (direction === 'right') {
     return 'left'
+  }
+}
+
+export function incTankLevel(tank: TankRecord) {
+  if (tank.level === 'basic') {
+    return tank.set('level', 'fast')
+  } else if (tank.level === 'fast') {
+    return tank.set('level', 'power')
+  } else {
+    return tank.set('level', 'armor')
+  }
+}
+
+export function getTankBulletLimit(tank: TankRecord) {
+  if (tank.side === 'ai' || tank.level === 'basic' || tank.level === 'fast') {
+    return 1
+  } else {
+    return 2
+  }
+}
+
+export function getTankBulletSpeed(tank: TankRecord) {
+  if (tank.side === 'human') {
+    if (tank.level === 'basic') {
+      return 2 * BULLET_MOVE_SPEED_UNIT
+    } else {
+      return 3 * BULLET_MOVE_SPEED_UNIT
+    }
+  } else {
+    if (tank.level === 'basic') {
+      return BULLET_MOVE_SPEED_UNIT
+    } else if (tank.level === 'power') {
+      return 3 * BULLET_MOVE_SPEED_UNIT
+    } else {
+      return 2 * BULLET_MOVE_SPEED_UNIT
+    }
+  }
+}
+
+export function getTankBulletInterval(tank: TankRecord) {
+  // todo 需要校准数值
+  return 300
+}
+
+export function getTankMoveSpeed(tank: TankRecord) {
+  if (tank.side === 'human') {
+    return 2 * TANK_MOVE_SPEED_UNIT
+  } else if (tank.level === 'basic') {
+    return TANK_MOVE_SPEED_UNIT
+  } else if (tank.level === 'fast') {
+    return 3 * TANK_MOVE_SPEED_UNIT
+  } else {
+    return 2 * TANK_MOVE_SPEED_UNIT
+  }
+}
+
+export function getTankBulletPower(tank: TankRecord) {
+  if (tank.side === 'human' && tank.level === 'armor') {
+    return 3
+  } else if (tank.side === 'ai' && tank.level === 'power') {
+    return 2
+  } else {
+    return 1
   }
 }

@@ -106,8 +106,7 @@ export default function* stageSaga(stageName: string) {
       // 处理powerup
       if (/* todo targetTank.withPowerUp */ true) {
         const powerUpName = _.sample(['tank', 'star', 'grenade', 'timer', 'helmet', 'shovel'] as PowerUpName[])
-        const validPositions: Point[] = yield select(selectors.validPowerUpSpawnPositions)
-        const position = _.sample(validPositions)
+        const position: Point = _.sample(yield select(selectors.validPowerUpSpawnPositions))
         yield fork(powerUp, PowerUpRecord({
           powerUpId: getNextId('power-up'),
           powerUpName,

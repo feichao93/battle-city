@@ -54,10 +54,6 @@ export default function* humanPlayerSaga(playerName: string, tankColor: TankColo
         side: 'human',
         color: tankColor,
         level: 'basic',
-        // todo 为了调试方便, 强化一下坦克
-        bulletSpeed: 0.2,
-        bulletInterval: 100,
-        bulletLimit: Infinity,
       }))
       yield put({
         type: 'ACTIVATE_PLAYER',

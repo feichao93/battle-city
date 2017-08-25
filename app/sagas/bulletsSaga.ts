@@ -102,6 +102,7 @@ function* handleTick() {
 }
 
 function* handleBulletsCollidedWithBricks(context: Context) {
+  // todo 需要考虑子弹强度
   const { bullets, map: { bricks } }: State = yield select()
 
   bullets.forEach((bullet) => {
@@ -116,6 +117,7 @@ function* handleBulletsCollidedWithBricks(context: Context) {
 }
 
 function* handleBulletsCollidedWithSteels(context: Context) {
+  // todo 需要考虑子弹强度
   const { bullets, map: { steels } }: State = yield select()
 
   bullets.forEach((bullet) => {

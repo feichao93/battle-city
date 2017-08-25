@@ -110,15 +110,9 @@ declare global {
       delta: number,
     }
 
-    export type AddBulletAction = {
-      type: 'ADD_BULLET',
-      bulletId: BulletId,
-      direction: Direction,
-      speed: number,
-      x: number,
-      y: number,
-      power?: number,
-      tankId: TankId,
+    export interface AddBulletAction {
+      type: 'ADD_BULLET'
+      bullet: BulletRecord
     }
 
     export interface SetHelmetDurationAction {

@@ -5,7 +5,7 @@ export type BulletsMap = Map<BulletId, BulletRecord>
 
 export default function bullets(state = Map() as BulletsMap, action: Action) {
   if (action.type === 'ADD_BULLET') {
-    return state.set(action.bulletId, BulletRecord(action))
+    return state.set(action.bullet.bulletId, action.bullet)
   } else if (action.type === 'DESTROY_BULLETS') {
     const set = action.bullets.toSet()
     return state.filterNot(bullet => set.has(bullet))

@@ -3,7 +3,7 @@ import { all, fork, put, select, spawn, take } from 'redux-saga/effects'
 import { getDirectionInfo, spawnTank } from 'utils/common'
 import directionController from 'sagas/directionController'
 import fireController from 'sagas/fireController'
-import { getNextId } from 'utils/common'
+import { getNextId, getTankBulletLimit } from 'utils/common'
 import * as selectors from 'utils/selectors'
 import { State } from 'reducers/index'
 import { TankRecord, PlayerRecord } from 'types'
@@ -87,7 +87,7 @@ function* handleCommands(playerName: string, commandChannel: Channel<AICommand>,
         }
         const { bullets }: State = yield select()
         const bulletCount = bullets.filter(b => b.tankId === tank.tankId).count()
-        const canFire = bulletCount < tank.bulletLimit && tank.cooldown <= 0
+        const canFire = bulletCount < getTankBulletLimit(tank) && tank.cooldown <= 0
         noteChannel.put({
           type: 'query-result',
           result: {
@@ -95,7 +95,6 @@ function* handleCommands(playerName: string, commandChannel: Channel<AICommand>,
             bulletCount,
             canFire,
             cooldown: tank.cooldown,
-            bulletLimit: tank.bulletLimit,
           },
         })
       }

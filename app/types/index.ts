@@ -151,7 +151,6 @@ declare global {
       canFire: boolean
       cooldown: number
       bulletCount: number
-      bulletLimit: number
     }
   }
 }

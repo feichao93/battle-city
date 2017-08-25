@@ -1,5 +1,5 @@
 import { put, select, take } from 'redux-saga/effects'
-import { getDirectionInfo } from 'utils/common'
+import { getDirectionInfo, getTankMoveSpeed } from 'utils/common'
 import canTankMove from 'utils/canTankMove'
 import * as selectors from 'utils/selectors'
 import { Input, TankRecord, State } from 'types'
@@ -51,7 +51,7 @@ export default function* directionController(playerName: string, getPlayerInput:
         tank: movedTank,
       })
     } else if (input.type === 'forward') {
-      const speed = 40 / 1000 // todo
+      const speed = getTankMoveSpeed(tank)
       const distance = Math.min(delta * speed, input.maxDistance || Infinity)
 
       const { xy, updater } = getDirectionInfo(tank.direction)
