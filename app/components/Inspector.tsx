@@ -7,6 +7,7 @@ function roundTank(t: TankRecord) {
   return t.update('x', Math.round)
     .update('y', Math.round)
     .update('cooldown', Math.round)
+    .update('helmetDuration', Math.round)
 }
 
 type View = 'scores' | 'tanks' | 'players'

@@ -1,6 +1,6 @@
 {
   "name": "battle-city",
-  "version": "0.1.3-SNAPSHOT",
+  "version": "0.1.3",
   "description": "Battle city re-edition built with react.",
   "author": "Shi Feichao <842351815@qq.com> (http://shinima.pw)",
   "scripts": {

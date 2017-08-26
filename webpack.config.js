@@ -8,24 +8,23 @@ const isProduction = process.env.NODE_ENV === 'production'
 
 const commonPlugins = [
   new webpack.EnvironmentPlugin({ NODE_ENV: 'development' }),
-  new ExtractTextPlugin('styles.css'),
   new HtmlWebpackPlugin({
     title: 'battle-city',
     filename: 'index.html',
     template: path.resolve(__dirname, 'app/index.tmpl.html'),
-    chunks: ['main'],
+    chunks: ['commons', 'main'],
   }),
   new HtmlWebpackPlugin({
     title: 'stories',
     filename: 'stories.html',
     template: path.resolve(__dirname, 'app/index.tmpl.html'),
-    chunks: ['stories'],
+    chunks: ['commons', 'stories'],
   }),
   new HtmlWebpackPlugin({
     title: 'editor',
     filename: 'editor.html',
     template: path.resolve(__dirname, 'app/index.tmpl.html'),
-    chunks: ['editor'],
+    chunks: ['commons', 'editor'],
   }),
 ]
 
@@ -33,7 +32,13 @@ const devPlugins = [
   new webpack.HotModuleReplacementPlugin(),
 ]
 
-const productionPlugins = []
+const productionPlugins = [
+  new webpack.optimize.CommonsChunkPlugin({
+    name: 'commons',
+    filename: 'commons.js',
+  }),
+  new ExtractTextPlugin('[name].css'),
+]
 
 module.exports = {
   context: __dirname,
@@ -46,7 +51,7 @@ module.exports = {
       __dirname + '/app/main.tsx'
     ],
     stories: path.resolve(__dirname, 'app/stories.tsx'),
-    editor: ['react-hot-loader/patch', path.resolve(__dirname, 'app/editor.tsx')],
+    editor: path.resolve(__dirname, 'app/editor.tsx'),
   },
 
   output: {
@@ -66,7 +71,12 @@ module.exports = {
     rules: [
       {
         test: /\.tsx?$/,
-        use: ['awesome-typescript-loader'],
+        use: [{
+          loader: 'awesome-typescript-loader',
+          options: {
+            transpileOnly: true,
+          },
+        }],
         exclude: /node_modules/,
       },
     ].concat(isProduction ? [
