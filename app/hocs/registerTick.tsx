@@ -4,6 +4,7 @@ import * as _ from 'lodash'
 import { State } from 'types'
 import { wrapDisplayName } from 'recompose'
 
+// deprecated.  使用redux-saga来代替该HOC
 // HOC. 用来向组件注入名为 'tickIndex' 的prop
 // tickIndex会随着时间变化
 // 提供不同的interval可以改变tickIndex变化速度和tickIndex的范围

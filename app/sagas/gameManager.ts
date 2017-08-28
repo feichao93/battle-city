@@ -71,13 +71,15 @@ interface StageResult {
 
 /**
  *  game-saga负责管理整体游戏进度
- *  负责管理游戏开始界面, 游戏结束界面, 游戏暂停
+ *  负责管理游戏开始界面, 游戏结束界面
  *  game-stage调用stage-saga来运行不同的关卡
  *  并根据stage-saga返回的结果选择继续下一个关卡, 或是选择游戏结束
  */
 export default function* gameManager() {
-  yield take((action: Action) => action.type === 'GAMESTART')
-  console.log('gamestart')
+  if (process.env.NODE_ENV === 'production') {
+    yield take((action: Action) => action.type === 'GAMESTART')
+    console.log('gamestart')
+  }
 
   const stages = Object.keys(stageConfigs)
   for (const stageName of stages) {

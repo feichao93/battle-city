@@ -1,4 +1,4 @@
-{
+﻿{
   "name": "1",
   "difficulty": 1,
   "map": [
@@ -6,15 +6,15 @@
     "X  Bf X  Bf X  Bf X  Bf X  Bf X  Bf X  ",
     "X  Bf X  Bf X  Bf X  Bf X  Bf X  Bf X  ",
     "X  Bf X  Bf X  Bf Tf Bf X  Bf X  Bf X  ",
-    "X  Bf X  Bf X  X  X  Bf F  Bf X  Bf X  ",
-    "X  F  F  F  F  Bf X  Bf F  F  X  X  X  ",
-    "Tc X  Bc BF R  R  R  R  R  BF BF X  Tc ",
-    "X  X  X  X  S  BF Bc Bf S  X  X  X  X  ",
-    "X  BF X  BF X  BF B3 BF X  BF X  BF X  ",
-    "X  BF X  BF X  BF X  BF X  BF X  BF X  ",
-    "X  BF X  BF X  X  X  X  X  BF X  BF X  ",
-    "X  BF X  BF X  B8 Bc B4 X  BF X  BF X  ",
-    "X  X  X  X  X  Ba EE B5 X  X  X  X  X  "
+    "X  Bf X  Bf X  B3 X  B3 X  Bf X  Bf X  ",
+    "X  B3 X  B3 X  Bc X  Bc X  B3 X  B3 X  ",
+    "Bc X  Bc Bc X  B3 X  B3 X  Bc Bc X  Bc ",
+    "T3 X  B3 B3 X  Bc X  Bc X  B3 B3 X  T3 ",
+    "X  Bc X  Bc X  Bf Bf Bf X  Bc X  Bc X  ",
+    "X  Bf X  Bf X  Bf X  Bf X  Bf X  Bf X  ",
+    "X  Bf X  Bf X  B3 X  B3 X  Bf X  Bf X  ",
+    "X  Bf X  Bf X  B8 Bc B4 X  Bf X  Bf X  ",
+    "X  X  X  X  X  Ba E  B5 X  X  X  X  X  "
   ],
   "enemies": [
     "18*basic",

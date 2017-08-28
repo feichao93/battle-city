@@ -24,6 +24,8 @@ declare global {
       | LoadStageAction
       | Simple<'GAMEOVER'>
       | Simple<'GAMESTART'>
+      | Simple<'GAMEPAUSE'>
+      | Simple<'GAMERESUME'>
       | LoadSceneAction
       | Simple<'REMOVE_FIRST_REMAINING_ENEMY'>
       | IncrementPlayerLifeAction

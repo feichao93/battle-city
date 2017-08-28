@@ -20,6 +20,9 @@ const emptyTransientKillInfo = Map({
 const defaultRemainingEnemies = Repeat('basic' as TankLevel, 20).toList()
 
 export const GameRecord = Record({
+  /** 游戏是否暂停 */
+  paused: false,
+  /** 当前场景 */
   scene: 'game-title' as Scene,
   /** 当前的关卡名 */
   currentStage: null as string,
@@ -61,6 +64,10 @@ export default function game(state = gameRecord, action: Action) {
     return state.set('showTotalKillCount', true)
   } else if (action.type === 'SET_AI_FROZEN_TIMEOUT') {
     return state.set('AIFrozenTimeout', action.AIFrozenTimeout)
+  } else if (action.type === 'GAMEPAUSE') {
+    return state.set('paused', true)
+  } else if (action.type === 'GAMERESUME') {
+    return state.set('paused', false)
   } else {
     return state
   }

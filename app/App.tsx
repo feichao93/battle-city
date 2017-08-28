@@ -5,6 +5,7 @@ import GameScene from 'components/GameScene'
 import GameoverScene from 'components/GameoverScene'
 import StatisticsScene from 'components/StatisticsScene'
 import GameTitleScene from 'components/GameTitleScene'
+import PauseIndicator from 'components/PauseIndicator'
 import { State } from 'types'
 
 let Inspector = () => (
@@ -31,9 +32,9 @@ const zoomLevel = 2
 const totalWidth = 16 * B
 const totalHeight = 15 * B
 
-class App extends React.PureComponent<{ scene: Scene }> {
+class App extends React.PureComponent<{ scene: Scene, paused: boolean }> {
   render() {
-    const { scene } = this.props
+    const { scene, paused } = this.props
 
     return (
       <div style={{ display: 'flex' }}>
@@ -48,6 +49,7 @@ class App extends React.PureComponent<{ scene: Scene }> {
           {scene === 'game' ? <GameScene /> : null}
           {scene === 'gameover' ? <GameoverScene /> : null}
           {scene === 'statistics' ? <StatisticsScene /> : null}
+          {paused ? <PauseIndicator /> : null}
         </svg>
         <Inspector />
       </div>
@@ -58,6 +60,7 @@ class App extends React.PureComponent<{ scene: Scene }> {
 function mapStateToProps(state: State) {
   return {
     scene: state.game.scene,
+    paused: state.game.paused,
   }
 }
 
