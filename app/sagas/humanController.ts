@@ -32,18 +32,50 @@ export default function* humanController(playerName: string, config: HumanContro
   // 用来记录上一个tick内, 玩家按下过的方向键
   const pressed: Direction[] = []
 
-  // 调用该函数用来获取当前人类玩家的移动操作(控制器级别)
+  function isGamePadConnected() {
+    for (let gp of navigator.getGamepads()) {
+      if (gp && gp.id === 'Xbox 360 Controller (XInput STANDARD GAMEPAD)') {
+        return gp.index;
+      }
+    }
+    return -1;
+  }
+
   function getDirectionControlInfo() {
-    if (pressed.length > 0) {
-      return { direction: _.last(pressed) }
+    if (isGamePadConnected() !== -1) {
+      const gp: Gamepad = navigator.getGamepads()[isGamePadConnected()];
+      if (gp) {
+        // 摇杆右左
+        if (gp.axes[0] > 0.5) {
+          return { direction: 'right' }
+        } else if (gp.axes[0] < -0.5) {
+          return { direction: 'left' }
+        }
+        // 摇杆下上
+        if (gp.axes[1] > 0.5) {
+          return { direction: 'down' }
+        } else if (gp.axes[1] < -0.5) {
+          return { direction: 'up' }
+        }
+        return { direction: null }
+      }
     } else {
-      return { direction: null }
+      if (pressed.length > 0) {
+        return { direction: _.last(pressed) }
+      } else {
+        return { direction: null }
+      }
     }
   }
 
-  // 调用该函数用来获取当前玩家的开火操作
+// 调用该函数用来获取当前玩家的开火操作
   function shouldFire() {
-    return firePressing || firePressed
+    if (isGamePadConnected() !== -1) {
+      const gp: Gamepad = navigator.getGamepads()[isGamePadConnected()]
+      return gp && gp.buttons[6].pressed
+    } else {
+      return firePressing || firePressed
+    }
   }
 
   function bindKeyWithDirection(key: string, direction: Direction) {
@@ -62,7 +94,7 @@ export default function* humanController(playerName: string, config: HumanContro
   bindKeyWithDirection(config.down, 'down')
   bindKeyWithDirection(config.right, 'right')
 
-  // 调用该函数来获取当前用户的移动操作(坦克级别)
+// 调用该函数来获取当前用户的移动操作(坦克级别)
   function* getHumanPlayerInput() {
     const tank: TankRecord = yield select(selectors.playerTank, playerName)
     if (tank != null) {
