@@ -6,8 +6,6 @@ import {
   FIELD_SIZE,
   TANK_SIZE,
   TANK_SPAWN_DELAY,
-  TANK_MOVE_SPEED_UNIT,
-  BULLET_MOVE_SPEED_UNIT,
 } from 'utils/constants'
 import { BulletRecord, TankRecord, EagleRecord, PowerUpRecord } from 'types'
 
@@ -189,17 +187,15 @@ export function getTankBulletLimit(tank: TankRecord) {
 export function getTankBulletSpeed(tank: TankRecord) {
   if (tank.side === 'human') {
     if (tank.level === 'basic') {
-      return 2 * BULLET_MOVE_SPEED_UNIT
+      return 0.12
     } else {
-      return 3 * BULLET_MOVE_SPEED_UNIT
+      return 0.24
     }
   } else {
     if (tank.level === 'basic') {
-      return BULLET_MOVE_SPEED_UNIT
-    } else if (tank.level === 'power') {
-      return 3 * BULLET_MOVE_SPEED_UNIT
+      return 0.12
     } else {
-      return 2 * BULLET_MOVE_SPEED_UNIT
+      return 0.24
     }
   }
 }
@@ -211,13 +207,15 @@ export function getTankBulletInterval(tank: TankRecord) {
 
 export function getTankMoveSpeed(tank: TankRecord) {
   if (tank.side === 'human') {
-    return 2 * TANK_MOVE_SPEED_UNIT
-  } else if (tank.level === 'basic') {
-    return TANK_MOVE_SPEED_UNIT
-  } else if (tank.level === 'fast') {
-    return 3 * TANK_MOVE_SPEED_UNIT
+    return 0.045
   } else {
-    return 2 * TANK_MOVE_SPEED_UNIT
+    if (tank.level === 'basic') {
+      return 0.03
+    } else if (tank.level === 'power') {
+      return 0.06
+    } else {
+      return 0.045
+    }
   }
 }
 

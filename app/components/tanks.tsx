@@ -6,6 +6,8 @@ import { BLOCK_SIZE, TANK_COLOR_SCHEMES } from 'utils/constants'
 import { TankRecord } from 'types'
 import { State } from 'reducers'
 
+const f = (x: number) => 1000 / 60 * x
+
 interface TankComponent {
   (props: { transform: string, color: string, shape: number }): JSX.Element
 }
@@ -17,7 +19,7 @@ function resolveTankColorConfig(tank: TankRecord): TankColorConfig {
     return [[tank.color, Infinity]]
   }
   if (tank.withPowerUp) {
-    return [['red', 300], ['silver', 300]]
+    return [['red', f(8)], ['silver', f(8)]]
   }
   if (tank.level === 'basic') {
     return [['silver', Infinity]]
@@ -28,9 +30,9 @@ function resolveTankColorConfig(tank: TankRecord): TankColorConfig {
   } else {
     const map: { [key: number]: TankColorConfig } = {
       1: [['silver', Infinity]],
-      2: [['green', 100], ['yellow', 100]],
-      3: [['silver', 100], ['yellow', 100]],
-      4: [['green', 100], ['silver', 100]],
+      2: [['green', f(3)], ['yellow', f(1)], ['green', f(1)], ['yellow', f(1)]],
+      3: [['silver', f(3)], ['yellow', f(1)], ['silver', f(1)], ['yellow', f(1)]],
+      4: [['silver', f(3)], ['green', f(1)], ['silver', f(1)], ['green', f(1)]],
     }
     return map[tank.hp]
   }

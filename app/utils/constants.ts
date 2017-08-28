@@ -12,10 +12,6 @@ export const BULLET_SIZE = 3
 export const TANK_SPAWN_DELAY = 1500
 /** 摧毁steel的最低子弹power值 */
 export const STEEL_POWER = 3
-/** 坦克移动速度单位. 玩家坦克2x, basic-tank 1x, fast-tank 3x, 其他坦克2x  */
-export const TANK_MOVE_SPEED_UNIT = 0.02
-/** 子弹飞行速度单位. 玩家坦克2x(如果没升级的话), basic-tank 1x, power-tank 3x, 其他坦克2x */
-export const BULLET_MOVE_SPEED_UNIT = 0.08
 
 /**
  * 坦克的配色方案
