@@ -56,6 +56,8 @@ export function* iterRowsAndCols(itemSize: number, box: Box) {
   }
 }
 
+export const frame = (x: number) => 1000 / 60 * x
+
 // 判断box是否在战场内
 // box: { x: number, y: number, width: number, height: number }
 export function isInField(box: Box) {

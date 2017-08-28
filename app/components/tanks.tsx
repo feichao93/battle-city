@@ -3,10 +3,9 @@ import * as _ from 'lodash'
 import { connect } from 'react-redux'
 import { Bitmap, Pixel } from 'components/elements'
 import { BLOCK_SIZE, TANK_COLOR_SCHEMES } from 'utils/constants'
+import { frame as f } from 'utils/common'
 import { TankRecord } from 'types'
 import { State } from 'reducers'
-
-const f = (x: number) => 1000 / 60 * x
 
 interface TankComponent {
   (props: { transform: string, color: string, shape: number }): JSX.Element

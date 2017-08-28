@@ -2,7 +2,7 @@ import { delay } from 'redux-saga'
 import { put, fork, select, take } from 'redux-saga/effects'
 import { BLOCK_SIZE } from 'utils/constants'
 import TankRecord from 'types/TankRecord'
-import { spawnTank, testCollide, asBox } from 'utils/common'
+import { spawnTank, testCollide, asBox, frame } from 'utils/common'
 import * as selectors from 'utils/selectors'
 import { State } from 'reducers/index'
 import PlayerRecord from 'types/PlayerRecord'
@@ -39,7 +39,7 @@ export default function* humanPlayerSaga(playerName: string, tankColor: TankColo
   })
 
   while (true) {
-    yield take((action: Action) => (
+    const action: Action = yield take((action: Action) => (
       action.type === 'LOAD_STAGE'
       || action.type === 'KILL' && action.targetPlayer.playerName === playerName
     ))
@@ -54,6 +54,7 @@ export default function* humanPlayerSaga(playerName: string, tankColor: TankColo
         side: 'human',
         color: tankColor,
         level: 'basic',
+        helmetDuration: action.type === 'LOAD_STAGE' ? frame(135) : frame(180),
       }))
       yield put({
         type: 'ACTIVATE_PLAYER',

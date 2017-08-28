@@ -2,7 +2,7 @@ import { delay } from 'redux-saga'
 import { fork, put, take, select, takeEvery, takeLatest } from 'redux-saga/effects'
 import { State, MapRecord, ScoreRecord } from 'types'
 import { N_MAP, ITEM_SIZE_MAP } from 'utils/constants'
-import { iterRowsAndCols, asBox, getNextId } from 'utils/common'
+import { iterRowsAndCols, asBox, getNextId, frame as f } from 'utils/common'
 import { destroyTanks } from 'sagas/bulletsSaga'
 
 function convertToBricks(map: MapRecord) {
@@ -73,26 +73,27 @@ function* shovel() {
     map: convertToSteels((yield select()).map),
   })
 
-  // shovel的有效时间
-  yield delay(3e3)
+  yield delay(f(1076))
 
-  // 闪烁
-  yield put<Action>({
-    type: 'UPDATE_MAP',
-    map: convertToBricks((yield select()).map),
-  })
-  for (let i = 0; i < 4; i++) {
-    yield delay(200)
-    yield put<Action>({
-      type: 'UPDATE_MAP',
-      map: convertToSteels((yield select()).map),
-    })
-    yield delay(200)
+  // 总共闪烁6次
+  for (let i = 0; i < 6; i++) {
     yield put<Action>({
       type: 'UPDATE_MAP',
       map: convertToBricks((yield select()).map),
     })
+    yield delay(f(16))
+    yield put<Action>({
+      type: 'UPDATE_MAP',
+      map: convertToSteels((yield select()).map),
+    })
+    yield delay(f(16))
   }
+
+  // 最后变回brick-wall
+  yield put<Action>({
+    type: 'UPDATE_MAP',
+    map: convertToBricks((yield select()).map),
+  })
 }
 
 function* timer() {
@@ -143,7 +144,7 @@ function* helmet({ tank }: Action.PickPowerUpAction) {
   yield put<Action.SetHelmetDurationAction>({
     type: 'SET_HELMET_DURATION',
     tankId: tank.tankId,
-    duration: 6e3,
+    duration: f(630),
   })
 }
 

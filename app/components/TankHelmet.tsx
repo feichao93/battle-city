@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { frame as f } from 'utils/common'
 import registerTick from 'hocs/registerTick'
 
 interface P {
@@ -41,4 +42,4 @@ class TankHelmet extends React.PureComponent<P> {
   }
 }
 
-export default registerTick(70, 70)(TankHelmet)
+export default registerTick(f(2), f(2))(TankHelmet)
