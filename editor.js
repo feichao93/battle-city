@@ -1,19 +1,19 @@
 webpackJsonp([2],{
 
-/***/ 354:
+/***/ 358:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 __webpack_require__(51);
-const file_saver_1 = __webpack_require__(355);
+const file_saver_1 = __webpack_require__(359);
 const React = __webpack_require__(0);
 const ReactDOM = __webpack_require__(52);
 const redux_saga_1 = __webpack_require__(17);
 const redux_1 = __webpack_require__(40);
 const immutable_1 = __webpack_require__(5);
-const react_redux_1 = __webpack_require__(11);
+const react_redux_1 = __webpack_require__(12);
 const constants_1 = __webpack_require__(2);
 const BrickLayer_1 = __webpack_require__(81);
 const SteelLayer_1 = __webpack_require__(82);
@@ -21,21 +21,21 @@ const RiverLayer_1 = __webpack_require__(83);
 const SnowLayer_1 = __webpack_require__(84);
 const ForestLayer_1 = __webpack_require__(85);
 const Eagle_1 = __webpack_require__(86);
-const Text_1 = __webpack_require__(13);
-const River_1 = __webpack_require__(153);
-const Snow_1 = __webpack_require__(154);
-const Forest_1 = __webpack_require__(155);
+const Text_1 = __webpack_require__(10);
+const River_1 = __webpack_require__(154);
+const Snow_1 = __webpack_require__(155);
+const Forest_1 = __webpack_require__(156);
 const tanks_1 = __webpack_require__(24);
 const BrickWall_1 = __webpack_require__(34);
-const SteelWall_1 = __webpack_require__(152);
-const TextInput_1 = __webpack_require__(358);
+const SteelWall_1 = __webpack_require__(153);
+const TextInput_1 = __webpack_require__(362);
 const TextButton_1 = __webpack_require__(94);
 const tickEmitter_1 = __webpack_require__(76);
 const index_1 = __webpack_require__(49);
 const game_1 = __webpack_require__(73);
 const parseStageMap_1 = __webpack_require__(75);
 const types_1 = __webpack_require__(9);
-const common_1 = __webpack_require__(8);
+const common_1 = __webpack_require__(6);
 const simpleSagaMiddleware = redux_saga_1.default();
 const simpleReducer = redux_1.combineReducers({ time: index_1.time, game: game_1.default });
 const simpleStore = redux_1.createStore(simpleReducer, undefined, redux_1.applyMiddleware(simpleSagaMiddleware));
@@ -530,7 +530,7 @@ ReactDOM.render(React.createElement(react_redux_1.Provider, { store: simpleStore
 
 /***/ }),
 
-/***/ 355:
+/***/ 359:
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_RESULT__;/* FileSaver.js
@@ -716,7 +716,7 @@ var saveAs = saveAs || (function(view) {
 
 if (typeof module !== "undefined" && module.exports) {
   module.exports.saveAs = saveAs;
-} else if (("function" !== "undefined" && __webpack_require__(356) !== null) && (__webpack_require__(357) !== null)) {
+} else if (("function" !== "undefined" && __webpack_require__(360) !== null) && (__webpack_require__(361) !== null)) {
   !(__WEBPACK_AMD_DEFINE_RESULT__ = function() {
     return saveAs;
   }.call(exports, __webpack_require__, exports, module),
@@ -726,7 +726,7 @@ if (typeof module !== "undefined" && module.exports) {
 
 /***/ }),
 
-/***/ 356:
+/***/ 360:
 /***/ (function(module, exports) {
 
 module.exports = function() {
@@ -736,7 +736,7 @@ module.exports = function() {
 
 /***/ }),
 
-/***/ 357:
+/***/ 361:
 /***/ (function(module, exports) {
 
 /* WEBPACK VAR INJECTION */(function(__webpack_amd_options__) {/* globals __webpack_amd_options__ */
@@ -746,14 +746,14 @@ module.exports = __webpack_amd_options__;
 
 /***/ }),
 
-/***/ 358:
+/***/ 362:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const React = __webpack_require__(0);
-const Text_1 = __webpack_require__(13);
+const Text_1 = __webpack_require__(10);
 const constants_1 = __webpack_require__(2);
 class TextInput extends React.Component {
     constructor(props) {
@@ -791,4 +791,4 @@ exports.default = TextInput;
 
 /***/ })
 
-},[354]);
+},[358]);

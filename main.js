@@ -6,9 +6,9 @@ webpackJsonp([0],{
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const effects_1 = __webpack_require__(12);
-const common_1 = __webpack_require__(8);
-const canTankMove_1 = __webpack_require__(337);
+const effects_1 = __webpack_require__(13);
+const common_1 = __webpack_require__(6);
+const canTankMove_1 = __webpack_require__(338);
 const selectors = __webpack_require__(33);
 function* directionController(playerName, getPlayerInput) {
     while (true) {
@@ -98,8 +98,8 @@ exports.default = directionController;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const effects_1 = __webpack_require__(12);
-const common_1 = __webpack_require__(8);
+const effects_1 = __webpack_require__(13);
+const common_1 = __webpack_require__(6);
 const selectors = __webpack_require__(33);
 const types_1 = __webpack_require__(9);
 function* fireController(playerName, shouldFire) {
@@ -150,16 +150,16 @@ exports.default = fireController;
 
 /***/ }),
 
-/***/ 151:
+/***/ 152:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const immutable_1 = __webpack_require__(5);
-const effects_1 = __webpack_require__(12);
+const effects_1 = __webpack_require__(13);
 const constants_1 = __webpack_require__(2);
-const common_1 = __webpack_require__(8);
+const common_1 = __webpack_require__(6);
 const types_1 = __webpack_require__(9);
 function isBulletInField(bullet) {
     return common_1.isInField(common_1.asBox(bullet));
@@ -321,7 +321,11 @@ function* destroyBricks(collidedBullets) {
 }
 function* filterBulletsCollidedWithEagle(bullets) {
     // 判断是否和eagle相撞
-    const { map: { eagle: { broken, x, y } } } = yield effects_1.select();
+    const { map: { eagle } } = yield effects_1.select();
+    if (eagle == null) {
+        return bullets.clear();
+    }
+    const { broken, x, y } = eagle;
     if (broken) {
         return immutable_1.Map();
     }
@@ -525,24 +529,24 @@ exports.default = bulletsSaga;
 
 /***/ }),
 
-/***/ 156:
-/***/ (function(module, exports, __webpack_require__) {
-
-__webpack_require__(157);
-module.exports = __webpack_require__(160);
-
-
-/***/ }),
-
 /***/ 157:
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(158);
+__webpack_require__(158);
+module.exports = __webpack_require__(161);
 
 
 /***/ }),
 
 /***/ 158:
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = __webpack_require__(159);
+
+
+/***/ }),
+
+/***/ 159:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -551,14 +555,14 @@ module.exports = __webpack_require__(158);
 
 
 if (true) {
-  module.exports = __webpack_require__(159);
+  module.exports = __webpack_require__(160);
 } else {
   module.exports = require('./patch.dev');
 }
 
 /***/ }),
 
-/***/ 159:
+/***/ 160:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -567,7 +571,7 @@ if (true) {
 
 /***/ }),
 
-/***/ 160:
+/***/ 161:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -576,9 +580,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 __webpack_require__(51);
 const React = __webpack_require__(0);
 const ReactDOM = __webpack_require__(52);
-const react_hot_loader_1 = __webpack_require__(251);
-const react_redux_1 = __webpack_require__(11);
-const store_1 = __webpack_require__(281);
+const react_hot_loader_1 = __webpack_require__(252);
+const react_redux_1 = __webpack_require__(12);
+const store_1 = __webpack_require__(282);
 const App_1 = __webpack_require__(345);
 function render(Component) {
     ReactDOM.render(React.createElement(react_hot_loader_1.AppContainer, null,
@@ -597,27 +601,11 @@ if (false) {
 
 /***/ }),
 
-/***/ 251:
-/***/ (function(module, exports, __webpack_require__) {
-
-module.exports = __webpack_require__(252);
-
-
-/***/ }),
-
 /***/ 252:
 /***/ (function(module, exports, __webpack_require__) {
 
-"use strict";
-/* eslint-disable global-require */
+module.exports = __webpack_require__(253);
 
-
-
-if (true) {
-  module.exports = __webpack_require__(253);
-} else {
-  module.exports = require('./index.dev');
-}
 
 /***/ }),
 
@@ -625,13 +613,29 @@ if (true) {
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
+/* eslint-disable global-require */
 
 
-module.exports.AppContainer = __webpack_require__(254);
+
+if (true) {
+  module.exports = __webpack_require__(254);
+} else {
+  module.exports = require('./index.dev');
+}
 
 /***/ }),
 
 /***/ 254:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports.AppContainer = __webpack_require__(255);
+
+/***/ }),
+
+/***/ 255:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -640,14 +644,14 @@ module.exports.AppContainer = __webpack_require__(254);
 
 
 if (true) {
-  module.exports = __webpack_require__(255);
+  module.exports = __webpack_require__(256);
 } else {
   module.exports = require('./AppContainer.dev');
 }
 
 /***/ }),
 
-/***/ 255:
+/***/ 256:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -693,7 +697,7 @@ module.exports = AppContainer;
 
 /***/ }),
 
-/***/ 281:
+/***/ 282:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -702,7 +706,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const redux_1 = __webpack_require__(40);
 const redux_saga_1 = __webpack_require__(17);
 const index_1 = __webpack_require__(49);
-const index_2 = __webpack_require__(335);
+const index_2 = __webpack_require__(336);
 const sagaMiddleware = redux_saga_1.default();
 exports.default = redux_1.createStore(index_1.default, redux_1.applyMiddleware(sagaMiddleware));
 sagaMiddleware.run(index_2.default);
@@ -718,7 +722,7 @@ sagaMiddleware.run(index_2.default);
 Object.defineProperty(exports, "__esModule", { value: true });
 const _ = __webpack_require__(22);
 const constants_1 = __webpack_require__(2);
-const common_1 = __webpack_require__(8);
+const common_1 = __webpack_require__(6);
 // 选取玩家的坦克对象. 如果玩家当前没有坦克, 则返回null
 exports.playerTank = (state, playerName) => {
     const { active, activeTankId } = state.players.get(playerName);
@@ -787,20 +791,21 @@ exports.validPowerUpSpawnPositions = ({ map: { bricks, rivers, steels, eagle } }
 
 /***/ }),
 
-/***/ 335:
+/***/ 336:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const redux_saga_1 = __webpack_require__(17);
-const effects_1 = __webpack_require__(12);
-const humanController_1 = __webpack_require__(336);
-const bulletsSaga_1 = __webpack_require__(151);
+const effects_1 = __webpack_require__(13);
+const humanController_1 = __webpack_require__(337);
+const bulletsSaga_1 = __webpack_require__(152);
 const gameManager_1 = __webpack_require__(339);
 const AISaga_1 = __webpack_require__(341);
 const tickEmitter_1 = __webpack_require__(76);
 const constants_1 = __webpack_require__(2);
+const common_1 = __webpack_require__(6);
 const humanPlayerSaga_1 = __webpack_require__(343);
 const powerUps_1 = __webpack_require__(344);
 function* autoRemoveEffects() {
@@ -818,7 +823,7 @@ function* autoRemoveEffects() {
         yield effects_1.put({ type: 'REMOVE_FLICKER', flickerId });
     });
     yield effects_1.takeEvery('ADD_SCORE', function* removeScore({ score: { scoreId } }) {
-        yield redux_saga_1.delay(2000);
+        yield redux_saga_1.delay(common_1.frame(48));
         yield effects_1.put({ type: 'REMOVE_SCORE', scoreId });
     });
 }
@@ -841,18 +846,18 @@ exports.default = rootSaga;
 
 /***/ }),
 
-/***/ 336:
+/***/ 337:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const effects_1 = __webpack_require__(12);
+const effects_1 = __webpack_require__(13);
 const selectors = __webpack_require__(33);
 const _ = __webpack_require__(22);
 const directionController_1 = __webpack_require__(149);
 const fireController_1 = __webpack_require__(150);
-const Mousetrap = __webpack_require__(338);
+const Mousetrap = __webpack_require__(151);
 // 一个humanController实例对应一个人类玩家(用户)的控制器(键盘或是手柄).
 // 参数playerName用来指定人类玩家的玩家名称, config为该玩家的操作配置.
 // humanController启动后, 会监听ACTIVATE_PLAYER action.
@@ -875,18 +880,53 @@ function* humanController(playerName, config) {
     });
     // 用来记录上一个tick内, 玩家按下过的方向键
     const pressed = [];
-    // 调用该函数用来获取当前人类玩家的移动操作(控制器级别)
+    function isGamePadConnected() {
+        for (let gp of navigator.getGamepads()) {
+            if (gp && gp.id === 'Xbox 360 Controller (XInput STANDARD GAMEPAD)') {
+                return gp.index;
+            }
+        }
+        return -1;
+    }
     function getDirectionControlInfo() {
-        if (pressed.length > 0) {
-            return { direction: _.last(pressed) };
+        if (isGamePadConnected() !== -1) {
+            const gp = navigator.getGamepads()[isGamePadConnected()];
+            if (gp) {
+                // 摇杆右左
+                if (gp.axes[0] > 0.5) {
+                    return { direction: 'right' };
+                }
+                else if (gp.axes[0] < -0.5) {
+                    return { direction: 'left' };
+                }
+                // 摇杆下上
+                if (gp.axes[1] > 0.5) {
+                    return { direction: 'down' };
+                }
+                else if (gp.axes[1] < -0.5) {
+                    return { direction: 'up' };
+                }
+                return { direction: null };
+            }
         }
         else {
-            return { direction: null };
+            if (pressed.length > 0) {
+                return { direction: _.last(pressed) };
+            }
+            else {
+                return { direction: null };
+            }
         }
     }
     // 调用该函数用来获取当前玩家的开火操作
     function shouldFire() {
-        return firePressing || firePressed;
+        if (isGamePadConnected() !== -1) {
+            const gp = navigator.getGamepads()[isGamePadConnected()];
+            return gp && gp.buttons[6].pressed;
+        }
+        else {
+            return firePressing || firePressed;
+        }
     }
     function bindKeyWithDirection(key, direction) {
         Mousetrap.bind(key, () => {
@@ -934,13 +974,13 @@ exports.default = humanController;
 
 /***/ }),
 
-/***/ 337:
+/***/ 338:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const common_1 = __webpack_require__(8);
+const common_1 = __webpack_require__(6);
 const constants_1 = __webpack_require__(2);
 function isTankCollidedWithEagle(eagle, tankTarget, threshhold) {
     const eagleBox = {
@@ -1053,1058 +1093,6 @@ exports.default = canTankMove;
 
 /***/ }),
 
-/***/ 338:
-/***/ (function(module, exports, __webpack_require__) {
-
-var __WEBPACK_AMD_DEFINE_RESULT__;/*global define:false */
-/**
- * Copyright 2012-2017 Craig Campbell
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * Mousetrap is a simple keyboard shortcut library for Javascript with
- * no external dependencies
- *
- * @version 1.6.1
- * @url craig.is/killing/mice
- */
-(function(window, document, undefined) {
-
-    // Check if mousetrap is used inside browser, if not, return
-    if (!window) {
-        return;
-    }
-
-    /**
-     * mapping of special keycodes to their corresponding keys
-     *
-     * everything in this dictionary cannot use keypress events
-     * so it has to be here to map to the correct keycodes for
-     * keyup/keydown events
-     *
-     * @type {Object}
-     */
-    var _MAP = {
-        8: 'backspace',
-        9: 'tab',
-        13: 'enter',
-        16: 'shift',
-        17: 'ctrl',
-        18: 'alt',
-        20: 'capslock',
-        27: 'esc',
-        32: 'space',
-        33: 'pageup',
-        34: 'pagedown',
-        35: 'end',
-        36: 'home',
-        37: 'left',
-        38: 'up',
-        39: 'right',
-        40: 'down',
-        45: 'ins',
-        46: 'del',
-        91: 'meta',
-        93: 'meta',
-        224: 'meta'
-    };
-
-    /**
-     * mapping for special characters so they can support
-     *
-     * this dictionary is only used incase you want to bind a
-     * keyup or keydown event to one of these keys
-     *
-     * @type {Object}
-     */
-    var _KEYCODE_MAP = {
-        106: '*',
-        107: '+',
-        109: '-',
-        110: '.',
-        111 : '/',
-        186: ';',
-        187: '=',
-        188: ',',
-        189: '-',
-        190: '.',
-        191: '/',
-        192: '`',
-        219: '[',
-        220: '\\',
-        221: ']',
-        222: '\''
-    };
-
-    /**
-     * this is a mapping of keys that require shift on a US keypad
-     * back to the non shift equivelents
-     *
-     * this is so you can use keyup events with these keys
-     *
-     * note that this will only work reliably on US keyboards
-     *
-     * @type {Object}
-     */
-    var _SHIFT_MAP = {
-        '~': '`',
-        '!': '1',
-        '@': '2',
-        '#': '3',
-        '$': '4',
-        '%': '5',
-        '^': '6',
-        '&': '7',
-        '*': '8',
-        '(': '9',
-        ')': '0',
-        '_': '-',
-        '+': '=',
-        ':': ';',
-        '\"': '\'',
-        '<': ',',
-        '>': '.',
-        '?': '/',
-        '|': '\\'
-    };
-
-    /**
-     * this is a list of special strings you can use to map
-     * to modifier keys when you specify your keyboard shortcuts
-     *
-     * @type {Object}
-     */
-    var _SPECIAL_ALIASES = {
-        'option': 'alt',
-        'command': 'meta',
-        'return': 'enter',
-        'escape': 'esc',
-        'plus': '+',
-        'mod': /Mac|iPod|iPhone|iPad/.test(navigator.platform) ? 'meta' : 'ctrl'
-    };
-
-    /**
-     * variable to store the flipped version of _MAP from above
-     * needed to check if we should use keypress or not when no action
-     * is specified
-     *
-     * @type {Object|undefined}
-     */
-    var _REVERSE_MAP;
-
-    /**
-     * loop through the f keys, f1 to f19 and add them to the map
-     * programatically
-     */
-    for (var i = 1; i < 20; ++i) {
-        _MAP[111 + i] = 'f' + i;
-    }
-
-    /**
-     * loop through to map numbers on the numeric keypad
-     */
-    for (i = 0; i <= 9; ++i) {
-
-        // This needs to use a string cause otherwise since 0 is falsey
-        // mousetrap will never fire for numpad 0 pressed as part of a keydown
-        // event.
-        //
-        // @see https://github.com/ccampbell/mousetrap/pull/258
-        _MAP[i + 96] = i.toString();
-    }
-
-    /**
-     * cross browser add event method
-     *
-     * @param {Element|HTMLDocument} object
-     * @param {string} type
-     * @param {Function} callback
-     * @returns void
-     */
-    function _addEvent(object, type, callback) {
-        if (object.addEventListener) {
-            object.addEventListener(type, callback, false);
-            return;
-        }
-
-        object.attachEvent('on' + type, callback);
-    }
-
-    /**
-     * takes the event and returns the key character
-     *
-     * @param {Event} e
-     * @return {string}
-     */
-    function _characterFromEvent(e) {
-
-        // for keypress events we should return the character as is
-        if (e.type == 'keypress') {
-            var character = String.fromCharCode(e.which);
-
-            // if the shift key is not pressed then it is safe to assume
-            // that we want the character to be lowercase.  this means if
-            // you accidentally have caps lock on then your key bindings
-            // will continue to work
-            //
-            // the only side effect that might not be desired is if you
-            // bind something like 'A' cause you want to trigger an
-            // event when capital A is pressed caps lock will no longer
-            // trigger the event.  shift+a will though.
-            if (!e.shiftKey) {
-                character = character.toLowerCase();
-            }
-
-            return character;
-        }
-
-        // for non keypress events the special maps are needed
-        if (_MAP[e.which]) {
-            return _MAP[e.which];
-        }
-
-        if (_KEYCODE_MAP[e.which]) {
-            return _KEYCODE_MAP[e.which];
-        }
-
-        // if it is not in the special map
-
-        // with keydown and keyup events the character seems to always
-        // come in as an uppercase character whether you are pressing shift
-        // or not.  we should make sure it is always lowercase for comparisons
-        return String.fromCharCode(e.which).toLowerCase();
-    }
-
-    /**
-     * checks if two arrays are equal
-     *
-     * @param {Array} modifiers1
-     * @param {Array} modifiers2
-     * @returns {boolean}
-     */
-    function _modifiersMatch(modifiers1, modifiers2) {
-        return modifiers1.sort().join(',') === modifiers2.sort().join(',');
-    }
-
-    /**
-     * takes a key event and figures out what the modifiers are
-     *
-     * @param {Event} e
-     * @returns {Array}
-     */
-    function _eventModifiers(e) {
-        var modifiers = [];
-
-        if (e.shiftKey) {
-            modifiers.push('shift');
-        }
-
-        if (e.altKey) {
-            modifiers.push('alt');
-        }
-
-        if (e.ctrlKey) {
-            modifiers.push('ctrl');
-        }
-
-        if (e.metaKey) {
-            modifiers.push('meta');
-        }
-
-        return modifiers;
-    }
-
-    /**
-     * prevents default for this event
-     *
-     * @param {Event} e
-     * @returns void
-     */
-    function _preventDefault(e) {
-        if (e.preventDefault) {
-            e.preventDefault();
-            return;
-        }
-
-        e.returnValue = false;
-    }
-
-    /**
-     * stops propogation for this event
-     *
-     * @param {Event} e
-     * @returns void
-     */
-    function _stopPropagation(e) {
-        if (e.stopPropagation) {
-            e.stopPropagation();
-            return;
-        }
-
-        e.cancelBubble = true;
-    }
-
-    /**
-     * determines if the keycode specified is a modifier key or not
-     *
-     * @param {string} key
-     * @returns {boolean}
-     */
-    function _isModifier(key) {
-        return key == 'shift' || key == 'ctrl' || key == 'alt' || key == 'meta';
-    }
-
-    /**
-     * reverses the map lookup so that we can look for specific keys
-     * to see what can and can't use keypress
-     *
-     * @return {Object}
-     */
-    function _getReverseMap() {
-        if (!_REVERSE_MAP) {
-            _REVERSE_MAP = {};
-            for (var key in _MAP) {
-
-                // pull out the numeric keypad from here cause keypress should
-                // be able to detect the keys from the character
-                if (key > 95 && key < 112) {
-                    continue;
-                }
-
-                if (_MAP.hasOwnProperty(key)) {
-                    _REVERSE_MAP[_MAP[key]] = key;
-                }
-            }
-        }
-        return _REVERSE_MAP;
-    }
-
-    /**
-     * picks the best action based on the key combination
-     *
-     * @param {string} key - character for key
-     * @param {Array} modifiers
-     * @param {string=} action passed in
-     */
-    function _pickBestAction(key, modifiers, action) {
-
-        // if no action was picked in we should try to pick the one
-        // that we think would work best for this key
-        if (!action) {
-            action = _getReverseMap()[key] ? 'keydown' : 'keypress';
-        }
-
-        // modifier keys don't work as expected with keypress,
-        // switch to keydown
-        if (action == 'keypress' && modifiers.length) {
-            action = 'keydown';
-        }
-
-        return action;
-    }
-
-    /**
-     * Converts from a string key combination to an array
-     *
-     * @param  {string} combination like "command+shift+l"
-     * @return {Array}
-     */
-    function _keysFromString(combination) {
-        if (combination === '+') {
-            return ['+'];
-        }
-
-        combination = combination.replace(/\+{2}/g, '+plus');
-        return combination.split('+');
-    }
-
-    /**
-     * Gets info for a specific key combination
-     *
-     * @param  {string} combination key combination ("command+s" or "a" or "*")
-     * @param  {string=} action
-     * @returns {Object}
-     */
-    function _getKeyInfo(combination, action) {
-        var keys;
-        var key;
-        var i;
-        var modifiers = [];
-
-        // take the keys from this pattern and figure out what the actual
-        // pattern is all about
-        keys = _keysFromString(combination);
-
-        for (i = 0; i < keys.length; ++i) {
-            key = keys[i];
-
-            // normalize key names
-            if (_SPECIAL_ALIASES[key]) {
-                key = _SPECIAL_ALIASES[key];
-            }
-
-            // if this is not a keypress event then we should
-            // be smart about using shift keys
-            // this will only work for US keyboards however
-            if (action && action != 'keypress' && _SHIFT_MAP[key]) {
-                key = _SHIFT_MAP[key];
-                modifiers.push('shift');
-            }
-
-            // if this key is a modifier then add it to the list of modifiers
-            if (_isModifier(key)) {
-                modifiers.push(key);
-            }
-        }
-
-        // depending on what the key combination is
-        // we will try to pick the best event for it
-        action = _pickBestAction(key, modifiers, action);
-
-        return {
-            key: key,
-            modifiers: modifiers,
-            action: action
-        };
-    }
-
-    function _belongsTo(element, ancestor) {
-        if (element === null || element === document) {
-            return false;
-        }
-
-        if (element === ancestor) {
-            return true;
-        }
-
-        return _belongsTo(element.parentNode, ancestor);
-    }
-
-    function Mousetrap(targetElement) {
-        var self = this;
-
-        targetElement = targetElement || document;
-
-        if (!(self instanceof Mousetrap)) {
-            return new Mousetrap(targetElement);
-        }
-
-        /**
-         * element to attach key events to
-         *
-         * @type {Element}
-         */
-        self.target = targetElement;
-
-        /**
-         * a list of all the callbacks setup via Mousetrap.bind()
-         *
-         * @type {Object}
-         */
-        self._callbacks = {};
-
-        /**
-         * direct map of string combinations to callbacks used for trigger()
-         *
-         * @type {Object}
-         */
-        self._directMap = {};
-
-        /**
-         * keeps track of what level each sequence is at since multiple
-         * sequences can start out with the same sequence
-         *
-         * @type {Object}
-         */
-        var _sequenceLevels = {};
-
-        /**
-         * variable to store the setTimeout call
-         *
-         * @type {null|number}
-         */
-        var _resetTimer;
-
-        /**
-         * temporary state where we will ignore the next keyup
-         *
-         * @type {boolean|string}
-         */
-        var _ignoreNextKeyup = false;
-
-        /**
-         * temporary state where we will ignore the next keypress
-         *
-         * @type {boolean}
-         */
-        var _ignoreNextKeypress = false;
-
-        /**
-         * are we currently inside of a sequence?
-         * type of action ("keyup" or "keydown" or "keypress") or false
-         *
-         * @type {boolean|string}
-         */
-        var _nextExpectedAction = false;
-
-        /**
-         * resets all sequence counters except for the ones passed in
-         *
-         * @param {Object} doNotReset
-         * @returns void
-         */
-        function _resetSequences(doNotReset) {
-            doNotReset = doNotReset || {};
-
-            var activeSequences = false,
-                key;
-
-            for (key in _sequenceLevels) {
-                if (doNotReset[key]) {
-                    activeSequences = true;
-                    continue;
-                }
-                _sequenceLevels[key] = 0;
-            }
-
-            if (!activeSequences) {
-                _nextExpectedAction = false;
-            }
-        }
-
-        /**
-         * finds all callbacks that match based on the keycode, modifiers,
-         * and action
-         *
-         * @param {string} character
-         * @param {Array} modifiers
-         * @param {Event|Object} e
-         * @param {string=} sequenceName - name of the sequence we are looking for
-         * @param {string=} combination
-         * @param {number=} level
-         * @returns {Array}
-         */
-        function _getMatches(character, modifiers, e, sequenceName, combination, level) {
-            var i;
-            var callback;
-            var matches = [];
-            var action = e.type;
-
-            // if there are no events related to this keycode
-            if (!self._callbacks[character]) {
-                return [];
-            }
-
-            // if a modifier key is coming up on its own we should allow it
-            if (action == 'keyup' && _isModifier(character)) {
-                modifiers = [character];
-            }
-
-            // loop through all callbacks for the key that was pressed
-            // and see if any of them match
-            for (i = 0; i < self._callbacks[character].length; ++i) {
-                callback = self._callbacks[character][i];
-
-                // if a sequence name is not specified, but this is a sequence at
-                // the wrong level then move onto the next match
-                if (!sequenceName && callback.seq && _sequenceLevels[callback.seq] != callback.level) {
-                    continue;
-                }
-
-                // if the action we are looking for doesn't match the action we got
-                // then we should keep going
-                if (action != callback.action) {
-                    continue;
-                }
-
-                // if this is a keypress event and the meta key and control key
-                // are not pressed that means that we need to only look at the
-                // character, otherwise check the modifiers as well
-                //
-                // chrome will not fire a keypress if meta or control is down
-                // safari will fire a keypress if meta or meta+shift is down
-                // firefox will fire a keypress if meta or control is down
-                if ((action == 'keypress' && !e.metaKey && !e.ctrlKey) || _modifiersMatch(modifiers, callback.modifiers)) {
-
-                    // when you bind a combination or sequence a second time it
-                    // should overwrite the first one.  if a sequenceName or
-                    // combination is specified in this call it does just that
-                    //
-                    // @todo make deleting its own method?
-                    var deleteCombo = !sequenceName && callback.combo == combination;
-                    var deleteSequence = sequenceName && callback.seq == sequenceName && callback.level == level;
-                    if (deleteCombo || deleteSequence) {
-                        self._callbacks[character].splice(i, 1);
-                    }
-
-                    matches.push(callback);
-                }
-            }
-
-            return matches;
-        }
-
-        /**
-         * actually calls the callback function
-         *
-         * if your callback function returns false this will use the jquery
-         * convention - prevent default and stop propogation on the event
-         *
-         * @param {Function} callback
-         * @param {Event} e
-         * @returns void
-         */
-        function _fireCallback(callback, e, combo, sequence) {
-
-            // if this event should not happen stop here
-            if (self.stopCallback(e, e.target || e.srcElement, combo, sequence)) {
-                return;
-            }
-
-            if (callback(e, combo) === false) {
-                _preventDefault(e);
-                _stopPropagation(e);
-            }
-        }
-
-        /**
-         * handles a character key event
-         *
-         * @param {string} character
-         * @param {Array} modifiers
-         * @param {Event} e
-         * @returns void
-         */
-        self._handleKey = function(character, modifiers, e) {
-            var callbacks = _getMatches(character, modifiers, e);
-            var i;
-            var doNotReset = {};
-            var maxLevel = 0;
-            var processedSequenceCallback = false;
-
-            // Calculate the maxLevel for sequences so we can only execute the longest callback sequence
-            for (i = 0; i < callbacks.length; ++i) {
-                if (callbacks[i].seq) {
-                    maxLevel = Math.max(maxLevel, callbacks[i].level);
-                }
-            }
-
-            // loop through matching callbacks for this key event
-            for (i = 0; i < callbacks.length; ++i) {
-
-                // fire for all sequence callbacks
-                // this is because if for example you have multiple sequences
-                // bound such as "g i" and "g t" they both need to fire the
-                // callback for matching g cause otherwise you can only ever
-                // match the first one
-                if (callbacks[i].seq) {
-
-                    // only fire callbacks for the maxLevel to prevent
-                    // subsequences from also firing
-                    //
-                    // for example 'a option b' should not cause 'option b' to fire
-                    // even though 'option b' is part of the other sequence
-                    //
-                    // any sequences that do not match here will be discarded
-                    // below by the _resetSequences call
-                    if (callbacks[i].level != maxLevel) {
-                        continue;
-                    }
-
-                    processedSequenceCallback = true;
-
-                    // keep a list of which sequences were matches for later
-                    doNotReset[callbacks[i].seq] = 1;
-                    _fireCallback(callbacks[i].callback, e, callbacks[i].combo, callbacks[i].seq);
-                    continue;
-                }
-
-                // if there were no sequence matches but we are still here
-                // that means this is a regular match so we should fire that
-                if (!processedSequenceCallback) {
-                    _fireCallback(callbacks[i].callback, e, callbacks[i].combo);
-                }
-            }
-
-            // if the key you pressed matches the type of sequence without
-            // being a modifier (ie "keyup" or "keypress") then we should
-            // reset all sequences that were not matched by this event
-            //
-            // this is so, for example, if you have the sequence "h a t" and you
-            // type "h e a r t" it does not match.  in this case the "e" will
-            // cause the sequence to reset
-            //
-            // modifier keys are ignored because you can have a sequence
-            // that contains modifiers such as "enter ctrl+space" and in most
-            // cases the modifier key will be pressed before the next key
-            //
-            // also if you have a sequence such as "ctrl+b a" then pressing the
-            // "b" key will trigger a "keypress" and a "keydown"
-            //
-            // the "keydown" is expected when there is a modifier, but the
-            // "keypress" ends up matching the _nextExpectedAction since it occurs
-            // after and that causes the sequence to reset
-            //
-            // we ignore keypresses in a sequence that directly follow a keydown
-            // for the same character
-            var ignoreThisKeypress = e.type == 'keypress' && _ignoreNextKeypress;
-            if (e.type == _nextExpectedAction && !_isModifier(character) && !ignoreThisKeypress) {
-                _resetSequences(doNotReset);
-            }
-
-            _ignoreNextKeypress = processedSequenceCallback && e.type == 'keydown';
-        };
-
-        /**
-         * handles a keydown event
-         *
-         * @param {Event} e
-         * @returns void
-         */
-        function _handleKeyEvent(e) {
-
-            // normalize e.which for key events
-            // @see http://stackoverflow.com/questions/4285627/javascript-keycode-vs-charcode-utter-confusion
-            if (typeof e.which !== 'number') {
-                e.which = e.keyCode;
-            }
-
-            var character = _characterFromEvent(e);
-
-            // no character found then stop
-            if (!character) {
-                return;
-            }
-
-            // need to use === for the character check because the character can be 0
-            if (e.type == 'keyup' && _ignoreNextKeyup === character) {
-                _ignoreNextKeyup = false;
-                return;
-            }
-
-            self.handleKey(character, _eventModifiers(e), e);
-        }
-
-        /**
-         * called to set a 1 second timeout on the specified sequence
-         *
-         * this is so after each key press in the sequence you have 1 second
-         * to press the next key before you have to start over
-         *
-         * @returns void
-         */
-        function _resetSequenceTimer() {
-            clearTimeout(_resetTimer);
-            _resetTimer = setTimeout(_resetSequences, 1000);
-        }
-
-        /**
-         * binds a key sequence to an event
-         *
-         * @param {string} combo - combo specified in bind call
-         * @param {Array} keys
-         * @param {Function} callback
-         * @param {string=} action
-         * @returns void
-         */
-        function _bindSequence(combo, keys, callback, action) {
-
-            // start off by adding a sequence level record for this combination
-            // and setting the level to 0
-            _sequenceLevels[combo] = 0;
-
-            /**
-             * callback to increase the sequence level for this sequence and reset
-             * all other sequences that were active
-             *
-             * @param {string} nextAction
-             * @returns {Function}
-             */
-            function _increaseSequence(nextAction) {
-                return function() {
-                    _nextExpectedAction = nextAction;
-                    ++_sequenceLevels[combo];
-                    _resetSequenceTimer();
-                };
-            }
-
-            /**
-             * wraps the specified callback inside of another function in order
-             * to reset all sequence counters as soon as this sequence is done
-             *
-             * @param {Event} e
-             * @returns void
-             */
-            function _callbackAndReset(e) {
-                _fireCallback(callback, e, combo);
-
-                // we should ignore the next key up if the action is key down
-                // or keypress.  this is so if you finish a sequence and
-                // release the key the final key will not trigger a keyup
-                if (action !== 'keyup') {
-                    _ignoreNextKeyup = _characterFromEvent(e);
-                }
-
-                // weird race condition if a sequence ends with the key
-                // another sequence begins with
-                setTimeout(_resetSequences, 10);
-            }
-
-            // loop through keys one at a time and bind the appropriate callback
-            // function.  for any key leading up to the final one it should
-            // increase the sequence. after the final, it should reset all sequences
-            //
-            // if an action is specified in the original bind call then that will
-            // be used throughout.  otherwise we will pass the action that the
-            // next key in the sequence should match.  this allows a sequence
-            // to mix and match keypress and keydown events depending on which
-            // ones are better suited to the key provided
-            for (var i = 0; i < keys.length; ++i) {
-                var isFinal = i + 1 === keys.length;
-                var wrappedCallback = isFinal ? _callbackAndReset : _increaseSequence(action || _getKeyInfo(keys[i + 1]).action);
-                _bindSingle(keys[i], wrappedCallback, action, combo, i);
-            }
-        }
-
-        /**
-         * binds a single keyboard combination
-         *
-         * @param {string} combination
-         * @param {Function} callback
-         * @param {string=} action
-         * @param {string=} sequenceName - name of sequence if part of sequence
-         * @param {number=} level - what part of the sequence the command is
-         * @returns void
-         */
-        function _bindSingle(combination, callback, action, sequenceName, level) {
-
-            // store a direct mapped reference for use with Mousetrap.trigger
-            self._directMap[combination + ':' + action] = callback;
-
-            // make sure multiple spaces in a row become a single space
-            combination = combination.replace(/\s+/g, ' ');
-
-            var sequence = combination.split(' ');
-            var info;
-
-            // if this pattern is a sequence of keys then run through this method
-            // to reprocess each pattern one key at a time
-            if (sequence.length > 1) {
-                _bindSequence(combination, sequence, callback, action);
-                return;
-            }
-
-            info = _getKeyInfo(combination, action);
-
-            // make sure to initialize array if this is the first time
-            // a callback is added for this key
-            self._callbacks[info.key] = self._callbacks[info.key] || [];
-
-            // remove an existing match if there is one
-            _getMatches(info.key, info.modifiers, {type: info.action}, sequenceName, combination, level);
-
-            // add this call back to the array
-            // if it is a sequence put it at the beginning
-            // if not put it at the end
-            //
-            // this is important because the way these are processed expects
-            // the sequence ones to come first
-            self._callbacks[info.key][sequenceName ? 'unshift' : 'push']({
-                callback: callback,
-                modifiers: info.modifiers,
-                action: info.action,
-                seq: sequenceName,
-                level: level,
-                combo: combination
-            });
-        }
-
-        /**
-         * binds multiple combinations to the same callback
-         *
-         * @param {Array} combinations
-         * @param {Function} callback
-         * @param {string|undefined} action
-         * @returns void
-         */
-        self._bindMultiple = function(combinations, callback, action) {
-            for (var i = 0; i < combinations.length; ++i) {
-                _bindSingle(combinations[i], callback, action);
-            }
-        };
-
-        // start!
-        _addEvent(targetElement, 'keypress', _handleKeyEvent);
-        _addEvent(targetElement, 'keydown', _handleKeyEvent);
-        _addEvent(targetElement, 'keyup', _handleKeyEvent);
-    }
-
-    /**
-     * binds an event to mousetrap
-     *
-     * can be a single key, a combination of keys separated with +,
-     * an array of keys, or a sequence of keys separated by spaces
-     *
-     * be sure to list the modifier keys first to make sure that the
-     * correct key ends up getting bound (the last key in the pattern)
-     *
-     * @param {string|Array} keys
-     * @param {Function} callback
-     * @param {string=} action - 'keypress', 'keydown', or 'keyup'
-     * @returns void
-     */
-    Mousetrap.prototype.bind = function(keys, callback, action) {
-        var self = this;
-        keys = keys instanceof Array ? keys : [keys];
-        self._bindMultiple.call(self, keys, callback, action);
-        return self;
-    };
-
-    /**
-     * unbinds an event to mousetrap
-     *
-     * the unbinding sets the callback function of the specified key combo
-     * to an empty function and deletes the corresponding key in the
-     * _directMap dict.
-     *
-     * TODO: actually remove this from the _callbacks dictionary instead
-     * of binding an empty function
-     *
-     * the keycombo+action has to be exactly the same as
-     * it was defined in the bind method
-     *
-     * @param {string|Array} keys
-     * @param {string} action
-     * @returns void
-     */
-    Mousetrap.prototype.unbind = function(keys, action) {
-        var self = this;
-        return self.bind.call(self, keys, function() {}, action);
-    };
-
-    /**
-     * triggers an event that has already been bound
-     *
-     * @param {string} keys
-     * @param {string=} action
-     * @returns void
-     */
-    Mousetrap.prototype.trigger = function(keys, action) {
-        var self = this;
-        if (self._directMap[keys + ':' + action]) {
-            self._directMap[keys + ':' + action]({}, keys);
-        }
-        return self;
-    };
-
-    /**
-     * resets the library back to its initial state.  this is useful
-     * if you want to clear out the current keyboard shortcuts and bind
-     * new ones - for example if you switch to another page
-     *
-     * @returns void
-     */
-    Mousetrap.prototype.reset = function() {
-        var self = this;
-        self._callbacks = {};
-        self._directMap = {};
-        return self;
-    };
-
-    /**
-     * should we stop this event before firing off callbacks
-     *
-     * @param {Event} e
-     * @param {Element} element
-     * @return {boolean}
-     */
-    Mousetrap.prototype.stopCallback = function(e, element) {
-        var self = this;
-
-        // if the element has the class "mousetrap" then no need to stop
-        if ((' ' + element.className + ' ').indexOf(' mousetrap ') > -1) {
-            return false;
-        }
-
-        if (_belongsTo(element, self.target)) {
-            return false;
-        }
-
-        // stop for input, select, and textarea
-        return element.tagName == 'INPUT' || element.tagName == 'SELECT' || element.tagName == 'TEXTAREA' || element.isContentEditable;
-    };
-
-    /**
-     * exposes _handleKey publicly so it can be overwritten by extensions
-     */
-    Mousetrap.prototype.handleKey = function() {
-        var self = this;
-        return self._handleKey.apply(self, arguments);
-    };
-
-    /**
-     * allow custom key mappings
-     */
-    Mousetrap.addKeycodes = function(object) {
-        for (var key in object) {
-            if (object.hasOwnProperty(key)) {
-                _MAP[key] = object[key];
-            }
-        }
-        _REVERSE_MAP = null;
-    };
-
-    /**
-     * Init the global mousetrap functions
-     *
-     * This method is needed to allow the global mousetrap functions to work
-     * now that mousetrap is a constructor function.
-     */
-    Mousetrap.init = function() {
-        var documentMousetrap = Mousetrap(document);
-        for (var method in documentMousetrap) {
-            if (method.charAt(0) !== '_') {
-                Mousetrap[method] = (function(method) {
-                    return function() {
-                        return documentMousetrap[method].apply(documentMousetrap, arguments);
-                    };
-                } (method));
-            }
-        }
-    };
-
-    Mousetrap.init();
-
-    // expose mousetrap to the global object
-    window.Mousetrap = Mousetrap;
-
-    // expose as a common js module
-    if (typeof module !== 'undefined' && module.exports) {
-        module.exports = Mousetrap;
-    }
-
-    // expose mousetrap as an AMD module
-    if (true) {
-        !(__WEBPACK_AMD_DEFINE_RESULT__ = function() {
-            return Mousetrap;
-        }.call(exports, __webpack_require__, exports, module),
-				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
-    }
-}) (typeof window !== 'undefined' ? window : null, typeof  window !== 'undefined' ? document : null);
-
-
-/***/ }),
-
 /***/ 339:
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -2112,9 +1100,9 @@ var __WEBPACK_AMD_DEFINE_RESULT__;/*global define:false */
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const redux_saga_1 = __webpack_require__(17);
-const effects_1 = __webpack_require__(12);
+const effects_1 = __webpack_require__(13);
 const constants_1 = __webpack_require__(2);
-const common_1 = __webpack_require__(8);
+const common_1 = __webpack_require__(6);
 const stageSaga_1 = __webpack_require__(340);
 const stages_1 = __webpack_require__(50);
 function* animateTexts(textIds, { direction, distance: totalDistance, duration }) {
@@ -2170,13 +1158,15 @@ function* animateGameover() {
 }
 /**
  *  game-saga负责管理整体游戏进度
- *  负责管理游戏开始界面, 游戏结束界面, 游戏暂停
+ *  负责管理游戏开始界面, 游戏结束界面
  *  game-stage调用stage-saga来运行不同的关卡
  *  并根据stage-saga返回的结果选择继续下一个关卡, 或是选择游戏结束
  */
 function* gameManager() {
-    yield effects_1.take((action) => action.type === 'GAMESTART');
-    console.log('gamestart');
+    if (true) {
+        yield effects_1.take((action) => action.type === 'GAMESTART');
+        console.log('gamestart');
+    }
     const stages = Object.keys(stages_1.default);
     for (const stageName of stages) {
         const stageResult = yield* stageSaga_1.default(stageName);
@@ -2205,9 +1195,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const _ = __webpack_require__(22);
 const immutable_1 = __webpack_require__(5);
 const redux_saga_1 = __webpack_require__(17);
-const effects_1 = __webpack_require__(12);
+const effects_1 = __webpack_require__(13);
 const selectors = __webpack_require__(33);
-const common_1 = __webpack_require__(8);
+const common_1 = __webpack_require__(6);
 const types_1 = __webpack_require__(9);
 const log = console.log;
 const tankLevels = ['basic', 'fast', 'power', 'armor'];
@@ -2236,11 +1226,11 @@ function* statistics() {
                 yield redux_saga_1.delay(160);
             }
         }
-        yield redux_saga_1.delay(300);
+        yield redux_saga_1.delay(200);
     }
-    yield redux_saga_1.delay(1000);
+    yield redux_saga_1.delay(200);
     yield effects_1.put({ type: 'SHOW_TOTAL_KILL_COUNT' });
-    yield redux_saga_1.delay(3000);
+    yield redux_saga_1.delay(1000);
 }
 function* powerUp(powerUp) {
     const pickThisPowerUp = (action) => (action.type === 'PICK_POWER_UP' && action.powerUp.powerUpId === powerUp.powerUpId);
@@ -2252,9 +1242,9 @@ function* powerUp(powerUp) {
         let visible = true;
         for (let i = 0; i < 50; i++) {
             const result = yield effects_1.race({
-                timeout: redux_saga_1.delay(200),
+                timeout: redux_saga_1.delay(common_1.frame(8)),
                 picked: effects_1.take(pickThisPowerUp),
-                stageChanged: effects_1.take('LOAD_STAGE'),
+                stageChanged: effects_1.take('START_STAGE'),
             });
             if (result.picked || result.stageChanged) {
                 break;
@@ -2273,6 +1263,14 @@ function* powerUp(powerUp) {
         });
     }
 }
+function* tween(duration, effectFactory) {
+    let accumulation = 0;
+    while (accumulation < duration) {
+        const { delta } = yield effects_1.take('TICK');
+        accumulation += delta;
+        yield effectFactory(_.clamp(accumulation / duration, 0, 1));
+    }
+}
 /**
  * stage-saga的一个实例对应一个关卡
  * 在关卡开始时, 一个stage-saga实例将会启动, 负责关卡地图生成
@@ -2281,7 +1279,35 @@ function* powerUp(powerUp) {
  */
 function* stageSaga(stageName) {
     yield effects_1.put({ type: 'LOAD_SCENE', scene: 'game' });
-    yield effects_1.put({ type: 'LOAD_STAGE', name: stageName });
+    // todo action SHOW_CURTAIN
+    yield effects_1.put({
+        type: 'UPDATE_CURTAIN',
+        curtainName: 'stage-enter-cutain',
+        t: 0,
+    });
+    yield* tween(common_1.frame(50), t => effects_1.put({
+        type: 'UPDATE_CURTAIN',
+        curtainName: 'stage-enter-cutain',
+        t,
+    }));
+    yield redux_saga_1.delay(common_1.frame(20));
+    yield effects_1.put({
+        type: 'LOAD_STAGE_MAP',
+        name: stageName,
+    });
+    yield redux_saga_1.delay(common_1.frame(30));
+    yield* tween(common_1.frame(50), t => effects_1.put({
+        type: 'UPDATE_CURTAIN',
+        curtainName: 'stage-enter-cutain',
+        t: 1 - t,
+    }));
+    // todo action HIDE_CURTAIN
+    // yield svgFilter 添加反色效果
+    // yield put<Action>({type:'FILTER_INVERT'})
+    // 移除反色效果
+    // yield fork(delayedPut, f(3), { type: 'REMOEV_FILTER_INVERT' })
+    yield effects_1.put({ type: 'START_STAGE', name: stageName });
+    yield effects_1.put({ type: 'SHOW_HUD' });
     while (true) {
         const { sourcePlayer, targetTank } = yield effects_1.take('KILL');
         const { players, game: { remainingEnemies }, tanks } = yield effects_1.select();
@@ -2335,11 +1361,11 @@ exports.default = stageSaga;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const redux_saga_1 = __webpack_require__(17);
-const effects_1 = __webpack_require__(12);
-const common_1 = __webpack_require__(8);
+const effects_1 = __webpack_require__(13);
+const common_1 = __webpack_require__(6);
 const directionController_1 = __webpack_require__(149);
 const fireController_1 = __webpack_require__(150);
-const common_2 = __webpack_require__(8);
+const common_2 = __webpack_require__(6);
 const selectors = __webpack_require__(33);
 const types_1 = __webpack_require__(9);
 const AIWorker = __webpack_require__(342);
@@ -2517,9 +1543,9 @@ function* AIMasterSaga() {
     const addAICommandChannel = redux_saga_1.channel();
     yield effects_1.fork(addAIHandler);
     while (true) {
-        const actionTypes = ['KILL', 'LOAD_STAGE', 'GAMEOVER'];
+        const actionTypes = ['KILL', 'START_STAGE', 'GAMEOVER'];
         const action = yield effects_1.take(actionTypes);
-        if (action.type === 'LOAD_STAGE') {
+        if (action.type === 'START_STAGE') {
             for (let i = 0; i < max; i++) {
                 addAICommandChannel.put('add');
             }
@@ -2586,7 +1612,7 @@ exports.default = AIMasterSaga;
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = function() {
-	return new Worker(__webpack_require__.p + "1258cdcfdcb3bc2388a7.worker.js");
+	return new Worker(__webpack_require__.p + "d47a331da8dbd1455f17.worker.js");
 };
 
 /***/ }),
@@ -2598,10 +1624,10 @@ module.exports = function() {
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const redux_saga_1 = __webpack_require__(17);
-const effects_1 = __webpack_require__(12);
+const effects_1 = __webpack_require__(13);
 const constants_1 = __webpack_require__(2);
 const TankRecord_1 = __webpack_require__(142);
-const common_1 = __webpack_require__(8);
+const common_1 = __webpack_require__(6);
 const selectors = __webpack_require__(33);
 const PlayerRecord_1 = __webpack_require__(143);
 function* handlePickPowerUps(playerName) {
@@ -2633,13 +1659,18 @@ function* humanPlayerSaga(playerName, tankColor) {
             side: 'human',
         }),
     });
+    // todo bug 进入新的关卡的时候, human tank一开始会出现在上一关结束的位置
+    // todo bug 进入新的关卡的时候, human tank会重置为最低等级的坦克
     while (true) {
-        yield effects_1.take((action) => (action.type === 'LOAD_STAGE'
+        const action = yield effects_1.take((action) => (action.type === 'START_STAGE'
             || action.type === 'KILL' && action.targetPlayer.playerName === playerName));
         const { players } = yield effects_1.select();
         const player = players.get(playerName);
         if (player.lives > 0) {
-            yield redux_saga_1.delay(500);
+            if (action.type === 'KILL') {
+                // todo 是否需要这个delay??
+                yield redux_saga_1.delay(500);
+            }
             yield effects_1.put({ type: 'DECREMENT_PLAYER_LIFE', playerName });
             const tankId = yield* common_1.spawnTank(TankRecord_1.default({
                 x: 4 * constants_1.BLOCK_SIZE,
@@ -2647,6 +1678,7 @@ function* humanPlayerSaga(playerName, tankColor) {
                 side: 'human',
                 color: tankColor,
                 level: 'basic',
+                helmetDuration: action.type === 'START_STAGE' ? common_1.frame(135) : common_1.frame(180),
             }));
             yield effects_1.put({
                 type: 'ACTIVATE_PLAYER',
@@ -2668,11 +1700,11 @@ exports.default = humanPlayerSaga;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const redux_saga_1 = __webpack_require__(17);
-const effects_1 = __webpack_require__(12);
+const effects_1 = __webpack_require__(13);
 const types_1 = __webpack_require__(9);
 const constants_1 = __webpack_require__(2);
-const common_1 = __webpack_require__(8);
-const bulletsSaga_1 = __webpack_require__(151);
+const common_1 = __webpack_require__(6);
+const bulletsSaga_1 = __webpack_require__(152);
 function convertToBricks(map) {
     const { eagle, steels, bricks } = map;
     const eagleSurroundingBox = {
@@ -2719,25 +1751,25 @@ function* shovel() {
         type: 'UPDATE_MAP',
         map: convertToSteels((yield effects_1.select()).map),
     });
-    // shovel的有效时间
-    yield redux_saga_1.delay(3e3);
-    // 闪烁
-    yield effects_1.put({
-        type: 'UPDATE_MAP',
-        map: convertToBricks((yield effects_1.select()).map),
-    });
-    for (let i = 0; i < 4; i++) {
-        yield redux_saga_1.delay(200);
-        yield effects_1.put({
-            type: 'UPDATE_MAP',
-            map: convertToSteels((yield effects_1.select()).map),
-        });
-        yield redux_saga_1.delay(200);
+    yield redux_saga_1.delay(common_1.frame(1076));
+    // 总共闪烁6次
+    for (let i = 0; i < 6; i++) {
         yield effects_1.put({
             type: 'UPDATE_MAP',
             map: convertToBricks((yield effects_1.select()).map),
         });
+        yield redux_saga_1.delay(common_1.frame(16));
+        yield effects_1.put({
+            type: 'UPDATE_MAP',
+            map: convertToSteels((yield effects_1.select()).map),
+        });
+        yield redux_saga_1.delay(common_1.frame(16));
     }
+    // 最后变回brick-wall
+    yield effects_1.put({
+        type: 'UPDATE_MAP',
+        map: convertToBricks((yield effects_1.select()).map),
+    });
 }
 function* timer() {
     yield effects_1.put({
@@ -2781,7 +1813,7 @@ function* helmet({ tank }) {
     yield effects_1.put({
         type: 'SET_HELMET_DURATION',
         tankId: tank.tankId,
-        duration: 6e3,
+        duration: common_1.frame(630),
     });
 }
 const is = (name) => (action) => (action.type === 'PICK_POWER_UP'
@@ -2834,12 +1866,14 @@ exports.default = powerUps;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const React = __webpack_require__(0);
-const react_redux_1 = __webpack_require__(11);
+const react_redux_1 = __webpack_require__(12);
 const constants_1 = __webpack_require__(2);
 const GameScene_1 = __webpack_require__(346);
 const GameoverScene_1 = __webpack_require__(91);
 const StatisticsScene_1 = __webpack_require__(92);
 const GameTitleScene_1 = __webpack_require__(93);
+const PauseIndicator_1 = __webpack_require__(353);
+const CurtainsContainer_1 = __webpack_require__(354);
 let Inspector = () => (React.createElement("div", { style: { maxWidth: 200, marginLeft: 20 } },
     React.createElement("p", null, "\u6E38\u620F\u4ECD\u5728\u5F00\u53D1\u4E2D\uFF0C\u76EE\u524D\u53EA\u652F\u6301\u5355\u4EBA\u8FDB\u884C\u6E38\u620F\u3002 \u76EE\u524D\u6E38\u620F\u4ECD\u6709\u5F88\u591ABUG\uFF0C\u8BF7\u89C1\u8C05\u3002 \u8BF7\u4F7F\u7528\u6700\u65B0\u7684chrome\u6D4F\u89C8\u5668\u3002 \u6E38\u620F\u5F00\u59CB\u9875\u9762\u8BF7\u4F7F\u7528\u9F20\u6807\u8FDB\u884C\u64CD\u4F5C\u3002 \u6574\u4E2A\u6E38\u620F\u90FD\u4F7F\u7528\u4E86\u77E2\u91CF\u56FE\uFF0C\u53EF\u4EE5\u9002\u5F53\u653E\u5927\u6D4F\u89C8\u5668\u7684\u7F29\u653E\u6BD4\u4F8B\u3002"),
     React.createElement("p", null, "WASD \u63A7\u5236\u5766\u514B\u65B9\u5411"),
@@ -2863,19 +1897,22 @@ const totalWidth = 16 * constants_1.BLOCK_SIZE;
 const totalHeight = 15 * constants_1.BLOCK_SIZE;
 class App extends React.PureComponent {
     render() {
-        const { scene } = this.props;
+        const { scene, paused } = this.props;
         return (React.createElement("div", { style: { display: 'flex' } },
             React.createElement("svg", { className: "svg", style: { background: '#757575' }, width: totalWidth * zoomLevel, height: totalHeight * zoomLevel, viewBox: `0 0 ${totalWidth} ${totalHeight}` },
                 scene === 'game-title' ? React.createElement(GameTitleScene_1.default, null) : null,
                 scene === 'game' ? React.createElement(GameScene_1.default, null) : null,
                 scene === 'gameover' ? React.createElement(GameoverScene_1.default, null) : null,
-                scene === 'statistics' ? React.createElement(StatisticsScene_1.default, null) : null),
+                scene === 'statistics' ? React.createElement(StatisticsScene_1.default, null) : null,
+                React.createElement(CurtainsContainer_1.default, null),
+                paused ? React.createElement(PauseIndicator_1.default, null) : null),
             React.createElement(Inspector, null)));
     }
 }
 function mapStateToProps(state) {
     return {
         scene: state.game.scene,
+        paused: state.game.paused,
     };
 }
 exports.default = react_redux_1.connect(mapStateToProps)(App);
@@ -2890,7 +1927,7 @@ exports.default = react_redux_1.connect(mapStateToProps)(App);
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const React = __webpack_require__(0);
-const react_redux_1 = __webpack_require__(11);
+const react_redux_1 = __webpack_require__(12);
 const _ = __webpack_require__(22);
 const constants_1 = __webpack_require__(2);
 const tanks_1 = __webpack_require__(24);
@@ -2921,7 +1958,8 @@ class GameScene extends React.Component {
                 React.createElement(SteelLayer_1.default, { steels: steels }),
                 React.createElement(BrickLayer_1.default, { bricks: bricks }),
                 React.createElement(SnowLayer_1.default, { snows: snows }),
-                React.createElement(Eagle_1.default, { x: eagle.x, y: eagle.y, broken: eagle.broken }),
+                eagle ?
+                    React.createElement(Eagle_1.default, { x: eagle.x, y: eagle.y, broken: eagle.broken }) : null,
                 React.createElement("g", { role: "bullet-layer" }, bullets.map((b, i) => React.createElement(Bullet_1.default, { key: i, direction: b.direction, x: b.x, y: b.y })).toArray()),
                 React.createElement("g", { role: "tank-layer" }, activeTanks.map(tank => React.createElement(tanks_1.Tank, { key: tank.tankId, tank: tank })).toArray()),
                 React.createElement("g", { role: "helmet-layer" }, activeTanks.map(tank => tank.helmetDuration > 0 ? (React.createElement(TankHelmet_1.default, { key: tank.tankId, x: tank.x, y: tank.y })) : null).toArray()),
@@ -2945,6 +1983,7 @@ exports.default = react_redux_1.connect(_.identity)(GameScene);
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const React = __webpack_require__(0);
+const common_1 = __webpack_require__(6);
 const registerTick_1 = __webpack_require__(25);
 class TankHelmet extends React.PureComponent {
     render() {
@@ -2960,7 +1999,7 @@ class TankHelmet extends React.PureComponent {
             React.createElement("path", { transform: "rotate(270)", style: { transformOrigin: 'right bottom' }, d: ds[tickIndex] })));
     }
 }
-exports.default = registerTick_1.default(70, 70)(TankHelmet);
+exports.default = registerTick_1.default(common_1.frame(2), common_1.frame(2))(TankHelmet);
 
 
 /***/ }),
@@ -2972,7 +2011,7 @@ exports.default = registerTick_1.default(70, 70)(TankHelmet);
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const React = __webpack_require__(0);
-const Text_1 = __webpack_require__(13);
+const Text_1 = __webpack_require__(10);
 class TextLayer extends React.PureComponent {
     render() {
         const { texts } = this.props;
@@ -2984,6 +2023,110 @@ exports.default = TextLayer;
 
 /***/ }),
 
+/***/ 353:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const React = __webpack_require__(0);
+const Text_1 = __webpack_require__(10);
+const constants_1 = __webpack_require__(2);
+class PauseIndicator extends React.PureComponent {
+    constructor() {
+        super(...arguments);
+        this.handle = null;
+        this.state = {
+            visible: true,
+        };
+    }
+    componentDidMount() {
+        this.handle = setInterval(() => this.setState({ visible: !this.state.visible }), 250);
+    }
+    componentWillUnmount() {
+        clearInterval(this.handle);
+    }
+    render() {
+        return (React.createElement("g", { role: "pause-indicator" },
+            React.createElement(Text_1.default, { content: "pause", x: 6.25 * constants_1.BLOCK_SIZE, y: 8 * constants_1.BLOCK_SIZE, fill: "#db2b00", style: { visibility: this.state.visible ? 'visible' : 'hidden' } })));
+    }
+}
+exports.default = PauseIndicator;
+
+
+/***/ }),
+
+/***/ 354:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const React = __webpack_require__(0);
+const react_redux_1 = __webpack_require__(12);
+const StageEnterCurtain_1 = __webpack_require__(355);
+class CurtainsContainer extends React.PureComponent {
+    render() {
+        const { stageEnterCurtainT: t } = this.props;
+        return React.createElement(StageEnterCurtain_1.default, { stageName: "stage  1", t: t });
+    }
+}
+function mapStateToProps(state) {
+    return {
+        stageEnterCurtainT: state.game.stageEnterCurtainT,
+    };
+}
+exports.default = react_redux_1.connect(mapStateToProps)(CurtainsContainer);
+
+
+/***/ }),
+
+/***/ 355:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const React = __webpack_require__(0);
+const constants_1 = __webpack_require__(2);
+const Curtain_1 = __webpack_require__(356);
+const Text_1 = __webpack_require__(10);
+class StageEnterCurtain extends React.PureComponent {
+    render() {
+        const { t, stageName } = this.props;
+        return (React.createElement(Curtain_1.default, { name: "stage-enter/exit", t: t, x: constants_1.BLOCK_SIZE, y: constants_1.BLOCK_SIZE, width: 13 * constants_1.BLOCK_SIZE, height: 13 * constants_1.BLOCK_SIZE },
+            React.createElement("rect", { width: 13 * constants_1.BLOCK_SIZE, height: 13 * constants_1.BLOCK_SIZE, fill: "#757575" }),
+            React.createElement(Text_1.default, { content: stageName, x: 5 * constants_1.BLOCK_SIZE, y: 6 * constants_1.BLOCK_SIZE, fill: "black" })));
+    }
+}
+exports.default = StageEnterCurtain;
+
+
+/***/ }),
+
+/***/ 356:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const React = __webpack_require__(0);
+class Curtain extends React.PureComponent {
+    render() {
+        const { name, children, t, x = 0, y = 0, width, height } = this.props;
+        return (React.createElement("g", { role: `curtain-${name}`, transform: `translate(${x}, ${y})` },
+            React.createElement("defs", null,
+                React.createElement("clipPath", { id: "default-curtain" },
+                    React.createElement("rect", { x: 0, y: 0, width: width, height: height / 2 * t }),
+                    React.createElement("rect", { x: 0, y: height * (1 - t / 2), width: width, height: height / 2 * t }))),
+            React.createElement("g", { clipPath: "url(#default-curtain)" }, children)));
+    }
+}
+exports.default = Curtain;
+
+
+/***/ }),
+
 /***/ 77:
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -2991,17 +2134,11 @@ exports.default = TextLayer;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const React = __webpack_require__(0);
-const react_redux_1 = __webpack_require__(11);
+const react_redux_1 = __webpack_require__(12);
 const EnemyCountIndicator_1 = __webpack_require__(78);
 const icons_1 = __webpack_require__(79);
-const Text_1 = __webpack_require__(13);
+const Text_1 = __webpack_require__(10);
 const constants_1 = __webpack_require__(2);
-function mapStateToProps(state) {
-    return {
-        remainingEnemyCount: state.game.remainingEnemies.size,
-        players: state.players,
-    };
-}
 class HUD extends React.PureComponent {
     renderPlayer1Info() {
         const { players } = this.props;
@@ -3032,12 +2169,19 @@ class HUD extends React.PureComponent {
         }
     }
     render() {
-        const { remainingEnemyCount } = this.props;
-        return (React.createElement("g", { role: "HUD" },
+        const { remainingEnemyCount, show } = this.props;
+        return (React.createElement("g", { role: "HUD", display: show ? 'inline' : 'none' },
             React.createElement(EnemyCountIndicator_1.default, { count: remainingEnemyCount }),
             this.renderPlayer1Info(),
             this.renderPlayer2Info()));
     }
+}
+function mapStateToProps(state) {
+    return {
+        remainingEnemyCount: state.game.remainingEnemies.size,
+        players: state.players,
+        show: state.game.showHUD,
+    };
 }
 exports.default = react_redux_1.connect(mapStateToProps)(HUD);
 
@@ -3566,7 +2710,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const React = __webpack_require__(0);
 const constants_1 = __webpack_require__(2);
 const BrickWall_1 = __webpack_require__(34);
-const Text_1 = __webpack_require__(13);
+const Text_1 = __webpack_require__(10);
 class GameoverScene extends React.PureComponent {
     render() {
         const size = constants_1.ITEM_SIZE_MAP.BRICK;
@@ -3597,8 +2741,8 @@ exports.default = GameoverScene;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const React = __webpack_require__(0);
-const react_redux_1 = __webpack_require__(11);
-const Text_1 = __webpack_require__(13);
+const react_redux_1 = __webpack_require__(12);
+const Text_1 = __webpack_require__(10);
 const tanks_1 = __webpack_require__(24);
 const constants_1 = __webpack_require__(2);
 const types_1 = __webpack_require__(9);
@@ -3665,9 +2809,9 @@ exports.default = react_redux_1.connect(mapStateToProps)(StatisticsScene);
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const React = __webpack_require__(0);
-const react_redux_1 = __webpack_require__(11);
+const react_redux_1 = __webpack_require__(12);
 const BrickWall_1 = __webpack_require__(34);
-const Text_1 = __webpack_require__(13);
+const Text_1 = __webpack_require__(10);
 const TextButton_1 = __webpack_require__(94);
 const tanks_1 = __webpack_require__(24);
 const constants_1 = __webpack_require__(2);
@@ -3730,4 +2874,4 @@ exports.default = react_redux_1.connect(undefined)(GameTitleScene);
 
 /***/ })
 
-},[156]);
+},[157]);

@@ -1,6 +1,6 @@
 webpackJsonp([1],{
 
-/***/ 353:
+/***/ 357:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -10,7 +10,7 @@ __webpack_require__(51);
 const React = __webpack_require__(0);
 const ReactDOM = __webpack_require__(52);
 const immutable_1 = __webpack_require__(5);
-const react_redux_1 = __webpack_require__(11);
+const react_redux_1 = __webpack_require__(12);
 const redux_1 = __webpack_require__(40);
 const redux_saga_1 = __webpack_require__(17);
 const players_1 = __webpack_require__(74);
@@ -22,7 +22,7 @@ const SteelLayer_1 = __webpack_require__(82);
 const RiverLayer_1 = __webpack_require__(83);
 const BrickLayer_1 = __webpack_require__(81);
 const ForestLayer_1 = __webpack_require__(85);
-const Text_1 = __webpack_require__(13);
+const Text_1 = __webpack_require__(10);
 const Eagle_1 = __webpack_require__(86);
 const Bullet_1 = __webpack_require__(80);
 const Flicker_1 = __webpack_require__(88);
@@ -210,17 +210,11 @@ ReactDOM.render(React.createElement(react_redux_1.Provider, { store: simpleStore
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const React = __webpack_require__(0);
-const react_redux_1 = __webpack_require__(11);
+const react_redux_1 = __webpack_require__(12);
 const EnemyCountIndicator_1 = __webpack_require__(78);
 const icons_1 = __webpack_require__(79);
-const Text_1 = __webpack_require__(13);
+const Text_1 = __webpack_require__(10);
 const constants_1 = __webpack_require__(2);
-function mapStateToProps(state) {
-    return {
-        remainingEnemyCount: state.game.remainingEnemies.size,
-        players: state.players,
-    };
-}
 class HUD extends React.PureComponent {
     renderPlayer1Info() {
         const { players } = this.props;
@@ -251,12 +245,19 @@ class HUD extends React.PureComponent {
         }
     }
     render() {
-        const { remainingEnemyCount } = this.props;
-        return (React.createElement("g", { role: "HUD" },
+        const { remainingEnemyCount, show } = this.props;
+        return (React.createElement("g", { role: "HUD", display: show ? 'inline' : 'none' },
             React.createElement(EnemyCountIndicator_1.default, { count: remainingEnemyCount }),
             this.renderPlayer1Info(),
             this.renderPlayer2Info()));
     }
+}
+function mapStateToProps(state) {
+    return {
+        remainingEnemyCount: state.game.remainingEnemies.size,
+        players: state.players,
+        show: state.game.showHUD,
+    };
 }
 exports.default = react_redux_1.connect(mapStateToProps)(HUD);
 
@@ -785,7 +786,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const React = __webpack_require__(0);
 const constants_1 = __webpack_require__(2);
 const BrickWall_1 = __webpack_require__(34);
-const Text_1 = __webpack_require__(13);
+const Text_1 = __webpack_require__(10);
 class GameoverScene extends React.PureComponent {
     render() {
         const size = constants_1.ITEM_SIZE_MAP.BRICK;
@@ -816,8 +817,8 @@ exports.default = GameoverScene;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const React = __webpack_require__(0);
-const react_redux_1 = __webpack_require__(11);
-const Text_1 = __webpack_require__(13);
+const react_redux_1 = __webpack_require__(12);
+const Text_1 = __webpack_require__(10);
 const tanks_1 = __webpack_require__(24);
 const constants_1 = __webpack_require__(2);
 const types_1 = __webpack_require__(9);
@@ -884,9 +885,9 @@ exports.default = react_redux_1.connect(mapStateToProps)(StatisticsScene);
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const React = __webpack_require__(0);
-const react_redux_1 = __webpack_require__(11);
+const react_redux_1 = __webpack_require__(12);
 const BrickWall_1 = __webpack_require__(34);
-const Text_1 = __webpack_require__(13);
+const Text_1 = __webpack_require__(10);
 const TextButton_1 = __webpack_require__(94);
 const tanks_1 = __webpack_require__(24);
 const constants_1 = __webpack_require__(2);
@@ -949,4 +950,4 @@ exports.default = react_redux_1.connect(undefined)(GameTitleScene);
 
 /***/ })
 
-},[353]);
+},[357]);
