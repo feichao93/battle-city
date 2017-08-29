@@ -34,11 +34,12 @@ class GameScene extends React.Component<State> {
           <SteelLayer steels={steels} />
           <BrickLayer bricks={bricks} />
           <SnowLayer snows={snows} />
-          <Eagle
-            x={eagle.x}
-            y={eagle.y}
-            broken={eagle.broken}
-          />
+          {eagle ?
+            <Eagle
+              x={eagle.x}
+              y={eagle.y}
+              broken={eagle.broken}
+            /> : null}
           <g role="bullet-layer">
             {bullets.map((b, i) =>
               <Bullet key={i} direction={b.direction} x={b.x} y={b.y} />

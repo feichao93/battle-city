@@ -1,10 +1,10 @@
 import * as _ from 'lodash'
 import { List, Map, Repeat, Collection } from 'immutable'
-import { delay } from 'redux-saga'
+import { delay, Effect } from 'redux-saga'
 import { race, fork, put, select, take } from 'redux-saga/effects'
 import { State } from 'reducers/index'
 import * as selectors from 'utils/selectors'
-import { getNextId, frame } from 'utils/common'
+import { getNextId, frame as f } from 'utils/common'
 import { PowerUpRecord } from 'types'
 
 const log = console.log
@@ -41,11 +41,11 @@ function* statistics() {
         yield delay(160)
       }
     }
-    yield delay(300)
+    yield delay(200)
   }
-  yield delay(1000)
+  yield delay(200)
   yield put<Action>({ type: 'SHOW_TOTAL_KILL_COUNT' })
-  yield delay(3000)
+  yield delay(1000)
 }
 
 function* powerUp(powerUp: PowerUpRecord) {
@@ -60,9 +60,9 @@ function* powerUp(powerUp: PowerUpRecord) {
     let visible = true
     for (let i = 0; i < 50; i++) {
       const result = yield race({
-        timeout: delay(frame(8)),
+        timeout: delay(f(8)),
         picked: take(pickThisPowerUp),
-        stageChanged: take('LOAD_STAGE'),
+        stageChanged: take('START_STAGE'),
       })
       if (result.picked || result.stageChanged) {
         break
@@ -81,6 +81,15 @@ function* powerUp(powerUp: PowerUpRecord) {
   }
 }
 
+function* tween(duration: number, effectFactory: (t: number) => Effect) {
+  let accumulation = 0
+  while (accumulation < duration) {
+    const { delta }: Action.TickAction = yield take('TICK')
+    accumulation += delta
+    yield effectFactory(_.clamp(accumulation / duration, 0, 1))
+  }
+}
+
 /**
  * stage-saga的一个实例对应一个关卡
  * 在关卡开始时, 一个stage-saga实例将会启动, 负责关卡地图生成
@@ -89,7 +98,37 @@ function* powerUp(powerUp: PowerUpRecord) {
  */
 export default function* stageSaga(stageName: string) {
   yield put<Action>({ type: 'LOAD_SCENE', scene: 'game' })
-  yield put<Action>({ type: 'LOAD_STAGE', name: stageName })
+
+  // todo action SHOW_CURTAIN
+  yield put<Action>({
+    type: 'UPDATE_CURTAIN',
+    curtainName: 'stage-enter-cutain',
+    t: 0,
+  })
+
+  yield* tween(f(50), t => put<Action>({
+    type: 'UPDATE_CURTAIN',
+    curtainName: 'stage-enter-cutain',
+    t,
+  }))
+  yield delay(f(20))
+  yield put<Action>({
+    type: 'LOAD_STAGE_MAP',
+    name: stageName,
+  })
+  yield delay(f(30))
+  yield* tween(f(50), t => put<Action>({
+    type: 'UPDATE_CURTAIN',
+    curtainName: 'stage-enter-cutain',
+    t: 1 - t,
+  }))
+  // todo action HIDE_CURTAIN
+  // yield svgFilter 添加反色效果
+  // yield put<Action>({type:'FILTER_INVERT'})
+  // 移除反色效果
+  // yield fork(delayedPut, f(3), { type: 'REMOEV_FILTER_INVERT' })
+  yield put<Action>({ type: 'START_STAGE', name: stageName })
+  yield put<Action>({ type: 'SHOW_HUD' })
 
   while (true) {
     const { sourcePlayer, targetTank }: Action.KillAction = yield take('KILL')

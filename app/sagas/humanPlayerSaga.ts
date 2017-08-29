@@ -38,15 +38,20 @@ export default function* humanPlayerSaga(playerName: string, tankColor: TankColo
     }),
   })
 
+  // todo bug 进入新的关卡的时候, human tank一开始会出现在上一关结束的位置
+  // todo bug 进入新的关卡的时候, human tank会重置为最低等级的坦克
   while (true) {
     const action: Action = yield take((action: Action) => (
-      action.type === 'LOAD_STAGE'
+      action.type === 'START_STAGE'
       || action.type === 'KILL' && action.targetPlayer.playerName === playerName
     ))
     const { players }: State = yield select()
     const player = players.get(playerName)
     if (player.lives > 0) {
-      yield delay(500)
+      if (action.type === 'KILL') {
+        // todo 是否需要这个delay??
+        yield delay(500)
+      }
       yield put({ type: 'DECREMENT_PLAYER_LIFE', playerName })
       const tankId = yield* spawnTank(TankRecord({
         x: 4 * BLOCK_SIZE,
@@ -54,7 +59,7 @@ export default function* humanPlayerSaga(playerName: string, tankColor: TankColo
         side: 'human',
         color: tankColor,
         level: 'basic',
-        helmetDuration: action.type === 'LOAD_STAGE' ? frame(135) : frame(180),
+        helmetDuration: action.type === 'START_STAGE' ? frame(135) : frame(180),
       }))
       yield put({
         type: 'ACTIVATE_PLAYER',

@@ -36,6 +36,12 @@ export const GameRecord = Record({
   showTotalKillCount: false,
   /** AI坦克的冻结时间. 小于等于0表示没有冻结, 大于0表示还需要一段时间解冻 */
   AIFrozenTimeout: 0,
+
+  /** 是否显示HUD */
+  showHUD: false,
+
+  /** stage-enter-curtain相关字段 TODO 这个字段需要移动到其他的reducer中 */
+  stageEnterCurtainT: 0,
 }, 'GameRecord')
 
 const gameRecord = GameRecord()
@@ -45,7 +51,7 @@ export type GameRecord = typeof gameRecord
 export default function game(state = gameRecord, action: Action) {
   if (action.type === 'LOAD_SCENE') {
     return state.set('scene', action.scene)
-  } else if (action.type === 'LOAD_STAGE') {
+  } else if (action.type === 'START_STAGE') {
     return state.merge({
       currentStage: action.name,
       transientKillInfo: emptyTransientKillInfo,
@@ -68,6 +74,12 @@ export default function game(state = gameRecord, action: Action) {
     return state.set('paused', true)
   } else if (action.type === 'GAMERESUME') {
     return state.set('paused', false)
+  } else if (action.type === 'UPDATE_CURTAIN') {
+    return state.set('stageEnterCurtainT', action.t)
+  } else if (action.type === 'SHOW_HUD') {
+    return state.set('showHUD', true)
+  } else if (action.type === 'HIDE_HUD') {
+    return state.set('showHUD', false)
   } else {
     return state
   }

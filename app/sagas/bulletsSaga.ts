@@ -202,7 +202,11 @@ function* destroyBricks(collidedBullets: BulletsMap) {
 
 function* filterBulletsCollidedWithEagle(bullets: BulletsMap) {
   // 判断是否和eagle相撞
-  const { map: { eagle: { broken, x, y } } }: State = yield select()
+  const { map: { eagle } }: State = yield select()
+  if (eagle == null) {
+    return bullets.clear()
+  }
+  const { broken, x, y } = eagle
   if (broken) {
     return IMap()
   } else {

@@ -6,19 +6,13 @@ import Text from 'components/Text'
 import { BLOCK_SIZE } from 'utils/constants'
 import { State, PlayersMap } from 'types'
 
-function mapStateToProps(state: State) {
-  return {
-    remainingEnemyCount: state.game.remainingEnemies.size,
-    players: state.players,
-  }
+interface P {
+  remainingEnemyCount: number
+  players: PlayersMap
+  show: boolean
 }
 
-type Props = {
-  remainingEnemyCount: number,
-  players: PlayersMap,
-}
-
-class HUD extends React.PureComponent<Props, {}> {
+class HUD extends React.PureComponent<P> {
   renderPlayer1Info() {
     const { players } = this.props
     const player1 = players.find(p => (p.playerName === 'player-1'))
@@ -64,15 +58,24 @@ class HUD extends React.PureComponent<Props, {}> {
   }
 
   render() {
-    const { remainingEnemyCount } = this.props
+    const { remainingEnemyCount, show } = this.props
 
     return (
-      <g role="HUD">
+      <g role="HUD" display={show ? 'inline' : 'none'}>
         <EnemyCountIndicator count={remainingEnemyCount} />
         {this.renderPlayer1Info()}
         {this.renderPlayer2Info()}
       </g>
     )
+  }
+}
+
+
+function mapStateToProps(state: State) {
+  return {
+    remainingEnemyCount: state.game.remainingEnemies.size,
+    players: state.players,
+    show: state.game.showHUD,
   }
 }
 

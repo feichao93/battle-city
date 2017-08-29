@@ -6,6 +6,7 @@ import gameManager from 'sagas/gameManager'
 import AIMasterSaga from 'sagas/AISaga'
 import tickEmitter from 'sagas/tickEmitter'
 import { CONTROL_CONFIG, TANK_SPAWN_DELAY } from 'utils/constants'
+import { frame as f } from 'utils/common'
 import humanPlayerSaga from 'sagas/humanPlayerSaga'
 import powerUps from 'sagas/powerUps'
 
@@ -23,7 +24,7 @@ function* autoRemoveEffects() {
     yield put<Action>({ type: 'REMOVE_FLICKER', flickerId })
   })
   yield takeEvery('ADD_SCORE', function* removeScore({ score: { scoreId } }: Action.AddScoreAction) {
-    yield delay(2000)
+    yield delay(f(48))
     yield put<Action>({ type: 'REMOVE_SCORE', scoreId })
   })
 }

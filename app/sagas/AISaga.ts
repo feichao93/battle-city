@@ -186,9 +186,9 @@ export default function* AIMasterSaga() {
   yield fork(addAIHandler)
 
   while (true) {
-    const actionTypes: ActionType[] = ['KILL', 'LOAD_STAGE', 'GAMEOVER']
+    const actionTypes: ActionType[] = ['KILL', 'START_STAGE', 'GAMEOVER']
     const action: Action = yield take(actionTypes)
-    if (action.type === 'LOAD_STAGE') {
+    if (action.type === 'START_STAGE') {
       for (let i = 0; i < max; i++) {
         addAICommandChannel.put('add')
       }

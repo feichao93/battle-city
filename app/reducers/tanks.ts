@@ -10,7 +10,7 @@ export default function tanks(state = Map() as TanksMap, action: Action) {
   } else if (action.type === 'HURT') {
     const tankId = action.targetTank.tankId
     return state.update(tankId, t => t.update('hp', hp => hp - action.hurt))
-  } else if (action.type === 'LOAD_STAGE') {
+  } else if (action.type === 'START_STAGE') {
     // 在载入关卡的时候清空tank
     return state.clear()
   } else if (action.type === 'MOVE') {
