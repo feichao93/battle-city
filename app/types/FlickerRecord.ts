@@ -1,17 +1,14 @@
 import { Record } from 'immutable'
 
-type Base = {
-  flickerId: FlickerId,
-  x: number,
-  y: number,
-}
-
-type FlickerRecord = Record.Instance<Base> & Readonly<Base>
-
 const FlickerRecord = Record({
   flickerId: 0,
   x: 0,
   y: 0,
-} as Base)
+  shape: 0,
+})
+
+const record = FlickerRecord()
+
+type FlickerRecord = typeof record
 
 export default FlickerRecord

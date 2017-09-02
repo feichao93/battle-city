@@ -5,7 +5,7 @@ import { incTankLevel } from 'utils/common'
 export type TanksMap = Map<TankId, TankRecord>
 
 export default function tanks(state = Map() as TanksMap, action: Action) {
-  if (action.type === 'SPAWN_TANK') {
+  if (action.type === 'ADD_TANK') {
     return state.set(action.tank.tankId, TankRecord(action.tank))
   } else if (action.type === 'HURT') {
     const tankId = action.targetTank.tankId

@@ -19,10 +19,6 @@ function* autoRemoveEffects() {
     }
     yield put<Action>({ type: 'REMOVE_EXPLOSION', explosionId })
   })
-  yield takeEvery('SPAWN_FLICKER', function* removeFlicker({ flickerId }: Action.SpawnFlickerAction) {
-    yield delay(TANK_SPAWN_DELAY)
-    yield put<Action>({ type: 'REMOVE_FLICKER', flickerId })
-  })
   yield takeEvery('ADD_SCORE', function* removeScore({ score: { scoreId } }: Action.AddScoreAction) {
     yield delay(f(48))
     yield put<Action>({ type: 'REMOVE_SCORE', scoreId })

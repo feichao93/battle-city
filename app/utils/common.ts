@@ -5,9 +5,8 @@ import {
   BULLET_SIZE,
   FIELD_SIZE,
   TANK_SIZE,
-  TANK_SPAWN_DELAY,
 } from 'utils/constants'
-import { BulletRecord, TankRecord, EagleRecord, PowerUpRecord } from 'types'
+import { BulletRecord, TankRecord, EagleRecord, PowerUpRecord, FlickerRecord } from 'types'
 
 // 根据坦克的位置计算子弹的生成位置
 // 参数x,y,direction为坦克的位置和方向
@@ -137,17 +136,31 @@ export function getDirectionInfo(direction: Direction, flipxy = false) {
   return result
 }
 
-export function* spawnTank(tank: TankRecord) {
-  yield put({
-    type: 'SPAWN_FLICKER',
-    flickerId: getNextId('flicker'),
-    x: tank.x,
-    y: tank.y,
-  })
-  yield delay(TANK_SPAWN_DELAY)
+export function* spawnTank(tank: TankRecord, spawnSpeed = 1) {
+  const flickerShapeArray = [3, 2, 1, 0, 1, 2, 3, 2, 1, 0, 1, 2]
+    .map(x => [x, 3])
+    .concat([[3, 1]])
+
+  const flickerId = getNextId('flicker')
+
+  for (const [shape, t] of flickerShapeArray) {
+    yield put<Action.AddOrUpdateFlickerAction>({
+      type: 'ADD_OR_UPDATE_FLICKER',
+      flicker: FlickerRecord({
+        flickerId,
+        x: tank.x,
+        y: tank.y,
+        shape,
+      }),
+    })
+    // todo 得考虑游戏暂停的情况
+    yield delay(frame(t / spawnSpeed))
+  }
+  yield put<Action.RemoveFlickerAction>({ type: 'REMOVE_FLICKER', flickerId })
+
   const tankId = getNextId('tank')
   yield put({
-    type: 'SPAWN_TANK',
+    type: 'ADD_TANK',
     tank: tank.set('tankId', tankId),
   })
   return tankId

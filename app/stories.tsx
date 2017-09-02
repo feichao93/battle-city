@@ -30,10 +30,10 @@ import { BLOCK_SIZE as B, FIELD_BLOCK_SIZE as FBZ } from 'utils/constants'
 import tickEmitter from 'sagas/tickEmitter'
 import stageConfigs from 'stages/index'
 import registerTick from 'hocs/registerTick'
-import { PlayerRecord, TankRecord, PowerUpRecord } from 'types'
+import { PlayerRecord, TankRecord, PowerUpRecord, FlickerRecord } from 'types'
 
-const BulletExplosion = registerTick(500, 500, 1000)(BulletExplosionClass)
-const TankExplosion = registerTick(500, 1000)(TankExplosionClass)
+const BulletExplosion = registerTick(1000, 1000, 1000)(BulletExplosionClass)
+const TankExplosion = registerTick(1000, 1000)(TankExplosionClass)
 const PowerUp = ({ name, x, y }: { name: PowerUpName, x: number, y: number }) => (
   <PowerUpBase powerUp={PowerUpRecord({ powerUpName: name, x, y, visible: true })} />
 )
@@ -89,6 +89,31 @@ const X4Text = ({ content }: { content: string }) => (
 const FontLevel1 = ({ children }: { children: string }) => (
   <span style={{ fontSize: 28, lineHeight: '40px' }}>{children}</span>
 )
+
+class FlickerStory extends React.PureComponent {
+  private handle: any
+  state = {
+    shape: 0,
+  }
+  componentDidMount() {
+    this.handle = setInterval(() => this.setState({ shape: (this.state.shape + 1) % 4 }), 500)
+  }
+  componentWillUnmount() {
+    clearInterval(this.handle)
+  }
+
+  render() {
+    const { shape } = this.state
+    return (
+      <Flicker flicker={FlickerRecord({
+        flickerId: 1,
+        x: 0,
+        y: 0,
+        shape,
+      })} />
+    )
+  }
+}
 
 const colors: TankColor[] = ['yellow', 'green', 'silver', 'red']
 const sides: Side[] = ['ai', 'human']
@@ -212,7 +237,7 @@ class Stories extends React.Component<{}, { stage: string }> {
               <Bullet x={3} y={3} direction="up" />
               <Bullet x={9} y={9} direction="down" />
             </X4>
-            <X4><Flicker x={0} y={0} /></X4>
+            <X4><FlickerStory /></X4>
           </Row>
           <Row>
             <X4>

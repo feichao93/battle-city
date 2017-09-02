@@ -76,11 +76,7 @@ class GameScene extends React.Component<State> {
           </g>
           <g role="flicker-layer">
             {flickers.map(flicker =>
-              <Flicker
-                key={flicker.flickerId}
-                x={flicker.x}
-                y={flicker.y}
-              />
+              <Flicker key={flicker.flickerId} flicker={flicker} />
             ).toArray()}
           </g>
           <g role="score-layer">

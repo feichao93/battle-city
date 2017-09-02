@@ -1,20 +1,15 @@
 import * as React from 'react'
-import registerTick from 'hocs/registerTick'
-import { TANK_SPAWN_DELAY } from 'utils/constants'
+import { FlickerRecord } from 'types'
 
-const interval = TANK_SPAWN_DELAY / 12
-
-type P = {
-  x: number,
-  y: number,
-  tickIndex?: number,
+interface P {
+  flicker: FlickerRecord
 }
 
-class Flicker extends React.PureComponent<P, {}> {
+export default class Flicker extends React.PureComponent<P> {
   render() {
-    const { x, y, tickIndex } = this.props
+    const { flicker: { x, y, shape } } = this.props
     const transform = `translate(${x},${y})`
-    if (tickIndex === 0) {
+    if (shape === 0) {
       return (
         <g transform={transform} fill="#ffffff">
           <rect x={3} y={7} width={9} height={1} />
@@ -22,7 +17,7 @@ class Flicker extends React.PureComponent<P, {}> {
           <rect x={7} y={3} width={1} height={9} />
         </g>
       )
-    } else if (tickIndex === 1) {
+    } else if (shape === 1) {
       return (
         <g transform={transform} fill="#ffffff">
           <rect x={2} y={7} width={11} height={1} />
@@ -31,7 +26,7 @@ class Flicker extends React.PureComponent<P, {}> {
           <rect x={7} y={2} width={1} height={11} />
         </g>
       )
-    } else if (tickIndex === 2) {
+    } else if (shape === 2) {
       return (
         <g transform={transform} fill="#ffffff">
           <rect x={1} y={7} width={13} height={1} />
@@ -40,7 +35,7 @@ class Flicker extends React.PureComponent<P, {}> {
           <rect x={7} y={1} width={1} height={13} />
         </g>
       )
-    } else if (tickIndex === 3) {
+    } else if (shape === 3) {
       return (
         <g transform={transform} fill="#ffffff">
           <rect x={0} y={7} width={15} height={1} />
@@ -51,9 +46,7 @@ class Flicker extends React.PureComponent<P, {}> {
         </g>
       )
     } else {
-      throw new Error(`Invalid tickIndex: ${tickIndex}`)
+      throw new Error(`Invalid tickIndex: ${shape}`)
     }
   }
 }
-
-export default registerTick(interval, interval, interval, interval)(Flicker) as React.ComponentClass<P>

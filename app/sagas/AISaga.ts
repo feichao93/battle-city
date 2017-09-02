@@ -234,7 +234,7 @@ export default function* AIMasterSaga() {
           side: 'ai',
           level,
           hp,
-        }))
+        }), 0.6) // todo 要根据关卡的难度来确定坦克的生成速度
         taskMap[playerName] = yield spawn(AIWorkerSaga, playerName, AIWorker)
 
         yield put<Action.ActivatePlayerAction>({

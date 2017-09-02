@@ -8,7 +8,7 @@ export const FIELD_BLOCK_SIZE = 13
 export const FIELD_SIZE = BLOCK_SIZE * FIELD_BLOCK_SIZE
 /** 子弹的大小 */
 export const BULLET_SIZE = 3
-/** 坦克生成的延迟 */
+/** @depreacted 坦克生成的延迟 */
 export const TANK_SPAWN_DELAY = 1500
 /** 摧毁steel的最低子弹power值 */
 export const STEEL_POWER = 3

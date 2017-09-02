@@ -23,18 +23,15 @@ class TankHelmet extends React.PureComponent<P> {
           d={ds[tickIndex]}
         />
         <path
-          transform="rotate(90)"
-          style={{ transformOrigin: 'right bottom' }}
+          transform="translate(16,0)rotate(90)"
           d={ds[tickIndex]}
         />
         <path
-          transform="rotate(180)"
-          style={{ transformOrigin: 'right bottom' }}
+          transform="translate(16, 16)rotate(180)"
           d={ds[tickIndex]}
         />
         <path
-          transform="rotate(270)"
-          style={{ transformOrigin: 'right bottom' }}
+          transform="translate(0, 16)rotate(270)"
           d={ds[tickIndex]}
         />
       </g>
