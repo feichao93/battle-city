@@ -1,13 +1,14 @@
 import { Map as IMap, Set as ISet } from 'immutable'
-import { fork, put, PutEffect, select, take } from 'redux-saga/effects'
+import { takeEvery, all, fork, put, PutEffect, select, take } from 'redux-saga/effects'
 import { BLOCK_SIZE, ITEM_SIZE_MAP, N_MAP, STEEL_POWER } from 'utils/constants'
+import { explosionFromBullet, explosionFromTank } from 'sagas/common'
 import {
   asBox,
   getDirectionInfo,
   getNextId,
   isInField,
   iterRowsAndCols,
-  testCollide
+  testCollide,
 } from 'utils/common'
 import { BulletRecord, BulletsMap, State, TankRecord, ScoreRecord } from 'types'
 
@@ -45,16 +46,6 @@ function getOrDefault<K, V>(map: Map<K, V>, key: K, getValue: () => V) {
   return map.get(key)
 }
 
-function makeExplosionFromBullet(bullet: BulletRecord): PutEffect<Action> {
-  return put({
-    type: 'SPAWN_EXPLOSION',
-    x: bullet.x - 6,
-    y: bullet.y - 6,
-    explosionType: 'bullet',
-    explosionId: getNextId('explosion'),
-  } as Action.SpawnExplosionAction)
-}
-
 function makeScoreFromTank(tank: TankRecord): PutEffect<Action> {
   const scoreMap = {
     basic: 100,
@@ -62,26 +53,16 @@ function makeScoreFromTank(tank: TankRecord): PutEffect<Action> {
     power: 300,
     armor: 400,
   }
-  return put({
+  return put<Action.AddScoreAction>({
     type: 'ADD_SCORE',
     score: ScoreRecord({
       score: scoreMap[tank.level],
       scoreId: getNextId('score'),
-      // todo 调整score位置
-      x: tank.x + 12,
-      y: tank.y - 12,
+      x: tank.x,
+      y: tank.y,
     }),
-  } as Action.AddScoreAction)
-}
-
-function makeExplosionFromTank(tank: TankRecord): PutEffect<Action> {
-  return put({
-    type: 'SPAWN_EXPLOSION',
-    x: tank.x - 6,
-    y: tank.y - 6,
-    explosionType: 'tank',
-    explosionId: getNextId('explosion'),
-  } as Action.SpawnExplosionAction)
+  })
+  // TODO clear score here
 }
 
 function* handleTick() {
@@ -166,17 +147,14 @@ function* destroySteels(collidedBullets: BulletsMap) {
   }
 }
 
-/** 从地图上移除坦克, 并产生坦克爆炸效果 */
-export function* destroyTanks(tankIdSet: ISet<TankId>) {
-  const { tanks }: State = yield select()
-  // 移除tank
-  yield* tankIdSet.map(tankId => put({
+/** 从地图上移除坦克, 并产生坦克爆炸效果  */
+export function* destroyTanks(destroyedTanks: ISet<TankRecord>) {
+  yield* destroyedTanks.map(tank => put({
     type: 'REMOVE_TANK',
-    tankId,
+    tankId: tank.tankId,
   }))
   // 产生坦克爆炸效果
-  yield* tankIdSet.map(tankId => tanks.get(tankId))
-    .map(makeExplosionFromTank)
+  yield all(destroyedTanks.map(tank => fork(explosionFromTank, tank)).toArray())
 }
 
 function* destroyBricks(collidedBullets: BulletsMap) {
@@ -366,11 +344,13 @@ function* handleAfterTick() {
         yield put<Action>({ type: 'HURT', targetTank, hurt })
       }
     }
-    if (destroyedTankIdSet.size > 0) {
-      // 移除坦克 & 产生爆炸效果
-      yield* destroyTanks(ISet(destroyedTankIdSet))
 
-      // 显示击杀得分
+    const destroyedTanks = ISet(destroyedTankIdSet).map(tankId => allTanks.get(tankId))
+    if (!destroyedTanks.isEmpty()) {
+      // 移除坦克 & 产生爆炸效果
+      yield fork(destroyTanks, destroyedTanks)
+
+      // 显示击杀得分 TODO 爆炸完成之后才会显示分数
       const destroyedAITanks = ISet(destroyedTankIdSet)
         .map(tankId => allTanks.get(tankId))
         .filter(tank => tank.side === 'ai')
@@ -407,12 +387,13 @@ export default function* bulletsSaga() {
   yield fork(handleTick)
   yield fork(handleAfterTick)
 
-  yield fork(function* handleDestroyBullets() {
-    while (true) {
-      const { bullets, spawnExplosion }: Action.DestroyBulletsAction = yield take('DESTROY_BULLETS')
+  // todo 是否使用channel来代替put/take
+  yield takeEvery(
+    'DESTROY_BULLETS' as Action['type'],
+    function* ({ bullets, spawnExplosion }: Action.DestroyBulletsAction) {
       if (spawnExplosion) {
-        yield* bullets.map(makeExplosionFromBullet).values()
+        yield all(bullets.map(bullet => fork(explosionFromBullet, bullet)).toArray())
       }
-    }
-  })
+    },
+  )
 }

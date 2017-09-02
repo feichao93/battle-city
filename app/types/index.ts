@@ -1,6 +1,7 @@
 export { default as TankRecord, PlainTankRecord } from 'types/TankRecord'
 export { default as PowerUpRecord } from 'types/PowerUpRecord'
 export { default as ScoreRecord } from 'types/ScoreRecord'
+export { default as ExplosionRecord } from 'types/ExplosionRecord'
 export { default as FlickerRecord } from 'types/FlickerRecord'
 export { default as TextRecord } from 'types/TextRecord'
 export { default as BulletRecord } from 'types/BulletRecord'
@@ -13,6 +14,7 @@ export { BulletsMap } from 'reducers/bullets'
 export { TextsMap } from 'reducers/texts'
 export { TanksMap } from 'reducers/tanks'
 export { ScoresMap } from 'reducers/scores'
+export { ExplosionsMap } from 'reducers/explosions'
 
 import { PlainTankRecord } from 'types/TankRecord'
 import { PlainMapRecord } from 'types/MapRecord'
@@ -40,6 +42,8 @@ declare global {
     x: number
     y: number
   }
+
+  type Timing<T> = [T, number][]
 
   interface StageConfig {
     name: string
@@ -72,13 +76,15 @@ declare global {
   type PlayerName = string
   type TextId = number
   type FlickerId = number
+  type ExplosionId = number
+
+  type ExplosionShape = 's0' | 's1' | 's2' | 'b0' | 'b1'
+  type FlickerShape = 0 | 1 | 2 | 3
 
   type SteelIndex = number
   type BrickIndex = number
   type RiverIndex = number
 
-  type ExplosionType = 'bullet' | 'tank'
-  type ExplosionId = number
   type Side = 'human' | 'ai'
 
   type AICommand = AICommand.AICommand
@@ -146,6 +152,7 @@ declare global {
       type: 'active-tanks-info'
       tanks: PlainTankRecord[]
     }
+
     interface MyFireInfo {
       type: 'my-fire-info'
       canFire: boolean

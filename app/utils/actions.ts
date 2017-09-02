@@ -7,6 +7,7 @@ import {
   PowerUpRecord,
   MapRecord,
   ScoreRecord,
+  ExplosionRecord,
 } from 'types'
 
 declare global {
@@ -45,7 +46,7 @@ declare global {
       | CreatePlayerAction
       | RemovePlayerAction
       | Simple<'DEACTIVATE_ALL_PLAYERS'>
-      | SpawnExplosionAction
+      | AddOrUpdateExplosion
       | RemoveExplosionAction
       | SetTextAction
       | UpdateTextPositionAction
@@ -188,17 +189,14 @@ declare global {
       name: string
     }
 
-    export type SpawnExplosionAction = {
-      type: 'SPAWN_EXPLOSION',
-      x: number,
-      y: number,
-      explosionId: ExplosionId,
-      explosionType: ExplosionType,
+    export interface AddOrUpdateExplosion {
+      type: 'ADD_OR_UPDATE_EXPLOSION'
+      explosion: ExplosionRecord
     }
 
-    export type RemoveExplosionAction = {
-      type: 'REMOVE_EXPLOSION',
-      explosionId: ExplosionId,
+    export interface RemoveExplosionAction {
+      type: 'REMOVE_EXPLOSION'
+      explosionId: ExplosionId
     }
 
     export interface AddOrUpdateFlickerAction {

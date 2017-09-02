@@ -5,20 +5,13 @@ import bulletsSaga from 'sagas/bulletsSaga'
 import gameManager from 'sagas/gameManager'
 import AIMasterSaga from 'sagas/AISaga'
 import tickEmitter from 'sagas/tickEmitter'
-import { CONTROL_CONFIG, TANK_SPAWN_DELAY } from 'utils/constants'
+import { CONTROL_CONFIG } from 'utils/constants'
 import { frame as f } from 'utils/common'
 import humanPlayerSaga from 'sagas/humanPlayerSaga'
 import powerUps from 'sagas/powerUps'
 
+/** @deprecated 不要使用autoRemoveEffects */
 function* autoRemoveEffects() {
-  yield takeEvery('SPAWN_EXPLOSION', function* removeExplosion({ explosionId, explosionType }: Action.SpawnExplosionAction) {
-    if (explosionType === 'bullet') {
-      yield delay(200)
-    } else if (explosionType === 'tank') {
-      yield delay(500)
-    }
-    yield put<Action>({ type: 'REMOVE_EXPLOSION', explosionId })
-  })
   yield takeEvery('ADD_SCORE', function* removeScore({ score: { scoreId } }: Action.AddScoreAction) {
     yield delay(f(48))
     yield put<Action>({ type: 'REMOVE_SCORE', scoreId })

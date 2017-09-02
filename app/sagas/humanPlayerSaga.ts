@@ -1,11 +1,10 @@
 import { delay } from 'redux-saga'
 import { put, fork, select, take } from 'redux-saga/effects'
 import { BLOCK_SIZE } from 'utils/constants'
-import TankRecord from 'types/TankRecord'
-import { spawnTank, testCollide, asBox, frame } from 'utils/common'
+import { testCollide, asBox, frame } from 'utils/common'
+import { TankRecord, PlayerRecord, State } from 'types'
+import { spawnTank } from 'sagas/common'
 import * as selectors from 'utils/selectors'
-import { State } from 'reducers/index'
-import PlayerRecord from 'types/PlayerRecord'
 
 function* handlePickPowerUps(playerName: string) {
   while (true) {

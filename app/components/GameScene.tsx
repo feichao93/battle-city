@@ -68,9 +68,7 @@ class GameScene extends React.Component<State> {
             {explosions.map(exp =>
               <Explosion
                 key={exp.explosionId}
-                explosionType={exp.explosionType}
-                x={exp.x}
-                y={exp.y}
+                explosion={exp}
               />
             ).toArray()}
           </g>

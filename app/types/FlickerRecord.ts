@@ -4,7 +4,7 @@ const FlickerRecord = Record({
   flickerId: 0,
   x: 0,
   y: 0,
-  shape: 0,
+  shape: 0 as FlickerShape,
 })
 
 const record = FlickerRecord()

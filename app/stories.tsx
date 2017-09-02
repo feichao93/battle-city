@@ -24,7 +24,7 @@ import StatisticsScene from 'components/StatisticsScene'
 import HUD from 'components/HUD'
 import Score from 'components/Score'
 import { default as PowerUpBase } from 'components/PowerUp'
-import { BulletExplosionClass, TankExplosionClass } from 'components/Explosion'
+import Explosion from 'components/Explosion'
 import parseStageMap from 'utils/parseStageMap'
 import { BLOCK_SIZE as B, FIELD_BLOCK_SIZE as FBZ } from 'utils/constants'
 import tickEmitter from 'sagas/tickEmitter'
@@ -32,8 +32,9 @@ import stageConfigs from 'stages/index'
 import registerTick from 'hocs/registerTick'
 import { PlayerRecord, TankRecord, PowerUpRecord, FlickerRecord } from 'types'
 
-const BulletExplosion = registerTick(1000, 1000, 1000)(BulletExplosionClass)
-const TankExplosion = registerTick(1000, 1000)(TankExplosionClass)
+// TODO 修复这里的BUG
+const BulletExplosion = registerTick(1000, 1000, 1000)(Explosion)
+const TankExplosion = registerTick(1000, 1000)(Explosion)
 const PowerUp = ({ name, x, y }: { name: PowerUpName, x: number, y: number }) => (
   <PowerUpBase powerUp={PowerUpRecord({ powerUpName: name, x, y, visible: true })} />
 )
@@ -93,7 +94,7 @@ const FontLevel1 = ({ children }: { children: string }) => (
 class FlickerStory extends React.PureComponent {
   private handle: any
   state = {
-    shape: 0,
+    shape: 0 as FlickerShape,
   }
   componentDidMount() {
     this.handle = setInterval(() => this.setState({ shape: (this.state.shape + 1) % 4 }), 500)

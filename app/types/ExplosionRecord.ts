@@ -1,19 +1,15 @@
 import { Record } from 'immutable'
 
-type Base = {
-  explosionId: ExplosionId,
-  explosionType: ExplosionType,
-  x: number,
-  y: number,
-}
-
-type ExplosionRecord = Record.Instance<Base> & Readonly<Base>
-
 const ExplosionRecord = Record({
-  explosionId: 0,
-  explosionType: 'bullet', // bullet | tank
-  x: 0,
-  y: 0,
-} as Base)
+  explosionId: 0 as ExplosionId,
+  shape: 's0' as ExplosionShape,
+  // 爆炸中心的位置, 因为爆炸形状改变的时候, 爆炸中心的坐标保持不变, 所以使用cx/cy比较合理
+  cx: 0,
+  cy: 0,
+})
+
+const record = ExplosionRecord()
+
+type ExplosionRecord = typeof record
 
 export default ExplosionRecord

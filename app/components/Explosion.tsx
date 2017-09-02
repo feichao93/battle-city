@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Bitmap } from 'components/elements'
-import registerTick from 'hocs/registerTick'
+import { ExplosionRecord } from 'types'
 
 const schema = {
   ' ': 'none',
@@ -9,8 +9,8 @@ const schema = {
   R: '#b53121',
 }
 
-const bulletExplosiondataArray = [
-  [
+const data = {
+  s0: [
     '                ',
     '                ',
     '       W     W  ',
@@ -27,7 +27,8 @@ const bulletExplosiondataArray = [
     '                ',
     '                ',
   ],
-  [
+
+  s1: [
     '                ',
     '      P   W     ',
     ' W  P WP WP   W ',
@@ -45,7 +46,8 @@ const bulletExplosiondataArray = [
     '  WP  W P PP    ',
     '                ',
   ],
-  [
+
+  s2: [
     '    P P    P  P ',
     ' W   W  W P  WP ',
     ' PPWW  WW   WP  ',
@@ -62,32 +64,7 @@ const bulletExplosiondataArray = [
     'WP  P   W    PW ',
     '        W P   P ',
   ],
-]
-
-type P = {
-  x: number,
-  y: number,
-  tickIndex?: number,
-}
-
-export class BulletExplosionClass extends React.PureComponent<P> {
-  render() {
-    const { x, y, tickIndex } = this.props
-    return (
-      <Bitmap
-        x={x}
-        y={y}
-        d={bulletExplosiondataArray[tickIndex]}
-        scheme={schema}
-      />
-    )
-  }
-}
-
-export const BulletExplosion: React.ComponentClass<P> = registerTick(66, 66, 9999)(BulletExplosionClass)
-
-const tankExplosionDataArray = [
-  [
+  b0: [
     '                                ',
     '                     W       W  ',
     '  W       W          W       W  ',
@@ -121,7 +98,7 @@ const tankExplosionDataArray = [
     '                                ',
     '                                ',
   ],
-  [
+  b1: [
     'W                               ',
     'PW   W             PPWW       W ',
     ' PW   P     WPPP PWWWWPP    WP  ',
@@ -155,33 +132,23 @@ const tankExplosionDataArray = [
     ' W  P       W   WWPPWPPP    P W ',
     'W          W     PPP P         P',
   ],
-]
+}
 
-export class TankExplosionClass extends React.PureComponent<P> {
+type P = {
+  explosion: ExplosionRecord
+}
+
+export default class Explosion extends React.PureComponent<P> {
   render() {
-    const { x, y, tickIndex } = this.props
+    const { explosion: { cx, cy, shape, explosionId } } = this.props
+    const smallShape = shape === 's0' || shape === 's1' || shape === 's2'
     return (
       <Bitmap
-        x={x}
-        y={y}
-        d={tankExplosionDataArray[tickIndex]}
+        x={cx - (smallShape ? 8 : 16)}
+        y={cy - (smallShape ? 8 : 16)}
+        d={data[shape]}
         scheme={schema}
       />
     )
-  }
-}
-
-const TankExplosion: React.ComponentClass<P> = registerTick(200, 9999)(TankExplosionClass)
-
-export default class Explosion extends React.PureComponent<{ explosionType: ExplosionType } & P> {
-  render() {
-    const { explosionType, ...otherProps } = this.props
-    if (explosionType === 'bullet') {
-      return <BulletExplosion {...otherProps} />
-    } else if (explosionType === 'tank') {
-      return <TankExplosion {...otherProps} />
-    } else {
-      return null
-    }
   }
 }
