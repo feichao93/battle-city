@@ -134,6 +134,7 @@ export default function* stageSaga(stageName: string) {
     const { sourcePlayer, targetTank }: Action.KillAction = yield take('KILL')
     const { players, game: { remainingEnemies }, tanks }: State = yield select()
 
+    // TODO 这里sourcePlayer可能为空将导致游戏崩溃 (AI-PLAYER被移除了)
     if (sourcePlayer.side === 'human') { // human击杀ai
       // 对human player的击杀信息进行统计
       yield put<Action>({
@@ -143,7 +144,7 @@ export default function* stageSaga(stageName: string) {
       })
 
       // 处理powerup
-      if (/* todo targetTank.withPowerUp */ true) {
+      if (targetTank.withPowerUp) {
         const powerUpName = _.sample(['tank', 'star', 'grenade', 'timer', 'helmet', 'shovel'] as PowerUpName[])
         const position: Point = _.sample(yield select(selectors.validPowerUpSpawnPositions))
         yield fork(powerUp, PowerUpRecord({

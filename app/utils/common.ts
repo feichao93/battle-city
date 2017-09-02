@@ -1,12 +1,11 @@
-import { delay } from 'redux-saga'
-import { put } from 'redux-saga/effects'
 import {
   BLOCK_SIZE,
   BULLET_SIZE,
   FIELD_SIZE,
   TANK_SIZE,
 } from 'utils/constants'
-import { BulletRecord, TankRecord, EagleRecord, PowerUpRecord, FlickerRecord } from 'types'
+import stageConfigs from 'stages'
+import { BulletRecord, TankRecord, EagleRecord, PowerUpRecord } from 'types'
 
 // 根据坦克的位置计算子弹的生成位置
 // 参数x,y,direction为坦克的位置和方向
@@ -212,4 +211,9 @@ export function getTankBulletPower(tank: TankRecord) {
   } else {
     return 1
   }
+}
+
+export function getWithPowerUpProbability(stageName: string) {
+  // TODO 需要校准数值
+  return 0.2 + stageConfigs[stageName].difficulty * 0.05
 }

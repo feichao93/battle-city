@@ -4,7 +4,7 @@ import { getDirectionInfo } from 'utils/common'
 import directionController from 'sagas/directionController'
 import fireController from 'sagas/fireController'
 import { spawnTank } from 'sagas/common'
-import { getNextId, getTankBulletLimit } from 'utils/common'
+import { getNextId, getTankBulletLimit, getWithPowerUpProbability } from 'utils/common'
 import * as selectors from 'utils/selectors'
 import { State } from 'reducers/index'
 import { TankRecord, PlayerRecord } from 'types'
@@ -214,7 +214,7 @@ export default function* AIMasterSaga() {
   function* addAIHandler() {
     while (true) {
       yield take(addAICommandChannel)
-      const { game: { remainingEnemies } }: State = yield select()
+      const { game: { remainingEnemies, currentStage } }: State = yield select()
       if (!remainingEnemies.isEmpty()) {
         const playerName = `AI-${getNextId('AI-player')}`
         yield put<Action>({
@@ -235,6 +235,7 @@ export default function* AIMasterSaga() {
           side: 'ai',
           level,
           hp,
+          withPowerUp: Math.random() < getWithPowerUpProbability(currentStage),
         }), 0.6) // todo 要根据关卡的难度来确定坦克的生成速度
         taskMap[playerName] = yield spawn(AIWorkerSaga, playerName, AIWorker)
 
