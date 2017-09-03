@@ -1,13 +1,12 @@
 import * as _ from 'lodash'
-import { List, Map, Repeat, Collection } from 'immutable'
-import { delay, Effect } from 'redux-saga'
-import { race, fork, put, select, take } from 'redux-saga/effects'
+import { Map } from 'immutable'
+import { Effect } from 'redux-saga'
+import { fork, put, race, select, take } from 'redux-saga/effects'
 import { State } from 'reducers/index'
 import * as selectors from 'utils/selectors'
-import { getNextId, frame as f } from 'utils/common'
+import { frame as f, getNextId } from 'utils/common'
 import { PowerUpRecord } from 'types'
-
-const log = console.log
+import { nonPauseDelay } from 'sagas/common'
 
 const tankLevels: TankLevel[] = ['basic', 'fast', 'power', 'armor']
 
@@ -20,12 +19,12 @@ function* statistics() {
 
   // todo 目前只考虑player-1的信息
 
-  yield delay(500)
+  yield nonPauseDelay(500)
 
   for (const tankLevel of tankLevels) {
     const { game: { transientKillInfo } }: State = yield select()
 
-    yield delay(250)
+    yield nonPauseDelay(250)
     const levelKillCount = player1KillInfo.get(tankLevel, 0)
     if (levelKillCount === 0) {
       yield put<Action>({
@@ -38,14 +37,14 @@ function* statistics() {
           type: 'UPDATE_TRANSIENT_KILL_INFO',
           info: transientKillInfo.setIn(['player-1', tankLevel], count),
         })
-        yield delay(160)
+        yield nonPauseDelay(160)
       }
     }
-    yield delay(200)
+    yield nonPauseDelay(200)
   }
-  yield delay(200)
+  yield nonPauseDelay(200)
   yield put<Action>({ type: 'SHOW_TOTAL_KILL_COUNT' })
-  yield delay(1000)
+  yield nonPauseDelay(1000)
 }
 
 function* powerUp(powerUp: PowerUpRecord) {
@@ -60,7 +59,7 @@ function* powerUp(powerUp: PowerUpRecord) {
     let visible = true
     for (let i = 0; i < 50; i++) {
       const result = yield race({
-        timeout: delay(f(8)),
+        timeout: nonPauseDelay(f(8)),
         picked: take(pickThisPowerUp),
         stageChanged: take('START_STAGE'),
       })
@@ -111,12 +110,12 @@ export default function* stageSaga(stageName: string) {
     curtainName: 'stage-enter-cutain',
     t,
   }))
-  yield delay(f(20))
+  yield nonPauseDelay(f(20))
   yield put<Action>({
     type: 'LOAD_STAGE_MAP',
     name: stageName,
   })
-  yield delay(f(30))
+  yield nonPauseDelay(f(30))
   yield* tween(f(50), t => put<Action>({
     type: 'UPDATE_CURTAIN',
     curtainName: 'stage-enter-cutain',
@@ -160,14 +159,14 @@ export default function* stageSaga(stageName: string) {
       if (remainingEnemies.isEmpty() && activeAITanks.isEmpty()) {
         // 剩余enemy数量为0, 且场上已经没有ai tank了
         // todo 如果场上有powerup, 则delay时间可以适当延长; 如果场上没有power, 则delay时间可以缩短
-        yield delay(6000)
+        yield nonPauseDelay(6000)
         yield* statistics()
         return { status: 'clear' }
       }
     } else { // ai击杀human
       if (!players.some(ply => ply.side === 'human' && ply.lives > 0)) {
         // 所有的human player都挂了
-        yield delay(2000)
+        yield nonPauseDelay(2000)
         yield* statistics()
         return { status: 'fail', reason: 'all-human-dead' }
       }

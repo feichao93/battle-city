@@ -43,7 +43,8 @@ declare global {
     y: number
   }
 
-  type Timing<T> = [T, number][]
+  // TODO 用object来表示TimingConfig更好一些 比如: { value: xxx, time: 200 }
+  type TimingConfig<T> = [T, number][]
 
   interface StageConfig {
     name: string

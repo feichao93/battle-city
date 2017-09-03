@@ -1,8 +1,8 @@
-import { delay } from 'redux-saga'
 import { put, take } from 'redux-saga/effects'
 import { BLOCK_SIZE } from 'utils/constants'
 import { getNextId } from 'utils/common'
 import stageSaga from 'sagas/stageSaga'
+import { nonPauseDelay } from 'sagas/common'
 import stageConfigs from 'stages'
 
 type Animation = {
@@ -58,7 +58,7 @@ function* animateGameover() {
     distance: BLOCK_SIZE * 6,
     duration: 2000,
   })
-  yield delay(500)
+  yield nonPauseDelay(500)
   yield put<Action>({ type: 'REMOVE_TEXT', textId: textId1 })
   yield put<Action>({ type: 'REMOVE_TEXT', textId: textId2 })
   yield put<Action>({ type: 'LOAD_SCENE', scene: 'gameover' })

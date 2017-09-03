@@ -1,9 +1,8 @@
-import { delay } from 'redux-saga'
 import { fork, put, take, select, takeEvery, takeLatest } from 'redux-saga/effects'
 import { State, MapRecord, ScoreRecord } from 'types'
 import { N_MAP, ITEM_SIZE_MAP } from 'utils/constants'
 import { iterRowsAndCols, asBox, getNextId, frame as f } from 'utils/common'
-import { destroyTanks } from 'sagas/common'
+import { destroyTanks, nonPauseDelay } from 'sagas/common'
 
 function convertToBricks(map: MapRecord) {
   const { eagle, steels, bricks } = map
@@ -73,7 +72,7 @@ function* shovel() {
     map: convertToSteels((yield select()).map),
   })
 
-  yield delay(f(1076))
+  yield nonPauseDelay(f(1076))
 
   // 总共闪烁6次
   for (let i = 0; i < 6; i++) {
@@ -81,12 +80,12 @@ function* shovel() {
       type: 'UPDATE_MAP',
       map: convertToBricks((yield select()).map),
     })
-    yield delay(f(16))
+    yield nonPauseDelay(f(16))
     yield put<Action>({
       type: 'UPDATE_MAP',
       map: convertToSteels((yield select()).map),
     })
-    yield delay(f(16))
+    yield nonPauseDelay(f(16))
   }
 
   // 最后变回brick-wall
@@ -178,8 +177,7 @@ function* scoreFromPickPowerUp(action: Action.PickPowerUpAction) {
       y,
     }),
   })
-  // TODO 考虑PAUSE的影响
-  yield delay(f(48))
+  yield nonPauseDelay(f(48))
   yield put<Action.RemoveScoreAction>({
     type: 'REMOVE_SCORE',
     scoreId,

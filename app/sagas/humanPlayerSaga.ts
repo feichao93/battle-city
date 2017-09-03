@@ -1,9 +1,8 @@
-import { delay } from 'redux-saga'
 import { put, fork, select, take } from 'redux-saga/effects'
 import { BLOCK_SIZE } from 'utils/constants'
 import { testCollide, asBox, frame } from 'utils/common'
 import { TankRecord, PlayerRecord, State } from 'types'
-import { spawnTank } from 'sagas/common'
+import { spawnTank, nonPauseDelay } from 'sagas/common'
 import * as selectors from 'utils/selectors'
 
 function* handlePickPowerUps(playerName: string) {
@@ -49,7 +48,7 @@ export default function* humanPlayerSaga(playerName: string, tankColor: TankColo
     if (player.lives > 0) {
       if (action.type === 'KILL') {
         // todo 是否需要这个delay??
-        yield delay(500)
+        yield nonPauseDelay(250)
       }
       yield put({ type: 'DECREMENT_PLAYER_LIFE', playerName })
       const tankId = yield* spawnTank(TankRecord({
