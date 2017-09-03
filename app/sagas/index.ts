@@ -1,20 +1,19 @@
-import { delay } from 'redux-saga'
-import { fork, put, takeEvery } from 'redux-saga/effects'
+import { fork } from 'redux-saga/effects'
 import humanController from 'sagas/humanController'
 import bulletsSaga from 'sagas/bulletsSaga'
 import gameManager from 'sagas/gameManager'
 import AIMasterSaga from 'sagas/AISaga'
 import tickEmitter from 'sagas/tickEmitter'
-import { CONTROL_CONFIG } from 'utils/constants'
 import humanPlayerSaga from 'sagas/humanPlayerSaga'
-import powerUps from 'sagas/powerUps'
+import pickPowerUps from 'sagas/pickPowerUps'
+import { CONTROL_CONFIG } from 'utils/constants'
 
 export default function* rootSaga() {
   console.debug('root saga started')
   yield fork(tickEmitter)
 
   yield fork(bulletsSaga)
-  yield fork(powerUps)
+  yield fork(pickPowerUps)
 
   // 生成两个humanController, 对应现实生活的游戏控制器
   yield fork(humanController, 'player-1', CONTROL_CONFIG.player1)

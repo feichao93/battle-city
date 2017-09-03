@@ -1,12 +1,11 @@
 import * as _ from 'lodash'
 import { Map } from 'immutable'
-import { Effect } from 'redux-saga'
 import { fork, put, race, select, take } from 'redux-saga/effects'
 import { State } from 'reducers/index'
 import * as selectors from 'utils/selectors'
 import { frame as f, getNextId } from 'utils/common'
 import { PowerUpRecord } from 'types'
-import { nonPauseDelay } from 'sagas/common'
+import { nonPauseDelay, tween } from 'sagas/common'
 
 const tankLevels: TankLevel[] = ['basic', 'fast', 'power', 'armor']
 
@@ -47,6 +46,7 @@ function* statistics() {
   yield nonPauseDelay(1000)
 }
 
+// TODO 使用一个独立的文件来防止powerUp
 function* powerUp(powerUp: PowerUpRecord) {
   const pickThisPowerUp = (action: Action) => (
     action.type === 'PICK_POWER_UP' && action.powerUp.powerUpId === powerUp.powerUpId
@@ -58,6 +58,7 @@ function* powerUp(powerUp: PowerUpRecord) {
     })
     let visible = true
     for (let i = 0; i < 50; i++) {
+      // 优化代码结构
       const result = yield race({
         timeout: nonPauseDelay(f(8)),
         picked: take(pickThisPowerUp),
@@ -80,15 +81,6 @@ function* powerUp(powerUp: PowerUpRecord) {
   }
 }
 
-function* tween(duration: number, effectFactory: (t: number) => Effect) {
-  let accumulation = 0
-  while (accumulation < duration) {
-    const { delta }: Action.TickAction = yield take('TICK')
-    accumulation += delta
-    yield effectFactory(_.clamp(accumulation / duration, 0, 1))
-  }
-}
-
 /**
  * stage-saga的一个实例对应一个关卡
  * 在关卡开始时, 一个stage-saga实例将会启动, 负责关卡地图生成
@@ -105,7 +97,7 @@ export default function* stageSaga(stageName: string) {
     t: 0,
   })
 
-  yield* tween(f(50), t => put<Action>({
+  yield* tween(f(30), t => put<Action>({
     type: 'UPDATE_CURTAIN',
     curtainName: 'stage-enter-cutain',
     t,
@@ -115,8 +107,8 @@ export default function* stageSaga(stageName: string) {
     type: 'LOAD_STAGE_MAP',
     name: stageName,
   })
-  yield nonPauseDelay(f(30))
-  yield* tween(f(50), t => put<Action>({
+  yield nonPauseDelay(f(20))
+  yield* tween(f(30), t => put<Action>({
     type: 'UPDATE_CURTAIN',
     curtainName: 'stage-enter-cutain',
     t: 1 - t,

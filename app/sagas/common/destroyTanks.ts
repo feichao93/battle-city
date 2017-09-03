@@ -24,12 +24,12 @@ function* scoreFromKillTank(tank: TankRecord) {
 
 function* explosionFromTank(tank: TankRecord) {
   const tankExplosionShapeTiming: TimingConfig<ExplosionShape> = [
-    ['s0', f(7)],
-    ['s1', f(5)],
-    ['s2', f(7)],
-    ['b0', f(5)],
-    ['b1', f(7)],
-    ['s2', f(5)],
+    { v: 's0', t: f(7) },
+    { v: 's1', t: f(5) },
+    { v: 's2', t: f(7) },
+    { v: 'b0', t: f(5) },
+    { v: 'b1', t: f(7) },
+    { v: 's2', t: f(5) },
   ]
 
   const explosionId = getNextId('explosion')

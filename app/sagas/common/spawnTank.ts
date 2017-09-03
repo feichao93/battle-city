@@ -3,27 +3,27 @@ import { FlickerRecord, TankRecord } from 'types'
 import { getNextId, frame as f } from 'utils/common'
 import { timing } from 'sagas/common'
 
-function applySpawnSpeed<T>(config: TimingConfig<T>, speed: number) {
-  return config.map(([x, time]) => [x, time / speed] as [T, number])
+function applySpawnSpeed<V>(config: TimingConfig<V>, speed: number) {
+  return config.map(({ t, v }) => ({ t: t / speed, v }))
 }
 
 // TODO 将flicker和add-tank的逻辑分离开来
 export default function* spawnTank(tank: TankRecord, spawnSpeed = 1) {
-  const flickerShapeTimingConfig: TimingConfig<FlickerShape> = [
-    [3, f(3)],
-    [2, f(3)],
-    [1, f(3)],
-    [0, f(3)],
-    [1, f(3)],
-    [2, f(3)],
-    [3, f(3)],
-    [2, f(3)],
-    [1, f(3)],
-    [0, f(3)],
-    [1, f(3)],
-    [2, f(3)],
-    [3, f(1)],
-  ]
+  const flickerShapeTimingConfig = [
+    { v: 3, t: f(3) },
+    { v: 2, t: f(3) },
+    { v: 1, t: f(3) },
+    { v: 0, t: f(3) },
+    { v: 1, t: f(3) },
+    { v: 2, t: f(3) },
+    { v: 3, t: f(3) },
+    { v: 2, t: f(3) },
+    { v: 1, t: f(3) },
+    { v: 0, t: f(3) },
+    { v: 1, t: f(3) },
+    { v: 2, t: f(3) },
+    { v: 3, t: f(1) },
+  ] as TimingConfig<FlickerShape>
 
   const flickerId = getNextId('flicker')
 

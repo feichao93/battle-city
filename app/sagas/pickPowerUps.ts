@@ -184,7 +184,8 @@ function* scoreFromPickPowerUp(action: Action.PickPowerUpAction) {
   })
 }
 
-export default function* powerUps() {
+/** 该saga用来处理道具拾取时触发的相应逻辑 */
+export default function* pickPowerUps() {
   yield takeEvery('PICK_POWER_UP', scoreFromPickPowerUp)
 
   yield takeLatest(is('shovel'), shovel)
