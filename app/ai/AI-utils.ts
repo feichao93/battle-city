@@ -3,7 +3,7 @@ import { MapRecord, TankRecord, TanksMap } from 'types'
 import { BLOCK_SIZE, FIELD_SIZE, ITEM_SIZE_MAP, N_MAP, TANK_SIZE } from 'utils/constants'
 import { asBox, getDirectionInfo, iterRowsAndCols } from 'utils/common'
 
-const logAhead = (...args: any[]) => console.log('[ahead]', ...args)
+const logAhead = (...args: any[]) => 0 /* console.log('[ahead]', ...args) */
 
 /** AI是否可以破坏该障碍物 */
 function canDestroy(barrierType: BarrierType) {
@@ -213,7 +213,7 @@ export function getEnv(map: MapRecord, tanks: TanksMap, tank: TankRecord): TankE
 /** 根据目前AI-tank的环境信息, 决定AI-tank是否应该开火 */
 export function shouldFire(tank: TankRecord, { barrierInfo, tankPosition: pos }: TankEnv) {
   const random = Math.random()
-  console.log('fire-random:', random)
+  // console.log('fire-random:', random)
 
   // todo 目前部分result的计算是多余的
   let result = false

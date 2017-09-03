@@ -11,25 +11,25 @@ interface TankComponent {
   (props: { transform: string, color: string, shape: number }): JSX.Element
 }
 
-function resolveTankColorConfig(tank: TankRecord): Timing<TankColor> {
+function resolveTankColorConfig(tank: TankRecord): TimingConfig<TankColor> {
   if (tank.color !== 'auto') {
-    return [[tank.color, Infinity]]
+    return [{ v: tank.color, t: Infinity }]
   }
   if (tank.withPowerUp) {
-    return [['red', f(8)], ['silver', f(8)]]
+    return [{ v: 'red', t: f(8) }, { v: 'silver', t: f(8) }]
   }
   if (tank.level === 'basic') {
-    return [['silver', Infinity]]
+    return [{ v: 'silver', t: Infinity }]
   } else if (tank.level === 'fast') {
-    return [['silver', Infinity]]
+    return [{ v: 'silver', t: Infinity }]
   } else if (tank.level === 'power') {
-    return [['silver', Infinity]]
+    return [{ v: 'silver', t: Infinity }]
   } else {
-    const map: { [key: number]: Timing<TankColor> } = {
-      1: [['silver', Infinity]],
-      2: [['green', f(3)], ['yellow', f(1)], ['green', f(1)], ['yellow', f(1)]],
-      3: [['silver', f(3)], ['yellow', f(1)], ['silver', f(1)], ['yellow', f(1)]],
-      4: [['silver', f(3)], ['green', f(1)], ['silver', f(1)], ['green', f(1)]],
+    const map: { [key: number]: TimingConfig<TankColor> } = {
+      1: [{ v: 'silver', t: Infinity }],
+      2: [{ v: 'green', t: f(3) }, { v: 'yellow', t: f(1) }, { v: 'green', t: f(1) }, { v: 'yellow', t: f(1) }],
+      3: [{ v: 'silver', t: f(3) }, { v: 'yellow', t: f(1) }, { v: 'silver', t: f(1) }, { v: 'yellow', t: f(1) }],
+      4: [{ v: 'silver', t: f(3) }, { v: 'green', t: f(1) }, { v: 'silver', t: f(1) }, { v: 'green', t: f(1) }],
     }
     return map[tank.hp]
   }
@@ -61,20 +61,19 @@ function resolveTankComponent(side: Side, level: TankLevel): TankComponent {
   return component
 }
 
-
-const tireShapeConfig: [number, number][] = [[0, 80], [1, 80]]
+const tireShapeConfig: TimingConfig<number> = [{ v: 0, t: 80 }, { v: 1, t: 80 }]
 
 const add = (x: number, y: number) => x + y
 
-function calculate<T>(config: Timing<T>, startTime: number, time: number): T {
-  const sum = config.map(item => item[1]).reduce(add)
+function calculate<V>(config: TimingConfig<V>, startTime: number, time: number): V {
+  const sum = config.map(item => item.t).reduce(add)
   let t = (time - startTime) % sum
   let index = 0
-  while (config[index][1] < t) {
-    t -= config[index][1]
+  while (config[index].t < t) {
+    t -= config[index].t
     index += 1
   }
-  return config[index][0]
+  return config[index].v
 }
 
 
@@ -110,7 +109,7 @@ type P = {
 
 type S = { lastTireShape: number }
 
-class TankClassBase extends React.Component<P, S> {
+export class TankClassBase extends React.Component<P, S> {
   private startTime: number
 
   constructor(props: P) {

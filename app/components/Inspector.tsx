@@ -1,7 +1,15 @@
 import * as React from 'react'
 import { connect } from 'react-redux'
 import * as _ from 'lodash'
-import { State, TanksMap, ScoresMap, TankRecord, PlayersMap, PlayerRecord } from 'types'
+import {
+  State,
+  TanksMap,
+  ScoresMap,
+  TankRecord,
+  PlayersMap,
+  PlayerRecord,
+  ExplosionsMap,
+} from 'types'
 
 function roundTank(t: TankRecord) {
   return t.update('x', Math.round)
@@ -10,13 +18,14 @@ function roundTank(t: TankRecord) {
     .update('helmetDuration', Math.round)
 }
 
-type View = 'scores' | 'tanks' | 'players'
+type View = 'scores' | 'tanks' | 'players' | 'explosions'
 
 interface S {
   view: View
   allScores: ScoresMap
   allTanks: TanksMap
   allPlayers: PlayersMap
+  allExplosions: ExplosionsMap
 }
 
 class Inspector extends React.PureComponent<State, S>{
@@ -25,15 +34,17 @@ class Inspector extends React.PureComponent<State, S>{
     allScores: this.props.scores,
     allTanks: this.props.tanks.map(roundTank),
     allPlayers: this.props.players,
+    allExplosions: this.props.explosions,
   }
 
   componentWillReceiveProps(nextProps: State) {
-    const { scores, tanks, players } = this.props
-    const { allScores, allTanks, allPlayers } = this.state
+    const { scores, tanks, players, explosions } = this.props
+    const { allScores, allTanks, allPlayers, allExplosions } = this.state
     this.setState({
       allScores: allScores.merge(scores),
       allTanks: allTanks.merge(tanks.map(roundTank)),
       allPlayers: allPlayers.merge(players),
+      allExplosions: allExplosions.merge(explosions),
     })
   }
 
@@ -61,6 +72,26 @@ class Inspector extends React.PureComponent<State, S>{
             }}
           >
             {JSON.stringify(p, null, 2)}
+          </pre>
+        ).toArray()}
+      </div>
+    )
+  }
+
+  renderExplosionsView() {
+    const { explosions } = this.props
+    const { allExplosions } = this.state
+    return (
+      <div role="explosions-view">
+        {allExplosions.isEmpty() ? <p>EMPTY EXPLOSIONS</p> : null}
+        {allExplosions.map(exp =>
+          <pre
+            key={exp.explosionId}
+            style={{
+              textDecoration: explosions.has(exp.explosionId) ? 'none' : 'line-through',
+            }}
+          >
+            {JSON.stringify(exp, null, 2)}
           </pre>
         ).toArray()}
       </div>
@@ -135,6 +166,12 @@ class Inspector extends React.PureComponent<State, S>{
           >
             Players
           </button>
+          <button
+            style={{ color: view === 'explosions' ? 'green' : 'inherit' }}
+            onClick={() => this.setState({ view: 'explosions' })}
+          >
+            Explosions
+          </button>
           <button onClick={this.debugger}>
             debugger
             </button>
@@ -142,6 +179,7 @@ class Inspector extends React.PureComponent<State, S>{
         {view === 'scores' ? this.renderScoresView() : null}
         {view === 'tanks' ? this.renderTanksView() : null}
         {view === 'players' ? this.renderPlayersView() : null}
+        {view === 'explosions' ? this.renderExplosionsView() : null}
       </div>
     )
   }
