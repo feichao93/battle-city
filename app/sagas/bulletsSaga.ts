@@ -147,14 +147,25 @@ function* destroySteels(collidedBullets: BulletsMap) {
   }
 }
 
-/** 从地图上移除坦克, 并产生坦克爆炸效果  */
-export function* destroyTanks(destroyedTanks: ISet<TankRecord>) {
-  yield* destroyedTanks.map(tank => put({
+function* killTank(tank: TankRecord) {
+  // 移除坦克
+  yield put({
     type: 'REMOVE_TANK',
     tankId: tank.tankId,
-  }))
+  })
+
   // 产生坦克爆炸效果
-  yield all(destroyedTanks.map(tank => fork(explosionFromTank, tank)).toArray())
+  yield* explosionFromTank(tank)
+  if (tank.side === 'ai') {
+    // 显示击杀得分
+    yield makeScoreFromTank(tank)
+    // TODO 这里一直等到score消失才算处理完成
+  }
+}
+
+// 移除坦克 & 产生爆炸效果 & 显示击杀得分信息
+export function* killTanks(destroyedTanks: ISet<TankRecord>) {
+  yield all(destroyedTanks.toArray().map(killTank))
 }
 
 function* destroyBricks(collidedBullets: BulletsMap) {
@@ -162,6 +173,7 @@ function* destroyBricks(collidedBullets: BulletsMap) {
   const bricksNeedToDestroy: BrickIndex[] = []
 
   collidedBullets.forEach((bullet) => {
+    // TODO spreadBullet的时候 根据bullet.power的不同会影响spread的范围
     for (const [row, col] of iterRowsAndCols(ITEM_SIZE_MAP.BRICK, spreadBullet(bullet))) {
       const t = row * N_MAP.BRICK + col
       if (bricks.get(t)) {
@@ -175,6 +187,22 @@ function* destroyBricks(collidedBullets: BulletsMap) {
       type: 'REMOVE_BRICKS',
       ts: ISet(bricksNeedToDestroy),
     })
+  }
+}
+
+function* destroyBullet(bullet: BulletRecord, useExplosion: boolean) {
+  yield put<Action.RemoveBulletAction>({
+    type: 'REMOVE_BULLET',
+    bulletId: bullet.bulletId,
+  })
+  if (useExplosion) {
+    yield* explosionFromBullet(bullet)
+  }
+}
+
+function* destroyBullets(bullets: BulletsMap, useExplosion: boolean) {
+  if (!bullets.isEmpty()) {
+    yield all(bullets.toArray().map(bullet => destroyBullet(bullet, useExplosion)))
   }
 }
 
@@ -276,11 +304,7 @@ function* handleAfterTick() {
 
     const bulletsCollidedWithEagle = yield* filterBulletsCollidedWithEagle(bullets)
     if (!bulletsCollidedWithEagle.isEmpty()) {
-      yield put({
-        type: 'DESTROY_BULLETS',
-        bullets: bulletsCollidedWithEagle,
-        spawnExplosion: true,
-      })
+      yield fork(destroyBullets, bulletsCollidedWithEagle, true)
       yield put({ type: 'DESTROY_EAGLE' })
       // DESTROY_EAGLE被dispatch之后将会触发游戏失败的流程
     }
@@ -302,11 +326,7 @@ function* handleAfterTick() {
     // 产生爆炸效果的的子弹
     const expBullets = bullets.filter(bullet => context.expBulletIdSet.has(bullet.bulletId))
     if (!expBullets.isEmpty()) {
-      yield put({
-        type: 'DESTROY_BULLETS',
-        bullets: expBullets,
-        spawnExplosion: true,
-      })
+      yield fork(destroyBullets, expBullets, true)
 
       // 产生爆炸效果的子弹才会破坏附近的brickWall和steelWall
       yield* destroyBricks(expBullets)
@@ -322,8 +342,7 @@ function* handleAfterTick() {
       })
     }
 
-    const kills: PutEffect<Action.KillAction>[] = []
-    const destroyedTankIdSet = new Set<TargetTankId>()
+    const kills: Action.KillAction[] = []
     // 坦克伤害结算
     for (const [targetTankId, hurtMap] of context.tankHurtMap.entries()) {
       const hurt = sum(hurtMap.values())
@@ -331,69 +350,35 @@ function* handleAfterTick() {
       if (hurt >= targetTank.hp) {
         // 击杀了目标坦克
         const sourceTankId = hurtMap.keys().next().value
-        kills.push(put<Action.KillAction>({
+        kills.push({
           type: 'KILL',
           targetTank,
           // 注意这里用allTanks, 因为sourceTank在这个时候可能已经挂了
           sourceTank: allTanks.get(sourceTankId),
           targetPlayer: players.find(p => p.activeTankId === targetTankId),
           sourcePlayer: players.find(p => p.activeTankId === sourceTankId),
-        }))
-        destroyedTankIdSet.add(targetTankId)
+        })
       } else {
         yield put<Action>({ type: 'HURT', targetTank, hurt })
       }
     }
 
-    const destroyedTanks = ISet(destroyedTankIdSet).map(tankId => allTanks.get(tankId))
-    if (!destroyedTanks.isEmpty()) {
-      // 移除坦克 & 产生爆炸效果
-      yield fork(destroyTanks, destroyedTanks)
+    yield fork(killTanks, ISet(kills.map(kill => kill.targetTank)))
 
-      // 显示击杀得分 TODO 爆炸完成之后才会显示分数
-      const destroyedAITanks = ISet(destroyedTankIdSet)
-        .map(tankId => allTanks.get(tankId))
-        .filter(tank => tank.side === 'ai')
-      if (destroyedAITanks.size > 0) {
-        yield* destroyedAITanks.map(makeScoreFromTank)
-      }
-    }
     // notice KillAction是在destroyTanks之后被dispatch的; 此时地图上的坦克已经被去除了
-    yield* kills
+    yield* kills.map(k => put(k))
 
     // 不产生爆炸, 直接消失的子弹
     const noExpBullets = bullets.filter(bullet => context.noExpBulletIdSet.has(bullet.bulletId))
-    if (context.noExpBulletIdSet.size > 0) {
-      yield put({
-        type: 'DESTROY_BULLETS',
-        bullets: noExpBullets,
-        spawnExplosion: false,
-      })
-    }
+    yield fork(destroyBullets, noExpBullets, false)
 
     // 移除在边界外面的子弹
     const outsideBullets = bullets.filterNot(isBulletInField)
-    if (!outsideBullets.isEmpty()) {
-      yield put({
-        type: 'DESTROY_BULLETS',
-        bullets: outsideBullets,
-        spawnExplosion: true,
-      })
-    }
+    yield fork(destroyBullets, outsideBullets, true)
   }
 }
 
 export default function* bulletsSaga() {
   yield fork(handleTick)
   yield fork(handleAfterTick)
-
-  // todo 是否使用channel来代替put/take
-  yield takeEvery(
-    'DESTROY_BULLETS' as Action['type'],
-    function* ({ bullets, spawnExplosion }: Action.DestroyBulletsAction) {
-      if (spawnExplosion) {
-        yield all(bullets.map(bullet => fork(explosionFromBullet, bullet)).toArray())
-      }
-    },
-  )
 }

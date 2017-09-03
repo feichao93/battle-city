@@ -25,7 +25,7 @@ declare global {
       | SetHelmetDurationAction
       | SetFrozenTimeoutAction
       | SetAIFrozenTimeoutAction
-      | DestroyBulletsAction
+      | RemoveBulletAction
       | RemoveSteelsAction
       | RemoveBricksAction
       | UpdateMapAction
@@ -153,10 +153,9 @@ declare global {
       AIFrozenTimeout: number
     }
 
-    export type DestroyBulletsAction = {
-      type: 'DESTROY_BULLETS',
-      bullets: Map<BulletId, BulletRecord>,
-      spawnExplosion: boolean,
+    export interface RemoveBulletAction {
+      type: 'REMOVE_BULLET'
+      bulletId: BulletId
     }
 
     export interface RemoveSteelsAction {

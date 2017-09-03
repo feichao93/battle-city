@@ -3,7 +3,7 @@ import { fork, put, take, select, takeEvery, takeLatest } from 'redux-saga/effec
 import { State, MapRecord, ScoreRecord } from 'types'
 import { N_MAP, ITEM_SIZE_MAP } from 'utils/constants'
 import { iterRowsAndCols, asBox, getNextId, frame as f } from 'utils/common'
-import { destroyTanks } from 'sagas/bulletsSaga'
+import { killTanks } from 'sagas/bulletsSaga'
 
 function convertToBricks(map: MapRecord) {
   const { eagle, steels, bricks } = map
@@ -119,7 +119,7 @@ function* grenade(action: Action.PickPowerUpAction) {
   const { tanks: allTanks, players }: State = yield select()
   const activeAITanks = allTanks.filter(t => (t.active && t.side === 'ai'))
 
-  yield* destroyTanks(activeAITanks.toSet())
+  yield* killTanks(activeAITanks.toSet())
 
   // todo 确定需要put KILL?
   yield* activeAITanks.map(targetTank => put<Action.KillAction>({
