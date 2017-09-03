@@ -42,6 +42,14 @@ export const TANK_COLOR_SCHEMES: Schema = {
   },
 }
 
+/** 击杀坦克的得分列表 */
+export const TANK_KILL_SCORE_MAP = {
+  basic: 100,
+  fast: 200,
+  power: 300,
+  armor: 400,
+}
+
 /** 物体的大小(边长) */
 export const ITEM_SIZE_MAP = {
   BRICK: 4,

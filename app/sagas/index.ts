@@ -6,24 +6,14 @@ import gameManager from 'sagas/gameManager'
 import AIMasterSaga from 'sagas/AISaga'
 import tickEmitter from 'sagas/tickEmitter'
 import { CONTROL_CONFIG } from 'utils/constants'
-import { frame as f } from 'utils/common'
 import humanPlayerSaga from 'sagas/humanPlayerSaga'
 import powerUps from 'sagas/powerUps'
-
-/** @deprecated 不要使用autoRemoveEffects */
-function* autoRemoveEffects() {
-  yield takeEvery('ADD_SCORE', function* removeScore({ score: { scoreId } }: Action.AddScoreAction) {
-    yield delay(f(48))
-    yield put<Action>({ type: 'REMOVE_SCORE', scoreId })
-  })
-}
 
 export default function* rootSaga() {
   console.debug('root saga started')
   yield fork(tickEmitter)
 
   yield fork(bulletsSaga)
-  yield fork(autoRemoveEffects)
   yield fork(powerUps)
 
   // 生成两个humanController, 对应现实生活的游戏控制器

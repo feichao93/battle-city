@@ -7,6 +7,21 @@ import {
 import stageConfigs from 'stages'
 import { BulletRecord, TankRecord, EagleRecord, PowerUpRecord } from 'types'
 
+export function sum(iterable: Iterable<number>) {
+  let result = 0
+  for (const item of iterable) {
+    result += item
+  }
+  return result
+}
+
+export function getOrDefault<K, V>(map: Map<K, V>, key: K, getValue: () => V) {
+  if (!map.has(key)) {
+    map.set(key, getValue())
+  }
+  return map.get(key)
+}
+
 // 根据坦克的位置计算子弹的生成位置
 // 参数x,y,direction为坦克的位置和方向
 export function calculateBulletStartPosition({ x, y, direction }: { x: number, y: number, direction: Direction }) {

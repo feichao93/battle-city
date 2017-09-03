@@ -1,68 +1,23 @@
 import { Map as IMap, Set as ISet } from 'immutable'
-import { takeEvery, all, fork, put, PutEffect, select, take } from 'redux-saga/effects'
+import { fork, put, select, take } from 'redux-saga/effects'
 import { BLOCK_SIZE, ITEM_SIZE_MAP, N_MAP, STEEL_POWER } from 'utils/constants'
-import { explosionFromBullet, explosionFromTank } from 'sagas/common'
-import {
-  asBox,
-  getDirectionInfo,
-  getNextId,
-  isInField,
-  iterRowsAndCols,
-  testCollide,
-} from 'utils/common'
-import { BulletRecord, BulletsMap, State, TankRecord, ScoreRecord } from 'types'
+import { destroyBullets, destroyTanks } from 'sagas/common'
+import { BulletRecord, BulletsMap, State } from 'types'
+import { asBox, getDirectionInfo, getOrDefault, isInField, iterRowsAndCols, sum, testCollide } from 'utils/common'
 
 type HurtCount = number
 type TargetTankId = TankId
 type SourceTankId = TankId
 
-type Context = {
+interface Context {
   /** 将要爆炸的子弹的id集合 */
-  expBulletIdSet: Set<BulletId>,
+  readonly expBulletIdSet: Set<BulletId>,
   /** 不需要爆炸的子弹的id集合 */
-  noExpBulletIdSet: Set<BulletId>,
+  readonly noExpBulletIdSet: Set<BulletId>,
   /** 坦克受伤统计Map */
-  tankHurtMap: Map<TargetTankId, Map<SourceTankId, HurtCount>>
+  readonly tankHurtMap: Map<TargetTankId, Map<SourceTankId, HurtCount>>
   /** 移动冻结的坦克tankId集合 */
-  frozenTankIdSet: Set<TankId>
-}
-
-function isBulletInField(bullet: BulletRecord) {
-  return isInField(asBox(bullet))
-}
-
-function sum(iterable: Iterable<number>) {
-  let result = 0
-  for (const item of iterable) {
-    result += item
-  }
-  return result
-}
-
-function getOrDefault<K, V>(map: Map<K, V>, key: K, getValue: () => V) {
-  if (!map.has(key)) {
-    map.set(key, getValue())
-  }
-  return map.get(key)
-}
-
-function makeScoreFromTank(tank: TankRecord): PutEffect<Action> {
-  const scoreMap = {
-    basic: 100,
-    fast: 200,
-    power: 300,
-    armor: 400,
-  }
-  return put<Action.AddScoreAction>({
-    type: 'ADD_SCORE',
-    score: ScoreRecord({
-      score: scoreMap[tank.level],
-      scoreId: getNextId('score'),
-      x: tank.x,
-      y: tank.y,
-    }),
-  })
-  // TODO clear score here
+  readonly frozenTankIdSet: Set<TankId>
 }
 
 function* handleTick() {
@@ -147,27 +102,6 @@ function* destroySteels(collidedBullets: BulletsMap) {
   }
 }
 
-function* killTank(tank: TankRecord) {
-  // 移除坦克
-  yield put({
-    type: 'REMOVE_TANK',
-    tankId: tank.tankId,
-  })
-
-  // 产生坦克爆炸效果
-  yield* explosionFromTank(tank)
-  if (tank.side === 'ai') {
-    // 显示击杀得分
-    yield makeScoreFromTank(tank)
-    // TODO 这里一直等到score消失才算处理完成
-  }
-}
-
-// 移除坦克 & 产生爆炸效果 & 显示击杀得分信息
-export function* killTanks(destroyedTanks: ISet<TankRecord>) {
-  yield all(destroyedTanks.toArray().map(killTank))
-}
-
 function* destroyBricks(collidedBullets: BulletsMap) {
   const { map: { bricks } }: State = yield select()
   const bricksNeedToDestroy: BrickIndex[] = []
@@ -187,22 +121,6 @@ function* destroyBricks(collidedBullets: BulletsMap) {
       type: 'REMOVE_BRICKS',
       ts: ISet(bricksNeedToDestroy),
     })
-  }
-}
-
-function* destroyBullet(bullet: BulletRecord, useExplosion: boolean) {
-  yield put<Action.RemoveBulletAction>({
-    type: 'REMOVE_BULLET',
-    bulletId: bullet.bulletId,
-  })
-  if (useExplosion) {
-    yield* explosionFromBullet(bullet)
-  }
-}
-
-function* destroyBullets(bullets: BulletsMap, useExplosion: boolean) {
-  if (!bullets.isEmpty()) {
-    yield all(bullets.toArray().map(bullet => destroyBullet(bullet, useExplosion)))
   }
 }
 
@@ -296,10 +214,41 @@ function* handleBulletsCollidedWithBullets(context: Context) {
   }
 }
 
+function calculateHurtsAndKillsFromContext({ tanks, players }: State, context: Context) {
+  const kills: Action.KillAction[] = []
+  const hurts: Action.HurtAction[] = []
+
+  for (const [targetTankId, hurtMap] of context.tankHurtMap.entries()) {
+    const hurt = sum(hurtMap.values())
+    const targetTank = tanks.get(targetTankId)
+    if (hurt >= targetTank.hp) {
+      // 击杀了目标坦克
+      const sourceTankId = hurtMap.keys().next().value
+      kills.push({
+        type: 'KILL',
+        targetTank,
+        // 注意这里用allTanks, 因为sourceTank在这个时候可能已经挂了
+        sourceTank: tanks.get(sourceTankId),
+        targetPlayer: players.find(p => p.activeTankId === targetTankId),
+        sourcePlayer: players.find(p => p.activeTankId === sourceTankId),
+      })
+    } else {
+      hurts.push({
+        type: 'HURT',
+        targetTank,
+        hurt,
+      })
+    }
+  }
+
+  return { kills, hurts }
+}
+
 function* handleAfterTick() {
   while (true) {
     yield take('AFTER_TICK')
-    const { bullets, players, tanks: allTanks }: State = yield select()
+    const state: State = yield select()
+    const { bullets, players, tanks: allTanks } = state
     const activeTanks = allTanks.filter(t => t.active)
 
     const bulletsCollidedWithEagle = yield* filterBulletsCollidedWithEagle(bullets)
@@ -342,38 +291,21 @@ function* handleAfterTick() {
       })
     }
 
-    const kills: Action.KillAction[] = []
-    // 坦克伤害结算
-    for (const [targetTankId, hurtMap] of context.tankHurtMap.entries()) {
-      const hurt = sum(hurtMap.values())
-      const targetTank = activeTanks.get(targetTankId)
-      if (hurt >= targetTank.hp) {
-        // 击杀了目标坦克
-        const sourceTankId = hurtMap.keys().next().value
-        kills.push({
-          type: 'KILL',
-          targetTank,
-          // 注意这里用allTanks, 因为sourceTank在这个时候可能已经挂了
-          sourceTank: allTanks.get(sourceTankId),
-          targetPlayer: players.find(p => p.activeTankId === targetTankId),
-          sourcePlayer: players.find(p => p.activeTankId === sourceTankId),
-        })
-      } else {
-        yield put<Action>({ type: 'HURT', targetTank, hurt })
-      }
-    }
+    const { kills, hurts } = calculateHurtsAndKillsFromContext(state, context)
 
-    yield fork(killTanks, ISet(kills.map(kill => kill.targetTank)))
-
-    // notice KillAction是在destroyTanks之后被dispatch的; 此时地图上的坦克已经被去除了
-    yield* kills.map(k => put(k))
+    yield* hurts.map(hurtAction => put(hurtAction))
+    // TODO destroyTanks和killAction哪个先put/fork 会影响逻辑么?
+    yield* kills.map(killAction => put(killAction))
+    yield fork(destroyTanks, IMap(kills.map(kill =>
+      [kill.targetTank.tankId, kill.targetTank]
+    )))
 
     // 不产生爆炸, 直接消失的子弹
     const noExpBullets = bullets.filter(bullet => context.noExpBulletIdSet.has(bullet.bulletId))
     yield fork(destroyBullets, noExpBullets, false)
 
     // 移除在边界外面的子弹
-    const outsideBullets = bullets.filterNot(isBulletInField)
+    const outsideBullets = bullets.filterNot(bullet => isInField(asBox(bullet)))
     yield fork(destroyBullets, outsideBullets, true)
   }
 }

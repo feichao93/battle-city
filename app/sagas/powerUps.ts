@@ -3,7 +3,7 @@ import { fork, put, take, select, takeEvery, takeLatest } from 'redux-saga/effec
 import { State, MapRecord, ScoreRecord } from 'types'
 import { N_MAP, ITEM_SIZE_MAP } from 'utils/constants'
 import { iterRowsAndCols, asBox, getNextId, frame as f } from 'utils/common'
-import { killTanks } from 'sagas/bulletsSaga'
+import { destroyTanks } from 'sagas/common'
 
 function convertToBricks(map: MapRecord) {
   const { eagle, steels, bricks } = map
@@ -119,7 +119,7 @@ function* grenade(action: Action.PickPowerUpAction) {
   const { tanks: allTanks, players }: State = yield select()
   const activeAITanks = allTanks.filter(t => (t.active && t.side === 'ai'))
 
-  yield* killTanks(activeAITanks.toSet())
+  yield* destroyTanks(activeAITanks)
 
   // todo 确定需要put KILL?
   yield* activeAITanks.map(targetTank => put<Action.KillAction>({
@@ -166,7 +166,7 @@ function* handleHelmetDuration() {
   }
 }
 
-function* showScoreWhenPickPowerUp(action: Action.PickPowerUpAction) {
+function* scoreFromPickPowerUp(action: Action.PickPowerUpAction) {
   const { powerUp: { x, y } } = action
   const scoreId = getNextId('score')
   yield put<Action.AddScoreAction>({
@@ -178,10 +178,16 @@ function* showScoreWhenPickPowerUp(action: Action.PickPowerUpAction) {
       y,
     }),
   })
+  // TODO 考虑PAUSE的影响
+  yield delay(f(48))
+  yield put<Action.RemoveScoreAction>({
+    type: 'REMOVE_SCORE',
+    scoreId,
+  })
 }
 
 export default function* powerUps() {
-  yield takeEvery('PICK_POWER_UP', showScoreWhenPickPowerUp)
+  yield takeEvery('PICK_POWER_UP', scoreFromPickPowerUp)
 
   yield takeLatest(is('shovel'), shovel)
   yield takeLatest(is('timer'), timer)
