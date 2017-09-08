@@ -16,7 +16,7 @@ declare global {
 
   namespace Action {
     export type Action =
-      MoveAction
+      Move
       | StartMoveAction
       | TickAction
       | AfterTickAction
@@ -31,7 +31,8 @@ declare global {
       | UpdateMapAction
       | UpdaetBulletsAction
       | LoadStageMapAction
-      | StartStageAction
+      | StartStage
+      | EndStage
       | Simple<'GAMEOVER'>
       | Simple<'GAMESTART'>
       | Simple<'GAMEPAUSE'>
@@ -74,10 +75,9 @@ declare global {
 
     export type ActionType = Action['type']
 
-    export type MoveAction = {
-      type: 'MOVE',
-      tankId: TankId,
-      tank: TankRecord,
+    export interface Move {
+      type: 'MOVE'
+      tank: TankRecord
     }
 
     export type HurtAction = {
@@ -183,9 +183,14 @@ declare global {
       name: string
     }
 
-    export interface StartStageAction {
+    export interface StartStage {
       type: 'START_STAGE'
       name: string
+      aliveHumanTankIdSet: Set<TankId>
+    }
+
+    export interface EndStage {
+      type: 'END_STAGE'
     }
 
     export interface AddOrUpdateExplosion {

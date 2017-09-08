@@ -18,12 +18,12 @@ function* statistics() {
 
   // todo 目前只考虑player-1的信息
 
-  yield nonPauseDelay(500)
+  yield nonPauseDelay(process.env.NODE_ENV === 'production' ? 500 : 200)
 
   for (const tankLevel of tankLevels) {
     const { game: { transientKillInfo } }: State = yield select()
 
-    yield nonPauseDelay(250)
+    yield nonPauseDelay(process.env.NODE_ENV === 'production' ? 250 : 100)
     const levelKillCount = player1KillInfo.get(tankLevel, 0)
     if (levelKillCount === 0) {
       yield put<Action>({
@@ -36,14 +36,14 @@ function* statistics() {
           type: 'UPDATE_TRANSIENT_KILL_INFO',
           info: transientKillInfo.setIn(['player-1', tankLevel], count),
         })
-        yield nonPauseDelay(160)
+        yield nonPauseDelay(process.env.NODE_ENV === 'production' ? 160 : 64)
       }
     }
-    yield nonPauseDelay(200)
+    yield nonPauseDelay(process.env.NODE_ENV === 'production' ? 200 : 80)
   }
-  yield nonPauseDelay(200)
+  yield nonPauseDelay(process.env.NODE_ENV === 'production' ? 200 : 80)
   yield put<Action>({ type: 'SHOW_TOTAL_KILL_COUNT' })
-  yield nonPauseDelay(1000)
+  yield nonPauseDelay(process.env.NODE_ENV === 'production' ? 1000 : 400)
 }
 
 // TODO 使用一个独立的文件来防止powerUp
@@ -118,7 +118,16 @@ export default function* stageSaga(stageName: string) {
   // yield put<Action>({type:'FILTER_INVERT'})
   // 移除反色效果
   // yield fork(delayedPut, f(3), { type: 'REMOEV_FILTER_INVERT' })
-  yield put<Action>({ type: 'START_STAGE', name: stageName })
+
+  const { players }: State = yield select()
+  const aliveHumanTankIdSet = players.filter(p => p.side === 'human')
+    .map(p => p.activeTankId)
+    .toSet()
+  yield put<Action.StartStage>({
+    type: 'START_STAGE',
+    name: stageName,
+    aliveHumanTankIdSet,
+  })
   yield put<Action>({ type: 'SHOW_HUD' })
 
   while (true) {
@@ -150,9 +159,15 @@ export default function* stageSaga(stageName: string) {
       const activeAITanks = tanks.filter(t => (t.active && t.side === 'ai'))
       if (remainingEnemies.isEmpty() && activeAITanks.isEmpty()) {
         // 剩余enemy数量为0, 且场上已经没有ai tank了
-        // todo 如果场上有powerup, 则delay时间可以适当延长; 如果场上没有power, 则delay时间可以缩短
-        yield nonPauseDelay(6000)
+        yield nonPauseDelay(1500)
+        const { powerUps }: State = yield select()
+        if (!powerUps.isEmpty()) {
+          // 如果场上有powerup, 则适当延长结束时间
+          yield nonPauseDelay(5000)
+        }
         yield* statistics()
+        yield put<Action>({ type: 'HIDE_HUD' })
+        yield put<Action.EndStage>({ type: 'END_STAGE' })
         return { status: 'clear' }
       }
     } else { // ai击杀human
@@ -160,6 +175,8 @@ export default function* stageSaga(stageName: string) {
         // 所有的human player都挂了
         yield nonPauseDelay(2000)
         yield* statistics()
+        yield put<Action>({ type: 'HIDE_HUD' })
+        yield put<Action.EndStage>({ type: 'END_STAGE' })
         return { status: 'fail', reason: 'all-human-dead' }
       }
     }

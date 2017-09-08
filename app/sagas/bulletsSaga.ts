@@ -294,11 +294,12 @@ function* handleAfterTick() {
     const { kills, hurts } = calculateHurtsAndKillsFromContext(state, context)
 
     yield* hurts.map(hurtAction => put(hurtAction))
-    // TODO destroyTanks和killAction哪个先put/fork 会影响逻辑么?
-    yield* kills.map(killAction => put(killAction))
+    // 注意 必须先fork destroyTanks, 然后再put killAction
+    // stageSaga中take KILL的逻辑, 依赖于REMOVE_TANK已经被处理
     yield fork(destroyTanks, IMap(kills.map(kill =>
       [kill.targetTank.tankId, kill.targetTank]
     )))
+    yield* kills.map(killAction => put(killAction))
 
     // 不产生爆炸, 直接消失的子弹
     const noExpBullets = bullets.filter(bullet => context.noExpBulletIdSet.has(bullet.bulletId))

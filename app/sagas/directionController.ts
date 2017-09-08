@@ -45,9 +45,8 @@ export default function* directionController(playerName: string, getPlayerInput:
       } else { // use-round
         movedTank = turned.set(xy, Math.round(n) * 8)
       }
-      yield put({
+      yield put<Action.Move>({
         type: 'MOVE',
-        tankId: tank.tankId,
         tank: movedTank,
       })
     } else if (input.type === 'forward') {
@@ -57,9 +56,8 @@ export default function* directionController(playerName: string, getPlayerInput:
       const { xy, updater } = getDirectionInfo(tank.direction)
       const movedTank = tank.update(xy, updater(distance))
       if (yield select(canTankMove, movedTank)) {
-        yield put({
+        yield put<Action.Move>({
           type: 'MOVE',
-          tankId: tank.tankId,
           tank: movedTank,
         })
         if (!tank.moving) {
