@@ -7,10 +7,18 @@ import StatisticsScene from 'components/StatisticsScene'
 import GameTitleScene from 'components/GameTitleScene'
 import PauseIndicator from 'components/PauseIndicator'
 import CurtainsContainer from 'components/CurtainsContainer'
+import Inspector from 'components/Inspector'
 import { State } from 'types'
 
-let Inspector = () => (
+declare global {
+  const COMPILE_VERSION: string
+  const COMPILE_DATE: string
+}
+
+const HelpInfo = () => (
   <div style={{ maxWidth: 200, marginLeft: 20 }}>
+    <p>当前版本 {COMPILE_VERSION}</p>
+    <p>编译时间 {COMPILE_DATE}</p>
     <p>
       游戏仍在开发中，目前只支持单人进行游戏。
       目前游戏仍有很多BUG，请见谅。
@@ -25,9 +33,6 @@ let Inspector = () => (
     <p>STAR ME ON <a href="https://github.com/shinima/battle-city">GitHub</a></p>
   </div>
 )
-if (process.env.NODE_ENV !== 'production') {
-  Inspector = require('components/Inspector').default
-}
 
 const zoomLevel = 2
 const totalWidth = 16 * B
@@ -53,7 +58,8 @@ class App extends React.PureComponent<{ scene: Scene, paused: boolean }> {
           <CurtainsContainer />
           {paused ? <PauseIndicator /> : null}
         </svg>
-        <Inspector />
+        {process.env.NODE_ENV !== 'production' ? <Inspector /> : null}
+        {process.env.NODE_ENV === 'production' ? <HelpInfo /> : null}
       </div>
     )
   }

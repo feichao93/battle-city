@@ -2,11 +2,19 @@ const path = require('path')
 const webpack = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
+const moment = require('moment')
 const packageInfo = require('./package.json')
+
+moment.locale('zh-cn')
 
 const isProduction = process.env.NODE_ENV === 'production'
 
 const commonPlugins = [
+  new webpack.DefinePlugin({
+    COMPILE_VERSION: JSON.stringify(packageInfo.version),
+    COMPILE_DATE: JSON.stringify(moment().format('YYYY-MM-DD HH:mm:ss')),
+  }),
+  // default value of process.env.NODE_ENV is 'development'
   new webpack.EnvironmentPlugin({ NODE_ENV: 'development' }),
   new HtmlWebpackPlugin({
     title: 'battle-city',
