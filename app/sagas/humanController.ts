@@ -111,7 +111,7 @@ export default function* humanController(playerName: string, config: HumanContro
   }
 
   while (true) {
-    const action: Action.ActivatePlayerAction = yield take('ACTIVATE_PLAYER')
+    const action: Action.ActivatePlayer = yield take('ACTIVATE_PLAYER')
     if (action.playerName === playerName) {
       yield all([
         directionController(playerName, getHumanPlayerInput),

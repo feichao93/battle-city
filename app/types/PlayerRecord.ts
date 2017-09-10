@@ -1,4 +1,5 @@
 import { Record } from 'immutable'
+import TankRecord from 'types/TankRecord'
 
 const PlayerRecord = Record({
   playerName: null as PlayerName,
@@ -7,6 +8,7 @@ const PlayerRecord = Record({
   lives: 0,
   score: 0,
   active: false,
+  reservedTank: null as TankRecord,
 })
 
 const record = PlayerRecord()

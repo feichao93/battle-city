@@ -78,20 +78,20 @@ interface StageResult {
 export default function* gameManager() {
   if (process.env.NODE_ENV === 'production') {
     yield take((action: Action) => action.type === 'GAMESTART')
-    console.log('gamestart')
   }
 
   const stages = Object.keys(stageConfigs)
   for (const stageName of stages) {
     const stageResult: StageResult = yield* stageSaga(stageName)
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('stageResult:', stageResult)
+    }
     if (stageResult.status === 'clear') {
       // continue to next stage
     } else {
       console.log(`gameover, reason: ${stageResult.reason}`)
       yield* animateGameover()
+      break
     }
   }
-
-  // clear all stages
-  // yield* animateClearance()
 }

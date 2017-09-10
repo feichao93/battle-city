@@ -14,6 +14,9 @@ export default function players(state = Map() as PlayersMap, action: Action) {
     return state.set(action.player.playerName, action.player)
   } else if (action.type === 'REMOVE_PLAYER') {
     return state.delete(action.playerName)
+  } else if (action.type === 'SET_REVERSED_TANK') {
+    const { playerName, reversedTank } = action
+    return state.update(playerName, p => p.set('reservedTank', reversedTank))
   } else if (action.type === 'REMOVE_TANK') {
     return state.map(p =>
       p.activeTankId === action.tankId ? p.set('activeTankId', 0) : p

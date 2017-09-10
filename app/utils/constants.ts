@@ -84,3 +84,5 @@ export const CONTROL_CONFIG = {
     fire: 'space',
   },
 }
+
+export const TANK_LEVELS: TankLevel[] = ['basic', 'fast', 'power', 'armor']

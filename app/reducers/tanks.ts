@@ -10,12 +10,8 @@ export default function tanks(state = Map() as TanksMap, action: Action) {
   } else if (action.type === 'HURT') {
     const tankId = action.targetTank.tankId
     return state.update(tankId, t => t.update('hp', hp => hp - action.hurt))
-  } else if (action.type === 'START_STAGE') {
-    // 在载入关卡的时候清空其它tank, 只保留acitve的人类玩家坦克
-    return state.filter(t => action.aliveHumanTankIdSet.has(t.tankId))
-  } else if (action.type === 'END_STAGE') {
-    // 在关卡结束的时候, 将所以的tank都设置为inactive
-    return state.map(t => t.set('active', false))
+  } else if (action.type === 'CLEAR_TANKS') {
+    return state.clear()
   } else if (action.type === 'MOVE') {
     return state.set(action.tank.tankId, action.tank)
   } else if (action.type === 'START_MOVE') {

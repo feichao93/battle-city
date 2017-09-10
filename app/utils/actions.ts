@@ -43,7 +43,7 @@ declare global {
       | Simple<'REMOVE_FIRST_REMAINING_ENEMY'>
       | IncrementPlayerLifeAction
       | DecrementPlayerLifeAction
-      | ActivatePlayerAction
+      | ActivatePlayer
       | CreatePlayerAction
       | RemovePlayerAction
       | Simple<'DEACTIVATE_ALL_PLAYERS'>
@@ -72,6 +72,8 @@ declare global {
       | RemoveScoreAction
       | UpgardeTankAction
       | UpdateCurtainAction
+      | SetReversedTank
+      | ClearTanks
 
     export type ActionType = Action['type']
 
@@ -186,7 +188,6 @@ declare global {
     export interface StartStage {
       type: 'START_STAGE'
       name: string
-      aliveHumanTankIdSet: Set<TankId>
     }
 
     export interface EndStage {
@@ -223,10 +224,10 @@ declare global {
       tankId: TankId,
     }
 
-    export type ActivatePlayerAction = {
-      type: 'ACTIVATE_PLAYER',
-      playerName: PlayerName,
-      tankId: TankId,
+    export interface ActivatePlayer {
+      type: 'ACTIVATE_PLAYER'
+      playerName: PlayerName
+      tankId: TankId
     }
 
     export type CreatePlayerAction = {
@@ -316,6 +317,16 @@ declare global {
       type: 'UPDATE_CURTAIN'
       curtainName: 'stage-enter-cutain'
       t: number
+    }
+
+    export interface SetReversedTank {
+      type: 'SET_REVERSED_TANK'
+      playerName: PlayerName
+      reversedTank: TankRecord
+    }
+
+    export interface ClearTanks {
+      type: 'CLEAR_TANKS'
     }
 
     export type Simple<T> = {
