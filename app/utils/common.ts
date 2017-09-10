@@ -185,10 +185,14 @@ export function getTankBulletLimit(tank: TankRecord) {
 
 export function getTankBulletSpeed(tank: TankRecord) {
   if (tank.side === 'human') {
-    if (tank.level === 'basic') {
-      return 0.12
+    if (process.env.NODE_ENV !== 'production') {
+      return 0.6
     } else {
-      return 0.24
+      if (tank.level === 'basic') {
+        return 0.12
+      } else {
+        return 0.24
+      }
     }
   } else {
     if (tank.level === 'basic') {
@@ -201,16 +205,20 @@ export function getTankBulletSpeed(tank: TankRecord) {
 
 export function getTankBulletInterval(tank: TankRecord) {
   // todo 需要校准数值
-  return 300
+  if (tank.level === 'basic') {
+    return 300
+  } else {
+    return 200
+  }
 }
 
 export function getTankMoveSpeed(tank: TankRecord) {
   if (tank.side === 'human') {
-    return 0.045
+    return process.env.NODE_ENV !== 'production' ? 0.09 : 0.045
   } else {
     if (tank.level === 'basic') {
       return 0.03
-    } else if (tank.level === 'power') {
+    } else if (tank.level === 'fast') {
       return 0.06
     } else {
       return 0.045

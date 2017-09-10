@@ -26,19 +26,19 @@ function* handleCommands(playerName: string, commandChannel: Channel<AICommand>,
       return false
     }
   })
-  yield fork(function* notifyWhenBulletComplete() {
-    while (true) {
-      // TODO 修复BUG
-      const { bullets }: Action.DestroyBulletsAction = yield take('DESTROY_BULLETS')
-      const tank = yield select(selectors.playerTank, playerName)
-      if (tank != null) {
-        if (bullets.some(b => (b.tankId === tank.tankId))) {
-          console.debug('bullet-completed. notify')
-          noteChannel.put({ type: 'bullet-complete' })
-        }
-      }
-    }
-  })
+  // yield fork(function* notifyWhenBulletComplete() {
+  //   while (true) {
+  //     // TODO 修复BUG
+  //     const { bullets }: Action.DestroyBulletsAction = yield take('DESTROY_BULLETS')
+  //     const tank = yield select(selectors.playerTank, playerName)
+  //     if (tank != null) {
+  //       if (bullets.some(b => (b.tankId === tank.tankId))) {
+  //         console.debug('bullet-completed. notify')
+  //         noteChannel.put({ type: 'bullet-complete' })
+  //       }
+  //     }
+  //   }
+  // })
 
   while (true) {
     const command: AICommand = yield take(commandChannel)
