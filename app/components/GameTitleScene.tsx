@@ -5,7 +5,7 @@ import BrickWall from 'components/BrickWall'
 import Text from 'components/Text'
 import TextButton from 'components/TextButton'
 import { Tank } from 'components/tanks'
-import { ITEM_SIZE_MAP, BLOCK_SIZE as B } from 'utils/constants'
+import { ITEM_SIZE_MAP, BLOCK_SIZE as B, CONTROL_CONFIG } from 'utils/constants'
 import { TankRecord, State } from 'types'
 
 type Choice = '1-player' | '2-players' | 'editor'
@@ -17,6 +17,26 @@ function y(choice: Choice) {
     return 9.25 * B
   } else {
     return 10.25 * B
+  }
+}
+
+function nextChoice(choice: Choice) {
+  if (choice === '1-player') {
+    return '2-players'
+  } else if (choice === '2-players') {
+    return 'editor'
+  } else {
+    return '1-player'
+  }
+}
+
+function prevChoice(choice: Choice) {
+  if (choice === '1-player') {
+    return 'editor'
+  } else if (choice === '2-players') {
+    return '1-player'
+  } else {
+    return '2-players'
   }
 }
 
@@ -33,10 +53,32 @@ class GameTitleScene extends React.PureComponent<P, S> {
     choice: '1-player' as Choice,
   }
 
+  componentDidMount() {
+    document.addEventListener('keypress', this.handleKeyPress)
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('keypress', this.handleKeyPress)
+  }
+
+  handleKeyPress = (event: KeyboardEvent) => {
+    const { dispatch } = this.props
+    const { choice } = this.state
+    const config = CONTROL_CONFIG.player1
+    if (event.key === config.down) {
+      this.setState({ choice: nextChoice(choice) })
+    } else if (event.key === config.up) {
+      this.setState({ choice: prevChoice(choice) })
+    } else if (event.key === config.fire) {
+      if (choice === '1-player') {
+        dispatch<Action>({ type: 'GAMESTART' })
+      }
+    }
+  }
+
   render() {
     const size = ITEM_SIZE_MAP.BRICK
     const scale = 4
-    const { dispatch } = this.props
     const { choice } = this.state
     return (
       <g role="game-title-scene">
@@ -88,28 +130,23 @@ class GameTitleScene extends React.PureComponent<P, S> {
             fill="url(#pattern-brickwall)"
           />
         </g>
-        <TextButton
+        <Text
           content="1 player"
           x={5.5 * B}
           y={8.5 * B}
-          textFill="white"
-          onMouseOver={() => this.setState({ choice: '1-player' })}
-          onClick={() => dispatch<Action>({ type: 'GAMESTART' })}
+          fill="white"
         />
-        <TextButton
+        <Text
           content="2 players"
           x={5.5 * B}
           y={9.5 * B}
-          textFill="white"
-          disabled
-          onMouseOver={() => this.setState({ choice: '2-players' })}
+          fill="white"
         />
-        <TextButton
+        <Text
           content="editor"
           x={5.5 * B}
           y={10.5 * B}
-          textFill="white"
-          onMouseOver={() => this.setState({ choice: 'editor' })}
+          fill="white"
         />
         <Tank tank={TankRecord({
           side: 'human',
