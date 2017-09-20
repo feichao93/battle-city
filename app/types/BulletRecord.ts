@@ -16,6 +16,8 @@ const BulletRecord = Record({
   power: 1,
   // 发射子弹的坦克id
   tankId: -1 as TankId,
+  // 发射子弹的玩家
+  playerName: null as PlayerName,
 })
 
 const record = BulletRecord()

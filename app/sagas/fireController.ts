@@ -39,6 +39,7 @@ export default function* fireController(playerName: string, shouldFire: () => bo
             power: getTankBulletPower(tank),
             speed: getTankBulletSpeed(tank),
             tankId: tank.tankId,
+            playerName,
           }),
         })
         // 一旦发射子弹, 则重置cooldown计数器

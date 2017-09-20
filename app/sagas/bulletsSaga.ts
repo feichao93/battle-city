@@ -5,17 +5,13 @@ import { destroyBullets, destroyTanks } from 'sagas/common'
 import { BulletRecord, BulletsMap, State } from 'types'
 import { asBox, getDirectionInfo, getOrDefault, isInField, iterRowsAndCols, sum, testCollide } from 'utils/common'
 
-type HurtCount = number
-type TargetTankId = TankId
-type SourceTankId = TankId
-
 interface Context {
   /** 将要爆炸的子弹的id集合 */
   readonly expBulletIdSet: Set<BulletId>,
   /** 不需要爆炸的子弹的id集合 */
   readonly noExpBulletIdSet: Set<BulletId>,
-  /** 坦克受伤统计Map */
-  readonly tankHurtMap: Map<TargetTankId, Map<SourceTankId, HurtCount>>
+  /** 坦克被击中的统计 */
+  readonly tankHitMap: Map<TankId, BulletRecord[]>
   /** 移动冻结的坦克tankId集合 */
   readonly frozenTankIdSet: Set<TankId>
 }
@@ -68,6 +64,7 @@ function* handleBulletsCollidedWithSteels(context: Context) {
 }
 
 const BULLET_EXPLOSION_SPREAD = 4
+
 function spreadBullet(bullet: BulletRecord) {
   const object = asBox(bullet)
   if (bullet.direction === 'up' || bullet.direction === 'down') {
@@ -173,18 +170,15 @@ function* handleBulletsCollidedWithTanks(context: Context) {
           context.expBulletIdSet.add(bullet.bulletId)
           context.frozenTankIdSet.add(tank.tankId)
         } else if (bulletSide === 'human' && tankSide === 'ai') {
-          const hurtSubMap = getOrDefault(context.tankHurtMap, tank.tankId, () => new Map())
-          const oldHurt = hurtSubMap.get(tank.tankId) || 0
-          hurtSubMap.set(bullet.tankId, oldHurt + 1)
-
+          getOrDefault(context.tankHitMap, tank.tankId, () => [])
+            .push(bullet)
           context.expBulletIdSet.add(bullet.bulletId)
         } else if (bulletSide === 'ai' && tankSide === 'human') {
           if (tank.helmetDuration > 0) {
             context.noExpBulletIdSet.add(bullet.bulletId)
           } else {
-            const hurtSubMap = getOrDefault(context.tankHurtMap, tank.tankId, () => new Map())
-            const oldHurt = hurtSubMap.get(tank.tankId) || 0
-            hurtSubMap.set(bullet.tankId, oldHurt + 1)
+            getOrDefault(context.tankHitMap, tank.tankId, () => [])
+              .push(bullet)
             context.expBulletIdSet.add(bullet.bulletId)
           }
         } else if (bulletSide === 'ai' && tankSide === 'ai') {
@@ -218,19 +212,19 @@ function calculateHurtsAndKillsFromContext({ tanks, players }: State, context: C
   const kills: Action.KillAction[] = []
   const hurts: Action.HurtAction[] = []
 
-  for (const [targetTankId, hurtMap] of context.tankHurtMap.entries()) {
-    const hurt = sum(hurtMap.values())
+  for (const [targetTankId, hitBullets] of context.tankHitMap.entries()) {
+    const hurt = hitBullets.length
     const targetTank = tanks.get(targetTankId)
     if (hurt >= targetTank.hp) {
       // 击杀了目标坦克
-      const sourceTankId = hurtMap.keys().next().value
+      const sourceTankId = hitBullets[0].tankId
+      const sourcePlayerName = hitBullets[0].playerName
       kills.push({
         type: 'KILL',
         targetTank,
-        // 注意这里用allTanks, 因为sourceTank在这个时候可能已经挂了
         sourceTank: tanks.get(sourceTankId),
         targetPlayer: players.find(p => p.activeTankId === targetTankId),
-        sourcePlayer: players.find(p => p.activeTankId === sourceTankId),
+        sourcePlayer: players.get(sourcePlayerName),
       })
     } else {
       hurts.push({
@@ -263,7 +257,7 @@ function* handleAfterTick() {
     const context: Context = {
       expBulletIdSet: new Set(),
       noExpBulletIdSet: new Set(),
-      tankHurtMap: new Map(),
+      tankHitMap: new Map(),
       frozenTankIdSet: new Set(),
     }
 
