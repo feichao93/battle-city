@@ -45,7 +45,7 @@ declare global {
       | DecrementPlayerLifeAction
       | ActivatePlayer
       | CreatePlayerAction
-      | RemovePlayerAction
+      | DeactivatePlayer
       | Simple<'DEACTIVATE_ALL_PLAYERS'>
       | AddOrUpdateExplosion
       | RemoveExplosionAction
@@ -74,6 +74,7 @@ declare global {
       | UpdateCurtainAction
       | SetReversedTank
       | ClearTanks
+      | ClearAIPlayers
 
     export type ActionType = Action['type']
 
@@ -230,14 +231,14 @@ declare global {
       tankId: TankId
     }
 
+    export interface DeactivatePlayer {
+      type: 'DEACTIVATE_PLAYER'
+      playerName: PlayerName
+    }
+
     export type CreatePlayerAction = {
       type: 'CREATE_PLAYER',
       player: PlayerRecord,
-    }
-
-    export type RemovePlayerAction = {
-      type: 'REMOVE_PLAYER',
-      playerName: PlayerName,
     }
 
     export type SetTextAction = {
@@ -327,6 +328,10 @@ declare global {
 
     export interface ClearTanks {
       type: 'CLEAR_TANKS'
+    }
+
+    export interface ClearAIPlayers {
+      type: 'CLEAR_AI_PLAYERS'
     }
 
     export type Simple<T> = {

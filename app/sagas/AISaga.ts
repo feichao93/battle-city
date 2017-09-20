@@ -182,7 +182,7 @@ function* AIWorkerSaga(playerName: string, WorkerClass: WorkerConstructor) {
 /** AIMasterSaga用来管理AIWorkerSaga的启动和停止, 并处理和AI程序的数据交互 */
 export default function* AIMasterSaga() {
   const max = 2
-  const taskMap: { [key: string]: Task } = {}
+  const taskMap = new Map<PlayerName, Task>()
   const addAICommandChannel = makeChannel<'add'>()
 
   yield fork(addAIHandler)
@@ -197,18 +197,18 @@ export default function* AIMasterSaga() {
     } else if (action.type === 'KILL' && action.targetTank.side === 'ai') {
       const { targetPlayer: { playerName } } = action
       // ai-player的坦克被击毁了
-      const task = taskMap[playerName]
+      const task = taskMap.get(playerName)
       task.cancel()
-      delete taskMap[action.targetPlayer.playerName]
-      yield put<Action>({ type: 'REMOVE_PLAYER', playerName })
+      taskMap.delete(action.targetPlayer.playerName)
+      yield put<Action.DeactivatePlayer>({ type: 'DEACTIVATE_PLAYER', playerName })
       addAICommandChannel.put('add')
     } else if (action.type === 'GAMEOVER') {
-      // 游戏结束时, 取消所有的ai-player // todo 这里有bug
-      for (const [playerName, task] of Object.entries(taskMap)) {
+      // 游戏结束时, 取消所有的ai-player
+      for (const [playerName, task] of taskMap.entries()) {
         task.cancel()
-        delete taskMap[playerName]
-        yield put<Action>({ type: 'REMOVE_PLAYER', playerName })
+        yield put<Action.DeactivatePlayer>({ type: 'DEACTIVATE_PLAYER', playerName })
       }
+      taskMap.clear()
     }
   }
 
@@ -238,7 +238,9 @@ export default function* AIMasterSaga() {
           hp,
           withPowerUp: Math.random() < getWithPowerUpProbability(currentStage),
         }), 0.6) // todo 要根据关卡的难度来确定坦克的生成速度
-        taskMap[playerName] = yield spawn(AIWorkerSaga, playerName, AIWorker)
+
+        const task = yield spawn(AIWorkerSaga, playerName, AIWorker)
+        taskMap.set(playerName, task)
 
         yield put<Action.ActivatePlayer>({
           type: 'ACTIVATE_PLAYER',

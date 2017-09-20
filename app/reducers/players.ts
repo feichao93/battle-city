@@ -12,8 +12,8 @@ export default function players(state = Map() as PlayersMap, action: Action) {
         .set('active', true))
   } else if (action.type === 'CREATE_PLAYER') {
     return state.set(action.player.playerName, action.player)
-  } else if (action.type === 'REMOVE_PLAYER') {
-    return state.delete(action.playerName)
+  } else if (action.type === 'CLEAR_AI_PLAYERS') {
+    return state.filterNot(player => player.side === 'ai')
   } else if (action.type === 'SET_REVERSED_TANK') {
     const { playerName, reversedTank } = action
     return state.update(playerName, p => p.set('reservedTank', reversedTank))
@@ -21,6 +21,8 @@ export default function players(state = Map() as PlayersMap, action: Action) {
     return state.map(p =>
       p.activeTankId === action.tankId ? p.set('activeTankId', 0) : p
     )
+  } else if (action.type === 'DEACTIVATE_PLAYER') {
+    return state.update(action.playerName, player => player.set('active', false))
   } else if (action.type === 'DEACTIVATE_ALL_PLAYERS') {
     return state.map(p => p.set('active', false))
   } else if (action.type === 'DECREMENT_PLAYER_LIFE') {

@@ -15,7 +15,7 @@ interface P {
 class HUD extends React.PureComponent<P> {
   renderPlayer1Info() {
     const { players } = this.props
-    const player1 = players.find(p => (p.playerName === 'player-1'))
+    const player1 = players.get('player-1')
     if (player1 == null) {
       return null
     } else {
@@ -37,7 +37,7 @@ class HUD extends React.PureComponent<P> {
 
   renderPlayer2Info() {
     const { players } = this.props
-    const player2 = players.find(p => (p.playerName === 'player-2'))
+    const player2 = players.get('player-2')
     if (player2 == null) {
       return null
     } else {

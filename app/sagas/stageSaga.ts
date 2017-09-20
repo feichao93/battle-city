@@ -76,7 +76,6 @@ export default function* stageSaga(stageName: string) {
       const { sourcePlayer, targetTank } = action
       const { players, game: { remainingEnemies }, tanks }: State = yield select()
 
-      // TODO 这里sourcePlayer可能为空将导致游戏崩溃 (AI-PLAYER被移除了)
       if (sourcePlayer.side === 'human') { // human击杀ai
         // 对human player的击杀信息进行统计
         yield put<Action>({
@@ -99,6 +98,7 @@ export default function* stageSaga(stageName: string) {
           yield* statistics()
           yield put<Action>({ type: 'HIDE_HUD' })
           yield put<Action.EndStage>({ type: 'END_STAGE' })
+          yield put<Action.ClearAIPlayers>({ type: 'CLEAR_AI_PLAYERS' })
           yield put<Action.ClearTanks>({ type: 'CLEAR_TANKS' })
           return { status: 'clear' }
         }
@@ -109,6 +109,7 @@ export default function* stageSaga(stageName: string) {
           yield* statistics()
           yield put<Action>({ type: 'HIDE_HUD' })
           yield put<Action.EndStage>({ type: 'END_STAGE' })
+          yield put<Action.ClearAIPlayers>({ type: 'CLEAR_AI_PLAYERS' })
           yield put<Action.ClearTanks>({ type: 'CLEAR_TANKS' })
           return { status: 'fail', reason: 'all-human-dead' }
         }
