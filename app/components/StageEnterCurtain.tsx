@@ -5,12 +5,12 @@ import Text from 'components/Text'
 
 interface P {
   t: number
-  stageName: string
+  content: string
 }
 
 export default class StageEnterCurtain extends React.PureComponent<P> {
   render() {
-    const { t, stageName } = this.props
+    const { t, content } = this.props
 
     return (
       <Curtain
@@ -22,7 +22,7 @@ export default class StageEnterCurtain extends React.PureComponent<P> {
         height={13 * B}
       >
         <rect width={13 * B} height={13 * B} fill="#757575" />
-        <Text content={stageName} x={5 * B} y={6 * B} fill="black" />
+        <Text content={content} x={5 * B} y={6 * B} fill="black" />
       </Curtain>
     )
   }

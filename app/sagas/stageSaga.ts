@@ -3,13 +3,17 @@ import { fork, put, select, take } from 'redux-saga/effects'
 import { State } from 'reducers/index'
 import * as selectors from 'utils/selectors'
 import { frame as f, getNextId } from 'utils/common'
+import { POWER_UP_NAMES } from 'utils/constants'
 import { PowerUpRecord } from 'types'
 import { nonPauseDelay, tween } from 'sagas/common'
 import powerUp from 'sagas/powerUp'
 import statistics from 'sagas/stageStatistics'
 
 function* startStage(stageName: string) {
-  // todo action SHOW_CURTAIN
+  yield put<Action>({
+    type: 'UPDATE_COMING_STAGE_NAME',
+    stageName,
+  })
   yield put<Action>({
     type: 'UPDATE_CURTAIN',
     curtainName: 'stage-enter-cutain',
@@ -22,6 +26,7 @@ function* startStage(stageName: string) {
     t,
   }))
   yield nonPauseDelay(f(20))
+  // 在幕布完全将舞台遮起来的时候载入地图
   yield put<Action>({
     type: 'LOAD_STAGE_MAP',
     name: stageName,
@@ -32,31 +37,24 @@ function* startStage(stageName: string) {
     curtainName: 'stage-enter-cutain',
     t: 1 - t,
   }))
-  // todo action HIDE_CURTAIN
-  // yield svgFilter 添加反色效果
-  // yield put<Action>({type:'FILTER_INVERT'})
-  // 移除反色效果
-  // yield fork(delayedPut, f(3), { type: 'REMOEV_FILTER_INVERT' })
+  // todo 游戏开始的时候有一个 反色效果
 
   yield put<Action.StartStage>({
     type: 'START_STAGE',
     name: stageName,
   })
-  yield put<Action>({ type: 'SHOW_HUD' })
 }
 
-function* spawnPowerUp({ targetTank }: Action.KillAction) {
-  if (targetTank.withPowerUp) {
-    const powerUpName = _.sample(['tank', 'star', 'grenade', 'timer', 'helmet', 'shovel'] as PowerUpName[])
-    const position: Point = _.sample(yield select(selectors.validPowerUpSpawnPositions))
-    yield* powerUp(PowerUpRecord({
-      powerUpId: getNextId('power-up'),
-      powerUpName,
-      visible: true,
-      x: position.x,
-      y: position.y,
-    }))
-  }
+function* spawnPowerUp() {
+  const powerUpName = _.sample(POWER_UP_NAMES)
+  const position: Point = _.sample(yield select(selectors.validPowerUpSpawnPositions))
+  yield* powerUp(PowerUpRecord({
+    powerUpId: getNextId('power-up'),
+    powerUpName,
+    visible: true,
+    x: position.x,
+    y: position.y,
+  }))
 }
 
 /**
@@ -84,7 +82,9 @@ export default function* stageSaga(stageName: string) {
           level: targetTank.level,
         })
 
-        yield fork(spawnPowerUp, action)
+        if (action.targetTank.withPowerUp) {
+          yield fork(spawnPowerUp)
+        }
 
         const activeAITanks = tanks.filter(t => (t.active && t.side === 'ai'))
         if (remainingEnemies.isEmpty() && activeAITanks.isEmpty()) {
@@ -96,10 +96,7 @@ export default function* stageSaga(stageName: string) {
             yield nonPauseDelay(5000)
           }
           yield* statistics()
-          yield put<Action>({ type: 'HIDE_HUD' })
           yield put<Action.EndStage>({ type: 'END_STAGE' })
-          yield put<Action.ClearAIPlayers>({ type: 'CLEAR_AI_PLAYERS' })
-          yield put<Action.ClearTanks>({ type: 'CLEAR_TANKS' })
           return { status: 'clear' }
         }
       } else { // ai击杀human
@@ -107,10 +104,7 @@ export default function* stageSaga(stageName: string) {
           // 所有的human player都挂了
           yield nonPauseDelay(1500)
           yield* statistics()
-          yield put<Action>({ type: 'HIDE_HUD' })
           yield put<Action.EndStage>({ type: 'END_STAGE' })
-          yield put<Action.ClearAIPlayers>({ type: 'CLEAR_AI_PLAYERS' })
-          yield put<Action.ClearTanks>({ type: 'CLEAR_TANKS' })
           return { status: 'fail', reason: 'all-human-dead' }
         }
       }

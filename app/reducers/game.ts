@@ -26,6 +26,8 @@ export const GameRecord = Record({
   scene: 'game-title' as Scene,
   /** 当前的关卡名 */
   currentStage: null as string,
+  /** 即将开始的关卡的名称 */
+  comingStageName: null as string,
   /** 当前关卡剩余的敌人的类型列表 */
   remainingEnemies: defaultRemainingEnemies,
   /** 当前关卡的击杀信息 */
@@ -80,6 +82,8 @@ export default function game(state = gameRecord, action: Action) {
     return state.set('showHUD', true)
   } else if (action.type === 'HIDE_HUD') {
     return state.set('showHUD', false)
+  } else if (action.type === 'UPDATE_COMING_STAGE_NAME') {
+    return state.set('comingStageName', action.stageName)
   } else {
     return state
   }

@@ -1,11 +1,11 @@
-import { put, take } from 'redux-saga/effects'
+import { put, take, takeEvery } from 'redux-saga/effects'
 import { BLOCK_SIZE } from 'utils/constants'
 import { getNextId } from 'utils/common'
 import stageSaga from 'sagas/stageSaga'
 import { nonPauseDelay } from 'sagas/common'
 import stageConfigs from 'stages'
 
-type Animation = {
+interface Animation {
   direction: Direction
   distance: number
   duration: number
@@ -69,6 +69,17 @@ interface StageResult {
   reason?: string
 }
 
+function* startStage() {
+  yield put<Action>({ type: 'SHOW_HUD' })
+}
+
+function* endStage() {
+  yield put<Action>({ type: 'HIDE_HUD' })
+  yield put<Action>({ type: 'CLEAR_BULLETS' })
+  yield put<Action>({ type: 'CLEAR_TANKS' })
+  yield put<Action>({ type: 'CLEAR_AI_PLAYERS' })
+}
+
 /**
  *  game-saga负责管理整体游戏进度
  *  负责管理游戏开始界面, 游戏结束界面
@@ -76,6 +87,9 @@ interface StageResult {
  *  并根据stage-saga返回的结果选择继续下一个关卡, 或是选择游戏结束
  */
 export default function* gameManager() {
+  yield takeEvery('START_STAGE', startStage)
+  yield takeEvery('END_STAGE', endStage)
+
   if (process.env.NODE_ENV === 'production') {
     yield take((action: Action) => action.type === 'GAMESTART')
   }

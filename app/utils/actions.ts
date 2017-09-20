@@ -73,8 +73,10 @@ declare global {
       | UpgardeTankAction
       | UpdateCurtainAction
       | SetReversedTank
+      | ClearBullets
       | ClearTanks
       | ClearAIPlayers
+      | UpdateComingStageName
 
     export type ActionType = Action['type']
 
@@ -184,6 +186,11 @@ declare global {
     export interface LoadStageMapAction {
       type: 'LOAD_STAGE_MAP'
       name: string
+    }
+
+    export interface UpdateComingStageName {
+      type: 'UPDATE_COMING_STAGE_NAME'
+      stageName:string
     }
 
     export interface StartStage {
@@ -324,6 +331,10 @@ declare global {
       type: 'SET_REVERSED_TANK'
       playerName: PlayerName
       reversedTank: TankRecord
+    }
+
+    export interface ClearBullets {
+      type: 'CLEAR_BULLETS'
     }
 
     export interface ClearTanks {

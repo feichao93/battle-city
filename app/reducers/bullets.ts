@@ -3,13 +3,15 @@ import BulletRecord from 'types/BulletRecord'
 
 export type BulletsMap = Map<BulletId, BulletRecord>
 
-export default function bullets(state = Map() as BulletsMap, action: Action) {
+export default function bullets(state = Map() as BulletsMap, action: Action): BulletsMap {
   if (action.type === 'ADD_BULLET') {
     return state.set(action.bullet.bulletId, action.bullet)
   } else if (action.type === 'REMOVE_BULLET') {
     return state.delete(action.bulletId)
   } else if (action.type === 'UPDATE_BULLETS') {
     return state.merge(action.updatedBullets)
+  } else if (action.type === 'CLEAR_BULLETS') {
+    return state.clear()
   } else {
     return state
   }

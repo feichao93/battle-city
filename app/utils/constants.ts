@@ -86,3 +86,5 @@ export const CONTROL_CONFIG = {
 }
 
 export const TANK_LEVELS: TankLevel[] = ['basic', 'fast', 'power', 'armor']
+
+export const POWER_UP_NAMES: PowerUpName[] = ['tank', 'star', 'grenade', 'timer', 'helmet', 'shovel']

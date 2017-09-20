@@ -3,7 +3,7 @@ import { fork, put, select, take } from 'redux-saga/effects'
 import { BLOCK_SIZE, ITEM_SIZE_MAP, N_MAP, STEEL_POWER } from 'utils/constants'
 import { destroyBullets, destroyTanks } from 'sagas/common'
 import { BulletRecord, BulletsMap, State } from 'types'
-import { asBox, getDirectionInfo, getOrDefault, isInField, iterRowsAndCols, sum, testCollide } from 'utils/common'
+import { asBox, getDirectionInfo, getOrDefault, isInField, iterRowsAndCols, testCollide } from 'utils/common'
 
 interface Context {
   /** 将要爆炸的子弹的id集合 */

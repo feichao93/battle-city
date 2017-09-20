@@ -5,18 +5,20 @@ import StageEnterCurtain from 'components/StageEnterCurtain'
 
 interface P {
   stageEnterCurtainT: number
+  comingStageName: string
 }
 
 class CurtainsContainer extends React.PureComponent<P> {
   render() {
-    const { stageEnterCurtainT: t } = this.props
-    return <StageEnterCurtain stageName="stage  1" t={t} />
+    const { stageEnterCurtainT: t, comingStageName } = this.props
+    return <StageEnterCurtain content={`stage  ${comingStageName}`} t={t} />
   }
 }
 
 function mapStateToProps(state: State) {
   return {
     stageEnterCurtainT: state.game.stageEnterCurtainT,
+    comingStageName: state.game.comingStageName,
   }
 }
 
