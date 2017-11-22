@@ -1,7 +1,8 @@
 import { List } from 'immutable'
 import { MapRecord, TankRecord, TanksMap } from 'types'
-import { BLOCK_SIZE, FIELD_SIZE, ITEM_SIZE_MAP, N_MAP, TANK_SIZE } from 'utils/constants'
-import { asBox, getDirectionInfo, iterRowsAndCols } from 'utils/common'
+import { BLOCK_SIZE, FIELD_SIZE, ITEM_SIZE_MAP, TANK_SIZE } from 'utils/constants'
+import { asBox, getDirectionInfo } from 'utils/common'
+import IndexHelper from 'utils/IndexHelper'
 
 const logAhead = (...args: any[]) => 0 /* console.log('[ahead]', ...args) */
 
@@ -296,17 +297,15 @@ function lookAhead({ bricks, steels, rivers }: MapRecord, tank: TankRecord): Bar
 
 function getAheadBrickLength(bricks: List<boolean>, tank: TankRecord) {
   const size = ITEM_SIZE_MAP.BRICK
-  const N = N_MAP.BRICK
   const { xy, updater } = getDirectionInfo(tank.direction)
   let step = 1
   while (true) {
-    const iterable = iterRowsAndCols(size, asBox(tank.update(xy, updater(step * size)), -0.02))
+    const iterable = IndexHelper.iter('brick', asBox(tank.update(xy, updater(step * size)), -0.02))
     const array = Array.from(iterable)
     if (array.length === 0) {
       return Infinity
     }
-    for (const [row, col] of array) {
-      const t = row * N + col
+    for (const t of array) {
       if (bricks.get(t)) {
         return (step - 1) * size
       }
@@ -317,17 +316,15 @@ function getAheadBrickLength(bricks: List<boolean>, tank: TankRecord) {
 
 function getAheadSteelLength(steels: List<boolean>, tank: TankRecord) {
   const size = ITEM_SIZE_MAP.STEEL
-  const N = N_MAP.STEEL
   const { xy, updater } = getDirectionInfo(tank.direction)
   let step = 1
   while (true) {
-    const iterable = iterRowsAndCols(size, asBox(tank.update(xy, updater(step * size)), -0.02))
+    const iterable = IndexHelper.iter('steel', asBox(tank.update(xy, updater(step * size)), -0.02))
     const array = Array.from(iterable)
     if (array.length === 0) {
       return Infinity
     }
-    for (const [row, col] of array) {
-      const t = row * N + col
+    for (const t of array) {
       if (steels.get(t)) {
         return (step - 1) * size
       }
@@ -338,17 +335,15 @@ function getAheadSteelLength(steels: List<boolean>, tank: TankRecord) {
 
 function getAheadRiverLength(rivers: List<boolean>, tank: TankRecord) {
   const size = ITEM_SIZE_MAP.RIVER
-  const N = N_MAP.RIVER
   const { xy, updater } = getDirectionInfo(tank.direction)
   let step = 1
   while (true) {
-    const iterable = iterRowsAndCols(size, asBox(tank.update(xy, updater(step * size)), -0.02))
+    const iterable = IndexHelper.iter('river', asBox(tank.update(xy, updater(step * size)), -0.02))
     const array = Array.from(iterable)
     if (array.length === 0) {
       return Infinity
     }
-    for (const [row, col] of array) {
-      const t = row * N + col
+    for (const t of array) {
       if (rivers.get(t)) {
         return (step - 1) * size
       }

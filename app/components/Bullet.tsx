@@ -7,25 +7,22 @@ import { asBox } from 'utils/common'
 const fill = '#ADADAD'
 
 const Bullet = ({ bullet }: { bullet: BulletRecord }) => {
-  const { x, y, direction } = bullet
-  let head = null
+  const { direction } = bullet
+  let head: JSX.Element = null
   if (direction === 'up') {
     head = <Pixel x={1} y={-1} fill={fill} />
   } else if (direction === 'down') {
     head = <Pixel x={1} y={3} fill={fill} />
   } else if (direction === 'left') {
     head = <Pixel x={-1} y={1} fill={fill} />
-  } else if (direction === 'right') { // RIGHT
+  } else { // right
     head = <Pixel x={3} y={1} fill={fill} />
-  } else {
-    throw new Error(`Invalid direction ${direction}`)
   }
   const last = lastPos(bullet)
   const mbr = getMBR(asBox(bullet), asBox(last))
   return (
     <g role="bullet" transform={`translate(${mbr.x},${mbr.y})`}>
-      {/* <rect width={3} height={3} fill={fill} /> */}
-      <rect width={mbr.width} height={mbr.height} fill="red" />
+      <rect width={3} height={3} fill={fill} />
       {head}
     </g>
   )

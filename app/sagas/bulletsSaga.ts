@@ -1,10 +1,11 @@
 import { Map as IMap, Set as ISet } from 'immutable'
 import { fork, put, select, take } from 'redux-saga/effects'
-import { BLOCK_SIZE, BULLET_SIZE, FIELD_SIZE, ITEM_SIZE_MAP, N_MAP, STEEL_POWER } from 'utils/constants'
+import { BULLET_SIZE, FIELD_SIZE, STEEL_POWER } from 'utils/constants'
 import { destroyBullets, destroyTanks } from 'sagas/common'
 import { BulletRecord, BulletsMap, State } from 'types'
-import { asBox, getDirectionInfo, iterRowsAndCols, testCollide, DefaultMap } from 'utils/common'
+import { asBox, DefaultMap, getDirectionInfo, testCollide } from 'utils/common'
 import { BulletCollisionInfo, getCollisionInfoBetweenBullets, getMBR, lastPos, spreadBullet } from 'utils/bullet-utils'
+import IndexHelper from 'utils/IndexHelper'
 
 interface Context {
   /** 坦克被击中的统计 */
@@ -33,14 +34,13 @@ function* handleTick() {
   }
 }
 
-function* handleBulletsCollidedWithBricks(context: Context) {
+function handleBulletsCollidedWithBricks(context: Context, state: State) {
   // todo 需要考虑子弹强度
-  const { bullets, map: { bricks } }: State = yield select()
+  const { bullets, map: { bricks } } = state
 
   bullets.forEach((b) => {
     const mbr = getMBR(asBox(b), asBox(lastPos(b)))
-    for (const [row, col] of iterRowsAndCols(ITEM_SIZE_MAP.BRICK, mbr)) {
-      const t = row * N_MAP.BRICK + col
+    for (const t of IndexHelper.iter('brick', mbr)) {
       if (bricks.get(t)) {
         context.bulletCollisionInfo.get(b.bulletId).push({ type: 'brick', t })
       }
@@ -48,14 +48,13 @@ function* handleBulletsCollidedWithBricks(context: Context) {
   })
 }
 
-function* handleBulletsCollidedWithSteels({ bulletCollisionInfo }: Context) {
+function handleBulletsCollidedWithSteels({ bulletCollisionInfo }: Context, state: State) {
   // TODO 需要考虑子弹强度
-  const { bullets, map: { steels } }: State = yield select()
+  const { bullets, map: { steels } } = state
 
   bullets.forEach((b) => {
     const mbr = getMBR(asBox(b), asBox(lastPos(b)))
-    for (const [row, col] of iterRowsAndCols(ITEM_SIZE_MAP.STEEL, mbr)) {
-      const t = row * N_MAP.STEEL + col
+    for (const t of IndexHelper.iter('steel', mbr)) {
       if (steels.get(t)) {
         bulletCollisionInfo.get(b.bulletId).push({ type: 'steel', t })
       }
@@ -63,8 +62,8 @@ function* handleBulletsCollidedWithSteels({ bulletCollisionInfo }: Context) {
   })
 }
 
-function* handleBulletsCollidedWithBorder({ bulletCollisionInfo }: Context) {
-  const { bullets }: State = yield select()
+function handleBulletsCollidedWithBorder({ bulletCollisionInfo }: Context, state: State) {
+  const { bullets } = state
   bullets.forEach((bullet) => {
     if (bullet.x <= 0) {
       bulletCollisionInfo.get(bullet.bulletId).push({ type: 'border', which: 'left' })
@@ -86,8 +85,7 @@ function* destroySteels(collidedBullets: BulletsMap) {
   const steelsNeedToDestroy: SteelIndex[] = []
   collidedBullets.forEach((bullet) => {
     if (bullet.power >= STEEL_POWER) {
-      for (const [row, col] of iterRowsAndCols(ITEM_SIZE_MAP.STEEL, spreadBullet(bullet))) {
-        const t = row * N_MAP.STEEL + col
+      for (const t of IndexHelper.iter('steel', spreadBullet(bullet))) {
         if (steels.get(t)) {
           steelsNeedToDestroy.push(t)
         }
@@ -109,9 +107,7 @@ function* destroyBricks(collidedBullets: BulletsMap) {
 
   collidedBullets.forEach((bullet) => {
     // TODO spreadBullet的时候 根据bullet.power的不同会影响spread的范围
-    // TODO 使用IndexHelper
-    for (const [row, col] of iterRowsAndCols(ITEM_SIZE_MAP.BRICK, spreadBullet(bullet))) {
-      const t = row * N_MAP.BRICK + col
+    for (const t of IndexHelper.iter('brick', spreadBullet(bullet))) {
       if (bricks.get(t)) {
         bricksNeedToDestroy.push(t)
       }
@@ -139,8 +135,8 @@ function* destroyEagleIfNeeded(expBullets: BulletsMap) {
   }
 }
 
-function* handleBulletsCollidedWithTanks(context: Context) {
-  const { bullets, tanks: allTanks }: State = yield select()
+function handleBulletsCollidedWithTanks(context: Context, state: State) {
+  const { bullets, tanks: allTanks } = state
   const activeTanks = allTanks.filter(t => t.active)
 
   // 子弹与坦克碰撞的规则
@@ -184,8 +180,8 @@ function* handleBulletsCollidedWithTanks(context: Context) {
   }
 }
 
-function* handleBulletsCollidedWithBullets(context: Context) {
-  const { bullets }: State = yield select()
+function handleBulletsCollidedWithBullets(context: Context, state: State) {
+  const { bullets } = state
   for (const bullet of bullets.values()) {
     for (const other of bullets.values()) {
       if (bullet.bulletId <= other.bulletId) {
@@ -201,8 +197,8 @@ function* handleBulletsCollidedWithBullets(context: Context) {
   }
 }
 
-function* handleBulletsCollidedWithEagle({ bulletCollisionInfo }: Context) {
-  const { bullets, map: { eagle } }: State = yield select()
+function handleBulletsCollidedWithEagle({ bulletCollisionInfo }: Context, state: State) {
+  const { bullets, map: { eagle } } = state
   if (eagle == null || eagle.broken) {
     // 如果Eagle尚未加载, 或是已经被破坏, 那么直接返回
     return
@@ -260,13 +256,12 @@ function* handleAfterTick() {
       bulletCollisionInfo: new BulletCollisionInfo(bullets),
     }
 
-    // TODO 下面这些generator改成普通的函数调用
-    yield* handleBulletsCollidedWithEagle(context)
-    yield* handleBulletsCollidedWithTanks(context)
-    yield* handleBulletsCollidedWithBullets(context)
-    yield* handleBulletsCollidedWithBricks(context)
-    yield* handleBulletsCollidedWithSteels(context)
-    yield* handleBulletsCollidedWithBorder(context)
+    handleBulletsCollidedWithEagle(context, state)
+    handleBulletsCollidedWithTanks(context, state)
+    handleBulletsCollidedWithBullets(context, state)
+    handleBulletsCollidedWithBricks(context, state)
+    handleBulletsCollidedWithSteels(context, state)
+    handleBulletsCollidedWithBorder(context, state)
 
     const { expBullets, noExpBullets } = context.bulletCollisionInfo.getExplosionInfo()
 
