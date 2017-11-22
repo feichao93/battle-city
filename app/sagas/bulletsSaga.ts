@@ -3,12 +3,12 @@ import { fork, put, select, take } from 'redux-saga/effects'
 import { BLOCK_SIZE, BULLET_SIZE, FIELD_SIZE, ITEM_SIZE_MAP, N_MAP, STEEL_POWER } from 'utils/constants'
 import { destroyBullets, destroyTanks } from 'sagas/common'
 import { BulletRecord, BulletsMap, State } from 'types'
-import { asBox, getDirectionInfo, getOrDefault, iterRowsAndCols, testCollide } from 'utils/common'
+import { asBox, getDirectionInfo, iterRowsAndCols, testCollide, DefaultMap } from 'utils/common'
 import { BulletCollisionInfo, getCollisionInfoBetweenBullets, getMBR, lastPos, spreadBullet } from 'utils/bullet-utils'
 
 interface Context {
   /** 坦克被击中的统计 */
-  readonly tankHitMap: Map<TankId, BulletRecord[]>
+  readonly tankHitMap: DefaultMap<TankId, BulletRecord[]>
   /** 移动冻结的坦克tankId集合 */
   readonly frozenTankIdSet: Set<TankId>
   readonly bulletCollisionInfo: BulletCollisionInfo
@@ -143,9 +143,8 @@ function* handleBulletsCollidedWithTanks(context: Context) {
   const { bullets, tanks: allTanks }: State = yield select()
   const activeTanks = allTanks.filter(t => t.active)
 
-  // TODO: 注意CCD
   // 子弹与坦克碰撞的规则
-  // 1. player的子弹打到player-tank: player-tank将会停滞若干时间
+  // 1. player的子弹打到player-tank: player-tank将会停滞一段时间
   // 2. player的子弹打到AI-tank: AI-tank扣血
   // 3. AI的子弹打到player-tank: player-tank扣血/死亡
   // 4. AI的子弹达到AI-tank: 不发生任何事件
@@ -155,50 +154,28 @@ function* handleBulletsCollidedWithTanks(context: Context) {
         // 如果是自己发射的子弹, 则不需要进行处理
         continue
       }
-      const subject = {
-        x: tank.x,
-        y: tank.y,
-        width: BLOCK_SIZE,
-        height: BLOCK_SIZE,
-      }
-      if (testCollide(subject, asBox(bullet), -0.02)) {
+      const subject = asBox(tank)
+      const mbr = getMBR(asBox(lastPos(bullet)), asBox(bullet))
+      if (testCollide(subject, mbr, -0.02)) {
         const bulletSide = allTanks.find(t => (t.tankId === bullet.tankId)).side
         const tankSide = tank.side
+        const infoRow = context.bulletCollisionInfo.get(bullet.bulletId)
 
         if (bulletSide === 'human' && tankSide === 'human') {
-          context.bulletCollisionInfo.get(bullet.bulletId).push({
-            type: 'tank',
-            tank,
-            shouldExplode: true,
-          })
+          infoRow.push({ type: 'tank', tank, shouldExplode: true })
           context.frozenTankIdSet.add(tank.tankId)
         } else if (bulletSide === 'human' && tankSide === 'ai') {
-          getOrDefault(context.tankHitMap, tank.tankId, () => [])
-            .push(bullet)
-          context.bulletCollisionInfo.get(bullet.bulletId).push({
-            type: 'tank',
-            tank,
-            shouldExplode: true,
-          })
+          context.tankHitMap.get(tank.tankId).push(bullet)
+          infoRow.push({ type: 'tank', tank, shouldExplode: true })
         } else if (bulletSide === 'ai' && tankSide === 'human') {
           if (tank.helmetDuration > 0) {
-            context.bulletCollisionInfo.get(bullet.bulletId).push({
-              type: 'tank',
-              tank,
-              shouldExplode: false,
-            })
+            infoRow.push({ type: 'tank', tank, shouldExplode: false })
           } else {
-            getOrDefault(context.tankHitMap, tank.tankId, () => [])
-              .push(bullet)
-            context.bulletCollisionInfo.get(bullet.bulletId).push({
-              type: 'tank',
-              tank,
-              shouldExplode: true,
-            })
+            context.tankHitMap.get(tank.tankId).push(bullet)
+            infoRow.push({ type: 'tank', tank, shouldExplode: true })
           }
         } else if (bulletSide === 'ai' && tankSide === 'ai') {
-          // 子弹会穿过坦克
-          // context.noExpBulletIdSet.add(bullet.bulletId)
+          // 子弹穿过坦克
         } else {
           throw new Error('Error side status')
         }
@@ -278,7 +255,7 @@ function* handleAfterTick() {
     // 新建一个统计对象(context), 用来存放这一个tick中的统计信息
     // 注意这里的Set是ES2015的原生Set
     const context: Context = {
-      tankHitMap: new Map(),
+      tankHitMap: new DefaultMap(() => []),
       frozenTankIdSet: new Set(),
       bulletCollisionInfo: new BulletCollisionInfo(bullets),
     }

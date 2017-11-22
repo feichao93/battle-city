@@ -24,9 +24,9 @@ const Bullet = ({ bullet }: { bullet: BulletRecord }) => {
   const mbr = getMBR(asBox(bullet), asBox(last))
   return (
     <g role="bullet" transform={`translate(${mbr.x},${mbr.y})`}>
-      {head}
       {/* <rect width={3} height={3} fill={fill} /> */}
       <rect width={mbr.width} height={mbr.height} fill="red" />
+      {head}
     </g>
   )
 }
