@@ -161,7 +161,7 @@ function calculateHitTime(b1: BulletRecord, b2: BulletRecord): number {
     } else if (b2.direction === 'left') {
       // [x] <--- b2
       //  ↑
-      //  |       [x] means hitArea
+      //  |        [x] means hitArea
       //  b1
       const hitArea = { x: b1.x, y: b2.y, width: BULLET_SIZE, height: BULLET_SIZE }
 
@@ -222,9 +222,11 @@ function moveFromLast(bullet: BulletRecord, time: number): Point {
 // 判断两个子弹在两帧之内是否发生了碰撞
 // 子弹总是在进行匀速直线运动, 两个子弹发生接触就可以认为发生了碰撞
 // 如果没有发生碰撞, 该函数返回null
-export function getCollisionInfoBetweenBullets(b1: BulletRecord,
-                                               b2: BulletRecord,
-                                               delta: number,): [CollisionWithBullet, CollisionWithBullet] {
+export function getCollisionInfoBetweenBullets(
+  b1: BulletRecord,
+  b2: BulletRecord,
+  delta: number,
+): [CollisionWithBullet, CollisionWithBullet] {
   const mbr1 = getMBR(asBox(lastPos(b1)), asBox(b1))
   const mbr2 = getMBR(asBox(lastPos(b2)), asBox(b2))
   if (!testCollide(mbr1, mbr2)) {

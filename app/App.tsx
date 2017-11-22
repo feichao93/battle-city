@@ -10,11 +10,6 @@ import CurtainsContainer from 'components/CurtainsContainer'
 import Inspector from 'components/Inspector'
 import { State } from 'types'
 
-declare global {
-  const COMPILE_VERSION: string
-  const COMPILE_DATE: string
-}
-
 const HelpInfo = () => (
   <div style={{ maxWidth: 200, marginLeft: 20 }}>
     <p>当前版本 {COMPILE_VERSION}</p>
@@ -57,8 +52,7 @@ class App extends React.PureComponent<{ scene: Scene, paused: boolean }> {
           <CurtainsContainer />
           {paused ? <PauseIndicator /> : null}
         </svg>
-        {process.env.NODE_ENV !== 'production' ? <Inspector /> : null}
-        {process.env.NODE_ENV === 'production' ? <HelpInfo /> : null}
+        {DEV ? <Inspector /> : <HelpInfo />}
       </div>
     )
   }

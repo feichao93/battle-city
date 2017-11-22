@@ -90,14 +90,14 @@ export default function* gameManager() {
   yield takeEvery('START_STAGE', startStage)
   yield takeEvery('END_STAGE', endStage)
 
-  if (process.env.NODE_ENV === 'production') {
+  if (!DEV) {
     yield take((action: Action) => action.type === 'GAMESTART')
   }
 
   const stages = Object.keys(stageConfigs)
   for (const stageName of stages) {
     const stageResult: StageResult = yield* stageSaga(stageName)
-    if (process.env.NODE_ENV !== 'production') {
+    if (DEV) {
       console.log('stageResult:', stageResult)
     }
     if (stageResult.status === 'clear') {

@@ -35,3 +35,9 @@ declare module 'react' {
     role?: string
   }
 }
+
+declare global {
+  const COMPILE_VERSION: string
+  const COMPILE_DATE: string
+  const DEV: boolean
+}
