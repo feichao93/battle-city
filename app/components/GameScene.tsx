@@ -42,7 +42,7 @@ class GameScene extends React.Component<State> {
             /> : null}
           <g role="bullet-layer">
             {bullets.map((b, i) =>
-              <Bullet key={i} direction={b.direction} x={b.x} y={b.y} />
+              <Bullet key={i} bullet={b} />
             ).toArray()}
           </g>
           <g role="tank-layer">
@@ -94,4 +94,4 @@ class GameScene extends React.Component<State> {
   }
 }
 
-export default connect(_.identity)(GameScene)
+export default connect(_.identity)(GameScene as any)

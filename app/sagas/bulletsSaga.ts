@@ -4,16 +4,14 @@ import { BLOCK_SIZE, ITEM_SIZE_MAP, N_MAP, STEEL_POWER } from 'utils/constants'
 import { destroyBullets, destroyTanks } from 'sagas/common'
 import { BulletRecord, BulletsMap, State } from 'types'
 import { asBox, getDirectionInfo, getOrDefault, isInField, iterRowsAndCols, testCollide } from 'utils/common'
+import { getMBR, lastPos, BulletCollisionInfo } from 'utils/bullet-utils'
 
 interface Context {
-  /** 将要爆炸的子弹的id集合 */
-  readonly expBulletIdSet: Set<BulletId>,
-  /** 不需要爆炸的子弹的id集合 */
-  readonly noExpBulletIdSet: Set<BulletId>,
   /** 坦克被击中的统计 */
   readonly tankHitMap: Map<TankId, BulletRecord[]>
   /** 移动冻结的坦克tankId集合 */
   readonly frozenTankIdSet: Set<TankId>
+  readonly bulletCollisionInfo: BulletCollisionInfo
 }
 
 function* handleTick() {
@@ -28,6 +26,8 @@ function* handleTick() {
       const distance = speed * delta
       const { xy, updater } = getDirectionInfo(direction)
       return bullet.update(xy, updater(distance))
+        .set('lastX', bullet.x)
+        .set('lastY', bullet.y) // 设置子弹上一次的位置, 用于进行碰撞检测
     })
     yield put({ type: 'UPDATE_BULLETS', updatedBullets })
   }
@@ -37,12 +37,12 @@ function* handleBulletsCollidedWithBricks(context: Context) {
   // todo 需要考虑子弹强度
   const { bullets, map: { bricks } }: State = yield select()
 
-  bullets.forEach((bullet) => {
-    for (const [row, col] of iterRowsAndCols(ITEM_SIZE_MAP.BRICK, asBox(bullet))) {
+  bullets.forEach((b) => {
+    const mbr = getMBR(asBox(b), asBox(lastPos(b)))
+    for (const [row, col] of iterRowsAndCols(ITEM_SIZE_MAP.BRICK, mbr)) {
       const t = row * N_MAP.BRICK + col
       if (bricks.get(t)) {
-        context.expBulletIdSet.add(bullet.bulletId)
-        return
+        context.bulletCollisionInfo.get(b.bulletId).push({ type: 'brick', t })
       }
     }
   })
@@ -52,12 +52,12 @@ function* handleBulletsCollidedWithSteels(context: Context) {
   // todo 需要考虑子弹强度
   const { bullets, map: { steels } }: State = yield select()
 
-  bullets.forEach((bullet) => {
-    for (const [row, col] of iterRowsAndCols(ITEM_SIZE_MAP.STEEL, asBox(bullet))) {
+  bullets.forEach((b) => {
+    const mbr = getMBR(asBox(b), asBox(lastPos(b)))
+    for (const [row, col] of iterRowsAndCols(ITEM_SIZE_MAP.STEEL, mbr)) {
       const t = row * N_MAP.STEEL + col
       if (steels.get(t)) {
-        context.expBulletIdSet.add(bullet.bulletId)
-        return
+        context.bulletCollisionInfo.get(b.bulletId).push({ type: 'steel', t })
       }
     }
   })
@@ -167,19 +167,35 @@ function* handleBulletsCollidedWithTanks(context: Context) {
         const tankSide = tank.side
 
         if (bulletSide === 'human' && tankSide === 'human') {
-          context.expBulletIdSet.add(bullet.bulletId)
+          context.bulletCollisionInfo.get(bullet.bulletId).push({
+            type: 'tank',
+            tankId: tank.tankId,
+            shouldExplode: true,
+          })
           context.frozenTankIdSet.add(tank.tankId)
         } else if (bulletSide === 'human' && tankSide === 'ai') {
           getOrDefault(context.tankHitMap, tank.tankId, () => [])
             .push(bullet)
-          context.expBulletIdSet.add(bullet.bulletId)
+          context.bulletCollisionInfo.get(bullet.bulletId).push({
+            type: 'tank',
+            tankId: tank.tankId,
+            shouldExplode: true,
+          })
         } else if (bulletSide === 'ai' && tankSide === 'human') {
           if (tank.helmetDuration > 0) {
-            context.noExpBulletIdSet.add(bullet.bulletId)
+            context.bulletCollisionInfo.get(bullet.bulletId).push({
+              type: 'tank',
+              tankId: tank.tankId,
+              shouldExplode: false,
+            })
           } else {
             getOrDefault(context.tankHitMap, tank.tankId, () => [])
               .push(bullet)
-            context.expBulletIdSet.add(bullet.bulletId)
+            context.bulletCollisionInfo.get(bullet.bulletId).push({
+              type: 'tank',
+              tankId: tank.tankId,
+              shouldExplode: true,
+            })
           }
         } else if (bulletSide === 'ai' && tankSide === 'ai') {
           // 子弹会穿过坦克
@@ -202,7 +218,10 @@ function* handleBulletsCollidedWithBullets(context: Context) {
       }
       const object = asBox(other)
       if (testCollide(subject, object)) {
-        context.noExpBulletIdSet.add(bullet.bulletId)
+        context.bulletCollisionInfo.get(bullet.bulletId).push({
+          type: 'bullet',
+          bulletId: other.bulletId,
+        })
       }
     }
   }
@@ -255,10 +274,9 @@ function* handleAfterTick() {
     // 新建一个统计对象(context), 用来存放这一个tick中的统计信息
     // 注意这里的Set是ES2015的原生Set
     const context: Context = {
-      expBulletIdSet: new Set(),
-      noExpBulletIdSet: new Set(),
       tankHitMap: new Map(),
       frozenTankIdSet: new Set(),
+      bulletCollisionInfo: new BulletCollisionInfo(),
     }
 
     yield* handleBulletsCollidedWithTanks(context)
@@ -267,7 +285,8 @@ function* handleAfterTick() {
     yield* handleBulletsCollidedWithSteels(context)
 
     // 产生爆炸效果的的子弹
-    const expBullets = bullets.filter(bullet => context.expBulletIdSet.has(bullet.bulletId))
+    const { expBulletIdSet, noExpBulletIdSet } = context.bulletCollisionInfo.getBulletExpInfo()
+    const expBullets = bullets.filter(bullet => expBulletIdSet.has(bullet.bulletId))
     if (!expBullets.isEmpty()) {
       yield fork(destroyBullets, expBullets, true)
 
@@ -296,7 +315,7 @@ function* handleAfterTick() {
     yield* kills.map(killAction => put(killAction))
 
     // 不产生爆炸, 直接消失的子弹
-    const noExpBullets = bullets.filter(bullet => context.noExpBulletIdSet.has(bullet.bulletId))
+    const noExpBullets = bullets.filter(bullet => noExpBulletIdSet.has(bullet.bulletId))
     yield fork(destroyBullets, noExpBullets, false)
 
     // 移除在边界外面的子弹

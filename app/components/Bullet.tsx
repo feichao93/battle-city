@@ -1,15 +1,13 @@
 import * as React from 'react'
+import { BulletRecord } from 'types'
 import { Pixel } from 'components/elements'
+import { getMBR, lastPos } from 'utils/bullet-utils'
+import { asBox } from 'utils/common'
 
 const fill = '#ADADAD'
 
-type P = {
-  x: number,
-  y: number
-  direction: Direction,
-}
-
-const Bullet = ({ x, y, direction }: P) => {
+const Bullet = ({ bullet }: { bullet: BulletRecord }) => {
+  const { x, y, direction } = bullet
   let head = null
   if (direction === 'up') {
     head = <Pixel x={1} y={-1} fill={fill} />
@@ -22,10 +20,13 @@ const Bullet = ({ x, y, direction }: P) => {
   } else {
     throw new Error(`Invalid direction ${direction}`)
   }
+  const last = lastPos(bullet)
+  const mbr = getMBR(asBox(bullet), asBox(last))
   return (
-    <g role="bullet" transform={`translate(${x},${y})`}>
+    <g role="bullet" transform={`translate(${mbr.x},${mbr.y})`}>
       {head}
-      <rect width={3} height={3} fill={fill} />
+      {/* <rect width={3} height={3} fill={fill} /> */}
+      <rect width={mbr.width} height={mbr.height} fill="red" />
     </g>
   )
 }

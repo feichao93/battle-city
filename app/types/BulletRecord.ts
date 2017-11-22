@@ -9,6 +9,9 @@ const BulletRecord = Record({
   // 子弹的位置
   x: 0,
   y: 0,
+  // 子弹上一次的位置
+  lastX: 0,
+  lastY: 0,
   /**
    * 子弹的强度 默认强度为1
    * 强度大于等于2的子弹一下子可以破坏两倍的brick-wall

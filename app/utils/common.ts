@@ -232,3 +232,19 @@ export function getWithPowerUpProbability(stageName: string) {
   // TODO 需要校准数值
   return 0.2 + stageConfigs[stageName].difficulty * 0.05
 }
+
+export class DefaultMap<K, V> extends Map<K, V> {
+  private defaulter: () => V
+
+  constructor(defaulter: () => V) {
+    super()
+    this.defaulter = defaulter
+  }
+
+  get(key: K) {
+    if (!super.has(key)) {
+      this.set(key, this.defaulter())
+    }
+    return super.get(key)!
+  }
+}
