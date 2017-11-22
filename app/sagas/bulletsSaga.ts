@@ -180,14 +180,14 @@ function handleBulletsCollidedWithTanks(context: Context, state: State) {
   }
 }
 
-function handleBulletsCollidedWithBullets(context: Context, state: State) {
+function handleBulletsCollidedWithBullets(context: Context, state: State, delta: number) {
   const { bullets } = state
   for (const bullet of bullets.values()) {
     for (const other of bullets.values()) {
       if (bullet.bulletId <= other.bulletId) {
         continue
       }
-      const collisionInfo = getCollisionInfoBetweenBullets(bullet, other)
+      const collisionInfo = getCollisionInfoBetweenBullets(bullet, other, delta)
       if (collisionInfo) {
         const [info1, info2] = collisionInfo
         context.bulletCollisionInfo.get(bullet.bulletId).push(info1)
@@ -244,21 +244,20 @@ function calculateHurtsAndKillsFromContext({ tanks, players }: State, context: C
 
 function* handleAfterTick() {
   while (true) {
-    yield take('AFTER_TICK')
+    const { delta }: Action.AfterTickAction = yield take('AFTER_TICK')
     const state: State = yield select()
-    const { bullets, players, tanks: allTanks } = state
 
     // 新建一个统计对象(context), 用来存放这一个tick中的统计信息
     // 注意这里的Set是ES2015的原生Set
     const context: Context = {
       tankHitMap: new DefaultMap(() => []),
       frozenTankIdSet: new Set(),
-      bulletCollisionInfo: new BulletCollisionInfo(bullets),
+      bulletCollisionInfo: new BulletCollisionInfo(state.bullets),
     }
 
     handleBulletsCollidedWithEagle(context, state)
     handleBulletsCollidedWithTanks(context, state)
-    handleBulletsCollidedWithBullets(context, state)
+    handleBulletsCollidedWithBullets(context, state, delta)
     handleBulletsCollidedWithBricks(context, state)
     handleBulletsCollidedWithSteels(context, state)
     handleBulletsCollidedWithBorder(context, state)

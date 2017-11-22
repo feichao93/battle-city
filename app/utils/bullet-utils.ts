@@ -110,7 +110,7 @@ export class BulletCollisionInfo extends DefaultMap<BulletId, Collision[]> {
       if (expPos == null) {
         noExpBullets.set(bulletId, bullet)
       } else {
-        // 注意expBulletSet中存放的子弹的坐标是*子弹爆炸*的坐标
+        // 注意expBullets中存放的子弹的坐标是*子弹爆炸*的坐标
         expBullets.set(bulletId, bullet.merge(expPos))
       }
     }
@@ -121,31 +121,124 @@ export class BulletCollisionInfo extends DefaultMap<BulletId, Collision[]> {
   }
 }
 
+const rotateDirectionMap: { [key: string]: Direction } = {
+  up: 'right',
+  right: 'down',
+  down: 'left',
+  left: 'up',
+}
+
+/** 返回 坐标系旋转90度之后 子弹的新状态(方向/坐标) */
+function rotate(bullet: BulletRecord) {
+  return bullet.merge({
+    direction: rotateDirectionMap[bullet.direction],
+    x: bullet.y,
+    y: -bullet.x,
+    lastX: bullet.lastY,
+    lastY: -bullet.lastX,
+  })
+}
+
+function calculateHitTime(b1: BulletRecord, b2: BulletRecord): number {
+  if (b1.direction === 'up') {
+    if (b2.direction === 'down') {
+      // 两个子弹相向而行, 一定会发生碰撞
+      return (b1.lastY - b2.lastY - BULLET_SIZE) / (b1.speed + b2.speed)
+    } else if (b2.direction === 'up') {
+      if (b1.lastY < b2.lastY) {
+        //  [x]
+        //  ↑ ↑
+        //  | |   [x] means hitArea
+        // b1 |
+        //    |
+        //   b2
+        // b2从下方追赶b1
+        return (b2.lastY - b1.lastY - BULLET_SIZE) / (b2.speed - b1.speed)
+      } else {
+        // 递归 b1从下方追赶b2
+        return calculateHitTime(b2, b1)
+      }
+    } else if (b2.direction === 'left') {
+      // [x] <--- b2
+      //  ↑
+      //  |       [x] means hitArea
+      //  b1
+      const hitArea = { x: b1.x, y: b2.y, width: BULLET_SIZE, height: BULLET_SIZE }
+
+      const time1 = (b1.lastY - b2.lastY - BULLET_SIZE) / b1.speed
+      const b2XAtTime1 = b2.lastX - b2.speed * time1
+      const b2BoxAtTime1 = { x: b2XAtTime1, y: b2.y, width: BULLET_SIZE, height: BULLET_SIZE }
+      if (testCollide(hitArea, b2BoxAtTime1)) {
+        return time1
+      }
+      const time2 = (b2.lastX - b1.lastX - BULLET_SIZE) / b2.speed
+      const b1YAtTime2 = b1.lastY - b1.speed * time2
+      const b1BoxAtTime2 = { x: b1.x, y: b1YAtTime2, width: BULLET_SIZE, height: BULLET_SIZE }
+      if (testCollide(hitArea, b1BoxAtTime2)) {
+        return time2
+      }
+      return -1
+    } else { // b2.direction === 'right'
+      // b2 ---> [x]
+      //          ↑     [x] means hitArea
+      //          |
+      //          b1
+      const hitArea = { x: b1.x, y: b2.y, width: BULLET_SIZE, height: BULLET_SIZE }
+
+      const time1 = (b1.lastY - b2.lastY - BULLET_SIZE) / b1.speed
+      const b2XAtTime1 = b2.lastX + b2.speed * time1
+      const b2BoxAtTime1 = { x: b2XAtTime1, y: b2.y, width: BULLET_SIZE, height: BULLET_SIZE }
+      if (testCollide(hitArea, b2BoxAtTime1)) {
+        return time1
+      }
+      const time2 = (b1.lastX - b2.lastX - BULLET_SIZE) / b2.speed
+      const b1YAtTime2 = b1.lastY - b1.speed * time2
+      const b1BoxAtTime2 = { x: b1.x, y: b1YAtTime2, width: BULLET_SIZE, height: BULLET_SIZE }
+      if (testCollide(hitArea, b1BoxAtTime2)) {
+        return time2
+      }
+      return -1
+    }
+  } else {
+    // 旋啊旋. 旋转到b1 向上飞的时候...
+    return calculateHitTime(rotate(b1), rotate(b2))
+  }
+}
+
+/** 计算一个子弹从last-post移动time时间之后的位置 */
+function moveFromLast(bullet: BulletRecord, time: number): Point {
+  const distance = bullet.speed * time
+  if (bullet.direction === 'up') {
+    return { x: bullet.lastX, y: bullet.lastY - distance }
+  } else if (bullet.direction === 'down') {
+    return { x: bullet.lastX, y: bullet.lastY + distance }
+  } else if (bullet.direction === 'left') {
+    return { x: bullet.lastX - distance, y: bullet.lastY }
+  } else {
+    return { x: bullet.lastX + distance, y: bullet.lastY }
+  }
+}
+
 // 判断两个子弹在两帧之内是否发生了碰撞
 // 子弹总是在进行匀速直线运动, 两个子弹发生接触就可以认为发生了碰撞
-export function getCollisionInfoBetweenBullets(
-  b1: BulletRecord,
-  b2: BulletRecord,
-): [CollisionWithBullet, CollisionWithBullet] {
-  // 下面这些字段在判断是否碰撞的时候有用
-  // b1.speed
-  // b1.direction
-  // b1.x
-  // b1.y
-  // b1.lastX
-  // b1.lastY
-  // 如果没有发生碰撞, 那么返回null
-  // 如果发生碰撞, 返回对应的CollisionTarget
-  // return [
-  //   { type: 'bullet', bulletId: b2.bulletId, x: 0, y: 0 },
-  //   { type: 'bullet', bulletId: b1.bulletId, x: 3, y: 16 }
-  // ]
+// 如果没有发生碰撞, 该函数返回null
+export function getCollisionInfoBetweenBullets(b1: BulletRecord,
+                                               b2: BulletRecord,
+                                               delta: number,): [CollisionWithBullet, CollisionWithBullet] {
+  const mbr1 = getMBR(asBox(lastPos(b1)), asBox(b1))
+  const mbr2 = getMBR(asBox(lastPos(b2)), asBox(b2))
+  if (!testCollide(mbr1, mbr2)) {
+    return null
+  }
 
-  // TODO 目前用了最搓的方法...
-  if (testCollide(asBox(b1), asBox(b2))) {
+  const hitTime = calculateHitTime(b1, b2)
+
+  if (hitTime >= 0 && hitTime <= delta) {
+    const p1 = moveFromLast(b1, hitTime)
+    const p2 = moveFromLast(b2, hitTime)
     return [
-      { type: 'bullet', otherBulletId: b2.bulletId, x: b1.x, y: b1.y, otherX: b2.x, otherY: b2.y },
-      { type: 'bullet', otherBulletId: b1.bulletId, x: b2.x, y: b2.y, otherX: b1.x, otherY: b1.y },
+      { type: 'bullet', otherBulletId: b2.bulletId, x: p1.x, y: p1.y, otherX: p2.x, otherY: p2.y },
+      { type: 'bullet', otherBulletId: b1.bulletId, x: p2.x, y: p2.y, otherX: p1.x, otherY: p1.y },
     ]
   } else {
     return null
