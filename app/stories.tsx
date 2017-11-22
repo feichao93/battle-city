@@ -30,7 +30,7 @@ import { BLOCK_SIZE as B, FIELD_BLOCK_SIZE as FBZ } from 'utils/constants'
 import tickEmitter from 'sagas/tickEmitter'
 import stageConfigs from 'stages/index'
 import registerTick from 'hocs/registerTick'
-import { PlayerRecord, TankRecord, PowerUpRecord, FlickerRecord } from 'types'
+import { BulletRecord, FlickerRecord, PlayerRecord, PowerUpRecord, TankRecord } from 'types'
 
 // TODO 修复这里的BUG
 const BulletExplosion = registerTick(1000, 1000, 1000)(Explosion)
@@ -96,9 +96,11 @@ class FlickerStory extends React.PureComponent {
   state = {
     shape: 0 as FlickerShape,
   }
+
   componentDidMount() {
     this.handle = setInterval(() => this.setState({ shape: (this.state.shape + 1) % 4 }), 500)
   }
+
   componentWillUnmount() {
     clearInterval(this.handle)
   }
@@ -235,15 +237,15 @@ class Stories extends React.Component<{}, { stage: string }> {
           </summary>
           <Row>
             <X4>
-              <Bullet x={3} y={3} direction="up" />
-              <Bullet x={9} y={9} direction="down" />
+              <Bullet bullet={BulletRecord({ x: 3, y: 3, direction: 'up' })} />
+              <Bullet bullet={BulletRecord({ x: 9, y: 9, direction: 'down' })} />
             </X4>
             <X4><FlickerStory /></X4>
           </Row>
           <Row>
             <X4>
-              <Bullet x={3} y={3} direction="left" />
-              <Bullet x={9} y={9} direction="right" />
+              <Bullet bullet={BulletRecord({ x: 3, y: 3, direction: 'left' })} />
+              <Bullet bullet={BulletRecord({ x: 9, y: 9, direction: 'right' })} />
             </X4>
             <X4><BulletExplosion x={0} y={0} /></X4>
           </Row>

@@ -1,7 +1,8 @@
 import * as _ from 'lodash'
 import { State } from 'types'
-import { FIELD_BLOCK_SIZE as FBZ, BLOCK_SIZE as B, TANK_SIZE, N_MAP, ITEM_SIZE_MAP } from 'utils/constants'
-import { testCollide, iterRowsAndCols, asBox } from 'utils/common'
+import { BLOCK_SIZE as B, FIELD_BLOCK_SIZE as FBZ, TANK_SIZE } from 'utils/constants'
+import { asBox, testCollide } from 'utils/common'
+import IndexHelper from 'utils/IndexHelper'
 
 // 选取玩家的坦克对象. 如果玩家当前没有坦克, 则返回null
 export const playerTank = (state: State, playerName: string) => {
@@ -41,20 +42,20 @@ export const validPowerUpSpawnPositions = ({ map: { bricks, rivers, steels, eagl
         { x: x + 4, y: y + 8, width: 4, height: 4 },
         { x: x + 8, y: y + 8, width: 4, height: 4 },
       ]) {
-        for (const [brow, bcol] of iterRowsAndCols(ITEM_SIZE_MAP.BRICK, part)) {
-          if (bricks.get(brow * N_MAP.BRICK + bcol)) {
+        for (const t of IndexHelper.iter('brick', part)) {
+          if (bricks.get(t)) {
             collideCount++
             continue partLoop
           }
         }
-        for (const [trow, tcol] of iterRowsAndCols(ITEM_SIZE_MAP.STEEL, part)) {
-          if (steels.get(trow * N_MAP.STEEL + tcol)) {
+        for (const t of IndexHelper.iter('steel', part)) {
+          if (steels.get(t)) {
             collideCount++
             continue partLoop
           }
         }
-        for (const [rrow, rcol] of iterRowsAndCols(ITEM_SIZE_MAP.RIVER, part)) {
-          if (rivers.get(rrow * N_MAP.RIVER + rcol)) {
+        for (const t of IndexHelper.iter('river', part)) {
+          if (rivers.get(t)) {
             collideCount++
             continue partLoop
           }

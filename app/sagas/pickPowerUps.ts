@@ -1,8 +1,9 @@
-import { fork, put, take, select, takeEvery, takeLatest } from 'redux-saga/effects'
-import { State, MapRecord, ScoreRecord } from 'types'
-import { N_MAP, ITEM_SIZE_MAP } from 'utils/constants'
-import { iterRowsAndCols, asBox, getNextId, frame as f } from 'utils/common'
+import { fork, put, select, take, takeEvery, takeLatest } from 'redux-saga/effects'
+import { MapRecord, ScoreRecord, State } from 'types'
+import { N_MAP } from 'utils/constants'
+import { asBox, frame as f, getNextId } from 'utils/common'
 import { destroyTanks, nonPauseDelay } from 'sagas/common'
+import IndexHelper from 'utils/IndexHelper'
 
 function convertToBricks(map: MapRecord) {
   const { eagle, steels, bricks } = map
@@ -13,21 +14,14 @@ function convertToBricks(map: MapRecord) {
     height: 32 - 1,
   }
 
-  const btset = new Set(
-    Array.from(iterRowsAndCols(ITEM_SIZE_MAP.BRICK, eagleSurroundingBox))
-      .map(([brow, bcol]) => brow * N_MAP.BRICK + bcol)
-  )
-  const eagleBTSet = new Set(
-    Array.from(iterRowsAndCols(ITEM_SIZE_MAP.BRICK, asBox(eagle, -0.1)))
-      .map(([brow, bcol]) => brow * N_MAP.BRICK + bcol)
-  )
-  const ttset = new Set(
-    Array.from(iterRowsAndCols(ITEM_SIZE_MAP.BRICK, eagleSurroundingBox))
-      .map(([brow, bcol]) => {
-        const trow = Math.floor(brow / 2)
-        const tcol = Math.floor(bcol / 2)
-        return trow * N_MAP.STEEL + tcol
-      })
+  const btset = new Set(IndexHelper.iter('brick', eagleSurroundingBox))
+  const eagleBTSet = new Set(IndexHelper.iter('brick', asBox(eagle, -0.1)))
+  const ttset = new Set(Array.from(IndexHelper.iterRowCol('brick', eagleSurroundingBox))
+    .map(([brow, bcol]) => {
+      const trow = Math.floor(brow / 2)
+      const tcol = Math.floor(bcol / 2)
+      return trow * N_MAP.STEEL + tcol
+    })
   )
 
   const steels2 = steels.map((set, t) => (ttset.has(t) ? false : set))
@@ -44,22 +38,13 @@ function convertToSteels(map: MapRecord) {
     width: 32 - 1,
     height: 32 - 1,
   }
-  const surroundingTTSet = new Set(
-    Array.from(iterRowsAndCols(ITEM_SIZE_MAP.STEEL, eagleSurroundingBox))
-      .map(([trow, tcol]) => trow * N_MAP.STEEL + tcol)
-  )
-  const eagleTTSet = new Set(
-    Array.from(iterRowsAndCols(ITEM_SIZE_MAP.STEEL, asBox(eagle, -0.1)))
-      .map(([trow, tcol]) => trow * N_MAP.STEEL + tcol)
-  )
+  const surroundingTTSet = new Set(IndexHelper.iter('steel', eagleSurroundingBox))
+  const eagleTTSet = new Set(IndexHelper.iter('steel', asBox(eagle, -0.1)))
   const steels2 = steels.map((set, t) => (
     (surroundingTTSet.has(t) && !eagleTTSet.has(t)) ? true : set)
   )
 
-  const surroundBTSet = new Set(
-    Array.from(iterRowsAndCols(ITEM_SIZE_MAP.BRICK, eagleSurroundingBox))
-      .map(([brow, bcol]) => brow * N_MAP.BRICK + bcol)
-  )
+  const surroundBTSet = new Set(IndexHelper.iter('brick', eagleSurroundingBox))
   const bricks2 = bricks.map((set, t) => (surroundBTSet.has(t) ? false : set))
 
   return map.set('steels', steels2)

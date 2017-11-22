@@ -1,8 +1,8 @@
 import { List } from 'immutable'
-import { asBox, isInField, iterRowsAndCols, testCollide } from 'utils/common'
-import { BLOCK_SIZE, ITEM_SIZE_MAP, N_MAP } from 'utils/constants'
-import * as selectors from 'utils/selectors'
-import { TankRecord, State, EagleRecord, TanksMap } from 'types'
+import { asBox, isInField, testCollide } from 'utils/common'
+import { BLOCK_SIZE } from 'utils/constants'
+import { EagleRecord, State, TankRecord, TanksMap } from 'types'
+import IndexHelper from 'utils/IndexHelper'
 
 function isTankCollidedWithEagle(eagle: EagleRecord, tankTarget: Box, threshhold: number) {
   const eagleBox = {
@@ -15,16 +15,9 @@ function isTankCollidedWithEagle(eagle: EagleRecord, tankTarget: Box, threshhold
 }
 
 function isTankCollidedWithBricks(bricks: List<boolean>, tankTarget: Box, threshhold: number) {
-  const itemSize = ITEM_SIZE_MAP.BRICK
-  for (const [row, col] of iterRowsAndCols(itemSize, tankTarget)) {
-    const t = row * N_MAP.BRICK + col
+  for (const t of IndexHelper.iter('brick', tankTarget)) {
     if (bricks.get(t)) {
-      const subject = {
-        x: col * itemSize,
-        y: row * itemSize,
-        width: itemSize,
-        height: itemSize,
-      }
+      const subject = IndexHelper.getBox('brick', t)
       // 因为要考虑threshhold, 所以仍然要调用testCollide来判断是否相撞
       if (testCollide(subject, tankTarget, threshhold)) {
         return true
@@ -35,16 +28,9 @@ function isTankCollidedWithBricks(bricks: List<boolean>, tankTarget: Box, thresh
 }
 
 function isTankCollidedWithSteels(steels: List<boolean>, tankTarget: Box, threshhold: number) {
-  const itemSize = ITEM_SIZE_MAP.STEEL
-  for (const [row, col] of iterRowsAndCols(itemSize, tankTarget)) {
-    const t = row * N_MAP.STEEL + col
+  for (const t of IndexHelper.iter('steel', tankTarget)) {
     if (steels.get(t)) {
-      const subject = {
-        x: col * itemSize,
-        y: row * itemSize,
-        width: itemSize,
-        height: itemSize,
-      }
+      const subject = IndexHelper.getBox('steel', t)
       // 因为要考虑threshhold, 所以仍然要调用testCollide来判断是否相撞
       if (testCollide(subject, tankTarget, threshhold)) {
         return true
@@ -55,16 +41,9 @@ function isTankCollidedWithSteels(steels: List<boolean>, tankTarget: Box, thresh
 }
 
 function isTankCollidedWithRivers(rivers: List<boolean>, tankTarget: Box, threshhold: number) {
-  const itemSize = ITEM_SIZE_MAP.RIVER
-  for (const [row, col] of iterRowsAndCols(itemSize, tankTarget)) {
-    const t = row * N_MAP.RIVER + col
+  for (const t of IndexHelper.iter('river', tankTarget)) {
     if (rivers.get(t)) {
-      const subject = {
-        x: col * itemSize,
-        y: row * itemSize,
-        width: itemSize,
-        height: itemSize,
-      }
+      const subject = IndexHelper.getBox('river', t)
       // 因为要考虑threshhold, 所以仍然要调用testCollide来判断是否相撞
       if (testCollide(subject, tankTarget, threshhold)) {
         return true

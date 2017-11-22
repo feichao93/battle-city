@@ -36,6 +36,8 @@ export default function* fireController(playerName: string, shouldFire: () => bo
             direction: tank.direction,
             x,
             y,
+            lastX: x,
+            lastY: y,
             power: getTankBulletPower(tank),
             speed: getTankBulletSpeed(tank),
             tankId: tank.tankId,

@@ -7,13 +7,6 @@ import {
 import stageConfigs from 'stages'
 import { BulletRecord, TankRecord, EagleRecord, PowerUpRecord } from 'types'
 
-export function getOrDefault<K, V>(map: Map<K, V>, key: K, getValue: () => V) {
-  if (!map.has(key)) {
-    map.set(key, getValue())
-  }
-  return map.get(key)
-}
-
 // 根据坦克的位置计算子弹的生成位置
 // 参数x,y,direction为坦克的位置和方向
 export function calculateBulletStartPosition({ x, y, direction }: { x: number, y: number, direction: Direction }) {
@@ -42,23 +35,6 @@ export function getRowCol(t: number, N: number) {
 export function testCollide(subject: Box, object: Box, threshhold = 0) {
   return between(subject.x - object.width, object.x, subject.x + subject.width, threshhold)
     && between(subject.y - object.height, object.y, subject.y + subject.height, threshhold)
-}
-
-// 输入itemSize和box. item对应brick/steel/river, box对应bullet/tank
-// 生成器将yield满足条件<row行col列的item与box相撞>的[row, col]二元组
-// itemSize: number
-// box: { x: number, y: number, width: number, height: number }
-export function* iterRowsAndCols(itemSize: number, box: Box) {
-  const N = FIELD_SIZE / itemSize // todo should not use N
-  const col1 = Math.max(0, Math.floor(box.x / itemSize))
-  const col2 = Math.min(N - 1, Math.floor((box.x + box.width) / itemSize))
-  const row1 = Math.max(0, Math.floor(box.y / itemSize))
-  const row2 = Math.min(N - 1, Math.floor((box.y + box.height) / itemSize))
-  for (let row = row1; row <= row2; row += 1) {
-    for (let col = col1; col <= col2; col += 1) {
-      yield [row, col]
-    }
-  }
 }
 
 export const frame = (x: number) => 1000 / 60 * x
@@ -231,4 +207,20 @@ export function getTankBulletPower(tank: TankRecord) {
 export function getWithPowerUpProbability(stageName: string) {
   // TODO 需要校准数值
   return 0.2 + stageConfigs[stageName].difficulty * 0.05
+}
+
+export class DefaultMap<K, V> extends Map<K, V> {
+  private defaulter: () => V
+
+  constructor(defaulter: () => V) {
+    super()
+    this.defaulter = defaulter
+  }
+
+  get(key: K) {
+    if (!super.has(key)) {
+      this.set(key, this.defaulter())
+    }
+    return super.get(key)!
+  }
 }
