@@ -132,10 +132,10 @@ const rotateDirectionMap: { [key: string]: Direction } = {
 function rotate(bullet: BulletRecord) {
   return bullet.merge({
     direction: rotateDirectionMap[bullet.direction],
-    x: bullet.y,
-    y: -bullet.x,
-    lastX: bullet.lastY,
-    lastY: -bullet.lastX,
+    x: -bullet.y,
+    y: bullet.x,
+    lastX: -bullet.lastY,
+    lastY: bullet.lastX,
   })
 }
 
