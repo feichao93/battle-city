@@ -7,7 +7,7 @@ import { applyMiddleware, combineReducers, createStore } from 'redux'
 import createSagaMiddleware from 'redux-saga'
 import players from 'reducers/players'
 import { time } from 'reducers/index'
-import game from 'reducers/game'
+import game, { GameRecord } from 'reducers/game'
 import { Tank } from 'components/tanks'
 import SnowLayer from 'components/SnowLayer'
 import SteelLayer from 'components/SteelLayer'
@@ -30,11 +30,22 @@ import { BLOCK_SIZE as B, FIELD_BLOCK_SIZE as FBZ } from 'utils/constants'
 import tickEmitter from 'sagas/tickEmitter'
 import stageConfigs from 'stages/index'
 import registerTick from 'hocs/registerTick'
-import { BulletRecord, FlickerRecord, PlayerRecord, PowerUpRecord, TankRecord } from 'types'
+import { BulletRecord, FlickerRecord, PlayerRecord, PowerUpRecord, TankRecord, ExplosionRecord } from 'types'
 
-// TODO 修复这里的BUG
-const BulletExplosion = registerTick(1000, 1000, 1000)(Explosion)
-const TankExplosion = registerTick(1000, 1000)(Explosion)
+const BulletExplosion = (registerTick as any)(666, 667, 667)(
+  ({ tickIndex, x, y }: any) => <Explosion explosion={ExplosionRecord({
+    cx: x + 8,
+    cy: y + 8,
+    shape: `s${tickIndex}` as ExplosionShape,
+  })} />
+)
+const TankExplosion = (registerTick as any)(1000, 1000)(
+  ({ tickIndex, x, y }: any) => <Explosion explosion={ExplosionRecord({
+    cx: x + 16,
+    cy: y + 16,
+    shape: `b${tickIndex}` as ExplosionShape,
+  })} />
+)
 const PowerUp = ({ name, x, y }: { name: PowerUpName, x: number, y: number }) => (
   <PowerUpBase powerUp={PowerUpRecord({ powerUpName: name, x, y, visible: true })} />
 )
@@ -43,6 +54,7 @@ const simpleSagaMiddleware = createSagaMiddleware()
 const simpleReducer = combineReducers({ time, players, game })
 const initialState = {
   time: undefined as number,
+  game: GameRecord({ showHUD: true }),
   players: Map({
     'player-1': PlayerRecord({
       playerName: 'player-1',
