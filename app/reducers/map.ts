@@ -20,6 +20,10 @@ export default function mapReducer(state = initState, action: Action) {
     )
   } else if (action.type === 'UPDATE_MAP') {
     return action.map
+  } else if (action.type === 'ADD_RESTRICTED_AREA') {
+    return state.update('restrictedAreas', areas => areas.set(action.areaId, action.area))
+  } else if (action.type === 'REMOVE_RESTRICTED_AREA') {
+    return state.update('restrictedAreas', areas => areas.delete(action.areaId))
   } else {
     return state
   }

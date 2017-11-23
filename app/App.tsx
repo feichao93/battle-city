@@ -7,7 +7,7 @@ import StatisticsScene from 'components/StatisticsScene'
 import GameTitleScene from 'components/GameTitleScene'
 import PauseIndicator from 'components/PauseIndicator'
 import CurtainsContainer from 'components/CurtainsContainer'
-import Inspector from 'components/Inspector'
+import Inspector from 'components/dev-only/Inspector'
 import { State } from 'types'
 
 const HelpInfo = () => (
@@ -52,7 +52,8 @@ class App extends React.PureComponent<{ scene: Scene, paused: boolean }> {
           <CurtainsContainer />
           {paused ? <PauseIndicator /> : null}
         </svg>
-        {DEV ? <Inspector /> : <HelpInfo />}
+        {DEV ? null : <HelpInfo />}
+        <Inspector />
       </div>
     )
   }

@@ -32,10 +32,10 @@ export type Input = { type: 'turn', direction: Direction }
 
 declare global {
   interface Box {
-    x: number,
-    y: number,
-    width: number,
-    height: number,
+    x: number
+    y: number
+    width: number
+    height: number
   }
 
   interface Point {
@@ -70,6 +70,7 @@ declare global {
   type KillCount = number
   type PowerUpId = number
   type ScoreId = number
+  type AreaId = number
 
   /**
    * 玩家名称.

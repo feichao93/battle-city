@@ -17,12 +17,13 @@ import TankHelmet from 'components/TankHelmet'
 import TextLayer from 'components/TextLayer'
 import PowerUp from 'components/PowerUp'
 import Score from 'components/Score'
+import RestrictedAreaLayer from 'components/dev-only/RestrictedAreaLayer'
 import { State } from 'types'
 
 class GameScene extends React.Component<State> {
   render() {
     const { bullets, map, explosions, flickers, tanks, texts, powerUps, scores } = this.props
-    const { bricks, steels, rivers, snows, forests, eagle } = map.toObject()
+    const { bricks, steels, rivers, snows, forests, eagle, restrictedAreas } = map.toObject()
     const activeTanks = tanks.filter(t => t.active)
 
     return (
@@ -59,6 +60,7 @@ class GameScene extends React.Component<State> {
           </g>
           {/* 因为坦克/子弹可以"穿过"森林, 所以<ForestLayer />需要放在tank-layer和bullet-layer的后面 */}
           <ForestLayer forests={forests} />
+          <RestrictedAreaLayer areas={restrictedAreas} />
           <g role="power-up-layer">
             {powerUps.map(powerUp =>
               <PowerUp key={powerUp.powerUpId} powerUp={powerUp} />

@@ -1,4 +1,4 @@
-import { Record, Repeat } from 'immutable'
+import { Record, Repeat, Map as IMap } from 'immutable'
 import { N_MAP } from 'utils/constants'
 import { eagleRecord, PlainEagleRecord } from 'types/EagleRecord'
 
@@ -9,6 +9,7 @@ const MapRecord = Record({
   rivers: Repeat(false, N_MAP.RIVER ** 2).toList(),
   snows: Repeat(false, N_MAP.SNOW ** 2).toList(),
   forests: Repeat(false, N_MAP.FOREST ** 2).toList(),
+  restrictedAreas: IMap<AreaId, Box>(),
 })
 
 export const mapRecord = MapRecord()
@@ -16,11 +17,12 @@ type MapRecord = typeof mapRecord
 
 export default MapRecord
 
-export type PlainMapRecord = {
+export interface PlainMapRecord {
   eagle: PlainEagleRecord
   bricks: boolean[]
   steels: boolean[]
   rivers: boolean[]
   snows: boolean[]
   forests: boolean[]
+  restrictedAreas: { [areaId: number]: Box }
 }

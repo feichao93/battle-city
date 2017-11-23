@@ -46,7 +46,7 @@ export function isInField(box: Box) {
     && between(0, box.y, FIELD_SIZE - box.height)
 }
 
-const nextIdMap = new Map()
+const nextIdMap = new Map<string, number>()
 
 export function getNextId(tag = '') {
   if (nextIdMap.has(tag)) {

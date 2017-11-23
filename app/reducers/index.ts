@@ -11,7 +11,7 @@ import powerUps, { PowerUpsMap } from 'reducers/powerUps'
 import scores, { ScoresMap } from 'reducers/scores'
 import { MapRecord } from 'types'
 
-export type State = {
+export interface State {
   game: GameRecord,
   players: PlayersMap,
   bullets: BulletsMap,

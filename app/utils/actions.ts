@@ -1,13 +1,13 @@
 import { Map, Set } from 'immutable'
 import {
-  FlickerRecord,
   BulletRecord,
-  TankRecord,
+  ExplosionRecord,
+  FlickerRecord,
+  MapRecord,
   PlayerRecord,
   PowerUpRecord,
-  MapRecord,
   ScoreRecord,
-  ExplosionRecord,
+  TankRecord,
 } from 'types'
 
 declare global {
@@ -52,9 +52,9 @@ declare global {
       | SetTextAction
       | UpdateTextPositionAction
       | Simple<'DESTROY_EAGLE'>
-      | AddTankAction
+      | AddTank
       | StartMoveAction
-      | RemoveTankAction
+      | RemoveTank
       | StopMoveAction
       | RemoveTextAction
       | RemoveFlickerAction
@@ -77,6 +77,8 @@ declare global {
       | ClearTanks
       | ClearAIPlayers
       | UpdateComingStageName
+      | AddRestrictedArea
+      | RemoveRestrictedArea
 
     export type ActionType = Action['type']
 
@@ -85,13 +87,13 @@ declare global {
       tank: TankRecord
     }
 
-    export type HurtAction = {
+    export interface HurtAction {
       type: 'HURT'
       targetTank: TankRecord
       hurt: number
     }
 
-    export type KillAction = {
+    export interface KillAction {
       type: 'KILL'
       targetTank: TankRecord
       sourceTank: TankRecord
@@ -99,35 +101,35 @@ declare global {
       sourcePlayer: PlayerRecord
     }
 
-    export type UpdateTransientKillInfo = {
+    export interface UpdateTransientKillInfo {
       type: 'UPDATE_TRANSIENT_KILL_INFO'
       info: Map<PlayerName, Map<TankLevel, KillCount>>
     }
 
-    export type IncKillCount = {
+    export interface IncKillCount {
       type: 'INC_KILL_COUNT'
       playerName: PlayerName
       level: TankLevel
     }
 
-    export type StartMoveAction = {
-      type: 'START_MOVE',
-      tankId: TankId,
+    export interface StartMoveAction {
+      type: 'START_MOVE'
+      tankId: TankId
     }
 
-    export type StopMoveAction = {
-      type: 'STOP_MOVE',
-      tankId: TankId,
+    export interface StopMoveAction {
+      type: 'STOP_MOVE'
+      tankId: TankId
     }
 
-    export type TickAction = {
-      type: 'TICK',
-      delta: number,
+    export interface TickAction {
+      type: 'TICK'
+      delta: number
     }
 
-    export type AfterTickAction = {
-      type: 'AFTER_TICK',
-      delta: number,
+    export interface AfterTickAction {
+      type: 'AFTER_TICK'
+      delta: number
     }
 
     export interface AddBulletAction {
@@ -173,14 +175,14 @@ declare global {
       ts: Set<BrickIndex>
     }
 
-    export type UpdateMapAction = {
-      type: 'UPDATE_MAP',
-      map: MapRecord,
+    export interface UpdateMapAction {
+      type: 'UPDATE_MAP'
+      map: MapRecord
     }
 
-    export type UpdaetBulletsAction = {
-      type: 'UPDATE_BULLETS',
-      updatedBullets: Map<BulletId, BulletRecord>,
+    export interface UpdaetBulletsAction {
+      type: 'UPDATE_BULLETS'
+      updatedBullets: Map<BulletId, BulletRecord>
     }
 
     export interface LoadStageMapAction {
@@ -190,7 +192,7 @@ declare global {
 
     export interface UpdateComingStageName {
       type: 'UPDATE_COMING_STAGE_NAME'
-      stageName:string
+      stageName: string
     }
 
     export interface StartStage {
@@ -222,14 +224,14 @@ declare global {
       flickerId: FlickerId
     }
 
-    export interface AddTankAction {
-      type: 'ADD_TANK',
+    export interface AddTank {
+      type: 'ADD_TANK'
       tank: TankRecord
     }
 
-    export type RemoveTankAction = {
-      type: 'REMOVE_TANK',
-      tankId: TankId,
+    export interface RemoveTank {
+      type: 'REMOVE_TANK'
+      tankId: TankId
     }
 
     export interface ActivatePlayer {
@@ -243,61 +245,61 @@ declare global {
       playerName: PlayerName
     }
 
-    export type CreatePlayerAction = {
-      type: 'CREATE_PLAYER',
-      player: PlayerRecord,
+    export interface CreatePlayerAction {
+      type: 'CREATE_PLAYER'
+      player: PlayerRecord
     }
 
-    export type SetTextAction = {
-      type: 'SET_TEXT',
-      textId: TextId,
-      content: string,
-      fill: string,
-      x: number,
-      y: number,
+    export interface SetTextAction {
+      type: 'SET_TEXT'
+      textId: TextId
+      content: string
+      fill: string
+      x: number
+      y: number
     }
 
-    export type RemoveTextAction = {
-      type: 'REMOVE_TEXT',
-      textId: TextId,
+    export interface RemoveTextAction {
+      type: 'REMOVE_TEXT'
+      textId: TextId
     }
 
-    export type UpdateTextPositionAction = {
-      type: 'UPDATE_TEXT_POSITION',
-      textIds: Array<TextId>,
-      direction: Direction,
-      distance: number,
+    export interface UpdateTextPositionAction {
+      type: 'UPDATE_TEXT_POSITION'
+      textIds: Array<TextId>
+      direction: Direction
+      distance: number
     }
 
-    export type DecrementPlayerLifeAction = {
-      type: 'DECREMENT_PLAYER_LIFE',
-      playerName: PlayerName,
+    export interface DecrementPlayerLifeAction {
+      type: 'DECREMENT_PLAYER_LIFE'
+      playerName: PlayerName
     }
 
-    export type LoadSceneAction = {
-      type: 'LOAD_SCENE',
+    export interface LoadSceneAction {
+      type: 'LOAD_SCENE'
       scene: Scene
     }
 
-    export type AddPowerUpAction = {
-      type: 'ADD_POWER_UP',
+    export interface AddPowerUpAction {
+      type: 'ADD_POWER_UP'
       powerUp: PowerUpRecord
     }
 
-    export type RemovePowerUpAction = {
+    export interface RemovePowerUpAction {
       type: 'REMOVE_POWER_UP'
       powerUpId: PowerUpId
     }
 
-    export type UpdatePowerUpAction = {
+    export interface UpdatePowerUpAction {
       type: 'UPDATE_POWER_UP'
       powerUp: PowerUpRecord
     }
 
-    export type PickPowerUpAction = {
-      type: 'PICK_POWER_UP',
+    export interface PickPowerUpAction {
+      type: 'PICK_POWER_UP'
       player: PlayerRecord
-      tank: TankRecord,
+      tank: TankRecord
       powerUp: PowerUpRecord
     }
 
@@ -311,12 +313,12 @@ declare global {
       scoreId: ScoreId
     }
 
-    export type IncrementPlayerLifeAction = {
+    export interface IncrementPlayerLifeAction {
       type: 'INCREMENT_PLAYER_LIFE'
       playerName: PlayerName
     }
 
-    export type UpgardeTankAction = {
+    export interface UpgardeTankAction {
       type: 'UPGRADE_TANK'
       tankId: TankId
     }
@@ -345,8 +347,19 @@ declare global {
       type: 'CLEAR_AI_PLAYERS'
     }
 
-    export type Simple<T> = {
+    export interface Simple<T> {
       type: T
+    }
+
+    export interface AddRestrictedArea {
+      type: 'ADD_RESTRICTED_AREA'
+      areaId: AreaId
+      area: Box
+    }
+
+    export interface RemoveRestrictedArea {
+      type: 'REMOVE_RESTRICTED_AREA'
+      areaId: AreaId
     }
   }
 }

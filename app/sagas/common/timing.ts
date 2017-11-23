@@ -2,6 +2,10 @@ import { clamp } from 'lodash'
 import { Effect } from 'redux-saga'
 import { take, call } from 'redux-saga/effects'
 
+export function applySpawnSpeed<V>(config: TimingConfig<V>, speed: number) {
+  return config.map(({ t, v }) => ({ t: t / speed, v }))
+}
+
 export default function* timing<V>(config: TimingConfig<V>, handler: (v: V) => Iterable<any>) {
   let acc = 0
   let target = 0

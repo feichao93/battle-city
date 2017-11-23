@@ -1,4 +1,4 @@
-import { List } from 'immutable'
+import { List, Map } from 'immutable'
 import { asBox, isInField, testCollide } from 'utils/common'
 import { BLOCK_SIZE } from 'utils/constants'
 import { EagleRecord, State, TankRecord, TanksMap } from 'types'
@@ -53,6 +53,10 @@ function isTankCollidedWithRivers(rivers: List<boolean>, tankTarget: Box, thresh
   return false
 }
 
+function isTankCollidedWithRestrictedAreas(areas: Map<AreaId, Box>, tankTarget: Box, threshold: number) {
+  return areas.some(subject => testCollide(subject, tankTarget, threshold))
+}
+
 function isTankCollidedWithOtherTanks(activeTanks: TanksMap, tank: TankRecord, tankTarget: Box, threshhold: number) {
   // 判断坦克与其他坦克是否相撞
   for (const otherTank of activeTanks.values()) {
@@ -67,7 +71,8 @@ function isTankCollidedWithOtherTanks(activeTanks: TanksMap, tank: TankRecord, t
   return false
 }
 
-export default function canTankMove({ tanks, map: { bricks, steels, rivers, eagle } }: State, tank: TankRecord, threshhold = -0.01) {
+export default function canTankMove(state: State, tank: TankRecord, threshhold = -0.01) {
+  const { tanks, map: { bricks, steels, rivers, eagle, restrictedAreas } } = state
   const tankBox = asBox(tank)
 
   // 判断是否位于战场内
@@ -86,6 +91,11 @@ export default function canTankMove({ tanks, map: { bricks, steels, rivers, eagl
     return false
   }
   if (isTankCollidedWithRivers(rivers, tankBox, threshhold)) {
+    return false
+  }
+
+  // 判断是否与保留区域有碰撞
+  if (isTankCollidedWithRestrictedAreas(restrictedAreas, tankBox, threshhold)) {
     return false
   }
 
