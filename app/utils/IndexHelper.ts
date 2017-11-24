@@ -50,7 +50,7 @@ export default class IndexHelper {
     return { x: col * itemSize, y: row * itemSize }
   }
 
-  static getBox(type: ItemType, t: number): Box {
+  static getRect(type: ItemType, t: number): Rect {
     const itemSize = IndexHelper.resolveItemSize(type)
     const [row, col] = IndexHelper.getRowCol(type, t)
     return {
@@ -61,17 +61,17 @@ export default class IndexHelper {
     }
   }
 
-  /** 输入itemtType和box. 返回[row, col]的迭代器.
-   * [row, col]代表的元素将会与box发生碰撞
+  /** 输入itemtType和rect. 返回[row, col]的迭代器.
+   * [row, col]代表的元素将会与rect发生碰撞
    * 参数direction可以改变迭代的方向
    */
-  static * iterRowCol(type: ItemType, box: Box, direction: Direction = 'down') {
+  static * iterRowCol(type: ItemType, rect: Rect, direction: Direction = 'down') {
     const N = IndexHelper.resolveN(type)
     const itemSize = IndexHelper.resolveItemSize(type)
-    const col1 = Math.max(0, Math.floor(box.x / itemSize))
-    const col2 = Math.min(N - 1, Math.floor((box.x + box.width) / itemSize))
-    const row1 = Math.max(0, Math.floor(box.y / itemSize))
-    const row2 = Math.min(N - 1, Math.floor((box.y + box.height) / itemSize))
+    const col1 = Math.max(0, Math.floor(rect.x / itemSize))
+    const col2 = Math.min(N - 1, Math.floor((rect.x + rect.width) / itemSize))
+    const row1 = Math.max(0, Math.floor(rect.y / itemSize))
+    const row2 = Math.min(N - 1, Math.floor((rect.y + rect.height) / itemSize))
     if (direction === 'down') {
       for (const row of range(row1, row2 + 1)) {
         for (const col of range(col1, col2 + 1)) {
@@ -99,9 +99,9 @@ export default class IndexHelper {
     }
   }
 
-  static * iter(type: ItemType, box: Box, direction: Direction = 'down') {
+  static * iter(type: ItemType, rect: Rect, direction: Direction = 'down') {
     const N = IndexHelper.resolveN(type)
-    for (const [row, col] of IndexHelper.iterRowCol(type, box, direction)) {
+    for (const [row, col] of IndexHelper.iterRowCol(type, rect, direction)) {
       yield row * N + col
     }
   }

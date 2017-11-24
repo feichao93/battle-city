@@ -1,7 +1,7 @@
 import { List } from 'immutable'
 import { MapRecord, TankRecord, TanksMap } from 'types'
 import { BLOCK_SIZE, FIELD_SIZE, ITEM_SIZE_MAP, TANK_SIZE } from 'utils/constants'
-import { asBox, getDirectionInfo } from 'utils/common'
+import { asRect, getDirectionInfo } from 'utils/common'
 import IndexHelper from 'utils/IndexHelper'
 
 const logAhead = (...args: any[]) => 0 /* console.log('[ahead]', ...args) */
@@ -300,7 +300,7 @@ function getAheadBrickLength(bricks: List<boolean>, tank: TankRecord) {
   const { xy, updater } = getDirectionInfo(tank.direction)
   let step = 1
   while (true) {
-    const iterable = IndexHelper.iter('brick', asBox(tank.update(xy, updater(step * size)), -0.02))
+    const iterable = IndexHelper.iter('brick', asRect(tank.update(xy, updater(step * size)), -0.02))
     const array = Array.from(iterable)
     if (array.length === 0) {
       return Infinity
@@ -319,7 +319,7 @@ function getAheadSteelLength(steels: List<boolean>, tank: TankRecord) {
   const { xy, updater } = getDirectionInfo(tank.direction)
   let step = 1
   while (true) {
-    const iterable = IndexHelper.iter('steel', asBox(tank.update(xy, updater(step * size)), -0.02))
+    const iterable = IndexHelper.iter('steel', asRect(tank.update(xy, updater(step * size)), -0.02))
     const array = Array.from(iterable)
     if (array.length === 0) {
       return Infinity
@@ -338,7 +338,7 @@ function getAheadRiverLength(rivers: List<boolean>, tank: TankRecord) {
   const { xy, updater } = getDirectionInfo(tank.direction)
   let step = 1
   while (true) {
-    const iterable = IndexHelper.iter('river', asBox(tank.update(xy, updater(step * size)), -0.02))
+    const iterable = IndexHelper.iter('river', asRect(tank.update(xy, updater(step * size)), -0.02))
     const array = Array.from(iterable)
     if (array.length === 0) {
       return Infinity

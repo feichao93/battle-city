@@ -1,7 +1,7 @@
 import * as _ from 'lodash'
 import { State } from 'types'
 import { BLOCK_SIZE as B, FIELD_BLOCK_SIZE as FBZ, TANK_SIZE } from 'utils/constants'
-import { asBox, testCollide } from 'utils/common'
+import { asRect, testCollide } from 'utils/common'
 import IndexHelper from 'utils/IndexHelper'
 
 // 选取玩家的坦克对象. 如果玩家当前没有坦克, 则返回null
@@ -13,8 +13,8 @@ export const playerTank = (state: State, playerName: string) => {
   return state.tanks.get(activeTankId, null)
 }
 
-export const availableSpawnPosition = ({ tanks }: State): Box => {
-  const result: Box[] = []
+export const availableSpawnPosition = ({ tanks }: State): Rect => {
+  const result: Rect[] = []
   const activeTanks = tanks.filter(t => t.active)
   outer: for (const x of [0, 6 * B, 12 * B]) {
     const option = { x, y: 0, width: TANK_SIZE, height: TANK_SIZE }
@@ -60,7 +60,7 @@ export const validPowerUpSpawnPositions = ({ map: { bricks, rivers, steels, eagl
             continue partLoop
           }
         }
-        if (testCollide(asBox(eagle), part)) {
+        if (testCollide(asRect(eagle), part)) {
           collideCount++
           continue partLoop
         }

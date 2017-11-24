@@ -1,6 +1,6 @@
 import { put } from 'redux-saga/effects'
 import { TankRecord } from 'types'
-import { asBox, getNextId } from 'utils/common'
+import { asRect, getNextId } from 'utils/common'
 import { flickerSaga } from 'sagas/common'
 
 export default function* spawnTank(tank: TankRecord, spawnSpeed = 1) {
@@ -8,7 +8,7 @@ export default function* spawnTank(tank: TankRecord, spawnSpeed = 1) {
   yield put<Action>({
     type: 'ADD_RESTRICTED_AREA',
     areaId,
-    area: asBox(tank),
+    area: asRect(tank),
   })
 
   yield* flickerSaga(tank.x, tank.y, spawnSpeed)

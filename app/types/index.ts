@@ -31,7 +31,7 @@ export type Input = { type: 'turn', direction: Direction }
   | { type: 'forward', maxDistance?: number }
 
 declare global {
-  interface Box {
+  interface Rect {
     x: number
     y: number
     width: number

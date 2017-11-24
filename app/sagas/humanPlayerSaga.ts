@@ -1,6 +1,6 @@
 import { put, select, takeEvery } from 'redux-saga/effects'
 import { BLOCK_SIZE } from 'utils/constants'
-import { asBox, frame, testCollide } from 'utils/common'
+import { asRect, frame, testCollide } from 'utils/common'
 import { PlayerRecord, State, TankRecord } from 'types'
 import { spawnTank } from 'sagas/common'
 import * as selectors from 'utils/selectors'
@@ -9,7 +9,7 @@ function* handlePickPowerUps(playerName: string) {
   const tank: TankRecord = yield select(selectors.playerTank, playerName)
   if (tank != null) {
     const { powerUps, players }: State = yield select()
-    const powerUp = powerUps.find(p => testCollide(asBox(p, -0.5), asBox(tank)))
+    const powerUp = powerUps.find(p => testCollide(asRect(p, -0.5), asRect(tank)))
     if (powerUp) {
       yield put<Action>({
         type: 'PICK_POWER_UP',

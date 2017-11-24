@@ -2,7 +2,7 @@ import * as React from 'react'
 import { Map } from 'immutable'
 
 interface P {
-  areas: Map<AreaId, Box>
+  areas: Map<AreaId, Rect>
 }
 
 let RestrictedAreaLayer: React.ComponentClass<P> = (() => null as any) as any

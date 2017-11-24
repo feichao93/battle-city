@@ -1,7 +1,7 @@
 import { fork, put, select, take, takeEvery, takeLatest } from 'redux-saga/effects'
 import { MapRecord, ScoreRecord, State } from 'types'
 import { N_MAP } from 'utils/constants'
-import { asBox, frame as f, getNextId } from 'utils/common'
+import { asRect, frame as f, getNextId } from 'utils/common'
 import { destroyTanks, nonPauseDelay } from 'sagas/common'
 import IndexHelper from 'utils/IndexHelper'
 
@@ -15,7 +15,7 @@ function convertToBricks(map: MapRecord) {
   }
 
   const btset = new Set(IndexHelper.iter('brick', eagleSurroundingBox))
-  const eagleBTSet = new Set(IndexHelper.iter('brick', asBox(eagle, -0.1)))
+  const eagleBTSet = new Set(IndexHelper.iter('brick', asRect(eagle, -0.1)))
   const ttset = new Set(Array.from(IndexHelper.iterRowCol('brick', eagleSurroundingBox))
     .map(([brow, bcol]) => {
       const trow = Math.floor(brow / 2)
@@ -39,7 +39,7 @@ function convertToSteels(map: MapRecord) {
     height: 32 - 1,
   }
   const surroundingTTSet = new Set(IndexHelper.iter('steel', eagleSurroundingBox))
-  const eagleTTSet = new Set(IndexHelper.iter('steel', asBox(eagle, -0.1)))
+  const eagleTTSet = new Set(IndexHelper.iter('steel', asRect(eagle, -0.1)))
   const steels2 = steels.map((set, t) => (
     (surroundingTTSet.has(t) && !eagleTTSet.has(t)) ? true : set)
   )

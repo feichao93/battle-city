@@ -9,7 +9,7 @@ const MapRecord = Record({
   rivers: Repeat(false, N_MAP.RIVER ** 2).toList(),
   snows: Repeat(false, N_MAP.SNOW ** 2).toList(),
   forests: Repeat(false, N_MAP.FOREST ** 2).toList(),
-  restrictedAreas: IMap<AreaId, Box>(),
+  restrictedAreas: IMap<AreaId, Rect>(),
 })
 
 export const mapRecord = MapRecord()
@@ -24,5 +24,5 @@ export interface PlainMapRecord {
   rivers: boolean[]
   snows: boolean[]
   forests: boolean[]
-  restrictedAreas: { [areaId: number]: Box }
+  restrictedAreas: { [areaId: number]: Rect }
 }

@@ -354,7 +354,7 @@ declare global {
     export interface AddRestrictedArea {
       type: 'ADD_RESTRICTED_AREA'
       areaId: AreaId
-      area: Box
+      area: Rect
     }
 
     export interface RemoveRestrictedArea {

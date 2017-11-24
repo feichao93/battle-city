@@ -32,18 +32,17 @@ export function getRowCol(t: number, N: number) {
 }
 
 /** 用来判断subject和object是否相撞 */
-export function testCollide(subject: Box, object: Box, threshhold = 0) {
+export function testCollide(subject: Rect, object: Rect, threshhold = 0) {
   return between(subject.x - object.width, object.x, subject.x + subject.width, threshhold)
     && between(subject.y - object.height, object.y, subject.y + subject.height, threshhold)
 }
 
 export const frame = (x: number) => 1000 / 60 * x
 
-// 判断box是否在战场内
-// box: { x: number, y: number, width: number, height: number }
-export function isInField(box: Box) {
-  return between(0, box.x, FIELD_SIZE - box.width)
-    && between(0, box.y, FIELD_SIZE - box.height)
+// 判断rect是否在战场内
+export function isInField(rect: Rect) {
+  return between(0, rect.x, FIELD_SIZE - rect.width)
+    && between(0, rect.y, FIELD_SIZE - rect.height)
 }
 
 const nextIdMap = new Map<string, number>()
@@ -59,8 +58,8 @@ export function getNextId(tag = '') {
   }
 }
 
-// 将BulletRecord/TankRecord/Eagle/PowerUpRecord转换为Box类型对象
-export function asBox(item: BulletRecord | TankRecord | EagleRecord | PowerUpRecord, enlargement = 0): Box {
+// 将BulletRecord/TankRecord/Eagle/PowerUpRecord转换为Rect类型对象
+export function asRect(item: BulletRecord | TankRecord | EagleRecord | PowerUpRecord, enlargement = 0): Rect {
   if (item instanceof BulletRecord) {
     return {
       x: item.x - BULLET_SIZE / 2 * enlargement,
@@ -91,7 +90,7 @@ export function asBox(item: BulletRecord | TankRecord | EagleRecord | PowerUpRec
       height: BLOCK_SIZE * (1 + enlargement),
     }
   } else {
-    throw new Error('Cannot convert to type Box')
+    throw new Error('Cannot convert to type Rect')
   }
 }
 

@@ -3,7 +3,7 @@ import { fork, put, select, take } from 'redux-saga/effects'
 import { BULLET_SIZE, FIELD_SIZE, STEEL_POWER } from 'utils/constants'
 import { destroyBullets, destroyTanks } from 'sagas/common'
 import { BulletRecord, BulletsMap, State } from 'types'
-import { asBox, DefaultMap, getDirectionInfo, testCollide } from 'utils/common'
+import { asRect, DefaultMap, getDirectionInfo, testCollide } from 'utils/common'
 import { BulletCollisionInfo, getCollisionInfoBetweenBullets, getMBR, lastPos, spreadBullet } from 'utils/bullet-utils'
 import IndexHelper from 'utils/IndexHelper'
 
@@ -39,7 +39,7 @@ function handleBulletsCollidedWithBricks(context: Context, state: State) {
   const { bullets, map: { bricks } } = state
 
   bullets.forEach((b) => {
-    const mbr = getMBR(asBox(b), asBox(lastPos(b)))
+    const mbr = getMBR(asRect(b), asRect(lastPos(b)))
     for (const t of IndexHelper.iter('brick', mbr)) {
       if (bricks.get(t)) {
         context.bulletCollisionInfo.get(b.bulletId).push({ type: 'brick', t })
@@ -53,7 +53,7 @@ function handleBulletsCollidedWithSteels({ bulletCollisionInfo }: Context, state
   const { bullets, map: { steels } } = state
 
   bullets.forEach((b) => {
-    const mbr = getMBR(asBox(b), asBox(lastPos(b)))
+    const mbr = getMBR(asRect(b), asRect(lastPos(b)))
     for (const t of IndexHelper.iter('steel', mbr)) {
       if (steels.get(t)) {
         bulletCollisionInfo.get(b.bulletId).push({ type: 'steel', t })
@@ -124,7 +124,7 @@ function* destroyBricks(collidedBullets: BulletsMap) {
 
 function* destroyEagleIfNeeded(expBullets: BulletsMap) {
   const { map: { eagle } }: State = yield select()
-  const eagleBox = asBox(eagle)
+  const eagleBox = asRect(eagle)
   for (const bullet of expBullets.values()) {
     const spreaded = spreadBullet(bullet)
     if (testCollide(eagleBox, spreaded)) {
@@ -150,8 +150,8 @@ function handleBulletsCollidedWithTanks(context: Context, state: State) {
         // 如果是自己发射的子弹, 则不需要进行处理
         continue
       }
-      const subject = asBox(tank)
-      const mbr = getMBR(asBox(lastPos(bullet)), asBox(bullet))
+      const subject = asRect(tank)
+      const mbr = getMBR(asRect(lastPos(bullet)), asRect(bullet))
       if (testCollide(subject, mbr, -0.02)) {
         const bulletSide = allTanks.find(t => (t.tankId === bullet.tankId)).side
         const tankSide = tank.side
@@ -203,9 +203,9 @@ function handleBulletsCollidedWithEagle({ bulletCollisionInfo }: Context, state:
     // 如果Eagle尚未加载, 或是已经被破坏, 那么直接返回
     return
   }
-  const eagleBox = asBox(eagle)
+  const eagleBox = asRect(eagle)
   for (const bullet of bullets.values()) {
-    const mbr = getMBR(asBox(bullet), asBox(lastPos(bullet)))
+    const mbr = getMBR(asRect(bullet), asRect(lastPos(bullet)))
     if (testCollide(eagleBox, mbr)) {
       bulletCollisionInfo.get(bullet.bulletId).push({ type: 'eagle', eagle })
     }

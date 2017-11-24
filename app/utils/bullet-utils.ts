@@ -1,20 +1,20 @@
 import { Map as IMap } from 'immutable'
 import { BulletRecord } from 'types';
-import { asBox, DefaultMap, testCollide } from 'utils/common'
+import { asRect, DefaultMap, testCollide } from 'utils/common'
 import Collision, { CollisionWithBullet } from 'utils/Collision'
 import IndexHelper from 'utils/IndexHelper';
 import { BULLET_SIZE, FIELD_SIZE } from 'utils/constants'
 
-export function getMBR(...boxes: Box[]): Box {
+export function getMBR(...rects: Rect[]): Rect {
   let left = Infinity
   let top = Infinity
   let right = -Infinity
   let bottom = -Infinity
-  for (const box of boxes) {
-    left = Math.min(left, box.x)
-    top = Math.min(top, box.y)
-    right = Math.max(right, box.x + box.width)
-    bottom = Math.max(bottom, box.y + box.height)
+  for (const rect of rects) {
+    left = Math.min(left, rect.x)
+    top = Math.min(top, rect.y)
+    right = Math.max(right, rect.x + rect.width)
+    bottom = Math.max(bottom, rect.y + rect.height)
   }
 
   return {
@@ -37,23 +37,23 @@ export class BulletCollisionInfo extends DefaultMap<BulletId, Collision[]> {
     this.bullets = bullets
   }
 
-  // 获取一个Collision对象中 碰撞物体的Box对象
-  // 例如输入参数collision记录了一个子弹碰到了一个Brick对象, 那么该函数将返回Brick的Box
-  static getCollisionBox(collision: Collision) {
-    const borderCollisionBox: Box = {
+  // 获取一个Collision对象中 碰撞物体的Rect对象
+  // 例如输入参数collision记录了一个子弹碰到了一个Brick对象, 那么该函数将返回Brick的Rect
+  static getCollisionRect(collision: Collision) {
+    const borderCollisionRect: Rect = {
       x: FIELD_SIZE,
       y: FIELD_SIZE,
       width: -FIELD_SIZE,
       height: -FIELD_SIZE,
     }
     if (collision.type === 'brick' || collision.type === 'steel') {
-      return IndexHelper.getBox(collision.type, collision.t)
+      return IndexHelper.getRect(collision.type, collision.t)
     } else if (collision.type === 'border') {
-      return borderCollisionBox
+      return borderCollisionRect
     } else if (collision.type === 'tank') {
-      return asBox(collision.tank)
+      return asRect(collision.tank)
     } else if (collision.type === 'eagle') {
-      return asBox(collision.eagle)
+      return asRect(collision.eagle)
     } else { // c.type === 'bullet'
       return { x: collision.x, y: collision.y, width: 0, height: 0 }
     }
@@ -80,23 +80,23 @@ export class BulletCollisionInfo extends DefaultMap<BulletId, Collision[]> {
     if (!BulletCollisionInfo.shouldExplode(collisions)) {
       return null
     }
-    const cboxes = collisions.map(BulletCollisionInfo.getCollisionBox)
+    const collisionRects = collisions.map(BulletCollisionInfo.getCollisionRect)
 
     if (bullet.direction === 'right') {
       // 子弹往右边运动, 我们需要找到*最左边*的碰撞对象
-      const left = cboxes.reduce((left, b) => Math.min(left, b.x), Infinity)
+      const left = collisionRects.reduce((left, b) => Math.min(left, b.x), Infinity)
       return { x: left - BULLET_SIZE, y: bullet.y }
     } else if (bullet.direction === 'left') {
       // 子弹往左边运动, 我们需要找到*最右边*的碰撞对象
-      const right = cboxes.reduce((right, b) => Math.max(right, b.x + b.width), -Infinity)
+      const right = collisionRects.reduce((right, b) => Math.max(right, b.x + b.width), -Infinity)
       return { x: right, y: bullet.y }
     } else if (bullet.direction === 'up') {
       // 子弹往上方运动, 我们需要找到*最下边*的碰撞对象
-      const bottom = cboxes.reduce((bottom, b) => Math.max(bottom, b.y + b.height), -Infinity)
+      const bottom = collisionRects.reduce((bottom, b) => Math.max(bottom, b.y + b.height), -Infinity)
       return { x: bullet.x, y: bottom }
     } else { // bullet.direction === 'down'
       // 子弹往下方运动, 我们需要找到*最上边*的碰撞对象
-      const top = cboxes.reduce((top, b) => Math.min(top, b.y), Infinity)
+      const top = collisionRects.reduce((top, b) => Math.min(top, b.y), Infinity)
       return { x: bullet.x, y: top - BULLET_SIZE }
     }
   }
@@ -167,14 +167,14 @@ function calculateHitTime(b1: BulletRecord, b2: BulletRecord): number {
 
       const time1 = (b1.lastY - b2.lastY - BULLET_SIZE) / b1.speed
       const b2XAtTime1 = b2.lastX - b2.speed * time1
-      const b2BoxAtTime1 = { x: b2XAtTime1, y: b2.y, width: BULLET_SIZE, height: BULLET_SIZE }
-      if (testCollide(hitArea, b2BoxAtTime1)) {
+      const b2RectAtTime1 = { x: b2XAtTime1, y: b2.y, width: BULLET_SIZE, height: BULLET_SIZE }
+      if (testCollide(hitArea, b2RectAtTime1)) {
         return time1
       }
       const time2 = (b2.lastX - b1.lastX - BULLET_SIZE) / b2.speed
       const b1YAtTime2 = b1.lastY - b1.speed * time2
-      const b1BoxAtTime2 = { x: b1.x, y: b1YAtTime2, width: BULLET_SIZE, height: BULLET_SIZE }
-      if (testCollide(hitArea, b1BoxAtTime2)) {
+      const b1RectAtTime2 = { x: b1.x, y: b1YAtTime2, width: BULLET_SIZE, height: BULLET_SIZE }
+      if (testCollide(hitArea, b1RectAtTime2)) {
         return time2
       }
       return -1
@@ -187,14 +187,14 @@ function calculateHitTime(b1: BulletRecord, b2: BulletRecord): number {
 
       const time1 = (b1.lastY - b2.lastY - BULLET_SIZE) / b1.speed
       const b2XAtTime1 = b2.lastX + b2.speed * time1
-      const b2BoxAtTime1 = { x: b2XAtTime1, y: b2.y, width: BULLET_SIZE, height: BULLET_SIZE }
-      if (testCollide(hitArea, b2BoxAtTime1)) {
+      const b2RectAtTime1 = { x: b2XAtTime1, y: b2.y, width: BULLET_SIZE, height: BULLET_SIZE }
+      if (testCollide(hitArea, b2RectAtTime1)) {
         return time1
       }
       const time2 = (b1.lastX - b2.lastX - BULLET_SIZE) / b2.speed
       const b1YAtTime2 = b1.lastY - b1.speed * time2
-      const b1BoxAtTime2 = { x: b1.x, y: b1YAtTime2, width: BULLET_SIZE, height: BULLET_SIZE }
-      if (testCollide(hitArea, b1BoxAtTime2)) {
+      const b1RectAtTime2 = { x: b1.x, y: b1YAtTime2, width: BULLET_SIZE, height: BULLET_SIZE }
+      if (testCollide(hitArea, b1RectAtTime2)) {
         return time2
       }
       return -1
@@ -227,8 +227,8 @@ export function getCollisionInfoBetweenBullets(
   b2: BulletRecord,
   delta: number,
 ): [CollisionWithBullet, CollisionWithBullet] {
-  const mbr1 = getMBR(asBox(lastPos(b1)), asBox(b1))
-  const mbr2 = getMBR(asBox(lastPos(b2)), asBox(b2))
+  const mbr1 = getMBR(asRect(lastPos(b1)), asRect(b1))
+  const mbr2 = getMBR(asRect(lastPos(b2)), asRect(b2))
   if (!testCollide(mbr1, mbr2)) {
     return null
   }
@@ -252,7 +252,7 @@ const BULLET_EXPLOSION_SPREAD = 4
 const BULLET_EXPLOSION_THRESHOLD = 0.01
 
 export function spreadBullet(bullet: BulletRecord) {
-  const object = asBox(bullet)
+  const object = asRect(bullet)
   const value = BULLET_EXPLOSION_SPREAD + BULLET_EXPLOSION_THRESHOLD
   if (bullet.direction === 'up' || bullet.direction === 'down') {
     object.x -= value
