@@ -1,12 +1,7 @@
-import * as _ from 'lodash'
-import { fork, put, select, take } from 'redux-saga/effects'
+import { put, select, take } from 'redux-saga/effects'
 import { State } from 'reducers/index'
-import * as selectors from 'utils/selectors'
-import { frame as f, getNextId } from 'utils/common'
-import { POWER_UP_NAMES } from 'utils/constants'
-import { PowerUpRecord } from 'types'
+import { frame as f } from 'utils/common'
 import { nonPauseDelay, tween } from 'sagas/common'
-import powerUp from 'sagas/powerUpSaga'
 import statistics from 'sagas/stageStatistics'
 
 function* startStage(stageName: string) {
@@ -45,18 +40,6 @@ function* startStage(stageName: string) {
   })
 }
 
-function* spawnPowerUp() {
-  const powerUpName = _.sample(POWER_UP_NAMES)
-  const position: Point = _.sample(yield select(selectors.validPowerUpSpawnPositions))
-  yield* powerUp(PowerUpRecord({
-    powerUpId: getNextId('power-up'),
-    powerUpName,
-    visible: true,
-    x: position.x,
-    y: position.y,
-  }))
-}
-
 /**
  * stage-saga的一个实例对应一个关卡
  * 在关卡开始时, 一个stage-saga实例将会启动, 负责关卡地图生成
@@ -81,11 +64,6 @@ export default function* stageSaga(stageName: string) {
           playerName: sourcePlayer.playerName,
           level: targetTank.level,
         })
-
-        // TODO spawnPowerUp并不是在KILL的时候产生的, 而是在HURT的时候产生
-        if (action.targetTank.withPowerUp) {
-          yield fork(spawnPowerUp)
-        }
 
         const activeAITanks = tanks.filter(t => (t.active && t.side === 'ai'))
         if (remainingEnemies.isEmpty() && activeAITanks.isEmpty()) {

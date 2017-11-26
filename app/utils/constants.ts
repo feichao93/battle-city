@@ -8,8 +8,6 @@ export const FIELD_BLOCK_SIZE = 13
 export const FIELD_SIZE = BLOCK_SIZE * FIELD_BLOCK_SIZE
 /** 子弹的大小 */
 export const BULLET_SIZE = 3
-/** @depreacted 坦克生成的延迟 */
-export const TANK_SPAWN_DELAY = 1500
 /** 摧毁steel的最低子弹power值 */
 export const STEEL_POWER = 3
 
@@ -88,3 +86,6 @@ export const CONTROL_CONFIG = {
 export const TANK_LEVELS: TankLevel[] = ['basic', 'fast', 'power', 'armor']
 
 export const POWER_UP_NAMES: PowerUpName[] = ['tank', 'star', 'grenade', 'timer', 'helmet', 'shovel']
+
+/** 每一关中包含powerUp的tank的下标(从0开始计数) */
+export const TANK_INDEX_THAT_WITH_POWER_UP = [3, 10, 17]

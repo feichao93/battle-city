@@ -16,6 +16,7 @@ function* blink(powerUp: PowerUpRecord) {
   }
 }
 
+/** 一个power-up的生命周期 */
 export default function* powerUpSaga(powerUp: PowerUpRecord) {
   const pickThisPowerUp = (action: Action) => (
     action.type === 'PICK_POWER_UP'
@@ -31,6 +32,7 @@ export default function* powerUpSaga(powerUp: PowerUpRecord) {
   yield race({
     picked: take(pickThisPowerUp),
     stageChanged: take('START_STAGE'),
+    cleared: take('CLEAR_ALL_POWER_UPS'),
   })
   blinkTask.cancel()
   yield put<Action>({

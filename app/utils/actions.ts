@@ -52,6 +52,7 @@ declare global {
       | SetTextAction
       | UpdateTextPositionAction
       | Simple<'DESTROY_EAGLE'>
+      | StartSpawnTank
       | AddTank
       | StartMoveAction
       | RemoveTank
@@ -59,13 +60,15 @@ declare global {
       | RemoveTextAction
       | RemoveFlickerAction
       | AddOrUpdateFlickerAction
-      | HurtAction
-      | KillAction
+      | Hurt
+      | Kill
       | IncKillCount
       | UpdateTransientKillInfo
       | Simple<'SHOW_TOTAL_KILL_COUNT'>
       | AddOrUpdatePowerUp
-      | RemovePowerUpAction
+      | RemovePowerUp
+      | RemovePowerUpProperty
+      | ClearAllPowerUps
       | PickPowerUpAction
       | AddScoreAction
       | RemoveScoreAction
@@ -86,18 +89,19 @@ declare global {
       tank: TankRecord
     }
 
-    export interface HurtAction {
+    export interface Hurt {
       type: 'HURT'
       targetTank: TankRecord
       hurt: number
     }
 
-    export interface KillAction {
+    export interface Kill {
       type: 'KILL'
       targetTank: TankRecord
       sourceTank: TankRecord
       targetPlayer: PlayerRecord
       sourcePlayer: PlayerRecord
+      method: 'bullet' | 'grenade'
     }
 
     export interface UpdateTransientKillInfo {
@@ -223,6 +227,11 @@ declare global {
       flickerId: FlickerId
     }
 
+    export interface StartSpawnTank {
+      type: 'START_SPAWN_TANK'
+      tank: TankRecord
+    }
+
     export interface AddTank {
       type: 'ADD_TANK'
       tank: TankRecord
@@ -285,9 +294,18 @@ declare global {
       powerUp: PowerUpRecord
     }
 
-    export interface RemovePowerUpAction {
+    export interface RemovePowerUp {
       type: 'REMOVE_POWER_UP'
       powerUpId: PowerUpId
+    }
+
+    export interface RemovePowerUpProperty {
+      type: 'REMOVE_POWER_UP_PROPERTY'
+      tankId: TankId
+    }
+
+    export interface ClearAllPowerUps {
+      type: 'CLEAR_ALL_POWER_UPS'
     }
 
     export interface PickPowerUpAction {

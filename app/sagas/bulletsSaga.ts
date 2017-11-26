@@ -213,8 +213,8 @@ function handleBulletsCollidedWithEagle({ bulletCollisionInfo }: Context, state:
 }
 
 function calculateHurtsAndKillsFromContext({ tanks, players }: State, context: Context) {
-  const kills: Action.KillAction[] = []
-  const hurts: Action.HurtAction[] = []
+  const kills: Action.Kill[] = []
+  const hurts: Action.Hurt[] = []
 
   for (const [targetTankId, hitBullets] of context.tankHitMap.entries()) {
     const hurt = hitBullets.length
@@ -229,6 +229,7 @@ function calculateHurtsAndKillsFromContext({ tanks, players }: State, context: C
         sourceTank: tanks.get(sourceTankId),
         targetPlayer: players.find(p => p.activeTankId === targetTankId),
         sourcePlayer: players.get(sourcePlayerName),
+        method: 'bullet',
       })
     } else {
       hurts.push({
@@ -287,13 +288,13 @@ function* handleAfterTick() {
 
     const { kills, hurts } = calculateHurtsAndKillsFromContext(state, context)
 
-    yield* hurts.map(hurtAction => put(hurtAction))
+    yield* hurts.map(hurt => put<Action>(hurt))
     // 注意 必须先fork destroyTanks, 然后再put killAction
     // stageSaga中take KILL的逻辑, 依赖于"REMOVE_TANK已经被处理"
     yield fork(destroyTanks, IMap(kills.map(kill =>
       [kill.targetTank.tankId, kill.targetTank]
     )))
-    yield* kills.map(killAction => put(killAction))
+    yield* kills.map(kill => put<Action>(kill))
   }
 }
 

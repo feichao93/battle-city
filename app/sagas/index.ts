@@ -5,7 +5,7 @@ import gameManager from 'sagas/gameManager'
 import AIMasterSaga from 'sagas/AISaga'
 import tickEmitter from 'sagas/tickEmitter'
 import humanPlayerSaga from 'sagas/humanPlayerSaga'
-import pickPowerUps from 'sagas/pickPowerUps'
+import powerUpManager from 'sagas/powerUpManager'
 import { CONTROL_CONFIG } from 'utils/constants'
 
 export default function* rootSaga() {
@@ -13,7 +13,7 @@ export default function* rootSaga() {
   yield fork(tickEmitter)
 
   yield fork(bulletsSaga)
-  yield fork(pickPowerUps)
+  yield fork(powerUpManager)
 
   // 生成两个humanController, 对应现实生活的游戏控制器
   yield fork(humanController, 'player-1', CONTROL_CONFIG.player1)

@@ -1,8 +1,11 @@
+import * as _ from 'lodash'
 import { fork, put, select, take, takeEvery, takeLatest } from 'redux-saga/effects'
-import { MapRecord, ScoreRecord, State } from 'types'
-import { N_MAP } from 'utils/constants'
-import { asRect, frame as f, getNextId } from 'utils/common'
+import { MapRecord, ScoreRecord, State, PowerUpRecord } from 'types'
 import { destroyTanks, nonPauseDelay } from 'sagas/common'
+import powerUpSaga from 'sagas/powerUpSaga'
+import { N_MAP, POWER_UP_NAMES } from 'utils/constants'
+import { asRect, frame as f, getNextId } from 'utils/common'
+import * as selectors from 'utils/selectors'
 import IndexHelper from 'utils/IndexHelper'
 
 function convertToBricks(map: MapRecord) {
@@ -105,13 +108,13 @@ function* grenade(action: Action.PickPowerUpAction) {
 
   yield* destroyTanks(activeAITanks)
 
-  // todo 确定需要put KILL?
-  yield* activeAITanks.map(targetTank => put<Action.KillAction>({
+  yield* activeAITanks.map(targetTank => put<Action.Kill>({
     type: 'KILL',
     sourcePlayer: action.player,
     sourceTank: action.tank,
     targetPlayer: players.find(p => p.activeTankId === targetTank.tankId),
     targetTank,
+    method: 'grenade',
   })).values()
 }
 
@@ -169,8 +172,43 @@ function* scoreFromPickPowerUp(action: Action.PickPowerUpAction) {
   })
 }
 
-/** 该saga用来处理道具拾取时触发的相应逻辑 */
-export default function* pickPowerUps() {
+function* spawnPowerUpIfNeccessary(action: Action.Hurt | Action.Kill) {
+  if (action.targetTank.withPowerUp) {
+    if (action.type === 'HURT') {
+      yield put<Action.RemovePowerUpProperty>({
+        type: 'REMOVE_POWER_UP_PROPERTY',
+        tankId: action.targetTank.tankId,
+      })
+    } else if (action.method === 'grenade') {
+      // 如果是用手榴弹炸死的坦克, 那么也不生成powerUp
+      return
+    }
+    const powerUpName = _.sample(POWER_UP_NAMES)
+    const position: Point = _.sample(yield select(selectors.validPowerUpSpawnPositions))
+    yield* powerUpSaga(PowerUpRecord({
+      powerUpId: getNextId('power-up'),
+      powerUpName,
+      visible: true,
+      x: position.x,
+      y: position.y,
+    }))
+  }
+}
+
+function* clearAllPowerUps({ tank }: Action.StartSpawnTank) {
+  if (tank.side === 'ai' && tank.withPowerUp) {
+    yield put<Action>({ type: 'CLEAR_ALL_POWER_UPS' })
+  }
+}
+
+export default function* powerUpManager() {
+  yield takeEvery('START_SPAWN_TANK', clearAllPowerUps)
+
+  /** 处理道具掉落相关逻辑 */
+  yield takeEvery(['HURT', 'KILL'], spawnPowerUpIfNeccessary)
+
+
+  /** 处理道具拾取时触发的相应逻辑 */
   yield takeEvery('PICK_POWER_UP', scoreFromPickPowerUp)
 
   yield takeLatest(is('shovel'), shovel)

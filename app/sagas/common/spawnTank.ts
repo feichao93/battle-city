@@ -4,6 +4,8 @@ import { asRect, getNextId } from 'utils/common'
 import { flickerSaga } from 'sagas/common'
 
 export default function* spawnTank(tank: TankRecord, spawnSpeed = 1) {
+  yield put<Action>({ type: 'START_SPAWN_TANK', tank })
+
   const areaId = getNextId('area')
   yield put<Action>({
     type: 'ADD_RESTRICTED_AREA',

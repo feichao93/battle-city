@@ -4,7 +4,8 @@ import { getDirectionInfo } from 'utils/common'
 import directionController from 'sagas/directionController'
 import fireController from 'sagas/fireController'
 import { spawnTank } from 'sagas/common'
-import { getNextId, getTankBulletLimit, getWithPowerUpProbability } from 'utils/common'
+import { getNextId, getTankBulletLimit } from 'utils/common'
+import { TANK_INDEX_THAT_WITH_POWER_UP } from 'utils/constants'
 import * as selectors from 'utils/selectors'
 import { State } from 'reducers/index'
 import { TankRecord, PlayerRecord } from 'types'
@@ -236,8 +237,8 @@ export default function* AIMasterSaga() {
           side: 'ai',
           level,
           hp,
-          withPowerUp: Math.random() < getWithPowerUpProbability(currentStage),
-        }), 0.6) // todo 要根据关卡的难度来确定坦克的生成速度
+          withPowerUp: TANK_INDEX_THAT_WITH_POWER_UP.includes(20 - remainingEnemies.count()),
+        }), 0.6) // TODO 要根据关卡的难度来确定坦克的生成速度
 
         const task = yield spawn(AIWorkerSaga, playerName, AIWorker)
         taskMap.set(playerName, task)
