@@ -203,11 +203,6 @@ export function getTankBulletPower(tank: TankRecord) {
   }
 }
 
-export function getWithPowerUpProbability(stageName: string) {
-  // TODO 需要校准数值
-  return 0.2 + stageConfigs[stageName].difficulty * 0.05
-}
-
 export class DefaultMap<K, V> extends Map<K, V> {
   private defaulter: () => V
 
@@ -221,5 +216,11 @@ export class DefaultMap<K, V> extends Map<K, V> {
       this.set(key, this.defaulter())
     }
     return super.get(key)!
+  }
+}
+
+export function* alwaysYield<T>(v: T) {
+  while (true) {
+    yield v
   }
 }
