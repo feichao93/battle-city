@@ -64,9 +64,8 @@ declare global {
       | IncKillCount
       | UpdateTransientKillInfo
       | Simple<'SHOW_TOTAL_KILL_COUNT'>
-      | AddPowerUpAction
+      | AddOrUpdatePowerUp
       | RemovePowerUpAction
-      | UpdatePowerUpAction
       | PickPowerUpAction
       | AddScoreAction
       | RemoveScoreAction
@@ -281,19 +280,14 @@ declare global {
       scene: Scene
     }
 
-    export interface AddPowerUpAction {
-      type: 'ADD_POWER_UP'
+    export interface AddOrUpdatePowerUp {
+      type: 'ADD_OR_UPDATE_POWER_UP'
       powerUp: PowerUpRecord
     }
 
     export interface RemovePowerUpAction {
       type: 'REMOVE_POWER_UP'
       powerUpId: PowerUpId
-    }
-
-    export interface UpdatePowerUpAction {
-      type: 'UPDATE_POWER_UP'
-      powerUp: PowerUpRecord
     }
 
     export interface PickPowerUpAction {

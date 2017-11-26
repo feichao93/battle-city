@@ -6,7 +6,7 @@ import { frame as f, getNextId } from 'utils/common'
 import { POWER_UP_NAMES } from 'utils/constants'
 import { PowerUpRecord } from 'types'
 import { nonPauseDelay, tween } from 'sagas/common'
-import powerUp from 'sagas/powerUp'
+import powerUp from 'sagas/powerUpSaga'
 import statistics from 'sagas/stageStatistics'
 
 function* startStage(stageName: string) {
@@ -82,6 +82,7 @@ export default function* stageSaga(stageName: string) {
           level: targetTank.level,
         })
 
+        // TODO spawnPowerUp并不是在KILL的时候产生的, 而是在HURT的时候产生
         if (action.targetTank.withPowerUp) {
           yield fork(spawnPowerUp)
         }

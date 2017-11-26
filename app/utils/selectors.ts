@@ -13,18 +13,19 @@ export const playerTank = (state: State, playerName: string) => {
   return state.tanks.get(activeTankId, null)
 }
 
-export const availableSpawnPosition = ({ tanks }: State): Rect => {
+export const availableSpawnPosition = (state: State): Rect => {
   const result: Rect[] = []
-  const activeTanks = tanks.filter(t => t.active)
+  const activeTanks = state.tanks.filter(t => t.active)
   outer: for (const x of [0, 6 * B, 12 * B]) {
     const option = { x, y: 0, width: TANK_SIZE, height: TANK_SIZE }
     for (const tank of activeTanks.values()) {
-      if (testCollide(option, { x: tank.x, y: tank.y, width: TANK_SIZE, height: TANK_SIZE })) {
+      if (testCollide(option, asRect(tank))) {
         continue outer
       }
     }
     result.push(option)
   }
+  // TODO 需要考虑坦克默认生成的三个地点都被占用的情况
   return _.sample(result)
 }
 
