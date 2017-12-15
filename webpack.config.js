@@ -65,7 +65,7 @@ module.exports = function (env) {
         name: 'commons',
         filename: 'commons.js',
       }),
-      new ExtractTextPlugin('[name].css'),
+      new ExtractTextPlugin('[name]-[contenthash:6].css'),
       new MinifyPlugin(),
     )
   }
@@ -79,7 +79,7 @@ module.exports = function (env) {
 
     output: {
       path: path.resolve(__dirname, 'build', packageInfo.version),
-      filename: '[name].js',
+      filename: '[name]-[chunkhash:6].js',
     },
 
     resolve: {
