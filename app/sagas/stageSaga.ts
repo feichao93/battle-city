@@ -15,11 +15,13 @@ function* startStage(stageName: string) {
     t: 0,
   })
 
-  yield* tween(f(30), t => put<Action>({
-    type: 'UPDATE_CURTAIN',
-    curtainName: 'stage-enter-cutain',
-    t,
-  }))
+  yield* tween(f(30), t =>
+    put<Action>({
+      type: 'UPDATE_CURTAIN',
+      curtainName: 'stage-enter-cutain',
+      t,
+    }),
+  )
   yield nonPauseDelay(f(20))
   // 在幕布完全将舞台遮起来的时候载入地图
   yield put<Action>({
@@ -27,11 +29,13 @@ function* startStage(stageName: string) {
     name: stageName,
   })
   yield nonPauseDelay(f(20))
-  yield* tween(f(30), t => put<Action>({
-    type: 'UPDATE_CURTAIN',
-    curtainName: 'stage-enter-cutain',
-    t: 1 - t,
-  }))
+  yield* tween(f(30), t =>
+    put<Action>({
+      type: 'UPDATE_CURTAIN',
+      curtainName: 'stage-enter-cutain',
+      t: 1 - t,
+    }),
+  )
   // todo 游戏开始的时候有一个 反色效果
 
   yield put<Action.StartStage>({
@@ -57,7 +61,8 @@ export default function* stageSaga(stageName: string) {
       const { sourcePlayer, targetTank } = action
       const { players, game: { remainingEnemies }, tanks }: State = yield select()
 
-      if (sourcePlayer.side === 'human') { // human击杀ai
+      if (sourcePlayer.side === 'human') {
+        // human击杀ai
         // 对human player的击杀信息进行统计
         yield put<Action>({
           type: 'INC_KILL_COUNT',
@@ -65,7 +70,7 @@ export default function* stageSaga(stageName: string) {
           level: targetTank.level,
         })
 
-        const activeAITanks = tanks.filter(t => (t.active && t.side === 'ai'))
+        const activeAITanks = tanks.filter(t => t.active && t.side === 'ai')
         if (remainingEnemies.isEmpty() && activeAITanks.isEmpty()) {
           // 剩余enemy数量为0, 且场上已经没有ai tank了
           yield nonPauseDelay(1500)
@@ -78,7 +83,8 @@ export default function* stageSaga(stageName: string) {
           yield put<Action.EndStage>({ type: 'END_STAGE' })
           return { status: 'clear' }
         }
-      } else { // ai击杀human
+      } else {
+        // ai击杀human
         if (!players.some(ply => ply.side === 'human' && ply.lives > 0)) {
           // 所有的human player都挂了
           yield nonPauseDelay(1500)

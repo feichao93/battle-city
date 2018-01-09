@@ -16,7 +16,7 @@ declare global {
 
   namespace Action {
     export type Action =
-      Move
+      | Move
       | StartMoveAction
       | TickAction
       | AfterTickAction

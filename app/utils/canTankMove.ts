@@ -53,11 +53,20 @@ function isTankCollidedWithRivers(rivers: List<boolean>, tankTarget: Rect, thres
   return false
 }
 
-function isTankCollidedWithRestrictedAreas(areas: Map<AreaId, Rect>, tankTarget: Rect, threshold: number) {
+function isTankCollidedWithRestrictedAreas(
+  areas: Map<AreaId, Rect>,
+  tankTarget: Rect,
+  threshold: number,
+) {
   return areas.some(subject => testCollide(subject, tankTarget, threshold))
 }
 
-function isTankCollidedWithOtherTanks(activeTanks: TanksMap, tank: TankRecord, tankTarget: Rect, threshhold: number) {
+function isTankCollidedWithOtherTanks(
+  activeTanks: TanksMap,
+  tank: TankRecord,
+  tankTarget: Rect,
+  threshhold: number,
+) {
   // 判断坦克与其他坦克是否相撞
   for (const otherTank of activeTanks.values()) {
     if (tank.tankId === otherTank.tankId) {

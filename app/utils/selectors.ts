@@ -29,15 +29,16 @@ export const availableSpawnPosition = (state: State): Rect => {
   return _.sample(result)
 }
 
-export const validPowerUpSpawnPositions = ({ map: { bricks, rivers, steels, eagle } }: State): Point[] => {
+export const validPowerUpSpawnPositions = ({
+  map: { bricks, rivers, steels, eagle },
+}: State): Point[] => {
   // notice powerUp的显示大小为16*16, 但是碰撞大小为中间的8*8
   const validPositions: Point[] = []
   for (let y = 0; y < (FBZ - 1) * B; y += 0.5 * B) {
     for (let x = 0; x < (FBZ - 1) * B; x += 0.5 * B) {
       let collideCount = 0
 
-      partLoop:
-      for (const part of [
+      partLoop: for (const part of [
         { x: x + 4, y: y + 4, width: 4, height: 4 },
         { x: x + 8, y: y + 4, width: 4, height: 4 },
         { x: x + 4, y: y + 8, width: 4, height: 4 },

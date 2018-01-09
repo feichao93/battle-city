@@ -49,5 +49,11 @@
   },
   "resolutions": {
     "@types/react": "15.6.7"
+  },
+  "prettier": {
+    "printWidth": 100,
+    "semi": false,
+    "singleQuote": true,
+    "trailingComma": "all"
   }
 }

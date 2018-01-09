@@ -79,7 +79,7 @@ module.exports = function (env) {
 
     output: {
       path: path.resolve(__dirname, 'build', packageInfo.version),
-      filename: '[name]-[chunkhash:6].js',
+      filename: isProduction ? '[name]-[chunkhash:6].js' : '[name].js',
     },
 
     resolve: {
@@ -111,11 +111,11 @@ module.exports = function (env) {
           })
         },
       ] : [
-          {
-            test: /\.css$/,
-            use: ['style-loader', 'css-loader'],
-          },
-        ]),
+        {
+          test: /\.css$/,
+          use: ['style-loader', 'css-loader'],
+        },
+      ]),
     },
 
     plugins,

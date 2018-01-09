@@ -19,32 +19,35 @@ const emptyTransientKillInfo = Map({
 
 const defaultRemainingEnemies = Repeat('basic' as TankLevel, 20).toList()
 
-export const GameRecord = Record({
-  /** 游戏是否暂停 */
-  paused: false,
-  /** 当前场景 */
-  scene: 'game-title' as Scene,
-  /** 当前的关卡名 */
-  currentStage: null as string,
-  /** 即将开始的关卡的名称 */
-  comingStageName: null as string,
-  /** 当前关卡剩余的敌人的类型列表 */
-  remainingEnemies: defaultRemainingEnemies,
-  /** 当前关卡的击杀信息 */
-  killInfo: Map<PlayerName, Map<TankLevel, KillCount>>(),
-  /** 当前关卡的击杀信息, 用于进行动画播放 */
-  transientKillInfo: emptyTransientKillInfo,
-  /** 关卡击杀信息动画, 是否显示total的数量 */
-  showTotalKillCount: false,
-  /** AI坦克的冻结时间. 小于等于0表示没有冻结, 大于0表示还需要一段时间解冻 */
-  AIFrozenTimeout: 0,
+export const GameRecord = Record(
+  {
+    /** 游戏是否暂停 */
+    paused: false,
+    /** 当前场景 */
+    scene: 'game-title' as Scene,
+    /** 当前的关卡名 */
+    currentStage: null as string,
+    /** 即将开始的关卡的名称 */
+    comingStageName: null as string,
+    /** 当前关卡剩余的敌人的类型列表 */
+    remainingEnemies: defaultRemainingEnemies,
+    /** 当前关卡的击杀信息 */
+    killInfo: Map<PlayerName, Map<TankLevel, KillCount>>(),
+    /** 当前关卡的击杀信息, 用于进行动画播放 */
+    transientKillInfo: emptyTransientKillInfo,
+    /** 关卡击杀信息动画, 是否显示total的数量 */
+    showTotalKillCount: false,
+    /** AI坦克的冻结时间. 小于等于0表示没有冻结, 大于0表示还需要一段时间解冻 */
+    AIFrozenTimeout: 0,
 
-  /** 是否显示HUD */
-  showHUD: false,
+    /** 是否显示HUD */
+    showHUD: false,
 
-  /** stage-enter-curtain相关字段 TODO 这个字段需要移动到其他的reducer中 */
-  stageEnterCurtainT: 0,
-}, 'GameRecord')
+    /** stage-enter-curtain相关字段 TODO 这个字段需要移动到其他的reducer中 */
+    stageEnterCurtainT: 0,
+  },
+  'GameRecord',
+)
 
 const gameRecord = GameRecord()
 

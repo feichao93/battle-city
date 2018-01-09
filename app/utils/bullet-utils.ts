@@ -1,8 +1,8 @@
 import { Map as IMap } from 'immutable'
-import { BulletRecord } from 'types';
+import { BulletRecord } from 'types'
 import { asRect, DefaultMap, testCollide } from 'utils/common'
 import Collision, { CollisionWithBullet } from 'utils/Collision'
-import IndexHelper from 'utils/IndexHelper';
+import IndexHelper from 'utils/IndexHelper'
 import { BULLET_SIZE, FIELD_SIZE } from 'utils/constants'
 
 export function getMBR(...rects: Rect[]): Rect {
@@ -54,7 +54,8 @@ export class BulletCollisionInfo extends DefaultMap<BulletId, Collision[]> {
       return asRect(collision.tank)
     } else if (collision.type === 'eagle') {
       return asRect(collision.eagle)
-    } else { // c.type === 'bullet'
+    } else {
+      // c.type === 'bullet'
       return { x: collision.x, y: collision.y, width: 0, height: 0 }
     }
   }
@@ -62,11 +63,13 @@ export class BulletCollisionInfo extends DefaultMap<BulletId, Collision[]> {
   // 判断一颗子弹是否发生爆炸
   static shouldExplode(collisions: Collision[]) {
     for (const c of collisions) {
-      if (c.type === 'border'
-        || c.type === 'eagle'
-        || c.type === 'brick'
-        || c.type === 'steel'
-        || c.type === 'tank' && c.shouldExplode) {
+      if (
+        c.type === 'border' ||
+        c.type === 'eagle' ||
+        c.type === 'brick' ||
+        c.type === 'steel' ||
+        (c.type === 'tank' && c.shouldExplode)
+      ) {
         return true
       }
     }
@@ -92,9 +95,13 @@ export class BulletCollisionInfo extends DefaultMap<BulletId, Collision[]> {
       return { x: right, y: bullet.y }
     } else if (bullet.direction === 'up') {
       // 子弹往上方运动, 我们需要找到*最下边*的碰撞对象
-      const bottom = collisionRects.reduce((bottom, b) => Math.max(bottom, b.y + b.height), -Infinity)
+      const bottom = collisionRects.reduce(
+        (bottom, b) => Math.max(bottom, b.y + b.height),
+        -Infinity,
+      )
       return { x: bullet.x, y: bottom }
-    } else { // bullet.direction === 'down'
+    } else {
+      // bullet.direction === 'down'
       // 子弹往下方运动, 我们需要找到*最上边*的碰撞对象
       const top = collisionRects.reduce((top, b) => Math.min(top, b.y), Infinity)
       return { x: bullet.x, y: top - BULLET_SIZE }
@@ -178,7 +185,8 @@ function calculateHitTime(b1: BulletRecord, b2: BulletRecord): number {
         return time2
       }
       return -1
-    } else { // b2.direction === 'right'
+    } else {
+      // b2.direction === 'right'
       // b2 ---> [x]
       //          ↑     [x] means hitArea
       //          |
@@ -246,7 +254,6 @@ export function getCollisionInfoBetweenBullets(
     return null
   }
 }
-
 
 const BULLET_EXPLOSION_SPREAD = 4
 const BULLET_EXPLOSION_THRESHOLD = 0.01

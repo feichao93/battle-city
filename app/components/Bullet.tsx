@@ -13,7 +13,8 @@ const Bullet = ({ bullet }: { bullet: BulletRecord }) => {
     head = <Pixel x={1} y={3} fill={fill} />
   } else if (direction === 'left') {
     head = <Pixel x={-1} y={1} fill={fill} />
-  } else { // right
+  } else {
+    // right
     head = <Pixel x={3} y={1} fill={fill} />
   }
   return (

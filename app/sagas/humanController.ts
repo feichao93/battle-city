@@ -15,10 +15,14 @@ const Mousetrap = require('mousetrap')
 export default function* humanController(playerName: string, config: HumanControllerConfig) {
   let firePressing = false // 用来记录当前玩家是否按下了fire键
   let firePressed = false // 用来记录上一个tick内 玩家是否按下过fire键
-  Mousetrap.bind(config.fire, () => {
-    firePressing = true
-    firePressed = true
-  }, 'keydown')
+  Mousetrap.bind(
+    config.fire,
+    () => {
+      firePressing = true
+      firePressed = true
+    },
+    'keydown',
+  )
   Mousetrap.bind(config.fire, () => (firePressing = false), 'keyup')
 
   // 每次tick时, 都将firePressed重置
@@ -35,15 +39,15 @@ export default function* humanController(playerName: string, config: HumanContro
   function isGamePadConnected() {
     for (let gp of navigator.getGamepads()) {
       if (gp && gp.id === 'Xbox 360 Controller (XInput STANDARD GAMEPAD)') {
-        return gp.index;
+        return gp.index
       }
     }
-    return -1;
+    return -1
   }
 
   function getDirectionControlInfo() {
     if (isGamePadConnected() !== -1) {
-      const gp: Gamepad = navigator.getGamepads()[isGamePadConnected()];
+      const gp: Gamepad = navigator.getGamepads()[isGamePadConnected()]
       if (gp) {
         // 摇杆右左
         if (gp.axes[0] > 0.5) {
@@ -68,7 +72,7 @@ export default function* humanController(playerName: string, config: HumanContro
     }
   }
 
-// 调用该函数用来获取当前玩家的开火操作
+  // 调用该函数用来获取当前玩家的开火操作
   function shouldFire() {
     if (isGamePadConnected() !== -1) {
       const gp: Gamepad = navigator.getGamepads()[isGamePadConnected()]
@@ -79,14 +83,22 @@ export default function* humanController(playerName: string, config: HumanContro
   }
 
   function bindKeyWithDirection(key: string, direction: Direction) {
-    Mousetrap.bind(key, () => {
-      if (pressed.indexOf(direction) === -1) {
-        pressed.push(direction)
-      }
-    }, 'keydown')
-    Mousetrap.bind(key, () => {
-      _.pull(pressed, direction)
-    }, 'keyup')
+    Mousetrap.bind(
+      key,
+      () => {
+        if (pressed.indexOf(direction) === -1) {
+          pressed.push(direction)
+        }
+      },
+      'keydown',
+    )
+    Mousetrap.bind(
+      key,
+      () => {
+        _.pull(pressed, direction)
+      },
+      'keyup',
+    )
   }
 
   bindKeyWithDirection(config.up, 'up')
@@ -94,7 +106,7 @@ export default function* humanController(playerName: string, config: HumanContro
   bindKeyWithDirection(config.down, 'down')
   bindKeyWithDirection(config.right, 'right')
 
-// 调用该函数来获取当前用户的移动操作(坦克级别)
+  // 调用该函数来获取当前用户的移动操作(坦克级别)
   function* getHumanPlayerInput() {
     const tank: TankRecord = yield select(selectors.playerTank, playerName)
     if (tank != null) {

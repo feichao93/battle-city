@@ -6,8 +6,8 @@ import River from 'components/River'
 import registerTick from 'hocs/registerTick'
 
 type P = {
-  rivers: List<boolean>,
-  tickIndex: number,
+  rivers: List<boolean>
+  tickIndex: number
 }
 
 class RiverLayer extends React.PureComponent<P, {}> {

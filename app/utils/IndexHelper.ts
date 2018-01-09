@@ -65,7 +65,7 @@ export default class IndexHelper {
    * [row, col]代表的元素将会与rect发生碰撞
    * 参数direction可以改变迭代的方向
    */
-  static * iterRowCol(type: ItemType, rect: Rect, direction: Direction = 'down') {
+  static *iterRowCol(type: ItemType, rect: Rect, direction: Direction = 'down') {
     const N = IndexHelper.resolveN(type)
     const itemSize = IndexHelper.resolveItemSize(type)
     const col1 = Math.max(0, Math.floor(rect.x / itemSize))
@@ -90,7 +90,8 @@ export default class IndexHelper {
           yield [row, col]
         }
       }
-    } else { // direction === 'left'
+    } else {
+      // direction === 'left'
       for (const col of range(col2, col1 - 1, -1)) {
         for (const row of range(row1, row2 + 1)) {
           yield [row, col]
@@ -99,7 +100,7 @@ export default class IndexHelper {
     }
   }
 
-  static * iter(type: ItemType, rect: Rect, direction: Direction = 'down') {
+  static *iter(type: ItemType, rect: Rect, direction: Direction = 'down') {
     const N = IndexHelper.resolveN(type)
     for (const [row, col] of IndexHelper.iterRowCol(type, rect, direction)) {
       yield row * N + col

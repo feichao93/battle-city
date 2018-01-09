@@ -5,7 +5,7 @@ import { getRowCol } from 'utils/common'
 import BrickWall from 'components/BrickWall'
 
 type P = {
-  bricks: List<boolean>,
+  bricks: List<boolean>
 }
 
 export default class BrickLayer extends React.PureComponent<P, {}> {
@@ -17,13 +17,7 @@ export default class BrickLayer extends React.PureComponent<P, {}> {
         {bricks.map((set, t) => {
           if (set) {
             const [row, col] = getRowCol(t, N_MAP.BRICK)
-            return (
-              <BrickWall
-                key={t}
-                x={col * ITEM_SIZE_MAP.BRICK}
-                y={row * ITEM_SIZE_MAP.BRICK}
-              />
-            )
+            return <BrickWall key={t} x={col * ITEM_SIZE_MAP.BRICK} y={row * ITEM_SIZE_MAP.BRICK} />
           } else {
             return null
           }

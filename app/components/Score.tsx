@@ -38,7 +38,8 @@ const Two = ({ x, y }: Point) => (
 const Three = ({ x, y }: Point) => (
   <path
     role="three"
-    d={`M${x},${y + 1} h1 v-1 h2 v1 h1 v2 h-1 v1 h1 v2 h-1 v1 h-2 v-1 h-1 v-1 h1 v1 h2 v-2 h-2 v-1 h2 v-2 h-2 v1 h-1 v-1`}
+    d={`M${x},${y +
+      1} h1 v-1 h2 v1 h1 v2 h-1 v1 h1 v2 h-1 v1 h-2 v-1 h-1 v-1 h1 v1 h2 v-2 h-2 v-1 h2 v-2 h-2 v1 h-1 v-1`}
   />
 )
 

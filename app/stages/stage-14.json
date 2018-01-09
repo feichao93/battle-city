@@ -16,9 +16,5 @@
     "B5 B5 B5 X  X  B8 Bc B4 X  X  Ba Ba Ba ",
     "T5 T5 T5 Ta X  Ba E  B5 X  T5 Ta Ta Ta "
   ],
-  "enemies": [
-    "10*power",
-    "4*fast",
-    "6*armor"
-  ]
+  "enemies": ["10*power", "4*fast", "6*armor"]
 }

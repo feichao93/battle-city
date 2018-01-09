@@ -1,6 +1,7 @@
 import { TankRecord, EagleRecord } from 'types'
 
-type Collision = CollisionWithBrick
+type Collision =
+  | CollisionWithBrick
   | CollisionWithSteel
   | CollisionWithBorder
   | CollisionWithTank

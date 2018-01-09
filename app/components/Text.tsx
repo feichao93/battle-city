@@ -14,11 +14,7 @@ const chars: Chars = {
     />
   ),
   1: ({ fill }) => (
-    <path
-      role="character-1"
-      fill={fill}
-      d="M4,0 h2 v6 h2 v1 h-6 v-1 h2 v-4 h-1 v-1 h1 v-1"
-    />
+    <path role="character-1" fill={fill} d="M4,0 h2 v6 h2 v1 h-6 v-1 h2 v-4 h-1 v-1 h1 v-1" />
   ),
   2: ({ fill }) => (
     <path
@@ -64,9 +60,7 @@ const chars: Chars = {
   ),
   8: ({ fill }) => (
     <g role="character-8" fill={fill}>
-      <path
-        d="M2,0 h4 v1 h-3 v1 h1 v1 h2 v1 h2 v2 h-1 v1 h-5 v-1 h4 v-1 h-2 v-1 h-2  v-1 h-1 v-2 h1 v-1"
-      />
+      <path d="M2,0 h4 v1 h-3 v1 h1 v1 h2 v1 h2 v2 h-1 v1 h-5 v-1 h4 v-1 h-2 v-1 h-2  v-1 h-1 v-2 h1 v-1" />
       <rect x={6} y={1} width={1} height={2} />
       <rect x={1} y={4} width={1} height={2} />
     </g>
@@ -268,16 +262,7 @@ const chars: Chars = {
       d="M1,0 h7 v2 h-1 v1 h-1 v1 h-1 v1 h-1 v1 h4 v1 h-7 v-2 h1 v-1 h1 v-1 h1 v-1 h1 v-1 h-4 v-1"
     />
   ),
-  '-': ({ fill }) => (
-    <rect
-      role="character-dash"
-      fill={fill}
-      x="1"
-      y="3"
-      width="6"
-      height="2"
-    />
-  ),
+  '-': ({ fill }) => <rect role="character-dash" fill={fill} x="1" y="3" width="6" height="2" />,
   '+': ({ fill }) => (
     <g role="character-plus" fill={fill}>
       <rect x="1" y="3" width="6" height="2" />
@@ -290,9 +275,7 @@ const chars: Chars = {
       <rect x="2" y="5" width="2" height="2" />
     </g>
   ),
-  '.': ({ fill }) => (
-    <rect role="character-dot" x="2" y="5" width="2" height="2" fill={fill} />
-  ),
+  '.': ({ fill }) => <rect role="character-dot" x="2" y="5" width="2" height="2" fill={fill} />,
   '?': ({ fill }) => (
     <g role="character-question-mark" fill={fill}>
       <path d="M2,0 h5 v1 h1 v2 h-1 v1 h-1 v1 h-3 v-1 h2 v-1 h1 v-2 h-3 v2 h-2 v-2 h1 v-1" />
@@ -344,9 +327,9 @@ const chars: Chars = {
 }
 
 type Props = {
-  content: string,
-  x: number,
-  y: number,
+  content: string
+  x: number
+  y: number
   fill?: string
   style?: React.CSSProperties
 }

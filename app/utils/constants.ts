@@ -16,7 +16,7 @@ export const STEEL_POWER = 3
  * 共有4种配色方案: 黄色方案, 绿色方案, 银色方案, 红色方案
  * 每种配色方案包括三个具体的颜色值, a对应浅色, b对应一般颜色, c对应深色
  */
-type Schema = { [color: string]: { a: string, b: string, c: string } }
+type Schema = { [color: string]: { a: string; b: string; c: string } }
 export const TANK_COLOR_SCHEMES: Schema = {
   yellow: {
     a: '#E7E794',
@@ -85,7 +85,14 @@ export const CONTROL_CONFIG = {
 
 export const TANK_LEVELS: TankLevel[] = ['basic', 'fast', 'power', 'armor']
 
-export const POWER_UP_NAMES: PowerUpName[] = ['tank', 'star', 'grenade', 'timer', 'helmet', 'shovel']
+export const POWER_UP_NAMES: PowerUpName[] = [
+  'tank',
+  'star',
+  'grenade',
+  'timer',
+  'helmet',
+  'shovel',
+]
 
 /** 每一关中包含powerUp的tank的下标(从0开始计数) */
 export const TANK_INDEX_THAT_WITH_POWER_UP = [3, 10, 17]

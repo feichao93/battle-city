@@ -1,8 +1,8 @@
 import * as React from 'react'
 
 type P = {
-  x: number,
-  y: number,
+  x: number
+  y: number
 }
 
 export class PlayerTankThumbnail extends React.PureComponent<P, {}> {

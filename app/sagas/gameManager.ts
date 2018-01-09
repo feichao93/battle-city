@@ -11,7 +11,10 @@ interface Animation {
   duration: number
 }
 
-function* animateTexts(textIds: TextId[], { direction, distance: totalDistance, duration }: Animation) {
+function* animateTexts(
+  textIds: TextId[],
+  { direction, distance: totalDistance, duration }: Animation,
+) {
   const speed = totalDistance / duration
   // 累计移动的距离
   let animatedDistance = 0

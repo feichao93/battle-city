@@ -8,9 +8,9 @@ export default class TextLayer extends React.PureComponent<{ texts: TextsMap }, 
 
     return (
       <g role="text-layer">
-        {texts.map(t =>
-          <Text key={t.textId} content={t.content} fill={t.fill} x={t.x} y={t.y} />
-        ).toArray()}
+        {texts
+          .map(t => <Text key={t.textId} content={t.content} fill={t.fill} x={t.x} y={t.y} />)
+          .toArray()}
       </g>
     )
   }

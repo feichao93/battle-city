@@ -19,12 +19,12 @@ function convertToBricks(map: MapRecord) {
 
   const btset = new Set(IndexHelper.iter('brick', eagleSurroundingBox))
   const eagleBTSet = new Set(IndexHelper.iter('brick', asRect(eagle, -0.1)))
-  const ttset = new Set(Array.from(IndexHelper.iterRowCol('brick', eagleSurroundingBox))
-    .map(([brow, bcol]) => {
+  const ttset = new Set(
+    Array.from(IndexHelper.iterRowCol('brick', eagleSurroundingBox)).map(([brow, bcol]) => {
       const trow = Math.floor(brow / 2)
       const tcol = Math.floor(bcol / 2)
       return trow * N_MAP.STEEL + tcol
-    })
+    }),
   )
 
   const steels2 = steels.map((set, t) => (ttset.has(t) ? false : set))
@@ -43,15 +43,14 @@ function convertToSteels(map: MapRecord) {
   }
   const surroundingTTSet = new Set(IndexHelper.iter('steel', eagleSurroundingBox))
   const eagleTTSet = new Set(IndexHelper.iter('steel', asRect(eagle, -0.1)))
-  const steels2 = steels.map((set, t) => (
-    (surroundingTTSet.has(t) && !eagleTTSet.has(t)) ? true : set)
+  const steels2 = steels.map(
+    (set, t) => (surroundingTTSet.has(t) && !eagleTTSet.has(t) ? true : set),
   )
 
   const surroundBTSet = new Set(IndexHelper.iter('brick', eagleSurroundingBox))
   const bricks2 = bricks.map((set, t) => (surroundBTSet.has(t) ? false : set))
 
-  return map.set('steels', steels2)
-    .set('bricks', bricks2)
+  return map.set('steels', steels2).set('bricks', bricks2)
 }
 
 function* shovel() {
@@ -104,18 +103,22 @@ function* timer() {
 
 function* grenade(action: Action.PickPowerUpAction) {
   const { tanks: allTanks, players }: State = yield select()
-  const activeAITanks = allTanks.filter(t => (t.active && t.side === 'ai'))
+  const activeAITanks = allTanks.filter(t => t.active && t.side === 'ai')
 
   yield* destroyTanks(activeAITanks)
 
-  yield* activeAITanks.map(targetTank => put<Action.Kill>({
-    type: 'KILL',
-    sourcePlayer: action.player,
-    sourceTank: action.tank,
-    targetPlayer: players.find(p => p.activeTankId === targetTank.tankId),
-    targetTank,
-    method: 'grenade',
-  })).values()
+  yield* activeAITanks
+    .map(targetTank =>
+      put<Action.Kill>({
+        type: 'KILL',
+        sourcePlayer: action.player,
+        sourceTank: action.tank,
+        targetPlayer: players.find(p => p.activeTankId === targetTank.tankId),
+        targetTank,
+        method: 'grenade',
+      }),
+    )
+    .values()
 }
 
 function* star({ tank }: Action.PickPowerUpAction) {
@@ -134,21 +137,22 @@ function* helmet({ tank }: Action.PickPowerUpAction) {
   })
 }
 
-const is = (name: PowerUpName) => (action: Action) => (
-  action.type === 'PICK_POWER_UP'
-  && action.powerUp.powerUpName === name
-)
+const is = (name: PowerUpName) => (action: Action) =>
+  action.type === 'PICK_POWER_UP' && action.powerUp.powerUpName === name
 
 function* handleHelmetDuration() {
   while (true) {
     const { delta }: Action.TickAction = yield take('TICK')
     const { tanks }: State = yield select()
-    yield* tanks.filter(tank => (tank.active && tank.helmetDuration > 0))
-      .map(tank => put({
-        type: 'SET_HELMET_DURATION',
-        tankId: tank.tankId,
-        duration: tank.helmetDuration - delta,
-      } as Action.SetHelmetDurationAction))
+    yield* tanks
+      .filter(tank => tank.active && tank.helmetDuration > 0)
+      .map(tank =>
+        put({
+          type: 'SET_HELMET_DURATION',
+          tankId: tank.tankId,
+          duration: tank.helmetDuration - delta,
+        } as Action.SetHelmetDurationAction),
+      )
       .values()
   }
 }
@@ -185,13 +189,15 @@ function* spawnPowerUpIfNeccessary(action: Action.Hurt | Action.Kill) {
     }
     const powerUpName = _.sample(POWER_UP_NAMES)
     const position: Point = _.sample(yield select(selectors.validPowerUpSpawnPositions))
-    yield* powerUpSaga(PowerUpRecord({
-      powerUpId: getNextId('power-up'),
-      powerUpName,
-      visible: true,
-      x: position.x,
-      y: position.y,
-    }))
+    yield* powerUpSaga(
+      PowerUpRecord({
+        powerUpId: getNextId('power-up'),
+        powerUpName,
+        visible: true,
+        x: position.x,
+        y: position.y,
+      }),
+    )
   }
 }
 
@@ -206,7 +212,6 @@ export default function* powerUpManager() {
 
   /** 处理道具掉落相关逻辑 */
   yield takeEvery(['HURT', 'KILL'], spawnPowerUpIfNeccessary)
-
 
   /** 处理道具拾取时触发的相应逻辑 */
   yield takeEvery('PICK_POWER_UP', scoreFromPickPowerUp)

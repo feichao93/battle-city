@@ -97,11 +97,7 @@ class GameTitleScene extends React.PureComponent<P, S> {
             </g>
           </pattern>
         </defs>
-        <rect
-          fill="#000000"
-          width={16 * B}
-          height={15 * B}
-        />
+        <rect fill="#000000" width={16 * B} height={15 * B} />
         <g transform="scale(0.5)">
           <TextButton
             textFill="#607d8b"
@@ -111,11 +107,7 @@ class GameTitleScene extends React.PureComponent<P, S> {
             onClick={() => window.open('https://github.com/shinima/battle-city')}
           />
         </g>
-        <Text
-          content={'\u2160-    00 HI- 20000'}
-          x={1 * B}
-          y={1.5 * B}
-        />
+        <Text content={'\u2160-    00 HI- 20000'} x={1 * B} y={1.5 * B} />
         <g transform={`scale(${scale})`}>
           <Text
             content="battle"
@@ -130,43 +122,22 @@ class GameTitleScene extends React.PureComponent<P, S> {
             fill="url(#pattern-brickwall)"
           />
         </g>
-        <Text
-          content="1 player"
-          x={5.5 * B}
-          y={8.5 * B}
-          fill="white"
+        <Text content="1 player" x={5.5 * B} y={8.5 * B} fill="white" />
+        <Text content="2 players" x={5.5 * B} y={9.5 * B} fill="white" />
+        <Text content="editor" x={5.5 * B} y={10.5 * B} fill="white" />
+        <Tank
+          tank={TankRecord({
+            side: 'human',
+            direction: 'right',
+            color: 'yellow',
+            moving: true,
+            x: 4 * B,
+            y: y(choice),
+          })}
         />
-        <Text
-          content="2 players"
-          x={5.5 * B}
-          y={9.5 * B}
-          fill="white"
-        />
-        <Text
-          content="editor"
-          x={5.5 * B}
-          y={10.5 * B}
-          fill="white"
-        />
-        <Tank tank={TankRecord({
-          side: 'human',
-          direction: 'right',
-          color: 'yellow',
-          moving: true,
-          x: 4 * B,
-          y: y(choice),
-        })} />
 
-        <Text
-          content={'\u00a9 1980 1985 NAMCO LTD.'}
-          x={2 * B}
-          y={12.5 * B}
-        />
-        <Text
-          content="ALL RIGHTS RESERVED"
-          x={3 * B}
-          y={13.5 * B}
-        />
+        <Text content={'\u00a9 1980 1985 NAMCO LTD.'} x={2 * B} y={12.5 * B} />
+        <Text content="ALL RIGHTS RESERVED" x={3 * B} y={13.5 * B} />
       </g>
     )
   }

@@ -4,7 +4,13 @@ import { BULLET_SIZE, FIELD_SIZE, STEEL_POWER } from 'utils/constants'
 import { destroyBullets, destroyTanks } from 'sagas/common'
 import { BulletRecord, BulletsMap, State } from 'types'
 import { asRect, DefaultMap, getDirectionInfo, testCollide } from 'utils/common'
-import { BulletCollisionInfo, getCollisionInfoBetweenBullets, getMBR, lastPos, spreadBullet } from 'utils/bullet-utils'
+import {
+  BulletCollisionInfo,
+  getCollisionInfoBetweenBullets,
+  getMBR,
+  lastPos,
+  spreadBullet,
+} from 'utils/bullet-utils'
 import IndexHelper from 'utils/IndexHelper'
 
 interface Context {
@@ -22,11 +28,12 @@ function* handleTick() {
     if (bullets.isEmpty()) {
       continue
     }
-    const updatedBullets = bullets.map((bullet) => {
+    const updatedBullets = bullets.map(bullet => {
       const { direction, speed } = bullet
       const distance = speed * delta
       const { xy, updater } = getDirectionInfo(direction)
-      return bullet.update(xy, updater(distance))
+      return bullet
+        .update(xy, updater(distance))
         .set('lastX', bullet.x)
         .set('lastY', bullet.y) // 设置子弹上一次的位置, 用于进行碰撞检测
     })
@@ -38,7 +45,7 @@ function handleBulletsCollidedWithBricks(context: Context, state: State) {
   // todo 需要考虑子弹强度
   const { bullets, map: { bricks } } = state
 
-  bullets.forEach((b) => {
+  bullets.forEach(b => {
     const mbr = getMBR(asRect(b), asRect(lastPos(b)))
     for (const t of IndexHelper.iter('brick', mbr)) {
       if (bricks.get(t)) {
@@ -52,7 +59,7 @@ function handleBulletsCollidedWithSteels({ bulletCollisionInfo }: Context, state
   // TODO 需要考虑子弹强度
   const { bullets, map: { steels } } = state
 
-  bullets.forEach((b) => {
+  bullets.forEach(b => {
     const mbr = getMBR(asRect(b), asRect(lastPos(b)))
     for (const t of IndexHelper.iter('steel', mbr)) {
       if (steels.get(t)) {
@@ -64,7 +71,7 @@ function handleBulletsCollidedWithSteels({ bulletCollisionInfo }: Context, state
 
 function handleBulletsCollidedWithBorder({ bulletCollisionInfo }: Context, state: State) {
   const { bullets } = state
-  bullets.forEach((bullet) => {
+  bullets.forEach(bullet => {
     if (bullet.x <= 0) {
       bulletCollisionInfo.get(bullet.bulletId).push({ type: 'border', which: 'left' })
     }
@@ -83,7 +90,7 @@ function handleBulletsCollidedWithBorder({ bulletCollisionInfo }: Context, state
 function* destroySteels(collidedBullets: BulletsMap) {
   const { map: { steels } }: State = yield select()
   const steelsNeedToDestroy: SteelIndex[] = []
-  collidedBullets.forEach((bullet) => {
+  collidedBullets.forEach(bullet => {
     if (bullet.power >= STEEL_POWER) {
       for (const t of IndexHelper.iter('steel', spreadBullet(bullet))) {
         if (steels.get(t)) {
@@ -105,7 +112,7 @@ function* destroyBricks(collidedBullets: BulletsMap) {
   const { map: { bricks } }: State = yield select()
   const bricksNeedToDestroy: BrickIndex[] = []
 
-  collidedBullets.forEach((bullet) => {
+  collidedBullets.forEach(bullet => {
     // TODO spreadBullet的时候 根据bullet.power的不同会影响spread的范围
     for (const t of IndexHelper.iter('brick', spreadBullet(bullet))) {
       if (bricks.get(t)) {
@@ -153,7 +160,7 @@ function handleBulletsCollidedWithTanks(context: Context, state: State) {
       const subject = asRect(tank)
       const mbr = getMBR(asRect(lastPos(bullet)), asRect(bullet))
       if (testCollide(subject, mbr, -0.02)) {
-        const bulletSide = allTanks.find(t => (t.tankId === bullet.tankId)).side
+        const bulletSide = allTanks.find(t => t.tankId === bullet.tankId).side
         const tankSide = tank.side
         const infoRow = context.bulletCollisionInfo.get(bullet.bulletId)
 
@@ -291,9 +298,7 @@ function* handleAfterTick() {
     yield* hurts.map(hurt => put<Action>(hurt))
     // 注意 必须先fork destroyTanks, 然后再put killAction
     // stageSaga中take KILL的逻辑, 依赖于"REMOVE_TANK已经被处理"
-    yield fork(destroyTanks, IMap(kills.map(kill =>
-      [kill.targetTank.tankId, kill.targetTank]
-    )))
+    yield fork(destroyTanks, IMap(kills.map(kill => [kill.targetTank.tankId, kill.targetTank])))
     yield* kills.map(kill => put<Action>(kill))
   }
 }

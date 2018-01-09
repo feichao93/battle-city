@@ -19,21 +19,10 @@ class TankHelmet extends React.PureComponent<P> {
 
     return (
       <g role="tank-helmet" transform={`translate(${x}, ${y})`} fill="white">
-        <path
-          d={ds[tickIndex]}
-        />
-        <path
-          transform="translate(16,0)rotate(90)"
-          d={ds[tickIndex]}
-        />
-        <path
-          transform="translate(16, 16)rotate(180)"
-          d={ds[tickIndex]}
-        />
-        <path
-          transform="translate(0, 16)rotate(270)"
-          d={ds[tickIndex]}
-        />
+        <path d={ds[tickIndex]} />
+        <path transform="translate(16,0)rotate(90)" d={ds[tickIndex]} />
+        <path transform="translate(16, 16)rotate(180)" d={ds[tickIndex]} />
+        <path transform="translate(0, 16)rotate(270)" d={ds[tickIndex]} />
       </g>
     )
   }

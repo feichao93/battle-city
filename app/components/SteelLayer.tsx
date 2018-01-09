@@ -5,7 +5,7 @@ import { getRowCol } from 'utils/common'
 import SteelWall from 'components/SteelWall'
 
 type P = {
-  steels: List<boolean>,
+  steels: List<boolean>
 }
 
 export default class SteelLayer extends React.PureComponent<P, {}> {
@@ -17,13 +17,7 @@ export default class SteelLayer extends React.PureComponent<P, {}> {
         {steels.map((set, t) => {
           if (set) {
             const [row, col] = getRowCol(t, N_MAP.STEEL)
-            return (
-              <SteelWall
-                key={t}
-                x={col * ITEM_SIZE_MAP.STEEL}
-                y={row * ITEM_SIZE_MAP.STEEL}
-              />
-            )
+            return <SteelWall key={t} x={col * ITEM_SIZE_MAP.STEEL} y={row * ITEM_SIZE_MAP.STEEL} />
           } else {
             return null
           }

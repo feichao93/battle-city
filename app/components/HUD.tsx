@@ -70,7 +70,6 @@ class HUD extends React.PureComponent<P> {
   }
 }
 
-
 function mapStateToProps(state: State) {
   return {
     remainingEnemyCount: state.game.remainingEnemies.size,

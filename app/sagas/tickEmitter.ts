@@ -1,9 +1,10 @@
 import { eventChannel } from 'redux-saga'
 import { takeEvery, select, put, take } from 'redux-saga/effects'
-import { State } from 'types';
+import { State } from 'types'
+
 const Mousetrap = require('mousetrap')
 
-const tickChannel = eventChannel<Action.TickAction>((emit) => {
+const tickChannel = eventChannel<Action.TickAction>(emit => {
   let lastTime = performance.now()
   let requestId = requestAnimationFrame(emitTick)
 
@@ -23,7 +24,7 @@ export default function* tickEmitter(fps = Infinity) {
   let { game: { paused } }: State = yield select()
   const escChannel = eventChannel(emitter => {
     Mousetrap.bind('esc', emitter)
-    return () => 0
+    return () => Mousetrap.unbind('esc')
   })
   yield takeEvery(escChannel, function* handleESC() {
     paused = !paused

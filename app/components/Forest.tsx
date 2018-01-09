@@ -20,8 +20,8 @@ const d = [
 ]
 
 type P = {
-  x: number,
-  y: number,
+  x: number
+  y: number
 }
 
 export default class Forest extends React.PureComponent<P, {}> {

@@ -10,9 +10,7 @@ export default function* directionController(playerName: string, getPlayerInput:
     const input: Input = yield* getPlayerInput(delta)
     const tank: TankRecord = yield select(selectors.playerTank, playerName)
     const { game: { AIFrozenTimeout } }: State = yield select()
-    if (tank == null
-      || tank.frozenTimeout > 0
-      || tank.side === 'ai' && AIFrozenTimeout > 0) {
+    if (tank == null || tank.frozenTimeout > 0 || (tank.side === 'ai' && AIFrozenTimeout > 0)) {
       continue
     }
     let nextFrozenTimeout = tank.frozenTimeout <= 0 ? 0 : tank.frozenTimeout - delta
@@ -42,7 +40,8 @@ export default function* directionController(playerName: string, getPlayerInput:
         movedTank = useCeil
       } else if (!canMoveWhenUseCeil) {
         movedTank = useFloor
-      } else { // use-round
+      } else {
+        // use-round
         movedTank = turned.set(xy, Math.round(n) * 8)
       }
       yield put<Action.Move>({

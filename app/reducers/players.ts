@@ -8,8 +8,8 @@ export default function players(state = Map() as PlayersMap, action: Action) {
   if (action.type === 'ACTIVATE_PLAYER') {
     const { playerName, tankId } = action
     return state.update(playerName, player =>
-      player.set('activeTankId', tankId)
-        .set('active', true))
+      player.set('activeTankId', tankId).set('active', true),
+    )
   } else if (action.type === 'CREATE_PLAYER') {
     return state.set(action.player.playerName, action.player)
   } else if (action.type === 'CLEAR_AI_PLAYERS') {
@@ -18,9 +18,7 @@ export default function players(state = Map() as PlayersMap, action: Action) {
     const { playerName, reversedTank } = action
     return state.update(playerName, p => p.set('reservedTank', reversedTank))
   } else if (action.type === 'REMOVE_TANK') {
-    return state.map(p =>
-      p.activeTankId === action.tankId ? p.set('activeTankId', 0) : p
-    )
+    return state.map(p => (p.activeTankId === action.tankId ? p.set('activeTankId', 0) : p))
   } else if (action.type === 'DEACTIVATE_PLAYER') {
     return state.update(action.playerName, player => player.set('active', false))
   } else if (action.type === 'DEACTIVATE_ALL_PLAYERS') {

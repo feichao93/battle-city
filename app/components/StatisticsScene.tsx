@@ -37,22 +37,17 @@ class StatisticsScene extends React.PureComponent<P> {
 
     let player1Total = '  '
     if (showTotalKillCount) {
-      const total = (basic === -1 ? 0 : basic)
-        + (fast === -1 ? 0 : fast)
-        + (power === -1 ? 0 : power)
-        + (armor === -1 ? 0 : armor)
+      const total =
+        (basic === -1 ? 0 : basic) +
+        (fast === -1 ? 0 : fast) +
+        (power === -1 ? 0 : power) +
+        (armor === -1 ? 0 : armor)
       player1Total = String(total).padStart(2)
     }
 
     return (
       <g role="statistics-scene">
-        <rect
-          fill="#000000"
-          x={0}
-          y={0}
-          width={16 * B}
-          height={16 * B}
-        />
+        <rect fill="#000000" x={0} y={0} width={16 * B} height={16 * B} />
         <g transform={`translate(${-0.5 * B}, ${-1.5 * B})`}>
           <Text content="HI-SCORE" x={4.5 * B} y={3.5 * B} fill="#e44437" />
           <Text content="20000" x={10 * B} y={3.5 * B} fill="#feac4e" />
@@ -68,10 +63,30 @@ class StatisticsScene extends React.PureComponent<P> {
           {/* player-1的击杀统计 */}
           <Text content={'\u2160-PLAYER'} x={2 * B} y={5.5 * B} fill="#e44437" />
           <Text content="3200" x={4 * B} y={6.5 * B} fill="#feac4e" />
-          <Text content={`${basicPointsStr} PTS ${basicCountStr}\u2190`} x={2 * B} y={8 * B} fill="white" />
-          <Text content={`${fastPointsStr} PTS ${fastCountStr}\u2190`} x={2 * B} y={9.5 * B} fill="white" />
-          <Text content={`${powerPointsStr} PTS ${powerCountStr}\u2190`} x={2 * B} y={11 * B} fill="white" />
-          <Text content={`${armorPointsStr} PTS ${armorCountStr}\u2190`} x={2 * B} y={12.5 * B} fill="white" />
+          <Text
+            content={`${basicPointsStr} PTS ${basicCountStr}\u2190`}
+            x={2 * B}
+            y={8 * B}
+            fill="white"
+          />
+          <Text
+            content={`${fastPointsStr} PTS ${fastCountStr}\u2190`}
+            x={2 * B}
+            y={9.5 * B}
+            fill="white"
+          />
+          <Text
+            content={`${powerPointsStr} PTS ${powerCountStr}\u2190`}
+            x={2 * B}
+            y={11 * B}
+            fill="white"
+          />
+          <Text
+            content={`${armorPointsStr} PTS ${armorCountStr}\u2190`}
+            x={2 * B}
+            y={12.5 * B}
+            fill="white"
+          />
 
           {/* todo player-2的击杀统计 */}
 

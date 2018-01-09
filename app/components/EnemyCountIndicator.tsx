@@ -3,7 +3,7 @@ import * as _ from 'lodash'
 import { BLOCK_SIZE, FIELD_SIZE } from 'utils/constants'
 
 // <EnemyTankThumbnail />的尺寸为 8 * 8
-const EnemyTankThumbnail = ({ x, y }: { x: number, y: number }) => (
+const EnemyTankThumbnail = ({ x, y }: { x: number; y: number }) => (
   <g transform={`translate(${x},${y})`} fill="#00000">
     <rect x={1} y={1} width={1} height={6} />
     <rect x={7} y={1} width={1} height={6} />
@@ -23,9 +23,9 @@ export default class EnemyCountIndicator extends React.PureComponent<P, {}> {
     const { count } = this.props
     return (
       <g role="remaining-enemy-count-indicator" transform={transform}>
-        {_.range(count).map(t =>
+        {_.range(count).map(t => (
           <EnemyTankThumbnail key={t} x={8 * (t % 2)} y={8 * Math.floor(t / 2)} />
-        )}
+        ))}
       </g>
     )
   }

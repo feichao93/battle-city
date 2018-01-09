@@ -20,15 +20,16 @@ import { PlainTankRecord } from 'types/TankRecord'
 import { PlainMapRecord } from 'types/MapRecord'
 
 export interface HumanControllerConfig {
-  fire: string,
-  up: string,
-  down: string,
-  left: string,
-  right: string,
+  fire: string
+  up: string
+  down: string
+  left: string
+  right: string
 }
 
-export type Input = { type: 'turn', direction: Direction }
-  | { type: 'forward', maxDistance?: number }
+export type Input =
+  | { type: 'turn'; direction: Direction }
+  | { type: 'forward'; maxDistance?: number }
 
 declare global {
   interface Rect {

@@ -12,7 +12,11 @@ import { TankRecord, PlayerRecord } from 'types'
 
 const AIWorker = require('worker-loader!ai/worker')
 
-function* handleCommands(playerName: string, commandChannel: Channel<AICommand>, noteChannel: Channel<Note>) {
+function* handleCommands(
+  playerName: string,
+  commandChannel: Channel<AICommand>,
+  noteChannel: Channel<Note>,
+) {
   let fire = false
   let nextDirection: Direction = null
   let forwardLength = 0
@@ -80,7 +84,10 @@ function* handleCommands(playerName: string, commandChannel: Channel<AICommand>,
           type: 'query-result',
           result: {
             type: 'active-tanks-info',
-            tanks: tanks.filter(t => t.active).map(t => t.toObject()).toArray(),
+            tanks: tanks
+              .filter(t => t.active)
+              .map(t => t.toObject())
+              .toArray(),
           },
         })
       } else if (command.query === 'my-fire-info') {
@@ -146,7 +153,7 @@ function* sendNotes(worker: Worker, noteChannel: Channel<Note>) {
 }
 
 interface WorkerConstructor {
-  new(): Worker
+  new (): Worker
 }
 
 /**
@@ -165,7 +172,7 @@ function* AIWorkerSaga(playerName: string, WorkerClass: WorkerConstructor) {
     // noteChannel用来向AI程序发送消息/通知
     const noteChannel = makeChannel<Note>()
     // commandChannel用来从AI程序获取command
-    const commandChannel = eventChannel<AICommand>((emitter) => {
+    const commandChannel = eventChannel<AICommand>(emitter => {
       const listener = (event: MessageEvent) => emitter(event.data)
       worker.addEventListener('message', listener)
       return () => worker.removeEventListener('message', listener)
@@ -231,14 +238,17 @@ export default function* AIMasterSaga() {
         yield put<Action>({ type: 'REMOVE_FIRST_REMAINING_ENEMY' })
         const level = remainingEnemies.first()
         const hp = level === 'armor' ? 4 : 1
-        const tankId = yield* spawnTank(TankRecord({
-          x,
-          y,
-          side: 'ai',
-          level,
-          hp,
-          withPowerUp: TANK_INDEX_THAT_WITH_POWER_UP.includes(20 - remainingEnemies.count()),
-        }), 0.6) // TODO 要根据关卡的难度来确定坦克的生成速度
+        const tankId = yield* spawnTank(
+          TankRecord({
+            x,
+            y,
+            side: 'ai',
+            level,
+            hp,
+            withPowerUp: TANK_INDEX_THAT_WITH_POWER_UP.includes(20 - remainingEnemies.count()),
+          }),
+          0.6,
+        ) // TODO 要根据关卡的难度来确定坦克的生成速度
 
         const task = yield spawn(AIWorkerSaga, playerName, AIWorker)
         taskMap.set(playerName, task)

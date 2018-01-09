@@ -20,13 +20,13 @@ export default function* fireController(playerName: string, shouldFire: () => bo
     const { bullets: allBullets }: State = yield select()
     const tank: TankRecord = yield select(selectors.playerTank, playerName)
     const { game: { AIFrozenTimeout } }: State = yield select()
-    if (tank == null || tank.side === 'ai' && AIFrozenTimeout > 0) {
+    if (tank == null || (tank.side === 'ai' && AIFrozenTimeout > 0)) {
       continue
     }
     let nextCooldown = tank.cooldown <= 0 ? 0 : tank.cooldown - delta
 
     if (tank.cooldown <= 0 && shouldFire()) {
-      const bullets = allBullets.filter(bullet => (bullet.tankId === tank.tankId))
+      const bullets = allBullets.filter(bullet => bullet.tankId === tank.tankId)
       if (bullets.count() < getTankBulletLimit(tank)) {
         const { x, y } = calculateBulletStartPosition(tank)
         yield put<Action.AddBulletAction>({

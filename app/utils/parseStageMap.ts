@@ -49,35 +49,36 @@ export default function parseStageMap(map: StageConfig['map']) {
     const line = map[row].toLowerCase().split(/ +/)
     for (let col = 0; col < FIELD_BLOCK_SIZE; col += 1) {
       const item = line[col].trim()
-      if (item[0] === 'b') { // brick
+      if (item[0] === 'b') {
+        // brick
         const bits = parseBrickBits(item.substring(1))
         const rowrow = 4 * row
         const colcol = 4 * col
         const N = 52
 
         const part0 = (bits >> 12) & 0xf
-        ;(part0 & 0b0001) && bricks.add(rowrow * N + colcol + 0)
-        ;(part0 & 0b0010) && bricks.add(rowrow * N + colcol + 1)
-        ;(part0 & 0b0100) && bricks.add(rowrow * N + colcol + N)
-        ;(part0 & 0b1000) && bricks.add(rowrow * N + colcol + N + 1)
+        part0 & 0b0001 && bricks.add(rowrow * N + colcol + 0)
+        part0 & 0b0010 && bricks.add(rowrow * N + colcol + 1)
+        part0 & 0b0100 && bricks.add(rowrow * N + colcol + N)
+        part0 & 0b1000 && bricks.add(rowrow * N + colcol + N + 1)
 
         const part1 = (bits >> 8) & 0xf
-        ;(part1 & 0b0001) && bricks.add(rowrow * N + colcol + 2 + 0)
-        ;(part1 & 0b0010) && bricks.add(rowrow * N + colcol + 2 + 1)
-        ;(part1 & 0b0100) && bricks.add(rowrow * N + colcol + 2 + N)
-        ;(part1 & 0b1000) && bricks.add(rowrow * N + colcol + 2 + N + 1)
+        part1 & 0b0001 && bricks.add(rowrow * N + colcol + 2 + 0)
+        part1 & 0b0010 && bricks.add(rowrow * N + colcol + 2 + 1)
+        part1 & 0b0100 && bricks.add(rowrow * N + colcol + 2 + N)
+        part1 & 0b1000 && bricks.add(rowrow * N + colcol + 2 + N + 1)
 
         const part2 = (bits >> 4) & 0xf
-        ;(part2 & 0b0001) && bricks.add((rowrow + 2) * N + colcol + 0)
-        ;(part2 & 0b0010) && bricks.add((rowrow + 2) * N + colcol + 1)
-        ;(part2 & 0b0100) && bricks.add((rowrow + 2) * N + colcol + N)
-        ;(part2 & 0b1000) && bricks.add((rowrow + 2) * N + colcol + N + 1)
+        part2 & 0b0001 && bricks.add((rowrow + 2) * N + colcol + 0)
+        part2 & 0b0010 && bricks.add((rowrow + 2) * N + colcol + 1)
+        part2 & 0b0100 && bricks.add((rowrow + 2) * N + colcol + N)
+        part2 & 0b1000 && bricks.add((rowrow + 2) * N + colcol + N + 1)
 
         const part3 = (bits >> 0) & 0xf
-        ;(part3 & 0b0001) && bricks.add((rowrow + 2) * N + colcol + 2 + 0)
-        ;(part3 & 0b0010) && bricks.add((rowrow + 2) * N + colcol + 2 + 1)
-        ;(part3 & 0b0100) && bricks.add((rowrow + 2) * N + colcol + 2 + N)
-        ;(part3 & 0b1000) && bricks.add((rowrow + 2) * N + colcol + 2 + N + 1)
+        part3 & 0b0001 && bricks.add((rowrow + 2) * N + colcol + 2 + 0)
+        part3 & 0b0010 && bricks.add((rowrow + 2) * N + colcol + 2 + 1)
+        part3 & 0b0100 && bricks.add((rowrow + 2) * N + colcol + 2 + N)
+        part3 & 0b1000 && bricks.add((rowrow + 2) * N + colcol + 2 + N + 1)
       } else if (item[0] === 't') {
         const bits = parseInt(item[1], 16)
         // console.assert(0 < bits && bits < 16)
@@ -115,20 +116,27 @@ export default function parseStageMap(map: StageConfig['map']) {
   }
 
   return MapRecord({
-    eagle: eaglePos ? EagleRecord({
-      x: eaglePos.x,
-      y: eaglePos.y,
-      broken: false,
-    }) : null,
+    eagle: eaglePos
+      ? EagleRecord({
+          x: eaglePos.x,
+          y: eaglePos.y,
+          broken: false,
+        })
+      : null,
     bricks: Repeat(false, N_MAP.BRICK ** 2)
-      .map((set, index) => bricks.has(index)).toList(),
+      .map((set, index) => bricks.has(index))
+      .toList(),
     steels: Repeat(false, N_MAP.STEEL ** 2)
-      .map((set, index) => steels.has(index)).toList(),
+      .map((set, index) => steels.has(index))
+      .toList(),
     rivers: Repeat(false, N_MAP.RIVER ** 2)
-      .map((set, index) => rivers.has(index)).toList(),
+      .map((set, index) => rivers.has(index))
+      .toList(),
     snows: Repeat(false, N_MAP.SNOW ** 2)
-      .map((set, index) => snows.has(index)).toList(),
+      .map((set, index) => snows.has(index))
+      .toList(),
     forests: Repeat(false, N_MAP.FOREST ** 2)
-      .map((set, index) => forests.has(index)).toList(),
+      .map((set, index) => forests.has(index))
+      .toList(),
   })
 }

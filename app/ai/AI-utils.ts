@@ -12,9 +12,9 @@ function canDestroy(barrierType: BarrierType) {
 }
 
 interface PriorityMap {
-  up: number,
-  down: number,
-  left: number,
+  up: number
+  down: number
+  left: number
   right: number
 }
 
@@ -75,7 +75,8 @@ export class RelativePosition {
         length: -this.dy,
         offset: this.absdx,
       }
-    } else { // direction === 'down'
+    } else {
+      // direction === 'down'
       return {
         length: this.dy,
         offset: this.absdx,
@@ -111,8 +112,10 @@ export const FireThreshhold = {
   },
 }
 
-
-export function calculatePriorityMap({ tankPosition: pos, barrierInfo: binfo }: TankEnv): PriorityMap {
+export function calculatePriorityMap({
+  tankPosition: pos,
+  barrierInfo: binfo,
+}: TankEnv): PriorityMap {
   const priorityMap: PriorityMap = {
     up: 2,
     down: 2,
@@ -184,15 +187,18 @@ export function getEnv(map: MapRecord, tanks: TanksMap, tank: TankRecord): TankE
   }
 
   // 计算ai-tank与最近的human-tank的相对位置
-  const { nearestHumanTank } = tanks.reduce((reduction, next) => {
-    if (next.side === 'human') {
-      const distance = Math.abs(next.x - tank.x) + Math.abs(next.y - tank.y)
-      if (distance < reduction.minDistance) {
-        return { minDistance: distance, nearestHumanTank: next }
+  const { nearestHumanTank } = tanks.reduce(
+    (reduction, next) => {
+      if (next.side === 'human') {
+        const distance = Math.abs(next.x - tank.x) + Math.abs(next.y - tank.y)
+        if (distance < reduction.minDistance) {
+          return { minDistance: distance, nearestHumanTank: next }
+        }
       }
-    }
-    return reduction
-  }, { minDistance: Infinity, nearestHumanTank: null as TankRecord })
+      return reduction
+    },
+    { minDistance: Infinity, nearestHumanTank: null as TankRecord },
+  )
   if (nearestHumanTank) {
     pos.nearestHumanTank = new RelativePosition(tank, nearestHumanTank)
   }
@@ -272,9 +278,11 @@ function lookAhead({ bricks, steels, rivers }: MapRecord, tank: TankRecord): Bar
   const brickAheadLength = getAheadBrickLength(bricks, tank)
   const steelAheadLength = getAheadSteelLength(steels, tank)
   const riverAheadLength = getAheadRiverLength(rivers, tank)
-  if (steelAheadLength === Infinity
-    && brickAheadLength === Infinity
-    && riverAheadLength === Infinity) {
+  if (
+    steelAheadLength === Infinity &&
+    brickAheadLength === Infinity &&
+    riverAheadLength === Infinity
+  ) {
     let borderAheadLength
     if (tank.direction === 'up') {
       borderAheadLength = tank.y
@@ -282,7 +290,8 @@ function lookAhead({ bricks, steels, rivers }: MapRecord, tank: TankRecord): Bar
       borderAheadLength = FIELD_SIZE - tank.y - TANK_SIZE
     } else if (tank.direction === 'left') {
       borderAheadLength = tank.x
-    } else { // RIGHT
+    } else {
+      // RIGHT
       borderAheadLength = FIELD_SIZE - tank.x - TANK_SIZE
     }
     return { type: 'border', length: borderAheadLength }

@@ -41,19 +41,23 @@ function* startStage(playerName: string, tankColor: TankColor) {
       reversedTank: null,
     })
 
-    const tankPrototype = player.reservedTank || TankRecord({
-      side: 'human',
-      color: tankColor,
-      level: 'basic',
-    })
+    const tankPrototype =
+      player.reservedTank ||
+      TankRecord({
+        side: 'human',
+        color: tankColor,
+        level: 'basic',
+      })
 
-    const tankId = yield* spawnTank(tankPrototype.merge({
-      active: true,
-      x: 4 * BLOCK_SIZE,
-      y: 12 * BLOCK_SIZE,
-      direction: 'up',
-      helmetDuration: frame(135),
-    }))
+    const tankId = yield* spawnTank(
+      tankPrototype.merge({
+        active: true,
+        x: 4 * BLOCK_SIZE,
+        y: 12 * BLOCK_SIZE,
+        direction: 'up',
+        helmetDuration: frame(135),
+      }),
+    )
     yield put<Action.ActivatePlayer>({
       type: 'ACTIVATE_PLAYER',
       playerName,
@@ -78,14 +82,16 @@ function* killed(playerName: string, tankColor: TankColor) {
   const player = players.get(playerName)
   if (player.lives > 0) {
     yield put({ type: 'DECREMENT_PLAYER_LIFE', playerName })
-    const tankId = yield* spawnTank(TankRecord({
-      x: 4 * BLOCK_SIZE,
-      y: 12 * BLOCK_SIZE,
-      side: 'human',
-      color: tankColor,
-      level: 'basic',
-      helmetDuration: frame(180),
-    }))
+    const tankId = yield* spawnTank(
+      TankRecord({
+        x: 4 * BLOCK_SIZE,
+        y: 12 * BLOCK_SIZE,
+        side: 'human',
+        color: tankColor,
+        level: 'basic',
+        helmetDuration: frame(180),
+      }),
+    )
     yield put({
       type: 'ACTIVATE_PLAYER',
       playerName,
@@ -110,7 +116,6 @@ export default function* humanPlayerSaga(playerName: string, tankColor: TankColo
   yield takeEvery(killedAction, killed, playerName, tankColor)
 
   function killedAction(action: Action) {
-    return action.type === 'KILL'
-      && action.targetPlayer.playerName === playerName
+    return action.type === 'KILL' && action.targetPlayer.playerName === playerName
   }
 }

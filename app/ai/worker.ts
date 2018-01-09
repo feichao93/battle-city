@@ -3,22 +3,16 @@ import { reverseDirection } from 'utils/common'
 import { calculatePriorityMap, getEnv, getRandomDirection, shouldFire } from 'ai/AI-utils.ts'
 import GameAIClient from 'ai/GameAIClient'
 
-// const logFire = (...args: any[]) => console.log('[fire]', ...args)
-const logFire = (...args: any[]) => 0
-
 const client = new GameAIClient()
 
 function race<V, T extends { [key: string]: Promise<V> }>(map: T) {
-  return Promise.race(Object.entries(map)
-    .map(([key, promise]) => promise.then(value => ({ key, value }))))
-    .then(({ key: resolvedKey, value }) => ({ [resolvedKey]: value }))
+  return Promise.race(
+    Object.entries(map).map(([key, promise]) => promise.then(value => ({ key, value }))),
+  ).then(({ key: resolvedKey, value }) => ({ [resolvedKey]: value }))
 }
 
 async function main() {
-  await Promise.all([
-    moveLoop(),
-    fireLoop(),
-  ])
+  await Promise.all([moveLoop(), fireLoop()])
 }
 
 main()
@@ -82,16 +76,11 @@ async function fireLoop() {
     console.assert(tank != null, 'tank is null in fireLoop!')
     const fireInfo = await client.queryMyFireInfo()
     if (fireInfo.canFire) {
-      //   logFire('can not fire skip...')
-      // } else {
-      // logFire('can fire!')
-
       const map = await client.queryMapInfo()
       const tanks = await client.queryTanksInfo()
 
       const env = getEnv(map, tanks, tank)
       if (shouldFire(tank, env)) {
-        logFire('fire!')
         client.post({ type: 'fire' })
         await delay(500)
       }

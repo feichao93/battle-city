@@ -16,9 +16,5 @@
     "BF BF X  T5 X  B8 BC B4 X  F  F  F  X  ",
     "TF BF BF X  X  BA EE B5 X  BF X  X  X  "
   ],
-  "enemies": [
-    "14*basic",
-    "4*fast",
-    "2*armor"
-  ]
+  "enemies": ["14*basic", "4*fast", "2*armor"]
 }

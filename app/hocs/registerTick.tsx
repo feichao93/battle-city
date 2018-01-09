@@ -15,7 +15,7 @@ import { wrapDisplayName } from 'recompose'
 // todo 类型信息不对
 export default function registerTick(...intervals: number[]) {
   const sum = _.sum(intervals)
-  return function (BaseComponent: React.ComponentClass<any>) {
+  return function(BaseComponent: React.ComponentClass<any>) {
     type Props = { time: number }
     class Component extends React.Component<{}, {}> {
       static displayName = wrapDisplayName(BaseComponent, 'registerTick')
@@ -36,9 +36,7 @@ export default function registerTick(...intervals: number[]) {
           tickIndex += 1
         }
 
-        return (
-          <BaseComponent tickIndex={tickIndex} {...otherProps} />
-        )
+        return <BaseComponent tickIndex={tickIndex} {...otherProps} />
       }
     }
 

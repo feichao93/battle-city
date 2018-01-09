@@ -11,17 +11,15 @@ function* blink(powerUp: PowerUpRecord) {
     visible = !visible
     yield put<Action>({
       type: 'ADD_OR_UPDATE_POWER_UP',
-      powerUp: powerUp.set('visible', visible)
+      powerUp: powerUp.set('visible', visible),
     })
   }
 }
 
 /** 一个power-up的生命周期 */
 export default function* powerUpSaga(powerUp: PowerUpRecord) {
-  const pickThisPowerUp = (action: Action) => (
-    action.type === 'PICK_POWER_UP'
-    && action.powerUp.powerUpId === powerUp.powerUpId
-  )
+  const pickThisPowerUp = (action: Action) =>
+    action.type === 'PICK_POWER_UP' && action.powerUp.powerUpId === powerUp.powerUpId
 
   const blinkTask: Task = yield fork(blink, powerUp)
 

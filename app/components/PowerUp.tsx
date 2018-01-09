@@ -62,7 +62,7 @@ const powerUpDataArray = {
     'w bbb   bbbbbbwb',
     'gwwwwwwwwwwwwwgb',
     ' bbbbbbbbbbbbbb ',
-    '                '
+    '                ',
   ],
   timer: [
     ' wwwwwwwwwwwwwg ',
@@ -80,7 +80,7 @@ const powerUpDataArray = {
     'w bbbbbbbbbbbbwb',
     'gwwwwwwwwwwwwwgb',
     ' bbbbbbbbbbbbbb ',
-    '                '
+    '                ',
   ],
   helmet: [
     ' wwwwwwwwwwwwwg ',
@@ -98,7 +98,7 @@ const powerUpDataArray = {
     'w bbbbbbbbbbbbwb',
     'gwwwwwwwwwwwwwgb',
     ' bbbbbbbbbbbbbb ',
-    '                '
+    '                ',
   ],
   shovel: [
     ' wwwwwwwwwwwwwg ',
@@ -116,7 +116,7 @@ const powerUpDataArray = {
     'w b    bbbbbbbwb',
     'gwwwwwwwwwwwwwgb',
     ' bbbbbbbbbbbbbb ',
-    '                '
+    '                ',
   ],
   // todo pistol是高级物品, 目前先暂时不实现相关功能
   // pistol: [

@@ -24,26 +24,10 @@ export default class GameoverScene extends React.PureComponent {
             </g>
           </pattern>
         </defs>
-        <rect
-          fill="#000000"
-          x={0}
-          y={0}
-          width={16 * B}
-          height={15 * B}
-        />
+        <rect fill="#000000" x={0} y={0} width={16 * B} height={15 * B} />
         <g transform={`scale(${scale})`}>
-          <Text
-            content="game"
-            x={4 * B / scale}
-            y={4 * B / scale}
-            fill="url(#pattern-brickwall)"
-          />
-          <Text
-            content="over"
-            x={4 * B / scale}
-            y={7 * B / scale}
-            fill="url(#pattern-brickwall)"
-          />
+          <Text content="game" x={4 * B / scale} y={4 * B / scale} fill="url(#pattern-brickwall)" />
+          <Text content="over" x={4 * B / scale} y={7 * B / scale} fill="url(#pattern-brickwall)" />
         </g>
       </g>
     )

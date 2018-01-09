@@ -21,9 +21,7 @@ export default class Curtain extends React.PureComponent<P> {
             <rect x={0} y={height * (1 - t / 2)} width={width} height={height / 2 * t} />
           </clipPath>
         </defs>
-        <g clipPath="url(#default-curtain)">
-          {children}
-        </g>
+        <g clipPath="url(#default-curtain)">{children}</g>
       </g>
     )
   }

@@ -1,20 +1,14 @@
 import * as React from 'react'
 import { connect } from 'react-redux'
 import * as _ from 'lodash'
-import {
-  State,
-  TanksMap,
-  ScoresMap,
-  TankRecord,
-  PlayersMap,
-  ExplosionsMap,
-} from 'app/types'
+import { State, TanksMap, ScoresMap, TankRecord, PlayersMap, ExplosionsMap } from 'app/types'
 
 let connectedInspector: any = () => null as any
 
 if (DEV) {
   function roundTank(t: TankRecord) {
-    return t.update('x', Math.round)
+    return t
+      .update('x', Math.round)
       .update('y', Math.round)
       .update('cooldown', Math.round)
       .update('helmetDuration', Math.round)
@@ -53,10 +47,10 @@ if (DEV) {
     debugger = () => {
       console.log('state =', this.state)
       console.log('props =', this.props)
-      ;(function (w: any) {
+      ;(function(w: any) {
         w.state = this.state
         w.props = this.props
-      }).call(this, window)
+      }.call(this, window))
       debugger
     }
 
@@ -66,16 +60,18 @@ if (DEV) {
       return (
         <div role="players-view">
           {allPlayers.isEmpty() ? <p> EMPTY PLAYERS </p> : null}
-          {allPlayers.map(p =>
+          {allPlayers
+            .map(p => (
               <pre
                 key={p.playerName}
                 style={{
                   textDecoration: players.has(p.playerName) ? 'none' : 'line-through',
                 }}
               >
-            {JSON.stringify(p, null, 2)}
-          </pre>
-          ).toArray()}
+                {JSON.stringify(p, null, 2)}
+              </pre>
+            ))
+            .toArray()}
         </div>
       )
     }
@@ -86,16 +82,18 @@ if (DEV) {
       return (
         <div role="explosions-view">
           {allExplosions.isEmpty() ? <p>EMPTY EXPLOSIONS</p> : null}
-          {allExplosions.map(exp =>
+          {allExplosions
+            .map(exp => (
               <pre
                 key={exp.explosionId}
                 style={{
                   textDecoration: explosions.has(exp.explosionId) ? 'none' : 'line-through',
                 }}
               >
-            {JSON.stringify(exp, null, 2)}
-          </pre>
-          ).toArray()}
+                {JSON.stringify(exp, null, 2)}
+              </pre>
+            ))
+            .toArray()}
         </div>
       )
     }
@@ -106,16 +104,18 @@ if (DEV) {
       return (
         <div role="tanks-view">
           {allTanks.isEmpty() ? <p>EMPTY TANKS</p> : null}
-          {allTanks.map(t =>
+          {allTanks
+            .map(t => (
               <pre
                 key={t.tankId}
                 style={{
                   textDecoration: tanks.has(t.tankId) ? 'none' : 'line-through',
                 }}
               >
-            {JSON.stringify(t, null, 2)}
-          </pre>
-          ).toArray()}
+                {JSON.stringify(t, null, 2)}
+              </pre>
+            ))
+            .toArray()}
         </div>
       )
     }
@@ -126,16 +126,18 @@ if (DEV) {
       return (
         <div>
           {allScores.isEmpty() ? <p>EMPTY</p> : null}
-          {allScores.map(s =>
+          {allScores
+            .map(s => (
               <pre
                 key={s.scoreId}
                 style={{
                   textDecoration: scores.has(s.scoreId) ? 'none' : 'line-through',
                 }}
               >
-            {JSON.stringify(s, null, 2)}
-          </pre>
-          ).toArray()}
+                {JSON.stringify(s, null, 2)}
+              </pre>
+            ))
+            .toArray()}
         </div>
       )
     }
@@ -143,12 +145,14 @@ if (DEV) {
     render() {
       const { view } = this.state
       return (
-        <div style={{
-          maxHeight: '100vh',
-          overflow: 'auto',
-          fontSize: '12px',
-          border: '1px solid red',
-        }}>
+        <div
+          style={{
+            maxHeight: '100vh',
+            overflow: 'auto',
+            fontSize: '12px',
+            border: '1px solid red',
+          }}
+        >
           <div style={{ display: 'flex' }}>
             <button
               style={{ color: view === 'scores' ? 'green' : 'inherit' }}
@@ -174,9 +178,7 @@ if (DEV) {
             >
               Explosions
             </button>
-            <button onClick={this.debugger}>
-              debugger
-            </button>
+            <button onClick={this.debugger}>debugger</button>
           </div>
           {view === 'scores' ? this.renderScoresView() : null}
           {view === 'tanks' ? this.renderTanksView() : null}

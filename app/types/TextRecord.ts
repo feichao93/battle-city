@@ -1,11 +1,11 @@
 import { Record } from 'immutable'
 
 type Base = {
-  textId: TextId,
-  content: string,
-  fill: string,
-  x: number,
-  y: number,
+  textId: TextId
+  content: string
+  fill: string
+  x: number
+  y: number
 }
 
 type TextRecord = Record.Instance<Base> & Readonly<Base>

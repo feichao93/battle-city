@@ -12,17 +12,17 @@ import scores, { ScoresMap } from 'reducers/scores'
 import { MapRecord } from 'types'
 
 export interface State {
-  game: GameRecord,
-  players: PlayersMap,
-  bullets: BulletsMap,
-  explosions: ExplosionsMap,
-  map: MapRecord,
-  time: number,
-  tanks: TanksMap,
-  flickers: FlickersMap,
-  texts: TextsMap,
-  powerUps: PowerUpsMap,
-  scores: ScoresMap,
+  game: GameRecord
+  players: PlayersMap
+  bullets: BulletsMap
+  explosions: ExplosionsMap
+  map: MapRecord
+  time: number
+  tanks: TanksMap
+  flickers: FlickersMap
+  texts: TextsMap
+  powerUps: PowerUpsMap
+  scores: ScoresMap
 }
 
 export function time(state = 0, action: Action) {

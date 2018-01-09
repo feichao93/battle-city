@@ -39,10 +39,9 @@ export default class GameAIClient {
   queryMyTank() {
     return new Promise<TankRecord>(resolve => {
       this.post({ type: 'query', query: 'my-tank-info' })
-      this.pendingQueries['my-tank-info'].push(compose(resolve,
-        (result: QueryResult.MyTankInfo) => (
-          TankRecord(result.tank)
-        )))
+      this.pendingQueries['my-tank-info'].push(
+        compose(resolve, (result: QueryResult.MyTankInfo) => TankRecord(result.tank)),
+      )
     })
   }
 
@@ -56,30 +55,31 @@ export default class GameAIClient {
   queryMapInfo() {
     return new Promise<MapRecord>(resolve => {
       this.post({ type: 'query', query: 'map-info' })
-      this.pendingQueries['map-info'].push(compose(resolve,
-        (result: QueryResult.MapInfo) => (
+      this.pendingQueries['map-info'].push(
+        compose(resolve, (result: QueryResult.MapInfo) =>
           MapRecord(result.map as any)
             .update('eagle', EagleRecord)
             .update('bricks', List)
             .update('steels', List)
             .update('rivers', List)
             .update('snows', List)
-            .update('forests', List)
-        )))
+            .update('forests', List),
+        ),
+      )
     })
   }
 
   queryTanksInfo() {
     return new Promise<TanksMap>(resolve => {
       this.post({ type: 'query', query: 'active-tanks-info' })
-      this.pendingQueries['active-tanks-info'].push(compose(resolve,
-        (result: QueryResult.ActiveTanksInfo) => (
+      this.pendingQueries['active-tanks-info'].push(
+        compose(resolve, (result: QueryResult.ActiveTanksInfo) =>
           List(result.tanks)
             .toMap()
             .map(TankRecord)
-            .mapKeys((_, t) => t.tankId)
-        )
-      ))
+            .mapKeys((_, t) => t.tankId),
+        ),
+      )
     })
   }
 
