@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "esModuleInterop": true,
     "outDir": "./build/",
     "sourceMap": true,
     "noImplicitAny": true,
@@ -11,13 +12,8 @@
     "allowJs": true,
     "baseUrl": ".", // This must be specified if "paths" is.
     "paths": {
-      "*": [
-        "*",
-        "app/*"
-      ]
+      "*": ["*", "app/*"]
     }
   },
-  "include": [
-    "./app/**/*"
-  ]
+  "include": ["./app/**/*"]
 }

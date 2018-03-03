@@ -19,6 +19,13 @@ export { ExplosionsMap } from 'reducers/explosions'
 import { PlainTankRecord } from 'types/TankRecord'
 import { PlainMapRecord } from 'types/MapRecord'
 
+/** 记录一架坦克的开火信息 */
+export interface TankFireInfo {
+  bulletCount: number
+  canFire: boolean
+  cooldown: number
+}
+
 export interface HumanControllerConfig {
   fire: string
   up: string

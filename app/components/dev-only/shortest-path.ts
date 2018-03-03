@@ -32,15 +32,15 @@ const down = (t: number) => {
 const getRow = (t: number) => Math.floor(t / S)
 const getCol = (t: number) => t % S
 
-export type FireInfo = {
+export type FireEstimate = {
   t: number
   brickCount: number
   distance: number
 }
 
-export function calculateIdealFireInfoArray(map: MapRecord, target: number): FireInfo[] {
-  const startFireInfo = { brickCount: 0, distance: 0, t: target }
-  const result: FireInfo[] = [startFireInfo]
+export function calculateIdealFireInfoArray(map: MapRecord, target: number): FireEstimate[] {
+  const startEstimate = { brickCount: 0, distance: 0, t: target }
+  const result: FireEstimate[] = [startEstimate]
   for (const dir of [left, right, up, down]) {
     let cntPos = dir(target)
     let count = 0
@@ -78,7 +78,7 @@ export function calculateIdealFireInfoArray(map: MapRecord, target: number): Fir
 export interface PosInfo {
   canPass: boolean
   canFire?: boolean
-  fireInfo?: FireInfo
+  fireInfo?: FireEstimate
 }
 
 export function getT(p: Point) {
@@ -136,11 +136,13 @@ export interface PathInfo {
 export function shortestPathToEagle(posInfoArray: PosInfo[], start: number) {
   function getPath(end: number) {
     const path: number[] = []
-    while (end !== start) {
+    while (true) {
       path.unshift(end)
+      if (end === start) {
+        break
+      }
       end = pre[end]
     }
-    path.unshift(start)
     return path
   }
 

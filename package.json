@@ -1,6 +1,6 @@
 {
   "name": "battle-city",
-  "version": "0.1.5",
+  "version": "0.1.6-SNAPSHOT",
   "description": "Battle city re-edition built with react.",
   "author": "Shi Feichao <842351815@qq.com> (http://shinima.pw)",
   "scripts": {
@@ -8,44 +8,44 @@
     "build": "webpack --env.production --env.editor --env.stories"
   },
   "dependencies": {
-    "@types/lodash": "^4.14.62",
-    "@types/node": "^8.0.17",
+    "@types/lodash": "^4.14.104",
+    "@types/node": "^9.4.6",
     "@types/react": "^15.0.21",
     "@types/react-dom": "^15.5.1",
     "@types/react-hot-loader": "^3.0.1",
-    "@types/react-redux": "^5.0.13",
-    "@types/recompose": "^0.24.3",
+    "@types/react-redux": "^5.0.15",
+    "@types/recompose": "^0.24.5",
     "classnames": "^2.2.5",
     "file-saver": "^1.3.3",
     "immutable": "4.0.0-rc.2",
-    "lodash": "^4.17.4",
+    "lodash": "^4.17.5",
     "mousetrap": "^1.6.0",
-    "normalize.css": "^7.0.0",
+    "normalize.css": "^8.0.0",
     "react": "^15.3.2",
     "react-dom": "^15.3.2",
     "react-hot-loader": "^3.0.0-beta.6",
-    "react-redux": "^5.0.3",
+    "react-redux": "^5.0.7",
     "recompose": "^0.26.0",
     "redux": "^3.6.0",
-    "redux-saga": "^0.16.0"
+    "redux-saga": "1.0.0-beta.0"
   },
   "devDependencies": {
     "@types/classnames": "^2.2.0",
     "@types/file-saver": "^1.3.0",
     "awesome-typescript-loader": "^3.1.2",
     "babel-minify-webpack-plugin": "^0.2.0",
-    "css-loader": "^0.28.4",
+    "css-loader": "^0.28.10",
     "extract-text-webpack-plugin": "^3.0.0",
     "html-webpack-plugin": "^2.22.0",
     "json-loader": "^0.5.7",
-    "moment": "^2.18.1",
+    "moment": "^2.21.0",
     "source-map-loader": "^0.2.1",
-    "style-loader": "^0.19.0",
+    "style-loader": "^0.20.2",
     "stylus": "^0.54.5",
     "typescript": "^2.2.2",
     "webpack": "^3.8.1",
     "webpack-dev-server": "^2.9.4",
-    "worker-loader": "^1.1.0"
+    "worker-loader": "^1.1.1"
   },
   "resolutions": {
     "@types/react": "15.6.7"

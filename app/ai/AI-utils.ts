@@ -218,7 +218,7 @@ export function getEnv(map: MapRecord, tanks: TanksMap, tank: TankRecord): TankE
 }
 
 /** 根据目前AI-tank的环境信息, 决定AI-tank是否应该开火 */
-export function shouldFire(tank: TankRecord, { barrierInfo, tankPosition: pos }: TankEnv) {
+export function determineFire(tank: TankRecord, { barrierInfo, tankPosition: pos }: TankEnv) {
   const random = Math.random()
   // console.log('fire-random:', random)
 
