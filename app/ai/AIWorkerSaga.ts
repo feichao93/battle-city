@@ -10,6 +10,11 @@ import directionController from '../sagas/directionController'
 import fireController from '../sagas/fireController'
 import { getDirectionInfo, reverseDirection } from '../utils/common'
 import * as selectors from '../utils/selectors'
+import {
+  shortestPathToFirePos,
+  getPosInfoArray,
+  calculateIdealFireInfoArray,
+} from 'components/dev-only/shortest-path'
 
 function* waitFor(emitter: EventEmitter, expectedType: string) {
   let callback: any
@@ -37,31 +42,47 @@ function* waitFor(emitter: EventEmitter, expectedType: string) {
 //   }
 // })
 
+function* enterFollowPathMode(ctx: AITankCtx) {
+  const tank: TankRecord = yield select(selectors.playerTank, ctx.playerName)
+  const { map }: State = yield select()
+  const posInfoArray = getPosInfoArray(map)
+  const eagleCol = (map.eagle.x + 8) / 8
+  const eagleRow = (map.eagle.y + 8) / 8
+  const eagleT = eagleRow * 26 + eagleCol
+  const idealFireInfoArray = calculateIdealFireInfoArray(map, eagleT)
+  for (const fireInfo of idealFireInfoArray) {
+    posInfoArray[fireInfo.t].fireInfo = fireInfo
+    posInfoArray[fireInfo.t].canFire = true
+  }
+  const tankRow = Math.floor((tank.y + 8) / 8)
+  const tankCol = Math.floor((tank.x + 8) / 8)
+  const pathInfo = shortestPathToFirePos(posInfoArray, tankRow * 26 + tankCol)
+  // console.log(posInfoArray)
+  // console.log(pathInfo)
+}
+
 function* moveLoop(ctx: AITankCtx) {
   let skipDelayAtFirstTime = true
   while (true) {
     if (skipDelayAtFirstTime) {
       skipDelayAtFirstTime = false
     } else {
-      console.log(
-        'move-loop-result:',
-        yield race({
-          timeout: delay(3e3),
-          reach: waitFor(ctx.noteEmitter, 'reach'),
-          // TODO implement notifyWhenBulletComplete
-          bulletComplete: waitFor(ctx.noteEmitter, 'bullet-complete'),
-        }),
-      )
+      yield race({
+        timeout: delay(3e3),
+        reach: waitFor(ctx.noteEmitter, 'reach'),
+        // TODO implement notifyWhenBulletComplete
+        bulletComplete: waitFor(ctx.noteEmitter, 'bullet-complete'),
+      })
     }
 
     let tank: TankRecord = yield select(selectors.playerTank, ctx.playerName)
     if (tank == null) {
       continue
     }
+
+    yield* enterFollowPathMode(ctx)
     const { map, tanks }: State = yield select()
-
     const env = getEnv(map, tanks, tank)
-
     const priorityMap = calculatePriorityMap(env)
 
     // 降低回头的优先级
@@ -91,13 +112,10 @@ function* fireLoop(ctx: AITankCtx) {
     if (skipDelayAtFirstTime) {
       skipDelayAtFirstTime = false
     } else {
-      console.log(
-        'fire-loop race result',
-        yield race({
-          timeout: delay(300),
-          bulletComplete: waitFor(ctx.noteEmitter, 'bullet-complete'),
-        }),
-      )
+      yield race({
+        timeout: delay(300),
+        bulletComplete: waitFor(ctx.noteEmitter, 'bullet-complete'),
+      })
     }
 
     let tank = yield select(selectors.playerTank, ctx.playerName)

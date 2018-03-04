@@ -1,14 +1,12 @@
-import {
-  calculateIdealFireInfoArray,
-  getPosInfo,
-  getT,
-  shortestPathToEagle,
-} from 'components/dev-only/shortest-path.ts'
 import * as _ from 'lodash'
 import * as React from 'react'
 import { connect } from 'react-redux'
 import { State } from 'types'
-import { FIELD_BLOCK_SIZE as FBS } from 'utils/constants'
+import {
+  calculateIdealFireInfoArray,
+  getPosInfoArray,
+  shortestPathToFirePos,
+} from 'components/dev-only/shortest-path.ts'
 
 let connectedGraph: any = () => null as any
 
@@ -18,32 +16,30 @@ const colors = {
   orange: 'orange',
 }
 
-const S = FBS * 2 - 1
-
 if (DEV) {
-  interface S {}
-
-  class Graph extends React.PureComponent<State, S> {
+  class Graph extends React.PureComponent<State> {
     render() {
       const { map, tanks } = this.props
-      const posInfo = getPosInfo(map)
-      const firstAITank = tanks.find(t => t.active)
+      const posInfoArray = getPosInfoArray(map)
+      const firstAITank = tanks.find(t => t.active && t.side === 'ai')
       let pathElement: JSX.Element = null
       if (map.eagle && firstAITank) {
-        const eagleCol = map.eagle.x / 8
-        const eagleRow = map.eagle.y / 8
-        const eagleT = eagleRow * (FBS * 2 - 1) + eagleCol
+        const eagleCol = (map.eagle.x + 8) / 8
+        const eagleRow = (map.eagle.y + 8) / 8
+        const eagleT = eagleRow * 26 + eagleCol
         const idealFireInfoArray = calculateIdealFireInfoArray(map, eagleT)
         for (const fireInfo of idealFireInfoArray) {
-          posInfo[fireInfo.t].fireInfo = fireInfo
-          posInfo[fireInfo.t].canFire = true
+          posInfoArray[fireInfo.t].fireInfo = fireInfo
+          posInfoArray[fireInfo.t].canFire = true
         }
-        const pathInfo = shortestPathToEagle(posInfo, getT(firstAITank))
+        const firstAITankT =
+          Math.floor((firstAITank.y + 8) / 8) * 26 + Math.floor((firstAITank.x + 8) / 8)
+        const pathInfo = shortestPathToFirePos(posInfoArray, firstAITankT)
         if (pathInfo.path.length) {
           const points = pathInfo.path.map(t => {
-            const row = Math.floor(t / S)
-            const col = t % S
-            return `${col * 8 + 8},${row * 8 + 8}`
+            const row = Math.floor(t / 26)
+            const col = t % 26
+            return `${col * 8},${row * 8}`
           })
           pathElement = (
             <polyline
@@ -61,22 +57,27 @@ if (DEV) {
         <g role="graph">
           {pathElement}
           <g role="free-info">
-            {posInfo.map((posInfo, t) => {
-              const row = Math.floor(t / (FBS * 2 - 1))
-              const col = t % (FBS * 2 - 1)
+            {posInfoArray.map((posInfo, t) => {
+              const row = Math.floor(t / 26)
+              const col = t % 26
+              if (row === 0 || col === 0) {
+                return null
+              }
               const brickCount = posInfo.fireInfo ? posInfo.fireInfo.brickCount : ''
               return (
                 <g key={t}>
                   <circle
                     key={t}
-                    cx={8 * col + 8}
-                    cy={8 * row + 8}
+                    cx={8 * col}
+                    cy={8 * row}
                     r={1.5}
                     fill={
-                      posInfo.canFire ? colors.orange : posInfo.canPass ? colors.green : colors.red
+                      posInfo.canPass
+                        ? posInfo.canFire ? colors.orange : colors.green
+                        : colors.red
                     }
                   />
-                  <text x={8 * col + 8} y={8 * row + 8} dx={1.5} dy={1} fill="white" fontSize="4">
+                  <text x={8 * col} y={8 * row} dx={1.5} dy={1} fill="white" fontSize="4">
                     {brickCount}
                   </text>
                 </g>

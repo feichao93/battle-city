@@ -1,38 +1,37 @@
 import * as _ from 'lodash'
 import { MapRecord } from 'types'
-import { BLOCK_SIZE as BS, BULLET_SIZE, FIELD_BLOCK_SIZE as FBS } from 'utils/constants'
-import IndexHelper from 'utils/IndexHelper'
 import { testCollide } from 'utils/common'
+import IndexHelper from 'utils/IndexHelper'
 
-const S = FBS * 2 - 1
 const PANELTY = 3
+const N = 26
 const threshold = -0.01
 
 const left = (t: number) => {
   const row = getRow(t)
   const col = getCol(t)
-  return col === 0 ? null : row * S + (col - 1)
+  return col === 0 ? null : row * N + (col - 1)
 }
 const right = (t: number) => {
   const row = getRow(t)
   const col = getCol(t)
-  return col === S - 1 ? null : row * S + (col + 1)
+  return col === N - 1 ? null : row * N + (col + 1)
 }
 const up = (t: number) => {
   const row = getRow(t)
   const col = getCol(t)
-  return row === 0 ? null : (row - 1) * S + col
+  return row === 0 ? null : (row - 1) * N + col
 }
 const down = (t: number) => {
   const row = getRow(t)
   const col = getCol(t)
-  return row === S - 1 ? null : (row + 1) * S + col
+  return row === N - 1 ? null : (row + 1) * N + col
 }
 
-const getRow = (t: number) => Math.floor(t / S)
-const getCol = (t: number) => t % S
+const getRow = (t: number) => Math.floor(t / N)
+const getCol = (t: number) => t % N
 
-export type FireEstimate = {
+export interface FireEstimate {
   t: number
   brickCount: number
   distance: number
@@ -42,32 +41,53 @@ export function calculateIdealFireInfoArray(map: MapRecord, target: number): Fir
   const startEstimate = { brickCount: 0, distance: 0, t: target }
   const result: FireEstimate[] = [startEstimate]
   for (const dir of [left, right, up, down]) {
-    let cntPos = dir(target)
-    let count = 0
+    let lastPos = target
+    let cntPos = dir(lastPos)
+    let brickCount = 0
     let distance = 8
+    const e = 0.1
     while (cntPos != null) {
-      const row = getRow(cntPos)
-      const col = getCol(cntPos)
-      const bulletRect = {
-        x: col * 8 + 8 - BULLET_SIZE / 2,
-        y: row * 8 + 8 - BULLET_SIZE / 2,
-        width: BULLET_SIZE,
-        height: BULLET_SIZE,
+      const start = { x: getCol(lastPos) * 8, y: getRow(lastPos) * 8 }
+      const end = { x: getCol(cntPos) * 8, y: getRow(cntPos) * 8 }
+
+      let r1: Rect
+      let r2: Rect
+      if (dir === left) {
+        r1 = { x: end.x + 4 + e, y: end.y - e, width: 4 - 2 * e, height: 2 * e }
+        r2 = { x: end.x + e, y: end.y - e, width: 4 - 2 * e, height: 2 * e }
+      } else if (dir === right) {
+        r1 = { x: start.x + e, y: start.y - e, width: 4 - 2 * e, height: 2 * e }
+        r2 = { x: start.x + e + 4, y: start.y - e, width: 4 - 2 * e, height: 2 * e }
+      } else if (dir === up) {
+        r1 = { x: end.x - e, y: end.y + e + 4, width: 2 * e, height: 4 - 2 * e }
+        r2 = { x: end.x - e, y: end.y + e, width: 2 * e, height: 4 - 2 * e }
+      } else {
+        r1 = { x: start.x - e, y: start.y + e, width: 2 * e, height: 4 - 2 * e }
+        r2 = { x: start.x - e, y: start.y + e + 4, width: 2 * e, height: 4 - 2 * e }
       }
-      const collidedWithSteel = Array.from(IndexHelper.iter('steel', bulletRect)).some(steelT =>
-        map.steels.get(steelT),
-      )
+
+      const collidedWithSteel =
+        Array.from(IndexHelper.iter('steel', r1)).some(steelT => map.steels.get(steelT)) ||
+        Array.from(IndexHelper.iter('steel', r2)).some(steelT => map.steels.get(steelT))
       if (collidedWithSteel) {
         break
       }
-      const collidedWithBrick = Array.from(IndexHelper.iter('brick', bulletRect)).some(brickT =>
+
+      const r1CollidedWithBrick = Array.from(IndexHelper.iter('brick', r1)).some(brickT =>
         map.bricks.get(brickT),
       )
-      if (collidedWithBrick) {
-        count++
+      const r2CollidedWithBrick = Array.from(IndexHelper.iter('brick', r2)).some(brickT =>
+        map.bricks.get(brickT),
+      )
+      if (r1CollidedWithBrick) {
+        brickCount++
       }
-      // TODO count不一定就是brickCount
-      result.push({ t: cntPos, brickCount: count, distance })
+      if (r2CollidedWithBrick) {
+        brickCount++
+      }
+
+      result.push({ t: cntPos, brickCount, distance })
+      lastPos = cntPos
       cntPos = dir(cntPos)
       distance += 8
     }
@@ -81,19 +101,13 @@ export interface PosInfo {
   fireInfo?: FireEstimate
 }
 
-export function getT(p: Point) {
-  const col = Math.floor(p.x / 8)
-  const row = Math.floor(p.y / 8)
-  return row * (FBS * 2 - 1) + col
-}
-
-export function getPosInfo(map: MapRecord): PosInfo[] {
+export function getPosInfoArray(map: MapRecord): PosInfo[] {
   const result: PosInfo[] = []
-  for (const row of _.range(0, 2 * FBS - 1)) {
-    next: for (const col of _.range(0, 2 * FBS - 1)) {
-      const x = col * BS / 2
-      const y = row * BS / 2
-      const rect: Rect = { x, y, width: BS, height: BS }
+  for (const row of _.range(0, 26)) {
+    next: for (const col of _.range(0, 26)) {
+      const x = col * 8 - 8
+      const y = row * 8 - 8
+      const rect: Rect = { x, y, width: 16, height: 16 }
       for (const t of IndexHelper.iter('brick', rect)) {
         if (map.bricks.get(t)) {
           const subject = IndexHelper.getRect('brick', t)
@@ -133,7 +147,7 @@ export interface PathInfo {
   path: number[]
 }
 
-export function shortestPathToEagle(posInfoArray: PosInfo[], start: number) {
+export function shortestPathToFirePos(posInfoArray: PosInfo[], start: number) {
   function getPath(end: number) {
     const path: number[] = []
     while (true) {
