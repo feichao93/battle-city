@@ -99,7 +99,7 @@ export type MapItemType = 'X' | 'E' | 'B' | 'T' | 'R' | 'S' | 'F'
 
 export const MapItemRecord = Record({
   type: 'X' as MapItemType,
-  hex: 0xF,
+  hex: 0xf,
 })
 
 const mapItemRecord = MapItemRecord()
@@ -137,60 +137,61 @@ class DashLines extends React.PureComponent<DashLinesProps> {
     const hcol = t % FBZ
 
     return (
-      <g
-        className="dash-lines"
-        stroke="steelblue"
-        strokeWidth="0.5"
-        strokeDasharray="2 2"
-      >
-        {Range(1, FBZ + 1).map(col =>
-          <line
-            key={col}
-            x1={B * col}
-            y1={0}
-            x2={B * col}
-            y2={totalHeight}
-            strokeOpacity={(hcol === col || hcol === col - 1) ? 1 : 0.3}
-          />
-        ).toArray()}
-        {Range(1, FBZ + 1).map(row =>
-          <line
-            key={row}
-            x1={0}
-            y1={B * row}
-            x2={totalWidth}
-            y2={B * row}
-            strokeOpacity={(hrow === row || hrow === row - 1) ? 1 : 0.3}
-          />
-        ).toArray()}
+      <g className="dash-lines" stroke="steelblue" strokeWidth="0.5" strokeDasharray="2 2">
+        {Range(1, FBZ + 1)
+          .map(col => (
+            <line
+              key={col}
+              x1={B * col}
+              y1={0}
+              x2={B * col}
+              y2={totalHeight}
+              strokeOpacity={hcol === col || hcol === col - 1 ? 1 : 0.3}
+            />
+          ))
+          .toArray()}
+        {Range(1, FBZ + 1)
+          .map(row => (
+            <line
+              key={row}
+              x1={0}
+              y1={B * row}
+              x2={totalWidth}
+              y2={B * row}
+              strokeOpacity={hrow === row || hrow === row - 1 ? 1 : 0.3}
+            />
+          ))
+          .toArray()}
       </g>
     )
   }
 }
 
-const HexBrickWall = ({ x, y, hex }: { x: number, y: number, hex: number }) => (
+const HexBrickWall = ({ x, y, hex }: { x: number; y: number; hex: number }) => (
   <g role="hex-brick-wall">
-    {[[0b0001, 0, 0], [0b0010, 8, 0], [0b0100, 0, 8], [0b1000, 8, 8]].map(([mask, dx, dy], index) =>
-      <g
-        key={index}
-        style={{ opacity: (hex & mask) ? 1 : 0.3 }}
-        transform={`translate(${dx},${dy})`}
-      >
-        <BrickWall x={x} y={y} />
-        <BrickWall x={x + 4} y={y} />
-        <BrickWall x={x} y={y + 4} />
-        <BrickWall x={x + 4} y={y + 4} />
-      </g>
+    {[[0b0001, 0, 0], [0b0010, 8, 0], [0b0100, 0, 8], [0b1000, 8, 8]].map(
+      ([mask, dx, dy], index) => (
+        <g
+          key={index}
+          style={{ opacity: hex & mask ? 1 : 0.3 }}
+          transform={`translate(${dx},${dy})`}
+        >
+          <BrickWall x={x} y={y} />
+          <BrickWall x={x + 4} y={y} />
+          <BrickWall x={x} y={y + 4} />
+          <BrickWall x={x + 4} y={y + 4} />
+        </g>
+      ),
     )}
   </g>
 )
 
-const HexSteelWall = ({ x, y, hex }: { x: number, y: number, hex: number }) => (
+const HexSteelWall = ({ x, y, hex }: { x: number; y: number; hex: number }) => (
   <g role="hex-steel-wall">
-    <SteelWall x={x} y={y} gstyle={{ opacity: (hex & 0b0001) ? 1 : 0.3 }} />
-    <SteelWall x={x + 8} y={y} gstyle={{ opacity: (hex & 0b0010) ? 1 : 0.3 }} />
-    <SteelWall x={x} y={y + 8} gstyle={{ opacity: (hex & 0b0100) ? 1 : 0.3 }} />
-    <SteelWall x={x + 8} y={y + 8} gstyle={{ opacity: (hex & 0b1000) ? 1 : 0.3 }} />
+    <SteelWall x={x} y={y} gstyle={{ opacity: hex & 0b0001 ? 1 : 0.3 }} />
+    <SteelWall x={x + 8} y={y} gstyle={{ opacity: hex & 0b0010 ? 1 : 0.3 }} />
+    <SteelWall x={x} y={y + 8} gstyle={{ opacity: hex & 0b0100 ? 1 : 0.3 }} />
+    <SteelWall x={x + 8} y={y + 8} gstyle={{ opacity: hex & 0b1000 ? 1 : 0.3 }} />
   </g>
 )
 
@@ -214,7 +215,7 @@ const AreaButton = ({
   strokeWidth = 1,
   spreadX = 2,
   spreadY = 1,
- }: AreaButtonProps) => {
+}: AreaButtonProps) => {
   return (
     <rect
       className="area-button"
@@ -239,17 +240,26 @@ type TextWithLineWrapProps = {
 }
 
 // todo 针对单词进行换行
-const TextWithLineWrap = ({ x, y, fill, maxLength, content, lineSpacing = 0.25 * B }: TextWithLineWrapProps) => (
+const TextWithLineWrap = ({
+  x,
+  y,
+  fill,
+  maxLength,
+  content,
+  lineSpacing = 0.25 * B,
+}: TextWithLineWrapProps) => (
   <g role="text-with-line-wrap">
-    {Range(0, Math.ceil(content.length / maxLength)).map(index =>
-      <Text
-        key={index}
-        x={x}
-        y={y + (0.5 * B + lineSpacing) * index}
-        fill={fill}
-        content={content.substring(index * maxLength, (index + 1) * maxLength)}
-      />
-    ).toArray()}
+    {Range(0, Math.ceil(content.length / maxLength))
+      .map(index => (
+        <Text
+          key={index}
+          x={x}
+          y={y + (0.5 * B + lineSpacing) * index}
+          fill={fill}
+          content={content.substring(index * maxLength, (index + 1) * maxLength)}
+        />
+      ))
+      .toArray()}
   </g>
 )
 
@@ -339,13 +349,17 @@ class Editor extends React.Component {
   async loadStateFromFileContent(stage: StageConfig) {
     const stageName = stage.name
     const difficulty = stage.difficulty
-    const enemies = List(stage.enemies.map(line => {
-      const splited = line.split('*')
-      return EnemyConfigRecord({
-        count: Number(splited[0]),
-        tankLevel: splited[1] as TankLevel,
-      })
-    })).setSize(4).map(v => v ? v : enemyConfigRecord)
+    const enemies = List(
+      stage.enemies.map(line => {
+        const splited = line.split('*')
+        return EnemyConfigRecord({
+          count: Number(splited[0]),
+          tankLevel: splited[1] as TankLevel,
+        })
+      }),
+    )
+      .setSize(4)
+      .map(v => (v ? v : enemyConfigRecord))
     const map = List(stage.map).flatMap(line => {
       const items = line.trim().split(/ +/)
       return items.map(item => {
@@ -486,8 +500,10 @@ class Editor extends React.Component {
     if (totalEnemyCount === 0) {
       this.showAlertPopup('no enemy')
       return
-    } else if (totalEnemyCount !== 20 &&
-      !await this.showConfirmPopup('total enemy count is not 20. continue?')) {
+    } else if (
+      totalEnemyCount !== 20 &&
+      !await this.showConfirmPopup('total enemy count is not 20. continue?')
+    ) {
       return
     }
 
@@ -497,13 +513,16 @@ class Editor extends React.Component {
       return
     }
 
-    const content = JSON.stringify({
-      name: stageName.toLowerCase(),
-      difficulty,
-      map: toString(map),
-      enemies: enemies.filter(e => e.count > 0)
-        .map(e => `${e.count}*${e.tankLevel}`),
-    }, null, 2)
+    const content = JSON.stringify(
+      {
+        name: stageName.toLowerCase(),
+        difficulty,
+        map: toString(map),
+        enemies: enemies.filter(e => e.count > 0).map(e => `${e.count}*${e.tankLevel}`),
+      },
+      null,
+      2,
+    )
     saveAs(new Blob([content], { type: 'text/plain;charset=utf-8' }), `stage-${stageName}.json`)
   }
 
@@ -524,7 +543,7 @@ class Editor extends React.Component {
       popup: PopupRecord({
         type: 'confirm',
         message,
-      })
+      }),
     })
     return new Promise<boolean>(resolve => {
       this.resolveConfirm = resolve
@@ -558,7 +577,7 @@ class Editor extends React.Component {
   renderItemSwitchButtons() {
     return (
       <g role="item-switch-buttons">
-        {Object.entries(positionMap).map(([type, y]: [MapItemType, number]) =>
+        {Object.entries(positionMap).map(([type, y]: [MapItemType, number]) => (
           <AreaButton
             key={type}
             x={0.25 * B}
@@ -567,7 +586,7 @@ class Editor extends React.Component {
             height={B}
             onClick={() => this.setState({ itemType: type })}
           />
-        )}
+        ))}
       </g>
     )
   }
@@ -578,38 +597,38 @@ class Editor extends React.Component {
     let steelHexAdjustButtons: JSX.Element[] = null
 
     if (itemType === 'B') {
-      brickHexAdjustButtons = [0b0001, 0b0010, 0b0100, 0b1000].map(bin =>
+      brickHexAdjustButtons = [0b0001, 0b0010, 0b0100, 0b1000].map(bin => (
         <AreaButton
           key={bin}
-          x={B + ((bin & 0b1010) ? 0.5 * B : 0)}
-          y={2.5 * B + ((bin & 0b1100) ? 0.5 * B : 0)}
+          x={B + (bin & 0b1010 ? 0.5 * B : 0)}
+          y={2.5 * B + (bin & 0b1100 ? 0.5 * B : 0)}
           width={0.5 * B}
           height={0.5 * B}
           spreadX={0}
           spreadY={0}
           onClick={() => this.setState({ brickHex: brickHex ^ bin })}
         />
-      )
+      ))
     }
     if (itemType === 'T') {
-      steelHexAdjustButtons = [0b0001, 0b0010, 0b0100, 0b1000].map(bin =>
+      steelHexAdjustButtons = [0b0001, 0b0010, 0b0100, 0b1000].map(bin => (
         <AreaButton
           key={bin}
-          x={B + ((bin & 0b1010) ? 0.5 * B : 0)}
-          y={4 * B + ((bin & 0b1100) ? 0.5 * B : 0)}
+          x={B + (bin & 0b1010 ? 0.5 * B : 0)}
+          y={4 * B + (bin & 0b1100 ? 0.5 * B : 0)}
           width={0.5 * B}
           height={0.5 * B}
           spreadX={0}
           spreadY={0}
           onClick={() => this.setState({ steelHex: steelHex ^ bin })}
         />
-      )
+      ))
     }
     return (
       <g role="hex-adjust-buttons">
         {brickHexAdjustButtons}
         {steelHexAdjustButtons}
-        {itemType === 'B' ?
+        {itemType === 'B' ? (
           <TextButton
             content="f"
             spreadX={0.125 * B}
@@ -617,8 +636,8 @@ class Editor extends React.Component {
             y={2.75 * B}
             onClick={() => this.setState({ itemType: 'B', brickHex: 0xf })}
           />
-          : null}
-        {itemType === 'T' ?
+        ) : null}
+        {itemType === 'T' ? (
           <TextButton
             content="f"
             spreadX={0.125 * B}
@@ -626,7 +645,7 @@ class Editor extends React.Component {
             y={4.25 * B}
             onClick={() => this.setState({ itemType: 'T', steelHex: 0xf })}
           />
-          : null}
+        ) : null}
       </g>
     )
   }
@@ -643,13 +662,7 @@ class Editor extends React.Component {
           <SteelLayer steels={steels} />
           <BrickLayer bricks={bricks} />
           <SnowLayer snows={snows} />
-          {eagle ?
-            <Eagle
-              x={eagle.x}
-              y={eagle.y}
-              broken={eagle.broken}
-            />
-            : null}
+          {eagle ? <Eagle x={eagle.x} y={eagle.y} broken={eagle.broken} /> : null}
           <ForestLayer forests={forests} />
         </g>
         <DashLines t={t} />
@@ -728,7 +741,7 @@ class Editor extends React.Component {
                 disabled={tankLevel === 'basic'}
                 onClick={() => this.onDecEnemyLevel(index)}
               />
-              <Tank tank={TankRecord({ side: 'ai', level: tankLevel, x: B, y: 0 })} />
+              <Tank tank={new TankRecord({ side: 'ai', level: tankLevel, x: B, y: 0 })} />
               <TextButton
                 content={'\u2192'}
                 x={2.25 * B}
@@ -743,12 +756,7 @@ class Editor extends React.Component {
                 disabled={count === 0}
                 onClick={() => this.onDecEnemyCount(index)}
               />
-              <Text
-                content={String(count).padStart(2, '0')}
-                x={4.5 * B}
-                y={0.25 * B}
-                fill="#ccc"
-              />
+              <Text content={String(count).padStart(2, '0')} x={4.5 * B} y={0.25 * B} fill="#ccc" />
               <TextButton
                 content="+"
                 x={5.75 * B}
@@ -778,13 +786,7 @@ class Editor extends React.Component {
           <rect x={0} y={0} width={totalWidth} height={totalHeight} fill="transparent" />
           <g transform={`translate(${2.5 * B}, ${4.5 * B})`}>
             <rect x={-0.5 * B} y={-0.5 * B} width={12 * B} height={4 * B} fill="#e91e63" />
-            <TextWithLineWrap
-              x={0}
-              y={0}
-              fill="#333"
-              maxLength={22}
-              content={popup.message}
-            />
+            <TextWithLineWrap x={0} y={0} fill="#333" maxLength={22} content={popup.message} />
             <TextButton
               x={9.5 * B}
               y={2.25 * B}
@@ -801,13 +803,7 @@ class Editor extends React.Component {
           <rect x={0} y={0} width={totalWidth} height={totalHeight} fill="transparent" />
           <g transform={`translate(${2.5 * B}, ${4.5 * B})`}>
             <rect x={-0.5 * B} y={-0.5 * B} width={12 * B} height={4 * B} fill="#e91e63" />
-            <TextWithLineWrap
-              x={0}
-              y={0}
-              fill="#333"
-              maxLength={22}
-              content={popup.message}
-            />
+            <TextWithLineWrap x={0} y={0} fill="#333" maxLength={22} content={popup.message} />
             <TextButton
               x={7.5 * B}
               y={2 * B}
@@ -863,25 +859,14 @@ class Editor extends React.Component {
             selected={view === 'map'}
             onClick={() => this.onChangeView('map')}
           />
-          <TextButton
-            content="load"
-            x={7 * B}
-            y={0.5 * B}
-            onClick={this.onRequestLoad}
-          />
-          <TextButton
-            content="save"
-            x={9.5 * B}
-            y={0.5 * B}
-            onClick={this.onSave}
-          />
+          <TextButton content="load" x={7 * B} y={0.5 * B} onClick={this.onRequestLoad} />
+          <TextButton content="save" x={9.5 * B} y={0.5 * B} onClick={this.onSave} />
         </g>
         {this.renderPopup()}
       </svg>
     )
   }
 }
-
 
 ReactDOM.render(
   <Provider store={simpleStore}>

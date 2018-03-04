@@ -1,14 +1,14 @@
 import { Record } from 'immutable'
 
-const ScoreRecord = Record({
+const ScoreRecordBase = Record({
   scoreId: 0,
   score: 100,
   x: 0,
   y: 0,
 })
 
-const record = ScoreRecord()
-
-type ScoreRecord = typeof record
-
-export default ScoreRecord
+export default class ScoreRecord extends ScoreRecordBase {
+  static fromJS(object: any) {
+    return new ScoreRecord(object)
+  }
+}

@@ -162,7 +162,7 @@ function* scoreFromPickPowerUp(action: Action.PickPowerUpAction) {
   const scoreId = getNextId('score')
   yield put<Action.AddScoreAction>({
     type: 'ADD_SCORE',
-    score: ScoreRecord({
+    score: new ScoreRecord({
       scoreId,
       score: 500,
       x,
@@ -190,7 +190,7 @@ function* spawnPowerUpIfNeccessary(action: Action.Hurt | Action.Kill) {
     const powerUpName = _.sample(POWER_UP_NAMES)
     const position: Point = _.sample(yield select(selectors.validPowerUpSpawnPositions))
     yield* powerUpSaga(
-      PowerUpRecord({
+      new PowerUpRecord({
         powerUpId: getNextId('power-up'),
         powerUpName,
         visible: true,

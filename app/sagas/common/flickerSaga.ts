@@ -1,6 +1,6 @@
 import { put } from 'redux-saga/effects'
 import { getNextId, frame as f } from 'utils/common'
-import { timing } from 'sagas/common';
+import { timing } from 'sagas/common'
 import { applySpawnSpeed } from 'sagas/common/timing'
 import { FlickerRecord } from 'types'
 
@@ -23,10 +23,10 @@ const flickerShapeTimingConfig = [
 export default function* flickerSaga(x: number, y: number, spawnSpeed: number) {
   const flickerId = getNextId('flicker')
 
-  yield* timing(applySpawnSpeed(flickerShapeTimingConfig, spawnSpeed), function* (shape) {
+  yield* timing(applySpawnSpeed(flickerShapeTimingConfig, spawnSpeed), function*(shape) {
     yield put<Action.AddOrUpdateFlickerAction>({
       type: 'ADD_OR_UPDATE_FLICKER',
-      flicker: FlickerRecord({ flickerId, x, y, shape }),
+      flicker: new FlickerRecord({ flickerId, x, y, shape }),
     })
   })
 

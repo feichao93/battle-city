@@ -6,7 +6,7 @@ export type TextsMap = Map<TextId, TextRecord>
 
 export default function textsReducer(state = Map() as TextsMap, action: Action) {
   if (action.type === 'SET_TEXT') {
-    return state.set(action.textId, TextRecord(action))
+    return state.set(action.textId, new TextRecord(action))
   } else if (action.type === 'UPDATE_TEXT_POSITION') {
     const { textIds, direction, distance } = action
     const set = Set(textIds)

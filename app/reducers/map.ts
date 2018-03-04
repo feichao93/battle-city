@@ -1,8 +1,8 @@
-import parseStageMap from 'utils/parseStageMap'
 import stageConfigs from 'stages'
-import { mapRecord } from 'types'
+import { MapRecord } from 'types'
+import parseStageMap from 'utils/parseStageMap'
 
-const initState = mapRecord.set('eagle', null)
+const initState = new MapRecord({ eagle: null })
 
 export default function mapReducer(state = initState, action: Action) {
   if (action.type === 'LOAD_STAGE_MAP') {

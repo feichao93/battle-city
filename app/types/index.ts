@@ -1,4 +1,4 @@
-export { default as TankRecord, PlainTankRecord } from 'types/TankRecord'
+export { default as TankRecord } from 'types/TankRecord'
 export { default as PowerUpRecord } from 'types/PowerUpRecord'
 export { default as ScoreRecord } from 'types/ScoreRecord'
 export { default as ExplosionRecord } from 'types/ExplosionRecord'
@@ -6,8 +6,8 @@ export { default as FlickerRecord } from 'types/FlickerRecord'
 export { default as TextRecord } from 'types/TextRecord'
 export { default as BulletRecord } from 'types/BulletRecord'
 export { default as PlayerRecord } from 'types/PlayerRecord'
-export { default as MapRecord, mapRecord, PlainMapRecord } from 'types/MapRecord'
-export { default as EagleRecord, eagleRecord, PlainEagleRecord } from 'types/EagleRecord'
+export { default as MapRecord } from 'types/MapRecord'
+export { default as EagleRecord } from 'types/EagleRecord'
 export { State } from 'reducers/index'
 export { PlayersMap } from 'reducers/players'
 export { BulletsMap } from 'reducers/bullets'
@@ -15,9 +15,6 @@ export { TextsMap } from 'reducers/texts'
 export { TanksMap } from 'reducers/tanks'
 export { ScoresMap } from 'reducers/scores'
 export { ExplosionsMap } from 'reducers/explosions'
-
-import { PlainTankRecord } from 'types/TankRecord'
-import { PlainMapRecord } from 'types/MapRecord'
 
 /** 记录一架坦克的开火信息 */
 export interface TankFireInfo {
@@ -129,7 +126,7 @@ declare global {
   type Note = Note.Note
 
   namespace Note {
-    type Note = BulletComplete | Reach | QueryResultNote
+    type Note = BulletComplete | Reach
 
     interface BulletComplete {
       type: 'bullet-complete'
@@ -137,39 +134,6 @@ declare global {
 
     interface Reach {
       type: 'reach'
-    }
-
-    interface QueryResultNote {
-      type: 'query-result'
-      result: QueryResult
-    }
-  }
-
-  type QueryResult = QueryResult.QueryResult
-
-  namespace QueryResult {
-    type QueryResult = MapInfo | MyTankInfo | ActiveTanksInfo | MyFireInfo
-
-    interface MyTankInfo {
-      type: 'my-tank-info'
-      tank: PlainTankRecord
-    }
-
-    interface MapInfo {
-      type: 'map-info'
-      map: PlainMapRecord
-    }
-
-    interface ActiveTanksInfo {
-      type: 'active-tanks-info'
-      tanks: PlainTankRecord[]
-    }
-
-    interface MyFireInfo {
-      type: 'my-fire-info'
-      canFire: boolean
-      cooldown: number
-      bulletCount: number
     }
   }
 }

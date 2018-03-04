@@ -1,9 +1,9 @@
-import { Record, Repeat, Map as IMap } from 'immutable'
+import { Record, Repeat, Map as IMap, List } from 'immutable'
 import { N_MAP } from 'utils/constants'
-import { eagleRecord, PlainEagleRecord } from 'types/EagleRecord'
+import EagleRecord from 'types/EagleRecord'
 
-const MapRecord = Record({
-  eagle: eagleRecord,
+const MapRecordBase = Record({
+  eagle: new EagleRecord(),
   bricks: Repeat(false, N_MAP.BRICK ** 2).toList(),
   steels: Repeat(false, N_MAP.STEEL ** 2).toList(),
   rivers: Repeat(false, N_MAP.RIVER ** 2).toList(),
@@ -12,17 +12,15 @@ const MapRecord = Record({
   restrictedAreas: IMap<AreaId, Rect>(),
 })
 
-export const mapRecord = MapRecord()
-type MapRecord = typeof mapRecord
-
-export default MapRecord
-
-export interface PlainMapRecord {
-  eagle: PlainEagleRecord
-  bricks: boolean[]
-  steels: boolean[]
-  rivers: boolean[]
-  snows: boolean[]
-  forests: boolean[]
-  restrictedAreas: { [areaId: number]: Rect }
+export default class MapRecord extends MapRecordBase {
+  static fromJS(object: any) {
+    return new MapRecord(object)
+      .update('eagle', EagleRecord.fromJS)
+      .update('bricks', List)
+      .update('steels', List)
+      .update('rivers', List)
+      .update('snows', List)
+      .update('forests', List)
+      .update('restrictedAreas', IMap)
+  }
 }

@@ -78,8 +78,7 @@ module.exports = function(env) {
   return {
     context: __dirname,
     target: 'web',
-    // devtool: isProduction ? false : 'source-map',
-    devtool: false,
+    devtool: isProduction ? false : 'source-map',
 
     entry,
 

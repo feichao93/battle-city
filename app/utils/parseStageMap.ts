@@ -115,9 +115,9 @@ export default function parseStageMap(map: StageConfig['map']) {
     }
   }
 
-  return MapRecord({
+  return new MapRecord({
     eagle: eaglePos
-      ? EagleRecord({
+      ? new EagleRecord({
           x: eaglePos.x,
           y: eaglePos.y,
           broken: false,

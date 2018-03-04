@@ -126,14 +126,16 @@ class GameTitleScene extends React.PureComponent<P, S> {
         <Text content="2 players" x={5.5 * B} y={9.5 * B} fill="white" />
         <Text content="editor" x={5.5 * B} y={10.5 * B} fill="white" />
         <Tank
-          tank={TankRecord({
-            side: 'human',
-            direction: 'right',
-            color: 'yellow',
-            moving: true,
-            x: 4 * B,
-            y: y(choice),
-          })}
+          tank={
+            new TankRecord({
+              side: 'human',
+              direction: 'right',
+              color: 'yellow',
+              moving: true,
+              x: 4 * B,
+              y: y(choice),
+            })
+          }
         />
 
         <Text content={'\u00a9 1980 1985 NAMCO LTD.'} x={2 * B} y={12.5 * B} />

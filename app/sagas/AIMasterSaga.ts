@@ -50,7 +50,7 @@ export default function* AIMasterSaga() {
         const playerName = `AI-${getNextId('AI-player')}`
         yield put<Action>({
           type: 'CREATE_PLAYER',
-          player: PlayerRecord({
+          player: new PlayerRecord({
             playerName,
             lives: Infinity,
             side: 'ai',
@@ -61,7 +61,7 @@ export default function* AIMasterSaga() {
         const level = remainingEnemies.first()
         const hp = level === 'armor' ? 4 : 1
         const tankId = yield* spawnTank(
-          TankRecord({
+          new TankRecord({
             x,
             y,
             side: 'ai',

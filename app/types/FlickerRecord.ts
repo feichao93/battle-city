@@ -1,14 +1,14 @@
 import { Record } from 'immutable'
 
-const FlickerRecord = Record({
+const FlickerRecordBase = Record({
   flickerId: 0,
   x: 0,
   y: 0,
   shape: 0 as FlickerShape,
 })
 
-const record = FlickerRecord()
-
-type FlickerRecord = typeof record
-
-export default FlickerRecord
+export default class FlickerRecord extends FlickerRecordBase {
+  static fromJS(object: any) {
+    return new FlickerRecord(object)
+  }
+}

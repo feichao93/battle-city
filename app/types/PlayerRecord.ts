@@ -1,7 +1,7 @@
 import { Record } from 'immutable'
 import TankRecord from 'types/TankRecord'
 
-const PlayerRecord = Record({
+const PlayerRecordBase = Record({
   playerName: null as PlayerName,
   side: 'human' as Side,
   activeTankId: -1,
@@ -11,8 +11,8 @@ const PlayerRecord = Record({
   reservedTank: null as TankRecord,
 })
 
-const record = PlayerRecord()
-
-type PlayerRecord = typeof record
-
-export default PlayerRecord
+export default class PlayerRecord extends PlayerRecordBase {
+  static fromJS(object: any) {
+    return new PlayerRecord(object).update('reservedTank', TankRecord.fromJS)
+  }
+}

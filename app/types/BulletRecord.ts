@@ -1,6 +1,6 @@
 import { Record } from 'immutable'
 
-const BulletRecord = Record({
+const BulletRecordBase = Record({
   bulletId: 0 as BulletId,
   // 子弹的方向
   direction: 'up' as Direction,
@@ -23,8 +23,8 @@ const BulletRecord = Record({
   playerName: null as PlayerName,
 })
 
-const record = BulletRecord()
-
-type BulletRecord = typeof record
-
-export default BulletRecord
+export default class BulletRecord extends BulletRecordBase {
+  static fromJS(object: any) {
+    return new BulletRecord(object)
+  }
+}

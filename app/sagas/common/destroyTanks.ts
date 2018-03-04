@@ -8,7 +8,7 @@ function* scoreFromKillTank(tank: TankRecord) {
   const scoreId: ScoreId = getNextId('score')
   yield put<Action.AddScoreAction>({
     type: 'ADD_SCORE',
-    score: ScoreRecord({
+    score: new ScoreRecord({
       score: TANK_KILL_SCORE_MAP[tank.level],
       scoreId,
       x: tank.x,
@@ -33,10 +33,10 @@ function* explosionFromTank(tank: TankRecord) {
   ]
 
   const explosionId = getNextId('explosion')
-  yield* timing(tankExplosionShapeTiming, function* (shape) {
+  yield* timing(tankExplosionShapeTiming, function*(shape) {
     yield put<Action.AddOrUpdateExplosion>({
       type: 'ADD_OR_UPDATE_EXPLOSION',
-      explosion: ExplosionRecord({
+      explosion: new ExplosionRecord({
         cx: tank.x + 8,
         cy: tank.y + 8,
         shape,
@@ -67,5 +67,10 @@ function* killTank(tank: TankRecord) {
 
 // 移除坦克 & 产生爆炸效果 & 显示击杀得分信息
 export default function* destroyTanks(tanks: TanksMap) {
-  yield all(tanks.toArray().map(killTank))
+  yield all(
+    tanks
+      .toIndexedSeq()
+      .toArray()
+      .map(killTank),
+  )
 }

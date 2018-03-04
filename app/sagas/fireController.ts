@@ -31,7 +31,7 @@ export default function* fireController(playerName: string, shouldFire: () => bo
         const { x, y } = calculateBulletStartPosition(tank)
         yield put<Action.AddBulletAction>({
           type: 'ADD_BULLET',
-          bullet: BulletRecord({
+          bullet: new BulletRecord({
             bulletId: getNextId('bullet'),
             direction: tank.direction,
             x,

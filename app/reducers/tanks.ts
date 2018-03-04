@@ -6,7 +6,7 @@ export type TanksMap = Map<TankId, TankRecord>
 
 export default function tanks(state = Map() as TanksMap, action: Action) {
   if (action.type === 'ADD_TANK') {
-    return state.set(action.tank.tankId, TankRecord(action.tank))
+    return state.set(action.tank.tankId, new TankRecord(action.tank))
   } else if (action.type === 'HURT') {
     const tankId = action.targetTank.tankId
     return state.update(tankId, t => t.update('hp', hp => hp - action.hurt))

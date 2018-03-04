@@ -43,7 +43,7 @@ function* startStage(playerName: string, tankColor: TankColor) {
 
     const tankPrototype =
       player.reservedTank ||
-      TankRecord({
+      new TankRecord({
         side: 'human',
         color: tankColor,
         level: 'basic',
@@ -83,7 +83,7 @@ function* killed(playerName: string, tankColor: TankColor) {
   if (player.lives > 0) {
     yield put({ type: 'DECREMENT_PLAYER_LIFE', playerName })
     const tankId = yield* spawnTank(
-      TankRecord({
+      new TankRecord({
         x: 4 * BLOCK_SIZE,
         y: 12 * BLOCK_SIZE,
         side: 'human',
@@ -103,7 +103,7 @@ function* killed(playerName: string, tankColor: TankColor) {
 export default function* humanPlayerSaga(playerName: string, tankColor: TankColor) {
   yield put<Action>({
     type: 'CREATE_PLAYER',
-    player: PlayerRecord({
+    player: new PlayerRecord({
       playerName,
       lives: 3,
       side: 'human',

@@ -30,7 +30,7 @@ export default function* directionController(playerName: string, getPlayerInput:
       const turned = tank.set('direction', direction) // 转向之后的tank对象
       // 要进行校准的坐标字段
       const { xy } = getDirectionInfo(direction, true)
-      const n = tank.get(xy) / 8
+      const n = tank.get(xy, undefined) / 8
       const useFloor = turned.set(xy, Math.floor(n) * 8)
       const useCeil = turned.set(xy, Math.ceil(n) * 8)
       const canMoveWhenUseFloor = yield select(canTankMove, useFloor)

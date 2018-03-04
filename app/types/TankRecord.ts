@@ -1,6 +1,6 @@
 import { Record } from 'immutable'
 
-const TankRecord = Record({
+const TankRecordType = Record({
   active: true,
   tankId: 0,
   x: 0,
@@ -21,11 +21,8 @@ const TankRecord = Record({
   cooldown: 0,
 })
 
-const record = TankRecord()
-const plainTankRecord = record.toObject()
-
-type TankRecord = typeof record
-
-export default TankRecord
-
-export type PlainTankRecord = typeof plainTankRecord
+export default class TankRecord extends TankRecordType {
+  static fromJS(object: any) {
+    return new TankRecord(object)
+  }
+}

@@ -1,6 +1,6 @@
 import { Record } from 'immutable'
 
-const PowerUpRecord = Record({
+const PowerUpRecordBase = Record({
   powerUpId: 0 as PowerUpId,
   x: 0,
   y: 0,
@@ -8,8 +8,8 @@ const PowerUpRecord = Record({
   powerUpName: 'tank' as PowerUpName,
 })
 
-const record = PowerUpRecord()
-
-type PowerUpRecord = typeof record
-
-export default PowerUpRecord
+export default class PowerUpRecord extends PowerUpRecordBase {
+  static fromJS(object: any) {
+    return new PowerUpRecord(object)
+  }
+}
