@@ -10,6 +10,7 @@ import texts, { TextsMap } from 'reducers/texts'
 import powerUps, { PowerUpsMap } from 'reducers/powerUps'
 import scores, { ScoresMap } from 'reducers/scores'
 import { MapRecord } from 'types'
+import devOnly from 'components/dev-only/reducer'
 
 export interface State {
   game: GameRecord
@@ -23,6 +24,7 @@ export interface State {
   texts: TextsMap
   powerUps: PowerUpsMap
   scores: ScoresMap
+  devOnly: any
 }
 
 export function time(state = 0, action: Action) {
@@ -45,4 +47,5 @@ export default combineReducers<State>({
   texts,
   powerUps,
   scores,
+  devOnly,
 })

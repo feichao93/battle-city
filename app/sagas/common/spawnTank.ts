@@ -13,7 +13,9 @@ export default function* spawnTank(tank: TankRecord, spawnSpeed = 1) {
     area: asRect(tank),
   })
 
-  yield* flickerSaga(tank.x, tank.y, spawnSpeed)
+  if (!DEV) {
+    yield* flickerSaga(tank.x, tank.y, spawnSpeed)
+  }
 
   const tankId = getNextId('tank')
   yield put({

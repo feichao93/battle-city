@@ -81,6 +81,8 @@ declare global {
       | UpdateComingStageName
       | AddRestrictedArea
       | RemoveRestrictedArea
+      | SetAITankPath
+      | RemoveAITankPath
 
     export type ActionType = Action['type']
 
@@ -372,6 +374,15 @@ declare global {
     export interface RemoveRestrictedArea {
       type: 'REMOVE_RESTRICTED_AREA'
       areaId: AreaId
+    }
+
+    export interface SetAITankPath {
+      type: 'SET_AI_TANK_PATH'
+      path: number[]
+    }
+
+    export interface RemoveAITankPath {
+      type: 'REMOVE_AI_TANK_PATH'
     }
   }
 }

@@ -10,11 +10,14 @@ import directionController from '../sagas/directionController'
 import fireController from '../sagas/fireController'
 import { getDirectionInfo, reverseDirection } from '../utils/common'
 import * as selectors from '../utils/selectors'
-import {
-  shortestPathToFirePos,
-  getPosInfoArray,
-  calculateIdealFireInfoArray,
-} from 'components/dev-only/shortest-path'
+import { shortestPath, getPosInfoArray, getTankT } from 'ai/shortest-path'
+
+const logAI = (...args: any[]) =>
+  console.log('%c AI ', 'background: #666;color:white;font-weight: bold', ...args)
+const logNote = (...args: any[]) =>
+  console.log('%c NOTE ', 'background: #222; color: #bada55', ...args)
+const logCommand = (...args: any[]) =>
+  console.log('%c COMMAND ', 'background: #222; color: steelblue; font-weight: bold', ...args)
 
 function* waitFor(emitter: EventEmitter, expectedType: string) {
   let callback: any
@@ -41,24 +44,57 @@ function* waitFor(emitter: EventEmitter, expectedType: string) {
 //     }
 //   }
 // })
+function getDirection(t1: number, t2: number): Direction {
+  if (t2 === t1 + 1) return 'right'
+  if (t2 === t1 - 1) return 'left'
+  if (t2 === t1 + 26) return 'down'
+  if (t2 === t1 - 26) return 'up'
+  throw new Error('invalid direction')
+}
+function* followPath(ctx: AITankCtx, path: number[]) {
+  logAI('start-follow-path')
+  yield put<Action>({ type: 'SET_AI_TANK_PATH', path })
+  const tank: TankRecord = yield select(selectors.playerTank, ctx.playerName)
+  const start = getTankT(tank)
+  let index = path.indexOf(start)
+  console.assert(index !== -1)
+
+  while (index < path.length - 1) {
+    const direction = getDirection(path[index], path[index + 1])
+    yield put<AICommand>(ctx.commandChannel, { type: 'turn', direction })
+    const delta = path[index + 1] - path[index]
+    let step = 1
+    while (
+      index + step + 1 < path.length &&
+      path[index + step + 1] - path[index + step] === delta
+    ) {
+      step++
+    }
+    yield delay(100)
+    yield put<AICommand>(ctx.commandChannel, { type: 'forward', forwardLength: step * 8 })
+    // TODO 需要考虑移动失败（例如碰到了障碍物）的情况
+    yield waitFor(ctx.noteEmitter, 'reach')
+    index += step
+  }
+  yield put<Action>({ type: 'REMOVE_AI_TANK_PATH' })
+}
 
 function* enterFollowPathMode(ctx: AITankCtx) {
   const tank: TankRecord = yield select(selectors.playerTank, ctx.playerName)
   const { map }: State = yield select()
   const posInfoArray = getPosInfoArray(map)
-  const eagleCol = (map.eagle.x + 8) / 8
-  const eagleRow = (map.eagle.y + 8) / 8
-  const eagleT = eagleRow * 26 + eagleCol
-  const idealFireInfoArray = calculateIdealFireInfoArray(map, eagleT)
-  for (const fireInfo of idealFireInfoArray) {
-    posInfoArray[fireInfo.t].fireInfo = fireInfo
-    posInfoArray[fireInfo.t].canFire = true
-  }
-  const tankRow = Math.floor((tank.y + 8) / 8)
-  const tankCol = Math.floor((tank.x + 8) / 8)
-  const pathInfo = shortestPathToFirePos(posInfoArray, tankRow * 26 + tankCol)
-  // console.log(posInfoArray)
-  // console.log(pathInfo)
+  const estMap = posInfoArray[getTankT(map.eagle)].getIdealFireEstMap(map)
+  const { path } = shortestPath(
+    posInfoArray,
+    getTankT(tank),
+    ({ t }) => estMap.has(t),
+    (step, posInfo) => {
+      const est = estMap.get(posInfo.t)
+      if (est.steelCount > 0) return Infinity
+      return step + est.brickCount * 3
+    },
+  )
+  yield* followPath(ctx, path)
 }
 
 function* moveLoop(ctx: AITankCtx) {
@@ -67,7 +103,7 @@ function* moveLoop(ctx: AITankCtx) {
     if (skipDelayAtFirstTime) {
       skipDelayAtFirstTime = false
     } else {
-      yield race({
+      const raceResult = yield race({
         timeout: delay(3e3),
         reach: waitFor(ctx.noteEmitter, 'reach'),
         // TODO implement notifyWhenBulletComplete
@@ -80,29 +116,32 @@ function* moveLoop(ctx: AITankCtx) {
       continue
     }
 
-    yield* enterFollowPathMode(ctx)
-    const { map, tanks }: State = yield select()
-    const env = getEnv(map, tanks, tank)
-    const priorityMap = calculatePriorityMap(env)
+    if (Math.random() < 0.5) {
+      yield* enterFollowPathMode(ctx)
+    } else {
+      const { map, tanks }: State = yield select()
+      const env = getEnv(map, tanks, tank)
+      const priorityMap = calculatePriorityMap(env)
 
-    // 降低回头的优先级
-    const reverse = reverseDirection(tank.direction)
-    priorityMap[reverse] = Math.min(priorityMap[reverse], 1)
+      // 降低回头的优先级
+      const reverse = reverseDirection(tank.direction)
+      priorityMap[reverse] = Math.min(priorityMap[reverse], 1)
 
-    const nextDirection = getRandomDirection(priorityMap)
+      const nextDirection = getRandomDirection(priorityMap)
 
-    if (tank.direction !== nextDirection) {
-      yield put<AICommand>(ctx.commandChannel, { type: 'turn', direction: nextDirection })
-      tank = tank.set('direction', nextDirection)
-      // 等待足够长的时间, 保证turn命令已经被处理
-      yield delay(100)
+      if (tank.direction !== nextDirection) {
+        yield put<AICommand>(ctx.commandChannel, { type: 'turn', direction: nextDirection })
+        tank = tank.set('direction', nextDirection)
+        // 等待足够长的时间, 保证turn命令已经被处理
+        yield delay(100)
+      }
+
+      // TODO tank应该更加偏向于走到下一个 *路口*
+      yield put<AICommand>(ctx.commandChannel, {
+        type: 'forward',
+        forwardLength: env.barrierInfo[tank.direction].length,
+      })
     }
-
-    // TODO tank应该更加偏向于走到下一个 *路口*
-    yield put<AICommand>(ctx.commandChannel, {
-      type: 'forward',
-      forwardLength: env.barrierInfo[tank.direction].length,
-    })
   }
 }
 
@@ -138,6 +177,7 @@ function* fireLoop(ctx: AITankCtx) {
 function* handleCommands(ctx: AITankCtx) {
   while (true) {
     const command: AICommand = yield take(ctx.commandChannel)
+    logCommand(command)
     if (command.type === 'forward') {
       const tank = yield select(selectors.playerTank, ctx.playerName)
       if (tank == null) {
@@ -173,6 +213,7 @@ function* getAIInput(ctx: AITankCtx) {
     const maxDistance = ctx.forwardLength - movedLength
     if (movedLength === ctx.forwardLength) {
       ctx.forwardLength = 0
+      logNote('reach')
       ctx.noteEmitter.emit('reach')
       return null
     } else {

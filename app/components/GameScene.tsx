@@ -1,6 +1,7 @@
 import BrickLayer from 'components/BrickLayer'
 import Bullet from 'components/Bullet'
-import Graph from 'components/dev-only/Graph'
+import PosInfoGraph from 'components/dev-only/PosInfoGraph'
+import TankPath from 'components/dev-only/TankPath'
 import RestrictedAreaLayer from 'components/dev-only/RestrictedAreaLayer'
 import Eagle from 'components/Eagle'
 import Explosion from 'components/Explosion'
@@ -72,7 +73,8 @@ class GameScene extends React.Component<State> {
           <g role="score-layer">
             {scores.map(s => <Score key={s.scoreId} score={s.score} x={s.x} y={s.y} />).toArray()}
           </g>
-          <Graph />
+          <PosInfoGraph />
+          <TankPath />
         </g>
         <TextLayer texts={texts} />
       </g>
