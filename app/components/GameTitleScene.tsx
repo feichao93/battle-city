@@ -5,38 +5,18 @@ import BrickWall from 'components/BrickWall'
 import Text from 'components/Text'
 import TextButton from 'components/TextButton'
 import { Tank } from 'components/tanks'
-import { ITEM_SIZE_MAP, BLOCK_SIZE as B, CONTROL_CONFIG } from 'utils/constants'
-import { TankRecord, State } from 'types'
+import { BLOCK_SIZE as B, ITEM_SIZE_MAP } from 'utils/constants'
+import { State, TankRecord } from 'types'
 
-type Choice = '1-player' | '2-players' | 'editor'
+type Choice = '1-player' | 'editor' | 'gallery'
 
 function y(choice: Choice) {
   if (choice === '1-player') {
     return 8.25 * B
-  } else if (choice === '2-players') {
+  } else if (choice === 'editor') {
     return 9.25 * B
   } else {
     return 10.25 * B
-  }
-}
-
-function nextChoice(choice: Choice) {
-  if (choice === '1-player') {
-    return '2-players'
-  } else if (choice === '2-players') {
-    return 'editor'
-  } else {
-    return '1-player'
-  }
-}
-
-function prevChoice(choice: Choice) {
-  if (choice === '1-player') {
-    return 'editor'
-  } else if (choice === '2-players') {
-    return '1-player'
-  } else {
-    return '2-players'
   }
 }
 
@@ -53,32 +33,10 @@ class GameTitleScene extends React.PureComponent<P, S> {
     choice: '1-player' as Choice,
   }
 
-  componentDidMount() {
-    document.addEventListener('keypress', this.handleKeyPress)
-  }
-
-  componentWillUnmount() {
-    document.removeEventListener('keypress', this.handleKeyPress)
-  }
-
-  handleKeyPress = (event: KeyboardEvent) => {
-    const { dispatch } = this.props
-    const { choice } = this.state
-    const config = CONTROL_CONFIG.player1
-    if (event.key === config.down) {
-      this.setState({ choice: nextChoice(choice) })
-    } else if (event.key === config.up) {
-      this.setState({ choice: prevChoice(choice) })
-    } else if (event.key === config.fire) {
-      if (choice === '1-player') {
-        dispatch<Action>({ type: 'GAMESTART' })
-      }
-    }
-  }
-
   render() {
     const size = ITEM_SIZE_MAP.BRICK
     const scale = 4
+    const { dispatch } = this.props
     const { choice } = this.state
     return (
       <g role="game-title-scene">
@@ -122,9 +80,30 @@ class GameTitleScene extends React.PureComponent<P, S> {
             fill="url(#pattern-brickwall)"
           />
         </g>
-        <Text content="1 player" x={5.5 * B} y={8.5 * B} fill="white" />
-        <Text content="2 players" x={5.5 * B} y={9.5 * B} fill="white" />
-        <Text content="editor" x={5.5 * B} y={10.5 * B} fill="white" />
+        <TextButton
+          content="1 player"
+          x={5.5 * B}
+          y={8.5 * B}
+          textFill="white"
+          onMouseOver={() => this.setState({ choice: '1-player' })}
+          onClick={() => dispatch<Action>({ type: 'GAMESTART' })}
+        />
+        <TextButton
+          content="editor"
+          x={5.5 * B}
+          y={9.5 * B}
+          textFill="white"
+          onMouseOver={() => this.setState({ choice: 'editor' })}
+          onClick={() => window.open('editor.html')}
+        />
+        <TextButton
+          content="gallery"
+          x={5.5 * B}
+          y={10.5 * B}
+          textFill="white"
+          onMouseOver={() => this.setState({ choice: 'gallery' })}
+          onClick={() => window.open('gallery.html')}
+        />
         <Tank
           tank={
             new TankRecord({

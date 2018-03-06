@@ -45,8 +45,7 @@
     "typescript": "^2.2.2",
     "uglifyjs-webpack-plugin": "^1.2.2",
     "webpack": "^3.8.1",
-    "webpack-dev-server": "^2.9.4",
-    "worker-loader": "^1.1.1"
+    "webpack-dev-server": "^2.9.4"
   },
   "resolutions": {
     "@types/react": "15.6.7"
