@@ -2,7 +2,7 @@ const path = require('path')
 const webpack = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
-const MinifyPlugin = require('babel-minify-webpack-plugin')
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 const moment = require('moment')
 const packageInfo = require('./package.json')
 
@@ -71,7 +71,7 @@ module.exports = function(env) {
         filename: 'commons.js',
       }),
       new ExtractTextPlugin('[name]-[contenthash:6].css'),
-      new MinifyPlugin(),
+      new UglifyJsPlugin({ uglifyOptions: { compress: { inline: false } } }),
     )
   }
 

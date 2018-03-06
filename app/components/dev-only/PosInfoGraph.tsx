@@ -1,4 +1,11 @@
-import { FireEstimate, getPosInfoArray, getTankT } from 'ai/shortest-path'
+import {
+  FireEstimate,
+  getPosInfoArray,
+  getSpot,
+  around,
+  mergeEstMap,
+  getFireResist,
+} from 'ai/shortest-path'
 import * as _ from 'lodash'
 import * as React from 'react'
 import { connect } from 'react-redux'
@@ -19,7 +26,9 @@ if (DEV) {
       const posInfoArray = getPosInfoArray(map)
       let estMap = new Map<number, FireEstimate>()
       if (map.eagle) {
-        estMap = posInfoArray[getTankT(map.eagle)].getIdealFireEstMap(map)
+        estMap = around(getSpot(map.eagle))
+          .map(spot => posInfoArray[spot].getIdealFireEstMap(map))
+          .reduce(mergeEstMap)
       }
       return (
         <g className="pos-info-graph">
@@ -30,7 +39,7 @@ if (DEV) {
               return null
             }
             const est = estMap.get(t)
-            const brickCount = est ? est.brickCount : ''
+            const fireResist = est ? getFireResist(est) : ''
             return (
               <g key={t}>
                 <circle
@@ -40,8 +49,8 @@ if (DEV) {
                   r={1.5}
                   fill={posInfo.canPass ? (est ? colors.orange : colors.green) : colors.red}
                 />
-                <text x={8 * col} y={8 * row} dx={1.5} dy={1} fill="white" fontSize="4">
-                  {brickCount}
+                <text x={8 * col} y={8 * row} dx={1.5} dy={1} fill="white" fontSize="2.5">
+                  {fireResist}
                 </text>
               </g>
             )

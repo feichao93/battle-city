@@ -4,7 +4,9 @@ import { BLOCK_SIZE, FIELD_SIZE, ITEM_SIZE_MAP, TANK_SIZE } from 'utils/constant
 import { asRect, getDirectionInfo } from 'utils/common'
 import IndexHelper from 'utils/IndexHelper'
 
-const logAhead = (...args: any[]) => 0 /* console.log('[ahead]', ...args) */
+const logAhead = (...args: any[]) => 0
+
+/* console.log('[ahead]', ...args) */
 
 /** AI是否可以破坏该障碍物 */
 function canDestroy(barrierType: BarrierType) {
@@ -89,26 +91,26 @@ export const FireThreshhold = {
   eagle(forwardLength: number) {
     logAhead('eagle:', forwardLength)
     if (forwardLength < 0) {
-      return 0
-    } else if (forwardLength <= 4 * BLOCK_SIZE) {
+      return 0.2
+    } else if (forwardLength <= 6 * BLOCK_SIZE) {
       return 0.8
     }
   },
   humanTank(forwardLength: number) {
     logAhead('human-tank:', forwardLength)
     if (forwardLength < 0) {
-      return 0
-    } else if (forwardLength <= 4 * BLOCK_SIZE) {
+      return 0.2
+    } else if (forwardLength <= 6 * BLOCK_SIZE) {
       return 0.6
     }
   },
   destroyable(forwardLength: number) {
     logAhead('destroyable:', forwardLength)
-    // 随着距离增加fire概率减小; 距离0时, 一定fire; 距离10*BLOCK_SIZE时, 不fire
-    return 1 - forwardLength / 10 * BLOCK_SIZE
+    // 随着距离增加fire概率减小; 距离0时, 一定fire; 距离 320 (20*BLOCK_SIZE) 时, 不fire
+    return 1 - forwardLength / 320
   },
   idle() {
-    return 0
+    return 0.1
   },
 }
 
@@ -220,15 +222,11 @@ export function getEnv(map: MapRecord, tanks: TanksMap, tank: TankRecord): TankE
 /** 根据目前AI-tank的环境信息, 决定AI-tank是否应该开火 */
 export function determineFire(tank: TankRecord, { barrierInfo, tankPosition: pos }: TankEnv) {
   const random = Math.random()
-  // console.log('fire-random:', random)
-
-  // todo 目前部分result的计算是多余的
-  let result = false
 
   const ahead = barrierInfo[tank.direction]
   if (canDestroy(ahead.type)) {
     if (random < FireThreshhold.destroyable(ahead.length)) {
-      result = true
+      return true
     }
   }
 
@@ -236,7 +234,7 @@ export function determineFire(tank: TankRecord, { barrierInfo, tankPosition: pos
   const eagleForwardInfo = pos.eagle.getForwardInfo(tank.direction)
   if (eagleForwardInfo.offset <= 8) {
     if (random < FireThreshhold.eagle(eagleForwardInfo.length)) {
-      result = true
+      return true
     }
   }
 
@@ -245,15 +243,16 @@ export function determineFire(tank: TankRecord, { barrierInfo, tankPosition: pos
     const humanTankForwardInfo = pos.nearestHumanTank.getForwardInfo(tank.direction)
     if (humanTankForwardInfo.offset <= 8) {
       if (random < FireThreshhold.humanTank(humanTankForwardInfo.length)) {
-        result = true
+        return true
       }
     }
   }
 
   if (random < FireThreshhold.idle()) {
-    result = true
+    return true
   }
-  return result
+
+  return false
 }
 
 export function getRandomDirection({ up, down, left, right }: PriorityMap): Direction {

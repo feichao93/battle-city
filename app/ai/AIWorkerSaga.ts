@@ -1,16 +1,14 @@
-import { TankClassBase } from 'components/tanks'
 import EventEmitter from 'events'
-import { TanksMap } from 'reducers/tanks'
 import { channel, Channel, delay } from 'redux-saga'
-import { all, call, fork, put, race, select, take } from 'redux-saga/effects'
-import { TankRecord, TankFireInfo } from 'types'
-import { calculatePriorityMap, determineFire, getEnv, getRandomDirection } from './AI-utils'
+import { fork, put, race, select, take } from 'redux-saga/effects'
+import { MapRecord, TankFireInfo, TankRecord } from 'types'
+import { determineFire, getEnv } from './AI-utils'
 import { State } from '../reducers'
 import directionController from '../sagas/directionController'
 import fireController from '../sagas/fireController'
-import { getDirectionInfo, reverseDirection } from '../utils/common'
+import { getDirectionInfo } from '../utils/common'
 import * as selectors from '../utils/selectors'
-import { shortestPath, getPosInfoArray, getTankT } from 'ai/shortest-path'
+import { findPath, getPosInfoArray, getSpot, mergeEstMap, PosInfo, } from 'ai/shortest-path'
 
 const logAI = (...args: any[]) =>
   console.log('%c AI ', 'background: #666;color:white;font-weight: bold', ...args)
@@ -51,97 +49,76 @@ function getDirection(t1: number, t2: number): Direction {
   if (t2 === t1 - 26) return 'up'
   throw new Error('invalid direction')
 }
+
 function* followPath(ctx: AITankCtx, path: number[]) {
   logAI('start-follow-path')
-  yield put<Action>({ type: 'SET_AI_TANK_PATH', path })
-  const tank: TankRecord = yield select(selectors.playerTank, ctx.playerName)
-  const start = getTankT(tank)
-  let index = path.indexOf(start)
-  console.assert(index !== -1)
+  try {
+    yield put<Action>({ type: 'SET_AI_TANK_PATH', path })
+    const tank: TankRecord = yield select(selectors.playerTank, ctx.playerName)
+    const start = getSpot(tank)
+    let index = path.indexOf(start)
+    console.assert(index !== -1)
 
-  while (index < path.length - 1) {
-    const direction = getDirection(path[index], path[index + 1])
-    yield put<AICommand>(ctx.commandChannel, { type: 'turn', direction })
-    const delta = path[index + 1] - path[index]
-    let step = 1
-    while (
-      index + step + 1 < path.length &&
-      path[index + step + 1] - path[index + step] === delta
-    ) {
-      step++
+    while (index < path.length - 1) {
+      const direction = getDirection(path[index], path[index + 1])
+      yield put<AICommand>(ctx.commandChannel, { type: 'turn', direction })
+      const delta = path[index + 1] - path[index]
+      let step = 1
+      while (
+        index + step + 1 < path.length &&
+        path[index + step + 1] - path[index + step] === delta
+      ) {
+        step++
+      }
+      yield delay(100)
+      // TODO forwardLength不一定就是 step * 8，有可能是一个小数
+      yield put<AICommand>(ctx.commandChannel, { type: 'forward', forwardLength: step * 8 })
+      // TODO 需要考虑移动失败（例如碰到了障碍物）的情况
+      yield waitFor(ctx.noteEmitter, 'reach')
+      index += step
     }
-    yield delay(100)
-    yield put<AICommand>(ctx.commandChannel, { type: 'forward', forwardLength: step * 8 })
-    // TODO 需要考虑移动失败（例如碰到了障碍物）的情况
-    yield waitFor(ctx.noteEmitter, 'reach')
-    index += step
+  } finally {
+    yield put<Action>({ type: 'REMOVE_AI_TANK_PATH' })
   }
-  yield put<Action>({ type: 'REMOVE_AI_TANK_PATH' })
 }
 
-function* enterFollowPathMode(ctx: AITankCtx) {
-  const tank: TankRecord = yield select(selectors.playerTank, ctx.playerName)
-  const { map }: State = yield select()
-  const posInfoArray = getPosInfoArray(map)
-  const estMap = posInfoArray[getTankT(map.eagle)].getIdealFireEstMap(map)
-  const { path } = shortestPath(
-    posInfoArray,
-    getTankT(tank),
-    ({ t }) => estMap.has(t),
-    (step, posInfo) => {
-      const est = estMap.get(posInfo.t)
-      if (est.steelCount > 0) return Infinity
-      return step + est.brickCount * 3
-    },
-  )
-  yield* followPath(ctx, path)
+function calculateFireEstimateMap(spots: number[], posInfoArray: PosInfo[], map: MapRecord) {
+  return spots.map(spot => posInfoArray[spot].getIdealFireEstMap(map)).reduce(mergeEstMap)
+}
+
+function randint(start: number, end: number) {
+  return Math.floor(Math.random() * (end - start)) + start
+}
+
+function getRandomPassablePos(posInfoArray: PosInfo[]) {
+  while (true) {
+    const t = randint(0, 26 ** 2)
+    if (posInfoArray[t].canPass) {
+      return t
+    }
+  }
+}
+
+function* wanderMode(ctx: AITankCtx) {
+  while (true) {
+    const tank: TankRecord = yield select(selectors.playerTank, ctx.playerName)
+    const { map }: State = yield select()
+    const posInfoArray = getPosInfoArray(map)
+
+    // const estMap = calculateFireEstimateMap(around(getSpot(map.eagle)), posInfoArray, map)
+    const path = findPath(posInfoArray, getSpot(tank), getRandomPassablePos(posInfoArray))
+    yield* followPath(ctx, path)
+  }
 }
 
 function* moveLoop(ctx: AITankCtx) {
-  let skipDelayAtFirstTime = true
   while (true) {
-    if (skipDelayAtFirstTime) {
-      skipDelayAtFirstTime = false
-    } else {
-      const raceResult = yield race({
-        timeout: delay(3e3),
-        reach: waitFor(ctx.noteEmitter, 'reach'),
-        // TODO implement notifyWhenBulletComplete
-        bulletComplete: waitFor(ctx.noteEmitter, 'bullet-complete'),
-      })
-    }
-
-    let tank: TankRecord = yield select(selectors.playerTank, ctx.playerName)
-    if (tank == null) {
-      continue
-    }
-
-    if (Math.random() < 0.5) {
-      yield* enterFollowPathMode(ctx)
-    } else {
-      const { map, tanks }: State = yield select()
-      const env = getEnv(map, tanks, tank)
-      const priorityMap = calculatePriorityMap(env)
-
-      // 降低回头的优先级
-      const reverse = reverseDirection(tank.direction)
-      priorityMap[reverse] = Math.min(priorityMap[reverse], 1)
-
-      const nextDirection = getRandomDirection(priorityMap)
-
-      if (tank.direction !== nextDirection) {
-        yield put<AICommand>(ctx.commandChannel, { type: 'turn', direction: nextDirection })
-        tank = tank.set('direction', nextDirection)
-        // 等待足够长的时间, 保证turn命令已经被处理
-        yield delay(100)
-      }
-
-      // TODO tank应该更加偏向于走到下一个 *路口*
-      yield put<AICommand>(ctx.commandChannel, {
-        type: 'forward',
-        forwardLength: env.barrierInfo[tank.direction].length,
-      })
-    }
+    yield take(
+      (action: Action) => action.type === 'ACTIVATE_PLAYER' && action.playerName === ctx.playerName,
+    )
+    // if (Math.random() < 1) {
+    yield* wanderMode(ctx)
+    // }
   }
 }
 

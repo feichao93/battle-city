@@ -7,7 +7,20 @@ const N = 26
 const threshold = -0.01
 const e = 0.1
 
-export const getTankT = (point: Point) => {
+export function getFireResist(est: FireEstimate) {
+  return est.brickCount + est.steelCount * 100
+}
+
+export function mergeEstMap(a: Map<number, FireEstimate>, b: Map<number, FireEstimate>) {
+  for (const [key, value] of b.entries()) {
+    if (!a.has(key) || (a.has(key) && getFireResist(a.get(key)) < getFireResist(value))) {
+      a.set(key, value)
+    }
+  }
+  return a
+}
+
+export const getSpot = (point: Point) => {
   const col = Math.floor((point.x + 8) / 8)
   const row = Math.floor((point.y + 8) / 8)
   return row * 26 + col
@@ -31,6 +44,18 @@ const down = (t: number) => {
   const row = getRow(t)
   const col = getCol(t)
   return row === N - 1 ? null : (row + 1) * N + col
+}
+export const around = (t: number) => {
+  return [
+    up(t),
+    up(left(t)),
+    left(t),
+    down(left(t)),
+    down(t),
+    down(right(t)),
+    right(t),
+    right(up(t)),
+  ].filter(x => x != null)
 }
 
 const getRow = (t: number) => Math.floor(t / N)
@@ -82,17 +107,20 @@ export class PosInfo {
           steelCount++
         }
 
-        const r1CollidedWithBrick = Array.from(IndexHelper.iter('brick', r1)).some(brickT =>
-          map.bricks.get(brickT),
-        )
-        const r2CollidedWithBrick = Array.from(IndexHelper.iter('brick', r2)).some(brickT =>
-          map.bricks.get(brickT),
-        )
-        if (r1CollidedWithBrick) {
-          brickCount++
-        }
-        if (r2CollidedWithBrick) {
-          brickCount++
+        if (!collidedWithSteel) {
+          // 只有在不碰到steel的情况下 才开始考虑brick
+          const r1CollidedWithBrick = Array.from(IndexHelper.iter('brick', r1)).some(brickT =>
+            map.bricks.get(brickT),
+          )
+          const r2CollidedWithBrick = Array.from(IndexHelper.iter('brick', r2)).some(brickT =>
+            map.bricks.get(brickT),
+          )
+          if (r1CollidedWithBrick) {
+            brickCount++
+          }
+          if (r2CollidedWithBrick) {
+            brickCount++
+          }
         }
 
         const est = { source: cntPos, distance, target: this.t, brickCount, steelCount }
@@ -106,6 +134,9 @@ export class PosInfo {
   }
 }
 
+/** 开火估算
+ * 从source开火击中target的过程中需要穿过的steel和brick的数量
+ */
 export interface FireEstimate {
   source: number
   target: number
@@ -127,6 +158,11 @@ export function getPosInfoArray(map: MapRecord): PosInfo[] {
       const y = row * 8
       const pos = row * 26 + col
       const rect: Rect = { x: x - 8, y: y - 8, width: 16, height: 16 }
+      if (row === 0 || col === 0) {
+        // 第一行和第一列总是和边界相撞
+        result.push(new PosInfo(pos, false))
+        continue
+      }
       for (const t of IndexHelper.iter('brick', rect)) {
         if (map.bricks.get(t)) {
           const subject = IndexHelper.getRect('brick', t)
@@ -160,18 +196,19 @@ export function getPosInfoArray(map: MapRecord): PosInfo[] {
   return result
 }
 
-export interface PathInfo {
-  score: number
-  end: number
-  path: number[]
-}
-
-export function shortestPath(
+export function findPath(
   posInfoArray: PosInfo[],
   start: number,
-  stopCondition: (posInfo: PosInfo) => boolean,
-  calculateScore: (step: number, posInfo: PosInfo) => number,
+  stopConditionOrTarget: number | ((posInfo: PosInfo) => boolean),
+  calculateScore: (step: number, posInfo: PosInfo) => number = step => step,
 ) {
+  let stopCondition: (posInfo: PosInfo) => boolean
+  if (typeof stopConditionOrTarget === 'number') {
+    stopCondition = (posInfo: PosInfo) => posInfo.t === stopConditionOrTarget
+  } else {
+    stopCondition = stopConditionOrTarget
+  }
+
   function getPath(end: number) {
     const path: number[] = []
     while (true) {
@@ -189,7 +226,8 @@ export function shortestPath(
   pre.fill(-1)
   distance.fill(Infinity)
 
-  let result: PathInfo = { score: Infinity, end: -1, path: null }
+  let end = -1
+  let minScore = Infinity
   let step = 0
   let cnt = new Set<number>()
   cnt.add(start)
@@ -204,8 +242,9 @@ export function shortestPath(
       distance[u] = step
       if (stopCondition(posInfo)) {
         const score = calculateScore(step, posInfo)
-        if (score < result.score) {
-          result = { end: u, path: null, score }
+        if (score < minScore) {
+          minScore = score
+          end = u
         }
       }
       for (const dir of [left, right, up, down]) {
@@ -220,8 +259,9 @@ export function shortestPath(
     cnt = next
   }
 
-  if (result.end !== -1) {
-    result.path = getPath(result.end)
+  if (end !== -1) {
+    return getPath(end)
+  } else {
+    return null
   }
-  return result
 }
