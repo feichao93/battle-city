@@ -100,7 +100,7 @@ declare global {
 
   /** AICommand 包含了一些AI逻辑向游戏逻辑发送的操作命令 */
   namespace AICommand {
-    type AICommand = Forward | Fire | Turn | Query
+    type AICommand = Forward | Fire | Turn
 
     interface Forward {
       type: 'forward'
@@ -115,11 +115,6 @@ declare global {
       type: 'turn'
       direction: Direction
     }
-
-    interface Query {
-      type: 'query'
-      query: 'my-tank-info' | 'map-info' | 'active-tanks-info' | 'my-fire-info'
-    }
   }
 
   /** Note 包含了一些游戏逻辑向AI逻辑发送的消息/通知 */
@@ -128,7 +123,7 @@ declare global {
   namespace Note {
     type Note = BulletComplete | Reach
 
-    interface BulletComplete {
+    interface BulletComplete { // TODO 这个还没有实现
       type: 'bullet-complete'
     }
 

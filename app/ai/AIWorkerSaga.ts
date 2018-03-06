@@ -1,33 +1,32 @@
+import {
+  around,
+  calculateFireEstimateMap,
+  findPath,
+  FireEstimate,
+  getFireResist,
+  getPosInfoArray,
+  getSpot,
+  PosInfo,
+} from 'ai/shortest-path'
+import simpleFireLoop from 'ai/simpleFireLoop'
 import EventEmitter from 'events'
-import { channel, Channel, delay } from 'redux-saga'
-import { fork, put, race, select, take } from 'redux-saga/effects'
-import { MapRecord, TankFireInfo, TankRecord } from 'types'
-import { determineFire, getEnv } from './AI-utils'
-import { State } from '../reducers'
-import directionController from '../sagas/directionController'
-import fireController from '../sagas/fireController'
-import { getDirectionInfo } from '../utils/common'
-import * as selectors from '../utils/selectors'
-import { findPath, getPosInfoArray, getSpot, mergeEstMap, PosInfo, } from 'ai/shortest-path'
+import { State } from 'reducers'
+import { channel, Channel, Task } from 'redux-saga'
+import { fork, put, select, take } from 'redux-saga/effects'
+import { nonPauseDelay } from 'sagas/common'
+import directionController from 'sagas/directionController'
+import fireController from 'sagas/fireController'
+import { TankFireInfo, TankRecord } from 'types'
+import { getDirectionInfo, randint, waitFor } from 'utils/common'
+import * as selectors from 'utils/selectors'
+import { getEnv } from './AI-utils'
 
 const logAI = (...args: any[]) =>
-  console.log('%c AI ', 'background: #666;color:white;font-weight: bold', ...args)
+  console.log('%c AILOG ', 'background: #666;color:white;font-weight: bold', ...args)
 const logNote = (...args: any[]) =>
   console.log('%c NOTE ', 'background: #222; color: #bada55', ...args)
 const logCommand = (...args: any[]) =>
   console.log('%c COMMAND ', 'background: #222; color: steelblue; font-weight: bold', ...args)
-
-function* waitFor(emitter: EventEmitter, expectedType: string) {
-  let callback: any
-  try {
-    yield new Promise(resolve => {
-      callback = resolve
-      emitter.addListener(expectedType, resolve)
-    })
-  } finally {
-    emitter.removeListener(expectedType, callback)
-  }
-}
 
 // yield fork(function* notifyWhenBulletComplete() {
 //   while (true) {
@@ -50,14 +49,14 @@ function getDirection(t1: number, t2: number): Direction {
   throw new Error('invalid direction')
 }
 
-function* followPath(ctx: AITankCtx, path: number[]) {
-  logAI('start-follow-path')
+export function* followPath(ctx: AITankCtx, path: number[]) {
+  DEV && logAI('follow-path', path)
   try {
     yield put<Action>({ type: 'SET_AI_TANK_PATH', path })
     const tank: TankRecord = yield select(selectors.playerTank, ctx.playerName)
     const start = getSpot(tank)
     let index = path.indexOf(start)
-    console.assert(index !== -1)
+    DEV && console.assert(index !== -1)
 
     while (index < path.length - 1) {
       const direction = getDirection(path[index], path[index + 1])
@@ -70,7 +69,7 @@ function* followPath(ctx: AITankCtx, path: number[]) {
       ) {
         step++
       }
-      yield delay(100)
+      yield nonPauseDelay(100)
       // TODO forwardLength不一定就是 step * 8，有可能是一个小数
       yield put<AICommand>(ctx.commandChannel, { type: 'forward', forwardLength: step * 8 })
       // TODO 需要考虑移动失败（例如碰到了障碍物）的情况
@@ -80,14 +79,6 @@ function* followPath(ctx: AITankCtx, path: number[]) {
   } finally {
     yield put<Action>({ type: 'REMOVE_AI_TANK_PATH' })
   }
-}
-
-function calculateFireEstimateMap(spots: number[], posInfoArray: PosInfo[], map: MapRecord) {
-  return spots.map(spot => posInfoArray[spot].getIdealFireEstMap(map)).reduce(mergeEstMap)
-}
-
-function randint(start: number, end: number) {
-  return Math.floor(Math.random() * (end - start)) + start
 }
 
 function getRandomPassablePos(posInfoArray: PosInfo[]) {
@@ -100,53 +91,56 @@ function getRandomPassablePos(posInfoArray: PosInfo[]) {
 }
 
 function* wanderMode(ctx: AITankCtx) {
-  while (true) {
+  DEV && logAI('enter wander-mode')
+  const simpleFireLoopTask: Task = yield fork(simpleFireLoop, ctx)
+  try {
     const tank: TankRecord = yield select(selectors.playerTank, ctx.playerName)
     const { map }: State = yield select()
     const posInfoArray = getPosInfoArray(map)
-
-    // const estMap = calculateFireEstimateMap(around(getSpot(map.eagle)), posInfoArray, map)
     const path = findPath(posInfoArray, getSpot(tank), getRandomPassablePos(posInfoArray))
+    if (path != null) {
+      yield* followPath(ctx, path)
+    }
+  } finally {
+    simpleFireLoopTask.cancel()
+  }
+}
+
+function* attackEagleMode(ctx: AITankCtx) {
+  DEV && logAI('enter attack-eagle-mode')
+  const simpleFireLoopTask: Task = yield fork(simpleFireLoop, ctx)
+  const { map }: State = yield select()
+  const tank: TankRecord = yield select(selectors.playerTank, ctx.playerName)
+  const eagleSpots = around(getSpot(map.eagle))
+  const posInfoArray = getPosInfoArray(map)
+  const estMap = calculateFireEstimateMap(eagleSpots, posInfoArray, map)
+  const candidates = Array.from(estMap.keys()).filter(pos => getFireResist(estMap.get(pos)) <= 8)
+  const target = candidates[randint(0, candidates.length)]
+  const path = findPath(posInfoArray, getSpot(tank), target)
+  if (path != null) {
     yield* followPath(ctx, path)
   }
+  simpleFireLoopTask.cancel()
+  DEV && logAI('start attack eagle')
+  yield* attackEagle(ctx, estMap.get(target))
 }
 
-function* moveLoop(ctx: AITankCtx) {
-  while (true) {
-    yield take(
-      (action: Action) => action.type === 'ACTIVATE_PLAYER' && action.playerName === ctx.playerName,
-    )
-    // if (Math.random() < 1) {
-    yield* wanderMode(ctx)
-    // }
-  }
-}
-
-function* fireLoop(ctx: AITankCtx) {
-  let skipDelayAtFirstTime = true
-  while (true) {
-    if (skipDelayAtFirstTime) {
-      skipDelayAtFirstTime = false
-    } else {
-      yield race({
-        timeout: delay(300),
-        bulletComplete: waitFor(ctx.noteEmitter, 'bullet-complete'),
-      })
-    }
-
-    let tank = yield select(selectors.playerTank, ctx.playerName)
-    if (tank == null) {
-      continue
-    }
+function* attackEagle(ctx: AITankCtx, fireEstimate: FireEstimate) {
+  const { map, tanks }: State = yield select()
+  const tank: TankRecord = yield select(selectors.playerTank, ctx.playerName)
+  const env = getEnv(map, tanks, tank)
+  yield put<AICommand>(ctx.commandChannel, {
+    type: 'turn',
+    direction: env.tankPosition.eagle.getPrimaryDirection(),
+  })
+  let fireCount = fireEstimate.brickCount + 1
+  while (fireCount > 0) {
+    yield nonPauseDelay(100)
     const fireInfo: TankFireInfo = yield select(selectors.fireInfo, ctx.playerName)
     if (fireInfo.canFire) {
-      const { map, tanks }: State = yield select()
-
-      const env = getEnv(map, tanks, tank)
-      if (determineFire(tank, env)) {
-        yield put<AICommand>(ctx.commandChannel, { type: 'fire' })
-        yield delay(500)
-      }
+      yield put<AICommand>(ctx.commandChannel, { type: 'fire' })
+      yield nonPauseDelay(200)
+      fireCount--
     }
   }
 }
@@ -154,7 +148,7 @@ function* fireLoop(ctx: AITankCtx) {
 function* handleCommands(ctx: AITankCtx) {
   while (true) {
     const command: AICommand = yield take(ctx.commandChannel)
-    logCommand(command)
+    DEV && logCommand(command)
     if (command.type === 'forward') {
       const tank = yield select(selectors.playerTank, ctx.playerName)
       if (tank == null) {
@@ -190,7 +184,7 @@ function* getAIInput(ctx: AITankCtx) {
     const maxDistance = ctx.forwardLength - movedLength
     if (movedLength === ctx.forwardLength) {
       ctx.forwardLength = 0
-      logNote('reach')
+      DEV && logNote('reach')
       ctx.noteEmitter.emit('reach')
       return null
     } else {
@@ -212,7 +206,7 @@ function shouldFire(ctx: AITankCtx) {
   }
 }
 
-class AITankCtx {
+export class AITankCtx {
   fire = false
   nextDirection: Direction = null
   forwardLength = 0
@@ -240,8 +234,20 @@ export default function* AIWorkerSaga(playerName: string) {
 
   yield fork(directionController, playerName, () => getAIInput(ctx))
   yield fork(fireController, playerName, () => shouldFire(ctx))
-
-  yield fork(moveLoop, ctx)
-  yield fork(fireLoop, ctx)
   yield fork(handleCommands, ctx)
+
+  yield take(
+    (action: Action) => action.type === 'ACTIVATE_PLAYER' && action.playerName === ctx.playerName,
+  )
+  // TODO dodge attack from player.
+  let continuousWanderModeCount = 0
+  while (true) {
+    if (Math.random() < 0.7 - continuousWanderModeCount * 0.1) {
+      continuousWanderModeCount++
+      yield* wanderMode(ctx)
+    } else {
+      continuousWanderModeCount = 0
+      yield* attackEagleMode(ctx)
+    }
+  }
 }

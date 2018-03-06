@@ -196,6 +196,7 @@ export function getPosInfoArray(map: MapRecord): PosInfo[] {
   return result
 }
 
+// TODO 使用A*算法
 export function findPath(
   posInfoArray: PosInfo[],
   start: number,
@@ -264,4 +265,8 @@ export function findPath(
   } else {
     return null
   }
+}
+
+export function calculateFireEstimateMap(spots: number[], posInfoArray: PosInfo[], map: MapRecord) {
+  return spots.map(spot => posInfoArray[spot].getIdealFireEstMap(map)).reduce(mergeEstMap)
 }

@@ -6,18 +6,9 @@ import IndexHelper from 'utils/IndexHelper'
 
 const logAhead = (...args: any[]) => 0
 
-/* console.log('[ahead]', ...args) */
-
 /** AI是否可以破坏该障碍物 */
 function canDestroy(barrierType: BarrierType) {
   return barrierType === 'brick'
-}
-
-interface PriorityMap {
-  up: number
-  down: number
-  left: number
-  right: number
 }
 
 interface BarrierInfoEntry {
@@ -59,6 +50,22 @@ export class RelativePosition {
     this.dy = object.y - subject.y
     this.absdx = Math.abs(this.dx)
     this.absdy = Math.abs(this.dy)
+  }
+
+  getPrimaryDirection(): Direction {
+    if (this.absdx > this.absdy) {
+      if (this.dx > 0) {
+        return 'right'
+      } else {
+        return 'left'
+      }
+    } else {
+      if (this.dy > 0) {
+        return 'down'
+      } else {
+        return 'up'
+      }
+    }
   }
 
   getForwardInfo(direction: Direction) {
@@ -114,73 +121,8 @@ export const FireThreshhold = {
   },
 }
 
-export function calculatePriorityMap({
-  tankPosition: pos,
-  barrierInfo: binfo,
-}: TankEnv): PriorityMap {
-  const priorityMap: PriorityMap = {
-    up: 2,
-    down: 2,
-    left: 2,
-    right: 2,
-  }
-
-  // 计算往下走的优先级
-  if (pos.eagle.dy >= 4 * BLOCK_SIZE) {
-    priorityMap.down += 2
-  } else if (pos.eagle.dy >= 2 * BLOCK_SIZE) {
-    priorityMap.down += 1
-  }
-  // if (binfo.down.length <= 2 * BLOCK_SIZE && !canDestroy(binfo.down.type)) {
-  //   priorityMap.down = 1
-  // }
-  if (binfo.down.length < 4 && !canDestroy(binfo.down.type)) {
-    priorityMap.down = 0
-  }
-
-  // 计算往上走的优先级
-  if (pos.eagle.dy <= -4 * BLOCK_SIZE) {
-    priorityMap.up += 2
-  } else if (pos.eagle.dy < -2 * BLOCK_SIZE) {
-    priorityMap.up += 1
-  }
-  // if (binfo.up.length <= 2 * BLOCK_SIZE && !canDestroy(binfo.up.type)) {
-  //   priorityMap.up = 1
-  // }
-  if (binfo.up.length < 4 && !canDestroy(binfo.up.type)) {
-    priorityMap.up = 0
-  }
-
-  // 计算往左走的优先级
-  if (pos.eagle.dx <= -4 * BLOCK_SIZE) {
-    priorityMap.left += 2
-  } else if (pos.eagle.dx <= -2 * BLOCK_SIZE) {
-    priorityMap.left += 1
-  }
-  // if (binfo.left.length <= 2 * BLOCK_SIZE && !canDestroy(binfo.left.type)) {
-  //   priorityMap.left = 1
-  // }
-  if (binfo.left.length < 4 && !canDestroy(binfo.left.type)) {
-    priorityMap.left = 0
-  }
-
-  // 计算往右走的优先级
-  if (pos.eagle.dx >= 4 * BLOCK_SIZE) {
-    priorityMap.right += 2
-  } else if (pos.eagle.dx >= 2 * BLOCK_SIZE) {
-    priorityMap.right += 1
-  }
-  // if (binfo.right.length <= 2 * BLOCK_SIZE && !canDestroy(binfo.right.type)) {
-  //   priorityMap.right = 1
-  // }
-  if (binfo.right.length < 4 && !canDestroy(binfo.right.type)) {
-    priorityMap.right = 0
-  }
-
-  return priorityMap
-}
-
-// 获取tank的环境信息
+/** 获取tank的「环境信息」
+ * 包括坦克上下左右四个方向的障碍物信息，以及坦克与最近的human-tank相对位置 */
 export function getEnv(map: MapRecord, tanks: TanksMap, tank: TankRecord): TankEnv {
   // pos对象用来存放tank与其他物体之间的相对位置
   const pos: TankPosition = {
@@ -255,24 +197,7 @@ export function determineFire(tank: TankRecord, { barrierInfo, tankPosition: pos
   return false
 }
 
-export function getRandomDirection({ up, down, left, right }: PriorityMap): Direction {
-  const total = up + down + left + right
-  let n = Math.random() * total
-  n -= up
-  if (n < 0) {
-    return 'up'
-  }
-  n -= down
-  if (n < 0) {
-    return 'down'
-  }
-  n -= left
-  if (n < 0) {
-    return 'left'
-  }
-  return 'right'
-}
-
+/** 向前「眺望」，返回前方的障碍物类型与距离 */
 function lookAhead({ bricks, steels, rivers }: MapRecord, tank: TankRecord): BarrierInfoEntry {
   const brickAheadLength = getAheadBrickLength(bricks, tank)
   const steelAheadLength = getAheadSteelLength(steels, tank)

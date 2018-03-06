@@ -1,5 +1,5 @@
+import EventEmitter from 'events'
 import { BLOCK_SIZE, BULLET_SIZE, FIELD_SIZE, TANK_SIZE } from 'utils/constants'
-import stageConfigs from 'stages'
 import { BulletRecord, TankRecord, EagleRecord, PowerUpRecord } from 'types'
 
 // 根据坦克的位置计算子弹的生成位置
@@ -229,5 +229,21 @@ export class DefaultMap<K, V> extends Map<K, V> {
 export function* alwaysYield<T>(v: T) {
   while (true) {
     yield v
+  }
+}
+
+export function randint(start: number, end: number) {
+  return Math.floor(Math.random() * (end - start)) + start
+}
+
+export function* waitFor(emitter: EventEmitter, expectedType: string) {
+  let callback: any
+  try {
+    yield new Promise(resolve => {
+      callback = resolve
+      emitter.addListener(expectedType, resolve)
+    })
+  } finally {
+    emitter.removeListener(expectedType, callback)
   }
 }
