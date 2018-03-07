@@ -25,6 +25,7 @@ declare global {
       | SetHelmetDurationAction
       | SetFrozenTimeoutAction
       | SetAIFrozenTimeoutAction
+      | BeforeRemoveBulletAction
       | RemoveBulletAction
       | RemoveSteelsAction
       | RemoveBricksAction
@@ -163,6 +164,11 @@ declare global {
     export interface SetAIFrozenTimeoutAction {
       type: 'SET_AI_FROZEN_TIMEOUT'
       AIFrozenTimeout: number
+    }
+
+    export interface BeforeRemoveBulletAction {
+      type: 'BEFORE_REMOVE_BULLET'
+      bulletId: BulletId
     }
 
     export interface RemoveBulletAction {

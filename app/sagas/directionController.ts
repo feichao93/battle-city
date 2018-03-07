@@ -4,15 +4,19 @@ import canTankMove from 'utils/canTankMove'
 import * as selectors from 'utils/selectors'
 import { Input, TankRecord, State } from 'types'
 
-export default function* directionController(playerName: string, getPlayerInput: Function) {
+export default function* directionController(
+  playerName: string,
+  getPlayerInput: (tank: TankRecord, delta: number) => Input,
+) {
   while (true) {
     const { delta }: Action.TickAction = yield take('TICK')
-    const input: Input = yield* getPlayerInput(delta)
     const tank: TankRecord = yield select(selectors.playerTank, playerName)
     const { game: { AIFrozenTimeout } }: State = yield select()
     if (tank == null || tank.frozenTimeout > 0 || (tank.side === 'ai' && AIFrozenTimeout > 0)) {
       continue
     }
+    const input: Input = getPlayerInput(tank, delta)
+
     let nextFrozenTimeout = tank.frozenTimeout <= 0 ? 0 : tank.frozenTimeout - delta
 
     if (input == null) {

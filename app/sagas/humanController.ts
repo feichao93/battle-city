@@ -1,9 +1,8 @@
-import { all, fork, select, take } from 'redux-saga/effects'
-import * as selectors from 'utils/selectors'
 import * as _ from 'lodash'
+import { all, fork, take } from 'redux-saga/effects'
 import directionController from 'sagas/directionController'
 import fireController from 'sagas/fireController'
-import { HumanControllerConfig, TankRecord } from 'types'
+import { HumanControllerConfig, Input, TankRecord } from 'types'
 
 const Mousetrap = require('mousetrap')
 
@@ -107,19 +106,15 @@ export default function* humanController(playerName: string, config: HumanContro
   bindKeyWithDirection(config.right, 'right')
 
   // 调用该函数来获取当前用户的移动操作(坦克级别)
-  function* getHumanPlayerInput() {
-    const tank: TankRecord = yield select(selectors.playerTank, playerName)
-    if (tank != null) {
-      const { direction } = getDirectionControlInfo()
-      if (direction != null) {
-        if (direction !== tank.direction) {
-          return { type: 'turn', direction }
-        } else {
-          return { type: 'forward' }
-        }
+  function getHumanPlayerInput(tank: TankRecord): Input {
+    const { direction } = getDirectionControlInfo()
+    if (direction != null) {
+      if (direction !== tank.direction) {
+        return { type: 'turn', direction } as Input
+      } else {
+        return { type: 'forward' }
       }
     }
-    return null
   }
 
   while (true) {

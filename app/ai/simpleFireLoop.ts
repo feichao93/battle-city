@@ -1,10 +1,10 @@
-import { AITankCtx } from 'ai/AIWorkerSaga'
 import { determineFire, getEnv } from 'ai/env-utils'
 import { State } from 'reducers'
-import { put, race, select } from 'redux-saga/effects'
+import { race, select } from 'redux-saga/effects'
 import { nonPauseDelay } from 'sagas/common'
 import { TankFireInfo } from 'types'
 import * as selectors from 'utils/selectors'
+import AITankCtx from './AITankCtx'
 
 type Options = {
   interval?: number
@@ -34,7 +34,7 @@ export default function* simpleFireLoop(ctx: AITankCtx, options?: Options) {
 
       const env = getEnv(map, tanks, tank)
       if (determineFire(tank, env)) {
-        yield put<AICommand>(ctx.commandChannel, { type: 'fire' })
+        ctx.fire()
         yield nonPauseDelay(cooldown)
       }
     }

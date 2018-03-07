@@ -96,27 +96,6 @@ declare global {
 
   type Side = 'human' | 'ai'
 
-  type AICommand = AICommand.AICommand
-
-  /** AICommand 包含了一些AI逻辑向游戏逻辑发送的操作命令 */
-  namespace AICommand {
-    type AICommand = Forward | Fire | Turn
-
-    interface Forward {
-      type: 'forward'
-      forwardLength: number
-    }
-
-    interface Fire {
-      type: 'fire'
-    }
-
-    interface Turn {
-      type: 'turn'
-      direction: Direction
-    }
-  }
-
   /** Note 包含了一些游戏逻辑向AI逻辑发送的消息/通知 */
   type Note = Note.Note
 

@@ -32,6 +32,10 @@ function* explosionFromBullet(bullet: BulletRecord) {
 
 /** 移除单个子弹, 调用explosionFromBullet来生成子弹爆炸(并在之后移除子弹爆炸效果) */
 function* destroyBullet(bullet: BulletRecord, useExplosion: boolean) {
+  yield put<Action.BeforeRemoveBulletAction>({
+    type: 'BEFORE_REMOVE_BULLET',
+    bulletId: bullet.bulletId,
+  })
   yield put<Action.RemoveBulletAction>({
     type: 'REMOVE_BULLET',
     bulletId: bullet.bulletId,
