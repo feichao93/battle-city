@@ -123,7 +123,8 @@ declare global {
   namespace Note {
     type Note = BulletComplete | Reach
 
-    interface BulletComplete { // TODO 这个还没有实现
+    interface BulletComplete {
+      // TODO 这个还没有实现
       type: 'bullet-complete'
     }
 

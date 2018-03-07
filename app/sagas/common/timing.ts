@@ -7,7 +7,7 @@ export function applySpawnSpeed<V>(config: TimingConfig<V>, speed: number) {
 }
 
 export default function* timing<V>(
-  config: Iterable<{ t: number, v: V }> | IterableIterator<{ t: number, v: V }>,
+  config: Iterable<{ t: number; v: V }> | IterableIterator<{ t: number; v: V }>,
   handler: (v: V) => Iterable<any>,
 ) {
   let acc = 0

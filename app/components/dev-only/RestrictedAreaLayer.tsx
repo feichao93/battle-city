@@ -13,9 +13,7 @@ if (DEV) {
       const { areas } = this.props
       return (
         <g role="restricted-area-layer">
-          {areas.map((area, areaId) =>
-            <rect key={areaId} {...area} fill="red" />
-          ).toArray()}
+          {areas.map((area, areaId) => <rect key={areaId} {...area} fill="red" />).toArray()}
         </g>
       )
     }
