@@ -1,13 +1,9 @@
-import {
-  around,
-  calculateFireEstimateMap,
-  findPath,
-  FireEstimate,
-  getFireResist,
-  getPosInfoArray,
-  getSpot,
-  PosInfo,
-} from 'ai/shortest-path'
+import { getEnv } from 'ai/env-utils.ts'
+import followPath from 'ai/followPath'
+import { logAI, logCommand, logNote } from 'ai/logger'
+import { around, getTankPos } from 'ai/pos-utils'
+import PosInfo from 'ai/PosInfo'
+import { findPath } from 'ai/shortest-path'
 import simpleFireLoop from 'ai/simpleFireLoop'
 import EventEmitter from 'events'
 import { State } from 'reducers'
@@ -17,16 +13,10 @@ import { nonPauseDelay } from 'sagas/common'
 import directionController from 'sagas/directionController'
 import fireController from 'sagas/fireController'
 import { TankFireInfo, TankRecord } from 'types'
-import { getDirectionInfo, randint, waitFor } from 'utils/common'
+import { getDirectionInfo, randint } from 'utils/common'
 import * as selectors from 'utils/selectors'
-import { getEnv } from './AI-utils'
-
-const logAI = (...args: any[]) =>
-  console.log('%c AILOG ', 'background: #666;color:white;font-weight: bold', ...args)
-const logNote = (...args: any[]) =>
-  console.log('%c NOTE ', 'background: #222; color: #bada55', ...args)
-const logCommand = (...args: any[]) =>
-  console.log('%c COMMAND ', 'background: #222; color: steelblue; font-weight: bold', ...args)
+import { calculateFireEstimateMap, FireEstimate, getFireResist } from './fire-utils'
+import getPosInfoArray from './getPosInfoArray'
 
 // yield fork(function* notifyWhenBulletComplete() {
 //   while (true) {
@@ -41,45 +31,6 @@ const logCommand = (...args: any[]) =>
 //     }
 //   }
 // })
-function getDirection(t1: number, t2: number): Direction {
-  if (t2 === t1 + 1) return 'right'
-  if (t2 === t1 - 1) return 'left'
-  if (t2 === t1 + 26) return 'down'
-  if (t2 === t1 - 26) return 'up'
-  throw new Error('invalid direction')
-}
-
-export function* followPath(ctx: AITankCtx, path: number[]) {
-  DEV && logAI('follow-path', path)
-  try {
-    yield put<Action>({ type: 'SET_AI_TANK_PATH', path })
-    const tank: TankRecord = yield select(selectors.playerTank, ctx.playerName)
-    const start = getSpot(tank)
-    let index = path.indexOf(start)
-    DEV && console.assert(index !== -1)
-
-    while (index < path.length - 1) {
-      const direction = getDirection(path[index], path[index + 1])
-      yield put<AICommand>(ctx.commandChannel, { type: 'turn', direction })
-      const delta = path[index + 1] - path[index]
-      let step = 1
-      while (
-        index + step + 1 < path.length &&
-        path[index + step + 1] - path[index + step] === delta
-      ) {
-        step++
-      }
-      yield nonPauseDelay(100)
-      // TODO forwardLength不一定就是 step * 8，有可能是一个小数
-      yield put<AICommand>(ctx.commandChannel, { type: 'forward', forwardLength: step * 8 })
-      // TODO 需要考虑移动失败（例如碰到了障碍物）的情况
-      yield waitFor(ctx.noteEmitter, 'reach')
-      index += step
-    }
-  } finally {
-    yield put<Action>({ type: 'REMOVE_AI_TANK_PATH' })
-  }
-}
 
 function getRandomPassablePos(posInfoArray: PosInfo[]) {
   while (true) {
@@ -97,7 +48,7 @@ function* wanderMode(ctx: AITankCtx) {
     const tank: TankRecord = yield select(selectors.playerTank, ctx.playerName)
     const { map }: State = yield select()
     const posInfoArray = getPosInfoArray(map)
-    const path = findPath(posInfoArray, getSpot(tank), getRandomPassablePos(posInfoArray))
+    const path = findPath(posInfoArray, getTankPos(tank), getRandomPassablePos(posInfoArray))
     if (path != null) {
       yield* followPath(ctx, path)
     }
@@ -111,12 +62,12 @@ function* attackEagleMode(ctx: AITankCtx) {
   const simpleFireLoopTask: Task = yield fork(simpleFireLoop, ctx)
   const { map }: State = yield select()
   const tank: TankRecord = yield select(selectors.playerTank, ctx.playerName)
-  const eagleSpots = around(getSpot(map.eagle))
+  const eagleSpots = around(getTankPos(map.eagle))
   const posInfoArray = getPosInfoArray(map)
   const estMap = calculateFireEstimateMap(eagleSpots, posInfoArray, map)
   const candidates = Array.from(estMap.keys()).filter(pos => getFireResist(estMap.get(pos)) <= 8)
   const target = candidates[randint(0, candidates.length)]
-  const path = findPath(posInfoArray, getSpot(tank), target)
+  const path = findPath(posInfoArray, getTankPos(tank), target)
   if (path != null) {
     yield* followPath(ctx, path)
   }

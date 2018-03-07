@@ -378,11 +378,13 @@ declare global {
 
     export interface SetAITankPath {
       type: 'SET_AI_TANK_PATH'
+      playerName: string
       path: number[]
     }
 
     export interface RemoveAITankPath {
       type: 'REMOVE_AI_TANK_PATH'
+      playerName: string
     }
   }
 }

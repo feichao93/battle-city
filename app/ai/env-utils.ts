@@ -1,10 +1,9 @@
+import { logAhead } from 'ai/logger'
 import { List } from 'immutable'
 import { MapRecord, TankRecord, TanksMap } from 'types'
-import { BLOCK_SIZE, FIELD_SIZE, ITEM_SIZE_MAP, TANK_SIZE } from 'utils/constants'
 import { asRect, getDirectionInfo } from 'utils/common'
+import { BLOCK_SIZE, FIELD_SIZE, ITEM_SIZE_MAP, TANK_SIZE } from 'utils/constants'
 import IndexHelper from 'utils/IndexHelper'
-
-const logAhead = (...args: any[]) => 0
 
 /** AI是否可以破坏该障碍物 */
 function canDestroy(barrierType: BarrierType) {
@@ -197,7 +196,7 @@ export function determineFire(tank: TankRecord, { barrierInfo, tankPosition: pos
   return false
 }
 
-/** 向前「眺望」，返回前方的障碍物类型与距离 */
+/** 向前观察，返回前方的障碍物类型与距离 */
 function lookAhead({ bricks, steels, rivers }: MapRecord, tank: TankRecord): BarrierInfoEntry {
   const brickAheadLength = getAheadBrickLength(bricks, tank)
   const steelAheadLength = getAheadSteelLength(steels, tank)

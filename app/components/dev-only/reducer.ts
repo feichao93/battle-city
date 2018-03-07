@@ -1,15 +1,17 @@
+import { Map, Record } from 'immutable'
 let reducer: any = () => 0
 
 if (DEV) {
-  const initState = {
-    path: null as number[],
-  }
+  const DevStateRecord = Record({
+    pathmap: Map<string, number[]>(),
+  })
+  class DevState extends DevStateRecord {}
 
-  reducer = function testOnly(state = initState, action: Action) {
+  reducer = function testOnly(state = new DevState(), action: Action) {
     if (action.type === 'SET_AI_TANK_PATH') {
-      return Object.assign({}, state, { path: action.path })
+      return state.update('pathmap', pathmap => pathmap.set(action.playerName, action.path))
     } else if (action.type === 'REMOVE_AI_TANK_PATH') {
-      return Object.assign({}, state, { path: null })
+      return state.update('pathmap', pathmap => pathmap.remove(action.playerName))
     } else {
       return state
     }

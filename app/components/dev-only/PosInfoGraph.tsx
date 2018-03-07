@@ -1,11 +1,6 @@
-import {
-  FireEstimate,
-  getPosInfoArray,
-  getSpot,
-  around,
-  mergeEstMap,
-  getFireResist,
-} from 'ai/shortest-path'
+import { FireEstimate, getFireResist, mergeEstMap } from 'ai/fire-utils'
+import getPosInfoArray from 'ai/getPosInfoArray'
+import { around, getTankPos } from 'ai/pos-utils'
 import * as _ from 'lodash'
 import * as React from 'react'
 import { connect } from 'react-redux'
@@ -26,7 +21,7 @@ if (DEV) {
       const posInfoArray = getPosInfoArray(map)
       let estMap = new Map<number, FireEstimate>()
       if (map.eagle) {
-        estMap = around(getSpot(map.eagle))
+        estMap = around(getTankPos(map.eagle))
           .map(spot => posInfoArray[spot].getIdealFireEstMap(map))
           .reduce(mergeEstMap)
       }
