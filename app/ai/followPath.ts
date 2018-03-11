@@ -11,6 +11,7 @@ export default function* followPath(ctx: AITankCtx, path: number[]) {
   try {
     yield put<Action>({ type: 'SET_AI_TANK_PATH', playerName: ctx.playerName, path })
     const tank: TankRecord = yield select(selectors.playerTank, ctx.playerName)
+    DEV && console.assert(tank != null)
     const start = getTankPos(tank)
     let index = path.indexOf(start)
     DEV && console.assert(index !== -1)

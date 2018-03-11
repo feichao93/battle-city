@@ -1,27 +1,27 @@
+import AIWorkerSaga from 'ai/AIWorkerSaga'
+import _ from 'lodash'
+import { State } from 'reducers'
 import { channel as makeChannel, Task } from 'redux-saga'
-import { fork, put, select, spawn, take } from 'redux-saga/effects'
-import { getNextId } from 'utils/common'
+import { fork, put, select, take } from 'redux-saga/effects'
 import { spawnTank } from 'sagas/common'
+import { PlayerRecord, TankRecord } from 'types'
+import { getNextId } from 'utils/common'
 import { TANK_INDEX_THAT_WITH_POWER_UP } from 'utils/constants'
 import * as selectors from 'utils/selectors'
-import { State } from 'reducers'
-import { PlayerRecord, TankRecord } from 'types'
-import AIWorkerSaga from '../ai/AIWorkerSaga'
 
 /** AIMasterSaga用来管理AIWorkerSaga的启动和停止, 并处理和AI程序的数据交互 */
 export default function* AIMasterSaga() {
-  // const max = 2
-  const max = 1
+  const max = DEV ? 1 : 3
   const taskMap = new Map<PlayerName, Task>()
   const addAICommandChannel = makeChannel<'add'>()
 
   yield fork(addAIHandler)
 
   while (true) {
-    const actionTypes: ActionType[] = ['KILL', 'START_STAGE', 'GAMEOVER']
+    const actionTypes: ActionType[] = ['KILL', 'START_STAGE', 'BEFORE_GAMEOVER']
     const action: Action = yield take(actionTypes)
     if (action.type === 'START_STAGE') {
-      for (let i = 0; i < max; i++) {
+      for (const i in _.range(0, max)) {
         addAICommandChannel.put('add')
       }
     } else if (action.type === 'KILL' && action.targetTank.side === 'ai') {
@@ -32,7 +32,7 @@ export default function* AIMasterSaga() {
       taskMap.delete(action.targetPlayer.playerName)
       yield put<Action.DeactivatePlayer>({ type: 'DEACTIVATE_PLAYER', playerName })
       addAICommandChannel.put('add')
-    } else if (action.type === 'GAMEOVER') {
+    } else if (action.type === 'BEFORE_GAMEOVER') {
       // 游戏结束时, 取消所有的ai-player
       for (const [playerName, task] of taskMap.entries()) {
         task.cancel()
@@ -72,7 +72,7 @@ export default function* AIMasterSaga() {
           0.6,
         ) // TODO 要根据关卡的难度来确定坦克的生成速度
 
-        const task = yield spawn(AIWorkerSaga, playerName)
+        const task = yield fork(AIWorkerSaga, playerName)
         taskMap.set(playerName, task)
 
         yield put<Action.ActivatePlayer>({

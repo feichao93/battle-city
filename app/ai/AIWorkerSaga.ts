@@ -11,7 +11,7 @@ import simpleFireLoop from 'ai/simpleFireLoop'
 import EventEmitter from 'events'
 import { State } from 'reducers'
 import { Task } from 'redux-saga'
-import { fork, select, take } from 'redux-saga/effects'
+import { call, fork, select, take } from 'redux-saga/effects'
 import { nonPauseDelay } from 'sagas/common'
 import directionController from 'sagas/directionController'
 import fireController from 'sagas/fireController'
@@ -31,16 +31,14 @@ function getRandomPassablePos(posInfoArray: PosInfo[]) {
 function* wanderMode(ctx: AITankCtx) {
   DEV && logAI('enter wander-mode')
   const simpleFireLoopTask: Task = yield fork(simpleFireLoop, ctx)
-  try {
-    const tank: TankRecord = yield select(selectors.playerTank, ctx.playerName)
-    const { map }: State = yield select()
-    const posInfoArray = getPosInfoArray(map)
-    const path = findPath(posInfoArray, getTankPos(tank), getRandomPassablePos(posInfoArray))
-    DEV && console.assert(path != null)
-    yield* followPath(ctx, path)
-  } finally {
-    simpleFireLoopTask.cancel()
-  }
+  const tank: TankRecord = yield select(selectors.playerTank, ctx.playerName)
+  DEV && console.assert(tank != null)
+  const { map }: State = yield select()
+  const posInfoArray = getPosInfoArray(map)
+  const path = findPath(posInfoArray, getTankPos(tank), getRandomPassablePos(posInfoArray))
+  DEV && console.assert(path != null)
+  yield call(followPath, ctx, path)
+  simpleFireLoopTask.cancel()
 }
 
 function* attackEagleMode(ctx: AITankCtx) {
@@ -48,25 +46,30 @@ function* attackEagleMode(ctx: AITankCtx) {
   const simpleFireLoopTask: Task = yield fork(simpleFireLoop, ctx)
   const { map }: State = yield select()
   const tank: TankRecord = yield select(selectors.playerTank, ctx.playerName)
+  DEV && console.assert(tank != null)
   const eagleSpots = around(getTankPos(map.eagle))
   const posInfoArray = getPosInfoArray(map)
   const estMap = calculateFireEstimateMap(eagleSpots, posInfoArray, map)
-  const candidates = Array.from(estMap.keys()).filter(pos => getFireResist(estMap.get(pos)) <= 8)
+  const candidates = Array.from(estMap.keys()).filter(
+    pos => posInfoArray[pos].canPass && getFireResist(estMap.get(pos)) <= 8,
+  )
   const target = candidates[randint(0, candidates.length)]
   const path = findPath(posInfoArray, getTankPos(tank), target)
   DEV && console.assert(path != null)
-  yield* followPath(ctx, path)
+  yield call(followPath, ctx, path)
   simpleFireLoopTask.cancel()
-  yield* attackEagle(ctx, estMap.get(target))
+  yield call(attackEagle, ctx, estMap.get(target))
 }
 
 function* attackEagle(ctx: AITankCtx, fireEstimate: FireEstimate) {
   DEV && logAI('start attack eagle')
   const { map, tanks }: State = yield select()
   const tank: TankRecord = yield select(selectors.playerTank, ctx.playerName)
+  DEV && console.assert(tank != null)
   const env = getEnv(map, tanks, tank)
   ctx.turn(env.tankPosition.eagle.getPrimaryDirection())
-  let fireCount = fireEstimate.brickCount + 1
+  yield take('TICK') // 等待一个 tick, 确保转向已经完成
+  let fireCount = Math.min(2, fireEstimate.brickCount + 1)
   while (fireCount > 0) {
     const fireInfo: TankFireInfo = yield select(selectors.fireInfo, ctx.playerName)
     if (fireInfo.canFire) {
@@ -115,10 +118,10 @@ export default function* AIWorkerSaga(playerName: string) {
   while (true) {
     if (Math.random() < 0.7 - continuousWanderModeCount * 0.1) {
       continuousWanderModeCount++
-      yield* wanderMode(ctx)
+      yield call(wanderMode, ctx)
     } else {
       continuousWanderModeCount = 0
-      yield* attackEagleMode(ctx)
+      yield call(attackEagleMode, ctx)
     }
   }
 }

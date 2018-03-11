@@ -1,8 +1,8 @@
+import { State } from 'reducers'
 import { put, select, take } from 'redux-saga/effects'
-import { State } from 'reducers/index'
-import { frame as f } from 'utils/common'
 import { nonPauseDelay, tween } from 'sagas/common'
 import statistics from 'sagas/stageStatistics'
+import { frame as f } from 'utils/common'
 
 function* startStage(stageName: string) {
   yield put<Action>({
@@ -51,50 +51,56 @@ function* startStage(stageName: string) {
  * 当玩家清空关卡时stage-saga退出, 并向game-saga返回该关卡相关信息
  */
 export default function* stageSaga(stageName: string) {
+  let shouldPutEndStage = false
   yield put<Action>({ type: 'LOAD_SCENE', scene: 'game' })
 
   yield* startStage(stageName)
+  try {
+    while (true) {
+      const action: Action = yield take(['KILL', 'DESTROY_EAGLE'])
+      if (action.type === 'KILL') {
+        const { sourcePlayer, targetTank } = action
+        const { players, game: { remainingEnemies }, tanks }: State = yield select()
 
-  while (true) {
-    const action: Action = yield take(['KILL', 'DESTROY_EAGLE'])
-    if (action.type === 'KILL') {
-      const { sourcePlayer, targetTank } = action
-      const { players, game: { remainingEnemies }, tanks }: State = yield select()
+        if (sourcePlayer.side === 'human') {
+          // human击杀ai
+          // 对human player的击杀信息进行统计
+          yield put<Action>({
+            type: 'INC_KILL_COUNT',
+            playerName: sourcePlayer.playerName,
+            level: targetTank.level,
+          })
 
-      if (sourcePlayer.side === 'human') {
-        // human击杀ai
-        // 对human player的击杀信息进行统计
-        yield put<Action>({
-          type: 'INC_KILL_COUNT',
-          playerName: sourcePlayer.playerName,
-          level: targetTank.level,
-        })
-
-        const activeAITanks = tanks.filter(t => t.active && t.side === 'ai')
-        if (remainingEnemies.isEmpty() && activeAITanks.isEmpty()) {
-          // 剩余enemy数量为0, 且场上已经没有ai tank了
-          yield nonPauseDelay(1500)
-          const { powerUps }: State = yield select()
-          if (!powerUps.isEmpty()) {
-            // 如果场上有powerup, 则适当延长结束时间
-            yield nonPauseDelay(5000)
+          const activeAITanks = tanks.filter(t => t.active && t.side === 'ai')
+          if (remainingEnemies.isEmpty() && activeAITanks.isEmpty()) {
+            // 剩余enemy数量为0, 且场上已经没有ai tank了
+            yield nonPauseDelay(1500)
+            const { powerUps }: State = yield select()
+            if (!powerUps.isEmpty()) {
+              // 如果场上有powerup, 则适当延长结束时间
+              yield nonPauseDelay(5000)
+            }
+            yield* statistics()
+            shouldPutEndStage = true
+            return { status: 'clear' }
           }
-          yield* statistics()
-          yield put<Action.EndStage>({ type: 'END_STAGE' })
-          return { status: 'clear' }
+        } else {
+          // ai击杀human
+          if (!players.some(ply => ply.side === 'human' && ply.lives > 0)) {
+            // 所有的human player都挂了
+            yield nonPauseDelay(1500)
+            yield* statistics()
+            shouldPutEndStage = true
+            return { status: 'fail', reason: 'all-human-dead' }
+          }
         }
-      } else {
-        // ai击杀human
-        if (!players.some(ply => ply.side === 'human' && ply.lives > 0)) {
-          // 所有的human player都挂了
-          yield nonPauseDelay(1500)
-          yield* statistics()
-          yield put<Action.EndStage>({ type: 'END_STAGE' })
-          return { status: 'fail', reason: 'all-human-dead' }
-        }
+      } else if (action.type === 'DESTROY_EAGLE') {
+        return { status: 'fail', reason: 'DESTROY_EAGLE' }
       }
-    } else if (action.type === 'DESTROY_EAGLE') {
-      return { status: 'fail', reason: 'DESTROY_EAGLE' }
+    }
+  } finally {
+    if (shouldPutEndStage) {
+      yield put<Action.EndStage>({ type: 'END_STAGE' })
     }
   }
 }

@@ -34,6 +34,7 @@ declare global {
       | LoadStageMapAction
       | StartStage
       | EndStage
+      | Simple<'BEFORE_GAMEOVER'>
       | Simple<'GAMEOVER'>
       | Simple<'GAMESTART'>
       | Simple<'GAMEPAUSE'>
