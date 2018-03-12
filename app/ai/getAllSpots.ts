@@ -1,4 +1,4 @@
-import PosInfo from 'ai/PosInfo'
+import Spot from 'ai/Spot'
 import _ from 'lodash'
 import MapRecord from 'types/MapRecord'
 import { testCollide } from 'utils/common'
@@ -6,24 +6,24 @@ import IndexHelper from 'utils/IndexHelper'
 
 const threshold = -0.01
 
-export default function getPosInfoArray(map: MapRecord): PosInfo[] {
-  const result: PosInfo[] = []
+export default function getAllSpots(map: MapRecord): Spot[] {
+  const result: Spot[] = []
   for (const row of _.range(0, 26)) {
     next: for (const col of _.range(0, 26)) {
       const x = col * 8
       const y = row * 8
-      const pos = row * 26 + col
+      const t = row * 26 + col
       const rect: Rect = { x: x - 8, y: y - 8, width: 16, height: 16 }
       if (row === 0 || col === 0) {
         // 第一行和第一列总是和边界相撞
-        result.push(new PosInfo(pos, false))
+        result.push(new Spot(t, false))
         continue
       }
       for (const t of IndexHelper.iter('brick', rect)) {
         if (map.bricks.get(t)) {
           const subject = IndexHelper.getRect('brick', t)
           if (testCollide(subject, rect, threshold)) {
-            result.push(new PosInfo(pos, false))
+            result.push(new Spot(t, false))
             continue next
           }
         }
@@ -32,7 +32,7 @@ export default function getPosInfoArray(map: MapRecord): PosInfo[] {
         if (map.steels.get(t)) {
           const subject = IndexHelper.getRect('steel', t)
           if (testCollide(subject, rect, threshold)) {
-            result.push(new PosInfo(pos, false))
+            result.push(new Spot(t, false))
             continue next
           }
         }
@@ -41,12 +41,12 @@ export default function getPosInfoArray(map: MapRecord): PosInfo[] {
         if (map.rivers.get(t)) {
           const subject = IndexHelper.getRect('river', t)
           if (testCollide(subject, rect, threshold)) {
-            result.push(new PosInfo(pos, false))
+            result.push(new Spot(t, false))
             continue next
           }
         }
       }
-      result.push(new PosInfo(pos, true))
+      result.push(new Spot(t, true))
     }
   }
   return result

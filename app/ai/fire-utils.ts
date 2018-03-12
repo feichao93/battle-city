@@ -1,5 +1,5 @@
 import { MapRecord } from '../types'
-import PosInfo from './PosInfo'
+import Spot from './Spot'
 
 /** 开火估算
  * 从source开火击中target的过程中需要穿过的steel和brick的数量
@@ -30,6 +30,6 @@ export function mergeEstMap(a: Map<number, FireEstimate>, b: Map<number, FireEst
   return a
 }
 
-export function calculateFireEstimateMap(spots: number[], posInfoArray: PosInfo[], map: MapRecord) {
+export function calculateFireEstimateMap(spots: number[], posInfoArray: Spot[], map: MapRecord) {
   return spots.map(spot => posInfoArray[spot].getIdealFireEstMap(map)).reduce(mergeEstMap)
 }

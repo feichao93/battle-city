@@ -4,8 +4,8 @@ import { select } from 'redux-saga/effects'
 import { Input, TankRecord } from 'types'
 import { getDirectionInfo } from 'utils/common'
 import * as selectors from '../utils/selectors'
-import { RelativePosition } from './env-utils'
-import { getCol, getRow } from './pos-utils'
+import { RelativePosition } from 'ai/env-utils'
+import { getCol, getRow } from 'ai/spot-utils'
 
 export default class AITankCtx {
   private _fire = false
@@ -34,12 +34,12 @@ export default class AITankCtx {
     this.forwardLength = forwardLength
   }
 
-  *moveTo(pos: number) {
+  *moveTo(t: number) {
     const tank = yield select(selectors.playerTank, this.playerName)
     DEV && console.assert(tank != null)
     const target = {
-      x: getCol(pos) * 8 - 8,
-      y: getRow(pos) * 8 - 8,
+      x: getCol(t) * 8 - 8,
+      y: getRow(t) * 8 - 8,
     }
     const relativePosition = new RelativePosition(tank, target)
     const direction = relativePosition.getPrimaryDirection()

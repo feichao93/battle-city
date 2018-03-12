@@ -43,7 +43,7 @@ export function around(t: number) {
   ].filter(x => x != null)
 }
 
-export const getTankPos = (point: Point) => {
+export const getTankSpot = (point: Point) => {
   const col = Math.floor((point.x + 8) / 8)
   const row = Math.floor((point.y + 8) / 8)
   return row * N + col

@@ -2,10 +2,10 @@ import AITankCtx from 'ai/AITankCtx'
 import { getEnv } from 'ai/env-utils'
 import { calculateFireEstimateMap, FireEstimate, getFireResist } from 'ai/fire-utils'
 import followPath from 'ai/followPath'
-import getPosInfoArray from 'ai/getPosInfoArray'
+import getAllSpots from 'ai/getAllSpots'
 import { logAI } from 'ai/logger'
-import { around, getTankPos } from 'ai/pos-utils'
-import PosInfo from 'ai/PosInfo'
+import { around, getTankSpot } from 'ai/spot-utils'
+import Spot from 'ai/Spot'
 import { findPath } from 'ai/shortest-path'
 import simpleFireLoop from 'ai/simpleFireLoop'
 import EventEmitter from 'events'
@@ -19,7 +19,7 @@ import { TankFireInfo, TankRecord } from 'types'
 import { randint, waitFor } from 'utils/common'
 import * as selectors from 'utils/selectors'
 
-function getRandomPassablePos(posInfoArray: PosInfo[]) {
+function getRandomPassablePos(posInfoArray: Spot[]) {
   while (true) {
     const t = randint(0, 26 ** 2)
     if (posInfoArray[t].canPass) {
@@ -34,8 +34,8 @@ function* wanderMode(ctx: AITankCtx) {
   const tank: TankRecord = yield select(selectors.playerTank, ctx.playerName)
   DEV && console.assert(tank != null)
   const { map }: State = yield select()
-  const posInfoArray = getPosInfoArray(map)
-  const path = findPath(posInfoArray, getTankPos(tank), getRandomPassablePos(posInfoArray))
+  const allSpots = getAllSpots(map)
+  const path = findPath(allSpots, getTankSpot(tank), getRandomPassablePos(allSpots))
   DEV && console.assert(path != null)
   yield call(followPath, ctx, path)
   simpleFireLoopTask.cancel()
@@ -47,14 +47,14 @@ function* attackEagleMode(ctx: AITankCtx) {
   const { map }: State = yield select()
   const tank: TankRecord = yield select(selectors.playerTank, ctx.playerName)
   DEV && console.assert(tank != null)
-  const eagleSpots = around(getTankPos(map.eagle))
-  const posInfoArray = getPosInfoArray(map)
-  const estMap = calculateFireEstimateMap(eagleSpots, posInfoArray, map)
+  const eagleSpots = around(getTankSpot(map.eagle))
+  const allSpots = getAllSpots(map)
+  const estMap = calculateFireEstimateMap(eagleSpots, allSpots, map)
   const candidates = Array.from(estMap.keys()).filter(
-    pos => posInfoArray[pos].canPass && getFireResist(estMap.get(pos)) <= 8,
+    t => allSpots[t].canPass && getFireResist(estMap.get(t)) <= 8,
   )
   const target = candidates[randint(0, candidates.length)]
-  const path = findPath(posInfoArray, getTankPos(tank), target)
+  const path = findPath(allSpots, getTankSpot(tank), target)
   DEV && console.assert(path != null)
   yield call(followPath, ctx, path)
   simpleFireLoopTask.cancel()

@@ -1,16 +1,16 @@
-import { dirs } from 'ai/pos-utils'
-import PosInfo from './PosInfo'
+import { dirs } from 'ai/spot-utils'
+import Spot from 'ai/Spot'
 
 // TODO 使用A*算法
 export function findPath(
-  posInfoArray: PosInfo[],
+  allSpots: Spot[],
   start: number,
-  stopConditionOrTarget: number | ((posInfo: PosInfo) => boolean),
-  calculateScore: (step: number, posInfo: PosInfo) => number = step => step,
+  stopConditionOrTarget: number | ((spot: Spot) => boolean),
+  calculateScore: (step: number, spot: Spot) => number = step => step,
 ) {
-  let stopCondition: (posInfo: PosInfo) => boolean
+  let stopCondition: (spot: Spot) => boolean
   if (typeof stopConditionOrTarget === 'number') {
-    stopCondition = (posInfo: PosInfo) => posInfo.t === stopConditionOrTarget
+    stopCondition = (spot: Spot) => spot.t === stopConditionOrTarget
   } else {
     stopCondition = stopConditionOrTarget
   }
@@ -27,8 +27,8 @@ export function findPath(
     return path
   }
 
-  const pre = new Array<number>(posInfoArray.length)
-  const distance = new Array<number>(posInfoArray.length)
+  const pre = new Array<number>(allSpots.length)
+  const distance = new Array<number>(allSpots.length)
   pre.fill(-1)
   distance.fill(Infinity)
 
@@ -41,13 +41,13 @@ export function findPath(
     step++
     const next = new Set<number>()
     for (const u of cnt) {
-      const posInfo = posInfoArray[u]
-      if (!posInfo.canPass) {
+      const spot = allSpots[u]
+      if (!spot.canPass) {
         continue
       }
       distance[u] = step
-      if (stopCondition(posInfo)) {
-        const score = calculateScore(step, posInfo)
+      if (stopCondition(spot)) {
+        const score = calculateScore(step, spot)
         if (score < minScore) {
           minScore = score
           end = u

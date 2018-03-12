@@ -1,5 +1,5 @@
 import { logAI } from 'ai/logger'
-import { getTankPos } from 'ai/pos-utils'
+import { getTankSpot } from 'ai/spot-utils'
 import { put, select } from 'redux-saga/effects'
 import { TankRecord } from 'types'
 import { waitFor } from 'utils/common'
@@ -12,7 +12,7 @@ export default function* followPath(ctx: AITankCtx, path: number[]) {
     yield put<Action>({ type: 'SET_AI_TANK_PATH', playerName: ctx.playerName, path })
     const tank: TankRecord = yield select(selectors.playerTank, ctx.playerName)
     DEV && console.assert(tank != null)
-    const start = getTankPos(tank)
+    const start = getTankSpot(tank)
     let index = path.indexOf(start)
     DEV && console.assert(index !== -1)
 
