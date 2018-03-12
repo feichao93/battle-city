@@ -1,3 +1,5 @@
+import { BulletRecord } from 'types'
+
 const N = 26
 
 export const getRow = (t: number) => Math.floor(t / N)
@@ -44,7 +46,13 @@ export function around(t: number) {
 }
 
 export const getTankSpot = (point: Point) => {
-  const col = Math.floor((point.x + 8) / 8)
-  const row = Math.floor((point.y + 8) / 8)
+  const col = Math.round((point.x + 8) / 8)
+  const row = Math.round((point.y + 8) / 8)
+  return row * N + col
+}
+
+export function getBulletSpot(bullet: BulletRecord) {
+  const col = Math.floor((bullet.x + 1) / 8)
+  const row = Math.round((bullet.y + 1) / 8)
   return row * N + col
 }

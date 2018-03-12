@@ -6,8 +6,9 @@ import { waitFor } from 'utils/common'
 import * as selectors from 'utils/selectors'
 import AITankCtx from './AITankCtx'
 
+// TODO 可以考虑「截断过长的路径」
 export default function* followPath(ctx: AITankCtx, path: number[]) {
-  DEV && logAI('follow-path')
+  DEV && logAI('start-follow-path')
   try {
     yield put<Action>({ type: 'SET_AI_TANK_PATH', playerName: ctx.playerName, path })
     const tank: TankRecord = yield select(selectors.playerTank, ctx.playerName)

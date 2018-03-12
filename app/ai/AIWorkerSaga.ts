@@ -1,10 +1,11 @@
+import { Map as IMap } from 'immutable'
 import AITankCtx from 'ai/AITankCtx'
-import { getEnv } from 'ai/env-utils'
+import { getEnv, RelativePosition } from 'ai/env-utils'
 import { calculateFireEstimateMap, FireEstimate, getFireResist } from 'ai/fire-utils'
 import followPath from 'ai/followPath'
 import getAllSpots from 'ai/getAllSpots'
 import { logAI } from 'ai/logger'
-import { around, getTankSpot } from 'ai/spot-utils'
+import { around, getTankSpot, getBulletSpot } from 'ai/spot-utils'
 import Spot from 'ai/Spot'
 import { findPath } from 'ai/shortest-path'
 import simpleFireLoop from 'ai/simpleFireLoop'
@@ -47,9 +48,9 @@ function* attackEagleMode(ctx: AITankCtx) {
   const { map }: State = yield select()
   const tank: TankRecord = yield select(selectors.playerTank, ctx.playerName)
   DEV && console.assert(tank != null)
-  const eagleSpots = around(getTankSpot(map.eagle))
+  const eagleWeakSpots = around(getTankSpot(map.eagle))
   const allSpots = getAllSpots(map)
-  const estMap = calculateFireEstimateMap(eagleSpots, allSpots, map)
+  const estMap = calculateFireEstimateMap(eagleWeakSpots, allSpots, map)
   const candidates = Array.from(estMap.keys()).filter(
     t => allSpots[t].canPass && getFireResist(estMap.get(t)) <= 8,
   )
@@ -93,6 +94,38 @@ function* generateBulletCompleteNote(ctx: AITankCtx) {
   }
 }
 
+// TODO WIP
+function* dangerDetectionLoop(ctx: AITankCtx) {
+  while (true) {
+    DEV && console.time('danger-detect')
+    const tank: TankRecord = yield select(selectors.playerTank, ctx.playerName)
+    DEV && console.assert(tank != null)
+    const tankWeakSpots = around(getTankSpot(tank))
+    const { map, bullets, tanks }: State = yield select()
+    const allSpots = getAllSpots(map)
+    const estMap = IMap(calculateFireEstimateMap(tankWeakSpots, allSpots, map))
+    // directEstMap: 开火后可以直接击中坦克的那些位置
+    const directEstMap = estMap.filter(est => getFireResist(est) === 0)
+    // upcomingBullets: 即将击中坦克的子弹
+    const upcomingBullets = bullets.filter(
+      blt =>
+        tanks.get(blt.tankId).side === 'human' &&
+        directEstMap.has(getBulletSpot(blt)) &&
+        // TODO 直接调用getPrimaryDirection可能会有一点点的误差
+        new RelativePosition(blt, tank).getPrimaryDirection() === blt.direction,
+    )
+    if (!upcomingBullets.isEmpty()) {
+      DEV && logAI('danger-detected', upcomingBullets.toJS())
+      // TODO 尝试以下方式来躲避危险
+      // 1. 继续前进
+      // 2. 向前开火以抵消攻击
+      // 3. 找到一个附近的 passable spot，然后开到那个位置
+    }
+    DEV && console.timeEnd('danger-detect')
+    yield nonPauseDelay(200)
+  }
+}
+
 /**
  * AIWorkerSaga对应一个正在游戏中的AI玩家.
  * 当一个AI玩家坦克创建/激活时, 一个AIWorkerSaga实例将被创建
@@ -113,6 +146,7 @@ export default function* AIWorkerSaga(playerName: string) {
   yield take(
     (action: Action) => action.type === 'ACTIVATE_PLAYER' && action.playerName === ctx.playerName,
   )
+  yield fork(dangerDetectionLoop, ctx)
   // TODO dodge attack from player.
   let continuousWanderModeCount = 0
   while (true) {

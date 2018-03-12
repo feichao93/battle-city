@@ -30,6 +30,6 @@ export function mergeEstMap(a: Map<number, FireEstimate>, b: Map<number, FireEst
   return a
 }
 
-export function calculateFireEstimateMap(spots: number[], posInfoArray: Spot[], map: MapRecord) {
-  return spots.map(spot => posInfoArray[spot].getIdealFireEstMap(map)).reduce(mergeEstMap)
+export function calculateFireEstimateMap(weakSpots: number[], allSpots: Spot[], map: MapRecord) {
+  return weakSpots.map(spot => allSpots[spot].getIdealFireEstMap(map)).reduce(mergeEstMap)
 }
