@@ -19,6 +19,7 @@ import fireController from 'sagas/fireController'
 import { TankFireInfo, TankRecord } from 'types'
 import { randint, waitFor } from 'utils/common'
 import * as selectors from 'utils/selectors'
+import * as dodgeUtils from 'ai/dodge-utils'
 
 function getRandomPassablePos(posInfoArray: Spot[]) {
   while (true) {
@@ -97,7 +98,6 @@ function* generateBulletCompleteNote(ctx: AITankCtx) {
 // TODO WIP
 function* dangerDetectionLoop(ctx: AITankCtx) {
   while (true) {
-    DEV && console.time('danger-detect')
     const tank: TankRecord = yield select(selectors.playerTank, ctx.playerName)
     DEV && console.assert(tank != null)
     const tankWeakSpots = around(getTankSpot(tank))
@@ -116,12 +116,16 @@ function* dangerDetectionLoop(ctx: AITankCtx) {
     )
     if (!upcomingBullets.isEmpty()) {
       DEV && logAI('danger-detected', upcomingBullets.toJS())
-      // TODO 尝试以下方式来躲避危险
+      // 这里坦克只考虑躲避第一个子弹
+      const bullet = upcomingBullets.first()
+      // 尝试以下方式来躲避危险
       // 1. 继续前进
+      if (dodgeUtils.canMoveToDodge(tank, bullet)) {
+        // TODO
+      }
       // 2. 向前开火以抵消攻击
       // 3. 找到一个附近的 passable spot，然后开到那个位置
     }
-    DEV && console.timeEnd('danger-detect')
     yield nonPauseDelay(200)
   }
 }

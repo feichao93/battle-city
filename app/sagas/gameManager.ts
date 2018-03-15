@@ -98,6 +98,10 @@ export default function* gameManager() {
   }
 
   const stages = Object.keys(stageConfigs)
+  if (DEV) {
+    stages.splice(stages.indexOf('test'), 1)
+    stages.unshift('test')
+  }
   for (const stageName of stages) {
     const stageResult: StageResult = yield* stageSaga(stageName)
     DEV && console.log('stageResult:', stageResult)
