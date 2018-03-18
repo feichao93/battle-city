@@ -38,8 +38,11 @@ function* wanderMode(ctx: AITankCtx) {
   const { map }: State = yield select()
   const allSpots = getAllSpots(map)
   const path = findPath(allSpots, getTankSpot(tank), getRandomPassablePos(allSpots))
-  DEV.ASSERT && console.assert(path != null)
-  yield call(followPath, ctx, path)
+  if (path == null) {
+    yield call(followPath, ctx, path)
+  } else {
+    yield nonPauseDelay(200)
+  }
   simpleFireLoopTask.cancel()
 }
 
@@ -57,10 +60,14 @@ function* attackEagleMode(ctx: AITankCtx) {
   )
   const target = candidates[randint(0, candidates.length)]
   const path = findPath(allSpots, getTankSpot(tank), target)
-  DEV.ASSERT && console.assert(path != null)
-  yield call(followPath, ctx, path)
-  simpleFireLoopTask.cancel()
-  yield call(attackEagle, ctx, estMap.get(target))
+  if (path != null) {
+    yield call(followPath, ctx, path)
+    simpleFireLoopTask.cancel()
+    yield attackEagle(ctx, estMap.get(target))
+  } else {
+    simpleFireLoopTask.cancel()
+    yield nonPauseDelay(200)
+  }
 }
 
 function* attackEagle(ctx: AITankCtx, fireEstimate: FireEstimate) {
@@ -130,10 +137,11 @@ function* dangerDetectionLoop(ctx: AITankCtx) {
   }
 }
 
+// fixme 在玩家触发 timer powerUp 的时候 blocked 被触发
 function* blocked(ctx: AITankCtx) {
   let counter = 0
   let lastTank = yield select(selectors.playerTank, ctx.playerName)
-  while (counter < 3) {
+  while (counter < 30) {
     yield take('TICK')
     const tank: TankRecord = yield select(selectors.playerTank, ctx.playerName)
     if (Math.abs(tank.x - lastTank.x) + Math.abs(tank.y - lastTank.y) <= 0.01) {
@@ -168,7 +176,6 @@ export default function* AIWorkerSaga(playerName: string) {
   )
   yield fork(dangerDetectionLoop, ctx)
   // TODO dodge attack from player.
-  let continuousWanderModeCount = 0
   while (true) {
     yield race({
       blocked: blocked(ctx),
@@ -177,6 +184,7 @@ export default function* AIWorkerSaga(playerName: string) {
   }
 
   function* mode() {
+    let continuousWanderModeCount = 0
     if (Math.random() < 0.7 - continuousWanderModeCount * 0.1) {
       continuousWanderModeCount++
       yield call(wanderMode, ctx)

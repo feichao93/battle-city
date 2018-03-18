@@ -12,10 +12,3 @@ ReactDOM.render(
   </Provider>,
   document.getElementById('container'),
 )
-
-// 自定义的react类型信息
-declare module 'react' {
-  interface SVGProps<T> {
-    role?: string
-  }
-}
