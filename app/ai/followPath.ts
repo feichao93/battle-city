@@ -8,14 +8,14 @@ import AITankCtx from './AITankCtx'
 
 // TODO 可以考虑「截断过长的路径」
 export default function* followPath(ctx: AITankCtx, path: number[]) {
-  DEV && logAI('start-follow-path')
+  DEV.LOG_AI && logAI('start-follow-path')
   try {
     yield put<Action>({ type: 'SET_AI_TANK_PATH', playerName: ctx.playerName, path })
     const tank: TankRecord = yield select(selectors.playerTank, ctx.playerName)
-    DEV && console.assert(tank != null)
+    DEV.ASSERT && console.assert(tank != null)
     const start = getTankSpot(tank)
     let index = path.indexOf(start)
-    DEV && console.assert(index !== -1)
+    DEV.ASSERT && console.assert(index !== -1)
 
     while (index < path.length - 1) {
       const delta = path[index + 1] - path[index]

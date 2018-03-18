@@ -5,14 +5,23 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin')
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 const moment = require('moment')
 const packageInfo = require('./package.json')
+const getDevConfig = require('./devConfig')
 
 moment.locale('zh-cn')
+
+function processDevConfig(config) {
+  const result = {}
+  for (const [key, value] of Object.entries(config)) {
+    result[key] = JSON.stringify(value)
+  }
+  return result
+}
 
 // --env.prod --env.stories --env.editor
 module.exports = function(env) {
   env = env || {}
 
-  const isProduction = env.production
+  const prod = env.production
 
   const entry = {}
   entry.main = ['react-hot-loader/patch', __dirname + '/app/main.tsx']
@@ -29,8 +38,9 @@ module.exports = function(env) {
     new webpack.DefinePlugin({
       COMPILE_VERSION: JSON.stringify(packageInfo.version),
       COMPILE_DATE: JSON.stringify(moment().format('YYYY-MM-DD HH:mm:ss')),
-      'process.env.NODE_ENV': JSON.stringify(isProduction ? 'production' : 'development'),
-      DEV: JSON.stringify(!isProduction),
+      'process.env.NODE_ENV': JSON.stringify(prod ? 'production' : 'development'),
+      // 将 devConfig.js 中的配置数据加入到 DefinePlugin 中
+      ...processDevConfig(getDevConfig(prod)),
     }),
   )
   plugins.push(
@@ -62,7 +72,7 @@ module.exports = function(env) {
     )
   }
 
-  if (!isProduction) {
+  if (!prod) {
     plugins.push(new webpack.HotModuleReplacementPlugin())
   } else {
     plugins.push(
@@ -78,13 +88,13 @@ module.exports = function(env) {
   return {
     context: __dirname,
     target: 'web',
-    devtool: isProduction ? false : 'source-map',
+    devtool: prod ? false : 'source-map',
 
     entry,
 
     output: {
       path: path.resolve(__dirname, 'build', packageInfo.version),
-      filename: isProduction ? '[name]-[chunkhash:6].js' : '[name].js',
+      filename: prod ? '[name]-[chunkhash:6].js' : '[name].js',
     },
 
     resolve: {
@@ -107,7 +117,7 @@ module.exports = function(env) {
           exclude: /node_modules/,
         },
       ].concat(
-        isProduction
+        prod
           ? [
               {
                 test: /\.css$/,

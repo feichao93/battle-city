@@ -13,7 +13,7 @@ export default function* spawnTank(tank: TankRecord, spawnSpeed = 1) {
     area: asRect(tank),
   })
 
-  if (!DEV) {
+  if (!DEV.FAST) {
     yield* flickerSaga(tank.x, tank.y, spawnSpeed)
   }
 

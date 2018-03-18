@@ -1,7 +1,7 @@
 import { Map, Record } from 'immutable'
 let reducer: any = () => 0
 
-if (DEV) {
+if (DEV.TANK_PATH) {
   const DevStateRecord = Record({
     pathmap: Map<string, number[]>(),
   })

@@ -5,7 +5,7 @@ import { State, TanksMap, ScoresMap, TankRecord, PlayersMap, ExplosionsMap } fro
 
 let connectedInspector: any = () => null as any
 
-if (DEV) {
+if (DEV.INSPECTOR) {
   function roundTank(t: TankRecord) {
     return t
       .update('x', Math.round)

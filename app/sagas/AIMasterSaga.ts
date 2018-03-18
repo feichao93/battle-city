@@ -11,7 +11,7 @@ import * as selectors from 'utils/selectors'
 
 /** AIMasterSaga用来管理AIWorkerSaga的启动和停止, 并处理和AI程序的数据交互 */
 export default function* AIMasterSaga() {
-  const max = DEV ? 1 : 3
+  const max = DEV.OTHER ? 1 : 3
   const taskMap = new Map<PlayerName, Task>()
   const addAICommandChannel = makeChannel()
 

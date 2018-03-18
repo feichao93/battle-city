@@ -16,19 +16,19 @@ export default class AITankCtx {
   constructor(readonly playerName: string, readonly noteEmitter: EventEmitter) {}
 
   turn(direction: Direction) {
-    DEV && logAI('turn', direction)
+    DEV.LOG_AI && logAI('turn', direction)
     this.nextDirection = direction
   }
 
   fire() {
-    DEV && logAI('fire')
+    DEV.LOG_AI && logAI('fire')
     this._fire = true
   }
 
   *forward(forwardLength: number) {
-    DEV && logAI('forward', forwardLength)
+    DEV.LOG_AI && logAI('forward', forwardLength)
     const tank = yield select(selectors.playerTank, this.playerName)
-    DEV && console.assert(tank != null)
+    DEV.ASSERT && console.assert(tank != null)
     const { xy } = getDirectionInfo(this.nextDirection || tank.direction)
     this.startPos = tank.get(xy)
     this.forwardLength = forwardLength
@@ -36,7 +36,7 @@ export default class AITankCtx {
 
   *moveTo(t: number) {
     const tank = yield select(selectors.playerTank, this.playerName)
-    DEV && console.assert(tank != null)
+    DEV.ASSERT && console.assert(tank != null)
     const target = {
       x: getCol(t) * 8 - 8,
       y: getRow(t) * 8 - 8,
@@ -58,7 +58,7 @@ export default class AITankCtx {
       const maxDistance = this.forwardLength - movedLength
       if (movedLength === this.forwardLength) {
         this.forwardLength = 0
-        DEV && logAI('note reach')
+        DEV.LOG_AI && logAI('note reach')
         this.noteEmitter.emit('reach')
         return null
       } else {

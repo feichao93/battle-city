@@ -7,7 +7,7 @@ interface P {
 
 let RestrictedAreaLayer: React.ComponentClass<P> = (() => null as any) as any
 
-if (DEV) {
+if (DEV.RESTRICTED_AREA) {
   RestrictedAreaLayer = class extends React.PureComponent<P> {
     render() {
       const { areas } = this.props

@@ -8,7 +8,7 @@ import { State } from 'types'
 
 let connectedSpotGraph: any = () => null as any
 
-if (!DEV) {
+if (!DEV.SPOT_GRAPH) {
   const colors = {
     red: '#ff0000b3',
     green: '#4caf50aa',

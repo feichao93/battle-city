@@ -159,14 +159,13 @@ export function getTankBulletLimit(tank: TankRecord) {
 
 export function getTankBulletSpeed(tank: TankRecord) {
   if (tank.side === 'human') {
-    if (DEV) {
+    if (DEV.FAST) {
       return 0.3
+    }
+    if (tank.level === 'basic') {
+      return 0.12
     } else {
-      if (tank.level === 'basic') {
-        return 0.12
-      } else {
-        return 0.24
-      }
+      return 0.24
     }
   } else {
     if (tank.level === 'basic') {
@@ -188,7 +187,7 @@ export function getTankBulletInterval(tank: TankRecord) {
 
 export function getTankMoveSpeed(tank: TankRecord) {
   if (tank.side === 'human') {
-    return DEV ? 0.06 : 0.045
+    return DEV.FAST ? 0.06 : 0.045
   } else {
     if (tank.level === 'basic') {
       return 0.03

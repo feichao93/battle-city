@@ -13,12 +13,12 @@ export default function* statistics() {
 
   // todo 目前只考虑player-1的信息
 
-  yield nonPauseDelay(DEV ? 200 : 500)
+  yield nonPauseDelay(DEV.FAST ? 200 : 500)
 
   for (const tankLevel of TANK_LEVELS) {
     const { game: { transientKillInfo } }: State = yield select()
 
-    yield nonPauseDelay(DEV ? 100 : 250)
+    yield nonPauseDelay(DEV.FAST ? 100 : 250)
     const levelKillCount = player1KillInfo.get(tankLevel, 0)
     if (levelKillCount === 0) {
       yield put<Action>({
@@ -31,12 +31,12 @@ export default function* statistics() {
           type: 'UPDATE_TRANSIENT_KILL_INFO',
           info: transientKillInfo.setIn(['player-1', tankLevel], count),
         })
-        yield nonPauseDelay(DEV ? 64 : 160)
+        yield nonPauseDelay(DEV.FAST ? 64 : 160)
       }
     }
-    yield nonPauseDelay(DEV ? 80 : 200)
+    yield nonPauseDelay(DEV.FAST ? 80 : 200)
   }
-  yield nonPauseDelay(DEV ? 80 : 200)
+  yield nonPauseDelay(DEV.FAST ? 80 : 200)
   yield put<Action>({ type: 'SHOW_TOTAL_KILL_COUNT' })
-  yield nonPauseDelay(DEV ? 400 : 1000)
+  yield nonPauseDelay(DEV.FAST ? 400 : 1000)
 }

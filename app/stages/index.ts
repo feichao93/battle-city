@@ -1,6 +1,6 @@
 const stageConfigs: { [name: string]: StageConfig } = {}
 
-if (DEV) {
+if (DEV.TEST_STAGE) {
   // inject stage test in dev mode
   stageConfigs['test'] = {
     name: '1',

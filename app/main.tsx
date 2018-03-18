@@ -1,3 +1,4 @@
+/// <reference path="../custom-tyings.d.ts" />
 import 'normalize.css'
 import * as React from 'react'
 import { ComponentClass } from 'react'
@@ -39,5 +40,4 @@ declare module 'react' {
 declare global {
   const COMPILE_VERSION: string
   const COMPILE_DATE: string
-  const DEV: boolean
 }

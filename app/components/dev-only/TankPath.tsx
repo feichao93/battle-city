@@ -5,7 +5,7 @@ import { State } from 'types'
 
 let connectedTankPath: any = () => null as any
 
-if (DEV) {
+if (DEV.TANK_PATH) {
   const colorList = ['aqua', 'red', 'yellow', 'coral', 'white']
   let nextColorIndex = 0
   const colorMap = new Map()

@@ -60,7 +60,7 @@ class App extends React.PureComponent<{ scene: Scene; paused: boolean }> {
           <CurtainsContainer />
           {paused ? <PauseIndicator /> : null}
         </svg>
-        {DEV ? null : <BuildInfo />}
+        {DEV.BUILD_INFO ? <BuildInfo /> : null}
         {/* <Inspector /> */}
       </div>
     )

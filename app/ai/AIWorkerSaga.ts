@@ -31,24 +31,24 @@ function getRandomPassablePos(posInfoArray: Spot[]) {
 }
 
 function* wanderMode(ctx: AITankCtx) {
-  DEV && logAI('enter wander-mode')
+  DEV.LOG_AI && logAI('enter wander-mode')
   const simpleFireLoopTask: Task = yield fork(simpleFireLoop, ctx)
   const tank: TankRecord = yield select(selectors.playerTank, ctx.playerName)
-  DEV && console.assert(tank != null)
+  DEV.ASSERT && console.assert(tank != null)
   const { map }: State = yield select()
   const allSpots = getAllSpots(map)
   const path = findPath(allSpots, getTankSpot(tank), getRandomPassablePos(allSpots))
-  DEV && console.assert(path != null)
+  DEV.ASSERT && console.assert(path != null)
   yield call(followPath, ctx, path)
   simpleFireLoopTask.cancel()
 }
 
 function* attackEagleMode(ctx: AITankCtx) {
-  DEV && logAI('enter attack-eagle-mode')
+  DEV.LOG_AI && logAI('enter attack-eagle-mode')
   const simpleFireLoopTask: Task = yield fork(simpleFireLoop, ctx)
   const { map }: State = yield select()
   const tank: TankRecord = yield select(selectors.playerTank, ctx.playerName)
-  DEV && console.assert(tank != null)
+  DEV.ASSERT && console.assert(tank != null)
   const eagleWeakSpots = around(getTankSpot(map.eagle))
   const allSpots = getAllSpots(map)
   const estMap = calculateFireEstimateMap(eagleWeakSpots, allSpots, map)
@@ -57,17 +57,17 @@ function* attackEagleMode(ctx: AITankCtx) {
   )
   const target = candidates[randint(0, candidates.length)]
   const path = findPath(allSpots, getTankSpot(tank), target)
-  DEV && console.assert(path != null)
+  DEV.ASSERT && console.assert(path != null)
   yield call(followPath, ctx, path)
   simpleFireLoopTask.cancel()
   yield call(attackEagle, ctx, estMap.get(target))
 }
 
 function* attackEagle(ctx: AITankCtx, fireEstimate: FireEstimate) {
-  DEV && logAI('start attack eagle')
+  DEV.LOG_AI && logAI('start attack eagle')
   const { map, tanks }: State = yield select()
   const tank: TankRecord = yield select(selectors.playerTank, ctx.playerName)
-  DEV && console.assert(tank != null)
+  DEV.ASSERT && console.assert(tank != null)
   const env = getEnv(map, tanks, tank)
   ctx.turn(env.tankPosition.eagle.getPrimaryDirection())
   yield take('TICK') // 等待一个 tick, 确保转向已经完成
@@ -99,7 +99,7 @@ function* generateBulletCompleteNote(ctx: AITankCtx) {
 function* dangerDetectionLoop(ctx: AITankCtx) {
   while (true) {
     const tank: TankRecord = yield select(selectors.playerTank, ctx.playerName)
-    DEV && console.assert(tank != null)
+    DEV.ASSERT && console.assert(tank != null)
     const tankWeakSpots = around(getTankSpot(tank))
     const { map, bullets, tanks }: State = yield select()
     const allSpots = getAllSpots(map)
@@ -115,7 +115,7 @@ function* dangerDetectionLoop(ctx: AITankCtx) {
         new RelativePosition(blt, tank).getPrimaryDirection() === blt.direction,
     )
     if (!upcomingBullets.isEmpty()) {
-      DEV && logAI('danger-detected', upcomingBullets.toJS())
+      DEV.LOG_AI && logAI('danger-detected', upcomingBullets.toJS())
       // 这里坦克只考虑躲避第一个子弹
       const bullet = upcomingBullets.first()
       // 尝试以下方式来躲避危险
@@ -143,7 +143,7 @@ function* blocked(ctx: AITankCtx) {
     }
     lastTank = tank
   }
-  DEV && logAI('blocked')
+  DEV.LOG_AI && logAI('blocked')
 }
 
 /**
