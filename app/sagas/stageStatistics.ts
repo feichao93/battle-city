@@ -1,11 +1,12 @@
 import { Map } from 'immutable'
+import { replace } from 'react-router-redux'
 import { put, select } from 'redux-saga/effects'
 import { State } from 'types'
 import { TANK_LEVELS } from 'utils/constants'
 import { nonPauseDelay } from 'sagas/common'
 
 export default function* statistics() {
-  yield put<Action>({ type: 'LOAD_SCENE', scene: 'statistics' })
+  yield put(replace('/statistics'))
 
   const { game: { killInfo } }: State = yield select()
 

@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { Dispatch } from 'redux'
 import { connect } from 'react-redux'
+import { replace } from 'react-router-redux'
 import BrickWall from 'components/BrickWall'
 import Text from 'components/Text'
 import TextButton from 'components/TextButton'
@@ -86,7 +87,7 @@ class GameTitleScene extends React.PureComponent<P, S> {
           y={8.5 * B}
           textFill="white"
           onMouseOver={() => this.setState({ choice: '1-player' })}
-          onClick={() => dispatch<Action>({ type: 'START_CHOOSE_STAGE' })}
+          onClick={() => dispatch(replace('/choose-stage'))}
         />
         <TextButton
           content="editor"

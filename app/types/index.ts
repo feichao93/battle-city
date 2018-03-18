@@ -63,8 +63,6 @@ declare global {
 
   type PowerUpName = 'tank' | 'star' | 'grenade' | 'timer' | 'helmet' | 'shovel'
 
-  type Scene = 'game-title' | 'choose-stage' | 'game' | 'gameover' | 'statistics'
-
   type TankLevel = 'basic' | 'fast' | 'power' | 'armor'
   type TankColor = 'green' | 'yellow' | 'silver' | 'red' | 'auto'
 

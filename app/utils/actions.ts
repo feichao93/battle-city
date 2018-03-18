@@ -35,12 +35,10 @@ declare global {
       | StartStage
       | EndStage
       | Simple<'BEFORE_GAMEOVER'>
-      | Simple<'START_CHOOSE_STAGE'>
       | Simple<'GAMEOVER'>
       | GameStart
       | Simple<'GAMEPAUSE'>
       | Simple<'GAMERESUME'>
-      | LoadSceneAction
       | Simple<'SHOW_HUD'>
       | Simple<'HIDE_HUD'>
       | Simple<'REMOVE_FIRST_REMAINING_ENEMY'>
@@ -297,11 +295,6 @@ declare global {
     export interface GameStart {
       type: 'GAMESTART'
       stageIndex: number
-    }
-
-    export interface LoadSceneAction {
-      type: 'LOAD_SCENE'
-      scene: Scene
     }
 
     export interface AddOrUpdatePowerUp {

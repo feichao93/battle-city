@@ -19,12 +19,10 @@ const emptyTransientKillInfo = Map({
 
 const defaultRemainingEnemies = Repeat('basic' as TankLevel, 20).toList()
 
-export const GameRecord = Record(
+const GameRecordBase = Record(
   {
     /** 游戏是否暂停 */
     paused: false,
-    /** 当前场景 */
-    scene: 'game-title' as Scene,
     /** 当前的关卡名 */
     currentStage: null as string,
     /** 即将开始的关卡的名称 */
@@ -49,14 +47,10 @@ export const GameRecord = Record(
   'GameRecord',
 )
 
-const gameRecord = GameRecord()
+export class GameRecord extends GameRecordBase {}
 
-export type GameRecord = typeof gameRecord
-
-export default function game(state = gameRecord, action: Action) {
-  if (action.type === 'LOAD_SCENE') {
-    return state.set('scene', action.scene)
-  } else if (action.type === 'START_STAGE') {
+export default function game(state = new GameRecord(), action: Action) {
+  if (action.type === 'START_STAGE') {
     return state.merge({
       currentStage: action.name,
       transientKillInfo: emptyTransientKillInfo,

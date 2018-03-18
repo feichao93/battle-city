@@ -1,5 +1,7 @@
 import React from 'react'
 import { connect, Dispatch } from 'react-redux'
+import { Switch, match, Redirect, Route } from 'react-router-dom'
+import { replace } from 'react-router-redux'
 import Text from 'components/Text'
 import { stageConfigs, stageNames } from 'stages'
 import TextButton from 'components/TextButton'
@@ -46,66 +48,98 @@ class StagePreview extends React.PureComponent<StagePreviewProps> {
   }
 }
 
-class ChooseStageScene extends React.PureComponent<
-  { dispatch: Dispatch<State> },
-  { index: number }
-> {
-  state = {
-    index: 0,
-  }
-
-  onChoosePrev = () => this.setState({ index: this.state.index - 1 })
-  onChooseNext = () => this.setState({ index: this.state.index + 1 })
-  onStartPlay = () => {
+class ChooseStageScene extends React.PureComponent<{
+  dispatch: Dispatch<State>
+  match: match<any>
+}> {
+  onChoose = (stageName: string) => this.props.dispatch(replace(`/choose-stage/${stageName}`))
+  onStartPlay = (stageIndex: number) => {
     this.props.dispatch<Action>({
       type: 'GAMESTART',
-      stageIndex: this.state.index,
+      stageIndex,
     })
   }
 
   render() {
-    const { index } = this.state
-    const current = stageNames[index]
-    const prev = stageNames[index - 1]
-    const next = stageNames[index + 1]
+    const { match, dispatch } = this.props
 
     return (
-      <g className="choose-stage-scene">
-        <Text content="choose stage:" x={0.5 * B} y={0.5 * B} />
-        <StagePreview key={prev} stageName={prev} x={0.75 * B} y={3.375 * B} scale={1 / 4} />
-        <StagePreview key={current} stageName={current} x={4.75 * B} y={1.75 * B} scale={1 / 2} />
-        <StagePreview key={next} stageName={next} x={12 * B} y={3.375 * B} scale={1 / 4} />
-        <Text content={`stage ${current}`} x={6.5 * B} y={8.5 * B} />
-        <g className="button-areas" transform={`translate(${2.5 * B}, ${11 * B})`}>
-          <TextButton
-            content="prev"
-            textFill="white"
-            disabled={index === 0}
-            x={0}
-            y={0}
-            onClick={this.onChoosePrev}
-          />
-          <TextButton
-            content="next"
-            textFill="white"
-            disabled={index === stageNames.length - 1}
-            x={3 * B}
-            y={0}
-            onClick={this.onChooseNext}
-          />
-          <TextButton
-            content="play"
-            textFill="#96d332"
-            x={6 * B}
-            y={0}
-            onClick={this.onStartPlay}
-          />
-          <TextButton content="back" textFill="white" x={9 * B} y={0} />
-        </g>
-        <g className="hint" transform={`translate(${0.5 * B},${14 * B}) scale(0.5)`}>
-          <Text fill="#ccc" content="This page is a little janky. Keep patient." x={0} y={0} />
-        </g>
-      </g>
+      <Switch>
+        <Route
+          exact
+          path={match.path}
+          render={() => <Redirect to={`/choose-stage/${stageNames[0]}`} />}
+        />
+        <Route
+          path={`${match.path}/:stageName`}
+          render={({ match: { params: { stageName } } }) => {
+            if (!stageNames.includes(stageName)) {
+              return <Redirect to={`${match.url}/${stageNames[0]}`} />
+            }
+            const index = stageNames.indexOf(stageName)
+            return (
+              <g className="choose-stage-scene">
+                <Text content="choose stage:" x={0.5 * B} y={0.5 * B} />
+                <StagePreview
+                  stageName={stageNames[index - 1]}
+                  x={0.75 * B}
+                  y={3.375 * B}
+                  scale={1 / 4}
+                />
+                <StagePreview stageName={stageName} x={4.75 * B} y={1.75 * B} scale={1 / 2} />
+                <StagePreview
+                  stageName={stageNames[index + 1]}
+                  x={12 * B}
+                  y={3.375 * B}
+                  scale={1 / 4}
+                />
+                <Text content={`stage ${stageName}`} x={6.5 * B} y={8.5 * B} />
+                <g className="button-areas" transform={`translate(${2.5 * B}, ${11 * B})`}>
+                  <TextButton
+                    content="prev"
+                    textFill="white"
+                    disabled={index === 0}
+                    x={0}
+                    y={0}
+                    onClick={() => this.onChoose(stageNames[index - 1])}
+                  />
+                  <TextButton
+                    content="next"
+                    textFill="white"
+                    disabled={index === stageNames.length - 1}
+                    x={3 * B}
+                    y={0}
+                    onClick={() => this.onChoose(stageNames[index + 1])}
+                  />
+                  <TextButton
+                    content="play"
+                    textFill="#96d332"
+                    stroke="#96d332"
+                    x={6 * B}
+                    y={0}
+                    onClick={() => this.onStartPlay(index)}
+                  />
+                  <TextButton
+                    content="back"
+                    textFill="white"
+                    x={9 * B}
+                    y={0}
+                    onClick={() => dispatch(replace('/'))}
+                  />
+                </g>
+                <g className="hint" transform={`translate(${0.5 * B},${14 * B}) scale(0.5)`}>
+                  <Text
+                    fill="#ccc"
+                    content="This page is a little janky. Keep patient."
+                    x={0}
+                    y={0}
+                  />
+                </g>
+              </g>
+            )
+          }}
+        />
+      </Switch>
     )
   }
 }

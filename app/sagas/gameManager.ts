@@ -1,3 +1,4 @@
+import { replace } from 'react-router-redux'
 import { put, take, takeEvery } from 'redux-saga/effects'
 import { BLOCK_SIZE } from 'utils/constants'
 import { getNextId } from 'utils/common'
@@ -64,7 +65,7 @@ function* animateGameover() {
   yield nonPauseDelay(500)
   yield put<Action>({ type: 'REMOVE_TEXT', textId: textId1 })
   yield put<Action>({ type: 'REMOVE_TEXT', textId: textId2 })
-  yield put<Action>({ type: 'LOAD_SCENE', scene: 'gameover' })
+  yield put(replace('/gameover'))
 }
 
 interface StageResult {
@@ -93,14 +94,7 @@ export default function* gameManager() {
   yield takeEvery('START_STAGE', startStage)
   yield takeEvery('END_STAGE', endStage)
 
-  let stageIndex: number
-  if (!DEV.OTHER) {
-    yield take('START_CHOOSE_STAGE')
-    yield put<Action>({ type: 'LOAD_SCENE', scene: 'choose-stage' })
-    stageIndex = ((yield take('GAMESTART')) as Action.GameStart).stageIndex
-  } else {
-    stageIndex = 0
-  }
+  const stageIndex = DEV.OTHER ? 0 : ((yield take('GAMESTART')) as Action.GameStart).stageIndex
 
   for (const name of stageNames.slice(stageIndex)) {
     const stageResult: StageResult = yield* stageSaga(name)

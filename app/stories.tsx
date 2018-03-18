@@ -69,7 +69,7 @@ const simpleSagaMiddleware = createSagaMiddleware()
 const simpleReducer = combineReducers({ time, players, game })
 const initialState = {
   time: undefined as number,
-  game: GameRecord({ showHUD: true }),
+  game: new GameRecord({ showHUD: true }),
   players: Map({
     'player-1': new PlayerRecord({
       playerName: 'player-1',

@@ -15,6 +15,7 @@ type TextButtonProps = {
   textFill?: string
   selectedTextFill?: string
   disabled?: boolean
+  stroke?: string
 }
 
 const TextButton = ({
@@ -29,6 +30,7 @@ const TextButton = ({
   textFill = '#ccc',
   selectedTextFill = '#333',
   disabled = false,
+  stroke = 'none',
 }: TextButtonProps) => {
   return (
     <g role="text-button">
@@ -40,6 +42,8 @@ const TextButton = ({
         height={0.5 * B + 2 * spreadY}
         onClick={disabled ? null : onClick}
         onMouseOver={onMouseOver}
+        stroke={stroke}
+        strokeDasharray="2"
       />
       <Text
         style={{ pointerEvents: 'none', opacity: disabled ? 0.3 : 1 }}

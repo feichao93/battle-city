@@ -3,6 +3,7 @@ import { put, select, take } from 'redux-saga/effects'
 import { nonPauseDelay, tween } from 'sagas/common'
 import statistics from 'sagas/stageStatistics'
 import { frame as f } from 'utils/common'
+import { replace } from 'react-router-redux'
 
 function* startStage(stageName: string) {
   yield put<Action>({
@@ -52,7 +53,7 @@ function* startStage(stageName: string) {
  */
 export default function* stageSaga(stageName: string) {
   let shouldPutEndStage = false
-  yield put<Action>({ type: 'LOAD_SCENE', scene: 'game' })
+  yield put(replace('/game'))
 
   yield* startStage(stageName)
   try {

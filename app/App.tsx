@@ -1,7 +1,10 @@
 import * as React from 'react'
 import { hot } from 'react-hot-loader'
+import { Route } from 'react-router-dom'
+import { ConnectedRouter } from 'react-router-redux'
 import { connect } from 'react-redux'
 import { BLOCK_SIZE as B } from 'utils/constants'
+import history from 'utils/history'
 import GameScene from 'components/GameScene'
 import GameoverScene from 'components/GameoverScene'
 import StatisticsScene from 'components/StatisticsScene'
@@ -39,39 +42,39 @@ const zoomLevel = 2
 const totalWidth = 16 * B
 const totalHeight = 15 * B
 
-class App extends React.PureComponent<{ scene: Scene; paused: boolean }> {
+class App extends React.PureComponent<{ paused: boolean }> {
   render() {
-    const { scene, paused } = this.props
+    const { paused } = this.props
 
     return (
-      <div style={{ display: 'flex' }}>
-        <svg
-          className="svg"
-          style={{ background: '#757575' }}
-          width={totalWidth * zoomLevel}
-          height={totalHeight * zoomLevel}
-          viewBox={`0 0 ${totalWidth} ${totalHeight}`}
-        >
-          {scene === 'game-title' ? <GameTitleScene /> : null}
-          {scene === 'choose-stage' ? <ChooseStageScene /> : null}
-          {scene === 'game' ? <GameScene /> : null}
-          {scene === 'gameover' ? <GameoverScene /> : null}
-          {scene === 'statistics' ? <StatisticsScene /> : null}
-          <CurtainsContainer />
-          {paused ? <PauseIndicator /> : null}
-        </svg>
-        {DEV.BUILD_INFO ? <BuildInfo /> : null}
-        {DEV.INSPECTOR ? <Inspector /> : null}
-      </div>
+      <ConnectedRouter history={history}>
+        {/* TODO gallery-page and editor-page */}
+        <div style={{ display: 'flex' }}>
+          <svg
+            className="svg"
+            style={{ background: '#757575' }}
+            width={totalWidth * zoomLevel}
+            height={totalHeight * zoomLevel}
+            viewBox={`0 0 ${totalWidth} ${totalHeight}`}
+          >
+            <Route exact path="/" component={GameTitleScene} />
+            <Route path="/choose-stage" component={ChooseStageScene} />
+            <Route exact path="/game" component={GameScene} />
+            <Route exact path="/gameover" component={GameoverScene} />
+            <Route exact path="/statistics" component={StatisticsScene} />
+            <CurtainsContainer />
+            {paused ? <PauseIndicator /> : null}
+          </svg>
+          {DEV.BUILD_INFO ? <BuildInfo /> : null}
+          {DEV.INSPECTOR ? <Inspector /> : null}
+        </div>
+      </ConnectedRouter>
     )
   }
 }
 
 function mapStateToProps(state: State) {
-  return {
-    scene: state.game.scene,
-    paused: state.game.paused,
-  }
+  return { paused: state.game.paused }
 }
 
 export default hot(module)(connect(mapStateToProps)(App))

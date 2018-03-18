@@ -1,4 +1,5 @@
 import { combineReducers } from 'redux'
+import { routerReducer } from 'react-router-redux'
 import game, { GameRecord } from 'reducers/game'
 import players, { PlayersMap } from 'reducers/players'
 import bullets, { BulletsMap } from 'reducers/bullets'
@@ -13,6 +14,7 @@ import { MapRecord } from 'types'
 import devOnly from 'components/dev-only/reducer'
 
 export interface State {
+  router: any,
   game: GameRecord
   players: PlayersMap
   bullets: BulletsMap
@@ -36,6 +38,7 @@ export function time(state = 0, action: Action) {
 }
 
 export default combineReducers<State>({
+  router: routerReducer,
   game,
   players,
   bullets,
