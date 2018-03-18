@@ -27,7 +27,7 @@ import players from 'reducers/players'
 import { applyMiddleware, combineReducers, createStore } from 'redux'
 import createSagaMiddleware from 'redux-saga'
 import tickEmitter from 'sagas/tickEmitter'
-import stageConfigs from 'stages/index'
+import { stageConfigs } from 'stages/index'
 import { BLOCK_SIZE as B, FIELD_BLOCK_SIZE as FBZ } from 'utils/constants'
 import parseStageMap from 'utils/parseStageMap'
 import {

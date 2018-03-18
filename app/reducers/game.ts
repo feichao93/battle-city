@@ -1,6 +1,6 @@
 import { Map, Record, Repeat } from 'immutable'
 import parseStageEnemies from 'utils/parseStageEnemies'
-import stageConfigs from 'stages'
+import { stageConfigs } from 'stages'
 
 const emptyTransientKillInfo = Map({
   'player-1': Map({

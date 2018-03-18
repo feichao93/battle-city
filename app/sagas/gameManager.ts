@@ -3,7 +3,7 @@ import { BLOCK_SIZE } from 'utils/constants'
 import { getNextId } from 'utils/common'
 import stageSaga from 'sagas/stageSaga'
 import { nonPauseDelay } from 'sagas/common'
-import stageConfigs from 'stages'
+import { stageNames } from 'stages'
 
 interface Animation {
   direction: Direction
@@ -93,18 +93,18 @@ export default function* gameManager() {
   yield takeEvery('START_STAGE', startStage)
   yield takeEvery('END_STAGE', endStage)
 
+  let stageIndex: number
   if (!DEV.OTHER) {
-    yield take('GAMESTART')
+    yield take('START_CHOOSE_STAGE')
+    yield put<Action>({ type: 'LOAD_SCENE', scene: 'choose-stage' })
+    stageIndex = ((yield take('GAMESTART')) as Action.GameStart).stageIndex
+  } else {
+    stageIndex = 0
   }
 
-  const stages = Object.keys(stageConfigs)
-  if (DEV.TEST_STAGE) {
-    stages.splice(stages.indexOf('test'), 1)
-    stages.unshift('test')
-  }
-  for (const stageName of stages) {
-    const stageResult: StageResult = yield* stageSaga(stageName)
-    DEV .OTHER&& console.log('stageResult:', stageResult)
+  for (const name of stageNames.slice(stageIndex)) {
+    const stageResult: StageResult = yield* stageSaga(name)
+    DEV.OTHER && console.log('stageResult:', stageResult)
     if (stageResult.status === 'clear') {
       // continue to next stage
     } else {

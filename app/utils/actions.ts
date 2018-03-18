@@ -35,8 +35,9 @@ declare global {
       | StartStage
       | EndStage
       | Simple<'BEFORE_GAMEOVER'>
+      | Simple<'START_CHOOSE_STAGE'>
       | Simple<'GAMEOVER'>
-      | Simple<'GAMESTART'>
+      | GameStart
       | Simple<'GAMEPAUSE'>
       | Simple<'GAMERESUME'>
       | LoadSceneAction
@@ -291,6 +292,11 @@ declare global {
     export interface DecrementPlayerLifeAction {
       type: 'DECREMENT_PLAYER_LIFE'
       playerName: PlayerName
+    }
+
+    export interface GameStart {
+      type: 'GAMESTART'
+      stageIndex: number
     }
 
     export interface LoadSceneAction {

@@ -58,7 +58,7 @@ class GameTitleScene extends React.PureComponent<P, S> {
         <rect fill="#000000" width={16 * B} height={15 * B} />
         <g transform="scale(0.5)">
           <TextButton
-            textFill="#607d8b"
+            textFill="#96d332"
             x={22 * B}
             y={B}
             content="star me on github"
@@ -86,7 +86,7 @@ class GameTitleScene extends React.PureComponent<P, S> {
           y={8.5 * B}
           textFill="white"
           onMouseOver={() => this.setState({ choice: '1-player' })}
-          onClick={() => dispatch<Action>({ type: 'GAMESTART' })}
+          onClick={() => dispatch<Action>({ type: 'START_CHOOSE_STAGE' })}
         />
         <TextButton
           content="editor"

@@ -6,6 +6,7 @@ import GameScene from 'components/GameScene'
 import GameoverScene from 'components/GameoverScene'
 import StatisticsScene from 'components/StatisticsScene'
 import GameTitleScene from 'components/GameTitleScene'
+import ChooseStageScene from 'components/ChooseStageScene'
 import PauseIndicator from 'components/PauseIndicator'
 import CurtainsContainer from 'components/CurtainsContainer'
 import Inspector from 'components/dev-only/Inspector'
@@ -31,9 +32,6 @@ const BuildInfo = () => (
         stories页面
       </a>浏览游戏中的组件/素材
     </p>
-    <p>
-      STAR ME ON <a href="https://github.com/shinima/battle-city">GitHub</a>
-    </p>
   </div>
 )
 
@@ -55,6 +53,7 @@ class App extends React.PureComponent<{ scene: Scene; paused: boolean }> {
           viewBox={`0 0 ${totalWidth} ${totalHeight}`}
         >
           {scene === 'game-title' ? <GameTitleScene /> : null}
+          {scene === 'choose-stage' ? <ChooseStageScene /> : null}
           {scene === 'game' ? <GameScene /> : null}
           {scene === 'gameover' ? <GameoverScene /> : null}
           {scene === 'statistics' ? <StatisticsScene /> : null}

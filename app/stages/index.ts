@@ -1,4 +1,4 @@
-const stageConfigs: { [name: string]: StageConfig } = {}
+export const stageConfigs: { [name: string]: StageConfig } = {}
 
 if (DEV.TEST_STAGE) {
   // inject stage test in dev mode
@@ -31,4 +31,10 @@ for (const filename of requireStage.keys()) {
   stageConfigs[stage.name] = stage
 }
 
-export default stageConfigs
+// TODO 使用 OrderedMap
+export const stageNames = Object.keys(stageConfigs)
+
+if (DEV.TEST_STAGE) {
+  stageNames.splice(stageNames.indexOf('test'), 1)
+  stageNames.unshift('test')
+}

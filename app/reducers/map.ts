@@ -1,4 +1,4 @@
-import stageConfigs from 'stages'
+import { stageConfigs } from 'stages'
 import { MapRecord } from 'types'
 import parseStageMap from 'utils/parseStageMap'
 
