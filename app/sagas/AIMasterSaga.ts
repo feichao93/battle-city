@@ -13,7 +13,7 @@ import * as selectors from 'utils/selectors'
 export default function* AIMasterSaga() {
   const max = DEV ? 1 : 3
   const taskMap = new Map<PlayerName, Task>()
-  const addAICommandChannel = makeChannel<'add'>()
+  const addAICommandChannel = makeChannel()
 
   yield fork(addAIHandler)
 
@@ -29,7 +29,7 @@ export default function* AIMasterSaga() {
       // ai-player的坦克被击毁了
       const task = taskMap.get(playerName)
       task.cancel()
-      taskMap.delete(action.targetPlayer.playerName)
+      taskMap.delete(playerName)
       yield put<Action.DeactivatePlayer>({ type: 'DEACTIVATE_PLAYER', playerName })
       addAICommandChannel.put('add')
     } else if (action.type === 'BEFORE_GAMEOVER') {

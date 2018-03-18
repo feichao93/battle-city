@@ -12,7 +12,7 @@ import simpleFireLoop from 'ai/simpleFireLoop'
 import EventEmitter from 'events'
 import { State } from 'reducers'
 import { Task } from 'redux-saga'
-import { call, fork, select, take } from 'redux-saga/effects'
+import { call, fork, select, take, race } from 'redux-saga/effects'
 import { nonPauseDelay } from 'sagas/common'
 import directionController from 'sagas/directionController'
 import fireController from 'sagas/fireController'
@@ -130,6 +130,22 @@ function* dangerDetectionLoop(ctx: AITankCtx) {
   }
 }
 
+function* blocked(ctx: AITankCtx) {
+  let counter = 0
+  let lastTank = yield select(selectors.playerTank, ctx.playerName)
+  while (counter < 3) {
+    yield take('TICK')
+    const tank: TankRecord = yield select(selectors.playerTank, ctx.playerName)
+    if (Math.abs(tank.x - lastTank.x) + Math.abs(tank.y - lastTank.y) <= 0.01) {
+      counter++
+    } else {
+      counter = 0
+    }
+    lastTank = tank
+  }
+  DEV && logAI('blocked')
+}
+
 /**
  * AIWorkerSaga对应一个正在游戏中的AI玩家.
  * 当一个AI玩家坦克创建/激活时, 一个AIWorkerSaga实例将被创建
@@ -154,6 +170,13 @@ export default function* AIWorkerSaga(playerName: string) {
   // TODO dodge attack from player.
   let continuousWanderModeCount = 0
   while (true) {
+    yield race({
+      blocked: blocked(ctx),
+      mode: mode(),
+    })
+  }
+
+  function* mode() {
     if (Math.random() < 0.7 - continuousWanderModeCount * 0.1) {
       continuousWanderModeCount++
       yield call(wanderMode, ctx)
