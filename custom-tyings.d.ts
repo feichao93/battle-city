@@ -10,3 +10,6 @@ declare const DEV: Readonly<{
   INSPECTOR: boolean
   OTHER: boolean
 }>
+
+declare const COMPILE_VERSION: string
+declare const COMPILE_DATE: string

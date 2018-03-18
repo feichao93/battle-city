@@ -2,7 +2,6 @@ const path = require('path')
 const webpack = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 const moment = require('moment')
 const packageInfo = require('./package.json')
 const getDevConfig = require('./devConfig')
@@ -21,10 +20,10 @@ function processDevConfig(config) {
 module.exports = function(env) {
   env = env || {}
 
-  const prod = env.production
+  const prod = Boolean(env.prod)
 
   const entry = {}
-  entry.main = ['react-hot-loader/patch', __dirname + '/app/main.tsx']
+  entry.main = path.resolve(__dirname, 'app/main.tsx')
   if (env.stories) {
     entry.stories = path.resolve(__dirname, 'app/stories.tsx')
   }
@@ -72,23 +71,16 @@ module.exports = function(env) {
     )
   }
 
-  if (!prod) {
-    plugins.push(new webpack.HotModuleReplacementPlugin())
+  if (prod) {
+    plugins.push(new ExtractTextPlugin('[name]-[contenthash:6].css'))
   } else {
-    plugins.push(
-      new webpack.optimize.CommonsChunkPlugin({
-        name: 'commons',
-        filename: 'commons.js',
-      }),
-      new ExtractTextPlugin('[name]-[contenthash:6].css'),
-      new UglifyJsPlugin({ uglifyOptions: { compress: { inline: false } } }),
-    )
+    plugins.push(new webpack.HotModuleReplacementPlugin())
   }
 
   return {
+    mode: prod ? 'production' : 'development',
     context: __dirname,
     target: 'web',
-    devtool: prod ? false : 'source-map',
 
     entry,
 
@@ -104,11 +96,18 @@ module.exports = function(env) {
 
     module: {
       rules: [
+        { test: /\.json$/, type: 'javascript/auto', loader: 'json-loader' },
         {
           test: /\.tsx?$/,
           use: [
             {
-              loader: 'awesome-typescript-loader',
+              loader: 'babel-loader',
+              options: {
+                plugins: ['react-hot-loader/babel'],
+              },
+            },
+            {
+              loader: 'ts-loader',
               options: {
                 transpileOnly: true,
               },

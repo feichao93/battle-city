@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { hot } from 'react-hot-loader'
 import { connect } from 'react-redux'
 import { BLOCK_SIZE as B } from 'utils/constants'
 import GameScene from 'components/GameScene'
@@ -61,7 +62,7 @@ class App extends React.PureComponent<{ scene: Scene; paused: boolean }> {
           {paused ? <PauseIndicator /> : null}
         </svg>
         {DEV.BUILD_INFO ? <BuildInfo /> : null}
-        {/* <Inspector /> */}
+        {DEV.INSPECTOR ? <Inspector /> : null}
       </div>
     )
   }
@@ -74,4 +75,4 @@ function mapStateToProps(state: State) {
   }
 }
 
-export default connect(mapStateToProps)(App)
+export default hot(module)(connect(mapStateToProps)(App))
