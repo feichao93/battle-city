@@ -39,7 +39,7 @@ module.exports = function(env) {
       COMPILE_DATE: JSON.stringify(moment().format('YYYY-MM-DD HH:mm:ss')),
       'process.env.NODE_ENV': JSON.stringify(prod ? 'production' : 'development'),
       // 将 devConfig.js 中的配置数据加入到 DefinePlugin 中
-      ...processDevConfig(getDevConfig(prod)),
+      ...processDevConfig(getDevConfig(!prod)),
     }),
   )
   plugins.push(

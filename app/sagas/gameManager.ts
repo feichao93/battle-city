@@ -94,15 +94,15 @@ export default function* gameManager() {
   yield takeEvery('START_STAGE', startStage)
   yield takeEvery('END_STAGE', endStage)
 
-  const stageIndex = DEV.OTHER ? 0 : ((yield take('GAMESTART')) as Action.GameStart).stageIndex
+  const stageIndex = DEV.SKIP_CHOOSE_STAGE ? 0 : ((yield take('GAMESTART')) as Action.GameStart).stageIndex
 
   for (const name of stageNames.slice(stageIndex)) {
     const stageResult: StageResult = yield* stageSaga(name)
-    DEV.OTHER && console.log('stageResult:', stageResult)
+    DEV.LOG && console.log('stageResult:', stageResult)
     if (stageResult.status === 'clear') {
       // continue to next stage
     } else {
-      DEV.OTHER && console.log(`gameover, reason: ${stageResult.reason}`)
+      DEV.LOG && console.log(`gameover, reason: ${stageResult.reason}`)
       yield* animateGameover()
       break
     }

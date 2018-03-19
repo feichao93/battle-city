@@ -6,9 +6,11 @@ declare const DEV: Readonly<{
   RESTRICTED_AREA: boolean
   FAST: boolean
   TEST_STAGE: boolean
-  BUILD_INFO: boolean
+  HIDE_BUILD_INFO: boolean
   INSPECTOR: boolean
-  OTHER: boolean
+  SINGLE_AI_TANK: boolean
+  LOG: boolean
+  SKIP_CHOOSE_STAGE: boolean
 }>
 
 declare const COMPILE_VERSION: string

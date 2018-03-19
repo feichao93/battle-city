@@ -9,7 +9,7 @@ import { getNextId } from 'utils/common'
 import { TANK_INDEX_THAT_WITH_POWER_UP } from 'utils/constants'
 import * as selectors from 'utils/selectors'
 
-const max = DEV.OTHER ? 1 : 3
+const max = DEV.SINGLE_AI_TANK ? 1 : 3
 
 /** AIMasterSaga用来管理AIWorkerSaga的启动和停止, 并处理和AI程序的数据交互 */
 export default function* AIMasterSaga() {

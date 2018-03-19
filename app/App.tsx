@@ -65,7 +65,7 @@ class App extends React.PureComponent<{ paused: boolean }> {
             <CurtainsContainer />
             {paused ? <PauseIndicator /> : null}
           </svg>
-          {DEV.BUILD_INFO ? <BuildInfo /> : null}
+          {DEV.HIDE_BUILD_INFO ? null : <BuildInfo />}
           {DEV.INSPECTOR ? <Inspector /> : null}
         </div>
       </ConnectedRouter>
