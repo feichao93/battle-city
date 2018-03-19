@@ -18,9 +18,12 @@ const emptyTransientKillInfo = Map({
 }) as Map<PlayerName, Map<TankLevel, KillCount>>
 
 const defaultRemainingEnemies = Repeat('basic' as TankLevel, 20).toList()
+type GameStatus = 'idle' | 'on' | 'stat' | 'gameover'
 
 const GameRecordBase = Record(
   {
+    /** 游戏状态 */
+    status: 'idle' as GameStatus,
     /** 游戏是否暂停 */
     paused: false,
     /** 当前的关卡名 */
@@ -50,7 +53,15 @@ const GameRecordBase = Record(
 export class GameRecord extends GameRecordBase {}
 
 export default function game(state = new GameRecord(), action: Action) {
-  if (action.type === 'START_STAGE') {
+  if (action.type === 'GAMESTART') {
+    return state.set('status', 'on').set('currentStage', null)
+  } else if (action.type === 'SHOW_STATISTICS') {
+    return state.set('status', 'stat')
+  } else if (action.type === 'HIDE_STATISTICS') {
+    return state.set('status', 'on')
+  } else if (action.type === 'GAMEOVER') {
+    return state.set('status', 'gameover').set('currentStage', null)
+  } else if (action.type === 'START_STAGE') {
     return state.merge({
       currentStage: action.name,
       transientKillInfo: emptyTransientKillInfo,

@@ -41,6 +41,8 @@ declare global {
       | Simple<'GAMERESUME'>
       | Simple<'SHOW_HUD'>
       | Simple<'HIDE_HUD'>
+      | Simple<'SHOW_STATISTICS'>
+      | Simple<'HIDE_STATISTICS'>
       | Simple<'REMOVE_FIRST_REMAINING_ENEMY'>
       | IncrementPlayerLifeAction
       | DecrementPlayerLifeAction

@@ -1,5 +1,5 @@
 import { replace } from 'react-router-redux'
-import { put, take, takeEvery } from 'redux-saga/effects'
+import { put, take, takeEvery, takeLatest } from 'redux-saga/effects'
 import { BLOCK_SIZE } from 'utils/constants'
 import { getNextId } from 'utils/common'
 import stageSaga from 'sagas/stageSaga'
@@ -65,7 +65,7 @@ function* animateGameover() {
   yield nonPauseDelay(500)
   yield put<Action>({ type: 'REMOVE_TEXT', textId: textId1 })
   yield put<Action>({ type: 'REMOVE_TEXT', textId: textId2 })
-  yield put(replace('/gameover'))
+  yield put(replace('/'))
 }
 
 interface StageResult {
@@ -94,21 +94,26 @@ export default function* gameManager() {
   yield takeEvery('START_STAGE', startStage)
   yield takeEvery('END_STAGE', endStage)
 
-  const stageIndex = DEV.SKIP_CHOOSE_STAGE ? 0 : ((yield take('GAMESTART')) as Action.GameStart).stageIndex
-
-  for (const name of stageNames.slice(stageIndex)) {
-    const stageResult: StageResult = yield* stageSaga(name)
-    DEV.LOG && console.log('stageResult:', stageResult)
-    if (stageResult.status === 'clear') {
-      // continue to next stage
-    } else {
-      DEV.LOG && console.log(`gameover, reason: ${stageResult.reason}`)
-      yield* animateGameover()
-      break
+  yield takeLatest('GAMESTART', function*({ stageIndex }: Action.GameStart) {
+    DEV.LOG && console.log('game-restart')
+    for (const name of stageNames.slice(stageIndex)) {
+      const stageResult: StageResult = yield stageSaga(name)
+      DEV.LOG && console.log('stageResult:', stageResult)
+      if (stageResult.status === 'clear') {
+        // continue to next stage
+      } else {
+        DEV.LOG && console.log(`gameover, reason: ${stageResult.reason}`)
+        yield* animateGameover()
+        break
+      }
     }
-  }
 
-  yield put<Action>({ type: 'BEFORE_GAMEOVER' })
-  yield put<Action>({ type: 'GAMEOVER' })
-  yield put<Action>({ type: 'END_STAGE' })
+    yield put<Action>({ type: 'BEFORE_GAMEOVER' })
+    yield put<Action>({ type: 'GAMEOVER' })
+    yield put<Action>({ type: 'END_STAGE' })
+  })
+
+  if (DEV.SKIP_CHOOSE_STAGE) {
+    yield put<Action>({ type: 'GAMESTART', stageIndex: 0 })
+  }
 }

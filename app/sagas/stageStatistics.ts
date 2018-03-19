@@ -1,12 +1,11 @@
 import { Map } from 'immutable'
-import { replace } from 'react-router-redux'
 import { put, select } from 'redux-saga/effects'
 import { State } from 'types'
 import { TANK_LEVELS } from 'utils/constants'
 import { nonPauseDelay } from 'sagas/common'
 
 export default function* statistics() {
-  yield put(replace('/statistics'))
+  yield put<Action>({ type: 'SHOW_STATISTICS' })
 
   const { game: { killInfo } }: State = yield select()
 
@@ -40,4 +39,6 @@ export default function* statistics() {
   yield nonPauseDelay(DEV.FAST ? 80 : 200)
   yield put<Action>({ type: 'SHOW_TOTAL_KILL_COUNT' })
   yield nonPauseDelay(DEV.FAST ? 400 : 1000)
+
+  yield put<Action>({ type: 'HIDE_STATISTICS' })
 }

@@ -53,7 +53,7 @@ function* startStage(stageName: string) {
  */
 export default function* stageSaga(stageName: string) {
   let shouldPutEndStage = false
-  yield put(replace('/game'))
+  yield put(replace(`/stage/${stageName}`))
 
   yield* startStage(stageName)
   try {

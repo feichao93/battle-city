@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { hot } from 'react-hot-loader'
-import { Route } from 'react-router-dom'
+import { Route, Redirect, Switch } from 'react-router-dom'
 import { ConnectedRouter } from 'react-router-redux'
 import { connect } from 'react-redux'
 import { BLOCK_SIZE as B } from 'utils/constants'
@@ -14,6 +14,8 @@ import PauseIndicator from 'components/PauseIndicator'
 import CurtainsContainer from 'components/CurtainsContainer'
 import Inspector from 'components/dev-only/Inspector'
 import { State } from 'types'
+import { GameRecord } from 'reducers/game'
+import { stageNames } from 'stages'
 
 const BuildInfo = () => (
   <div style={{ maxWidth: 200, marginLeft: 20 }}>
@@ -42,9 +44,9 @@ const zoomLevel = 2
 const totalWidth = 16 * B
 const totalHeight = 15 * B
 
-class App extends React.PureComponent<{ paused: boolean }> {
+class App extends React.PureComponent<{ game: GameRecord }> {
   render() {
-    const { paused } = this.props
+    const { game } = this.props
 
     return (
       <ConnectedRouter history={history}>
@@ -57,13 +59,30 @@ class App extends React.PureComponent<{ paused: boolean }> {
             height={totalHeight * zoomLevel}
             viewBox={`0 0 ${totalWidth} ${totalHeight}`}
           >
-            <Route exact path="/" component={GameTitleScene} />
-            <Route path="/choose-stage" component={ChooseStageScene} />
-            <Route exact path="/game" component={GameScene} />
-            <Route exact path="/gameover" component={GameoverScene} />
-            <Route exact path="/statistics" component={StatisticsScene} />
+            <Switch>
+              <Route
+                exact
+                path="/choose-stage"
+                render={() => <Redirect to={`/choose-stage/${stageNames[0]}`} />}
+              />
+              <Route path="/choose-stage/:stageName" component={ChooseStageScene} />
+              <Route
+                exact
+                path="/stage"
+                render={() => <Redirect to={`/stage/${stageNames[0]}`} />}
+              />
+              <Route
+                path="/stage/:stageName"
+                render={({ match }) =>
+                  game.status === 'stat' ? <StatisticsScene /> : <GameScene match={match} />
+                }
+              />
+              <Route
+                render={() => (game.status === 'gameover' ? <GameoverScene /> : <GameTitleScene />)}
+              />
+            </Switch>
             <CurtainsContainer />
-            {paused ? <PauseIndicator /> : null}
+            {game.paused ? <PauseIndicator /> : null}
           </svg>
           {DEV.HIDE_BUILD_INFO ? null : <BuildInfo />}
           {DEV.INSPECTOR ? <Inspector /> : null}
@@ -74,7 +93,7 @@ class App extends React.PureComponent<{ paused: boolean }> {
 }
 
 function mapStateToProps(state: State) {
-  return { paused: state.game.paused }
+  return { game: state.game }
 }
 
 export default hot(module)(connect(mapStateToProps)(App))

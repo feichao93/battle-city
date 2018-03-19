@@ -12,7 +12,7 @@ import simpleFireLoop from 'ai/simpleFireLoop'
 import EventEmitter from 'events'
 import { State } from 'reducers'
 import { Task } from 'redux-saga'
-import { call, fork, select, take, race } from 'redux-saga/effects'
+import { fork, select, take, race } from 'redux-saga/effects'
 import { nonPauseDelay } from 'sagas/common'
 import directionController from 'sagas/directionController'
 import fireController from 'sagas/fireController'
@@ -38,8 +38,8 @@ function* wanderMode(ctx: AITankCtx) {
   const { map }: State = yield select()
   const allSpots = getAllSpots(map)
   const path = findPath(allSpots, getTankSpot(tank), getRandomPassablePos(allSpots))
-  if (path == null) {
-    yield call(followPath, ctx, path)
+  if (path != null) {
+    yield followPath(ctx, path)
   } else {
     yield nonPauseDelay(200)
   }
@@ -61,7 +61,7 @@ function* attackEagleMode(ctx: AITankCtx) {
   const target = candidates[randint(0, candidates.length)]
   const path = findPath(allSpots, getTankSpot(tank), target)
   if (path != null) {
-    yield call(followPath, ctx, path)
+    yield followPath(ctx, path)
     simpleFireLoopTask.cancel()
     yield attackEagle(ctx, estMap.get(target))
   } else {
@@ -187,10 +187,10 @@ export default function* AIWorkerSaga(playerName: string) {
     let continuousWanderModeCount = 0
     if (Math.random() < 0.7 - continuousWanderModeCount * 0.1) {
       continuousWanderModeCount++
-      yield call(wanderMode, ctx)
+      yield wanderMode(ctx)
     } else {
       continuousWanderModeCount = 0
-      yield call(attackEagleMode, ctx)
+      yield attackEagleMode(ctx)
     }
   }
 }

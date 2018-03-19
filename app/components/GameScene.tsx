@@ -1,3 +1,5 @@
+import { Dispatch } from 'redux'
+import { match } from 'react-router'
 import BrickLayer from 'components/BrickLayer'
 import Bullet from 'components/Bullet'
 import SpotGraph from 'components/dev-only/SpotGraph'
@@ -21,8 +23,44 @@ import * as React from 'react'
 import { connect } from 'react-redux'
 import { State } from 'types'
 import { BLOCK_SIZE } from 'utils/constants'
+import { stageNames } from 'stages'
 
-class GameScene extends React.Component<State> {
+class GameScene extends React.Component<State & { dispatch: Dispatch<State>; match: match<any> }> {
+  componentDidMount() {
+    this.didMountOrUpdate()
+  }
+
+  componentDidUpdate() {
+    this.didMountOrUpdate()
+  }
+
+  didMountOrUpdate() {
+    const { game, dispatch, match } = this.props
+    if (game.status === 'idle' || game.status === 'gameover') {
+      // 如果游戏还没开始或已经结束 则开始游戏
+      const stageName = match.params.stageName
+      const stageIndex = stageNames.indexOf(stageName)
+      dispatch<Action>({
+        type: 'GAMESTART',
+        stageIndex: stageIndex === -1 ? 0 : stageIndex,
+      })
+    } else {
+      // status is 'on' or 'statistics'
+      // 用户在地址栏中手动输入了新的关卡名称
+      const stageName = match.params.stageName
+      if (
+        game.currentStage != null &&
+        stageNames.includes(stageName) &&
+        stageName !== game.currentStage
+      ) {
+        dispatch<Action>({
+          type: 'GAMESTART',
+          stageIndex: stageNames.indexOf(stageName),
+        })
+      }
+    }
+  }
+
   render() {
     const { bullets, map, explosions, flickers, tanks, texts, powerUps, scores } = this.props
     const { bricks, steels, rivers, snows, forests, eagle, restrictedAreas } = map.toObject()
@@ -82,4 +120,4 @@ class GameScene extends React.Component<State> {
   }
 }
 
-export default connect(_.identity)(GameScene as any)
+export default connect(_.identity)(GameScene) as any
