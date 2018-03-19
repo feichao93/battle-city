@@ -4,6 +4,8 @@ import { asRect, frame, testCollide } from 'utils/common'
 import { PlayerRecord, State, TankRecord } from 'types'
 import { spawnTank } from 'sagas/common'
 import * as selectors from 'utils/selectors'
+import { CONTROL_CONFIG } from '../utils/constants'
+import humanController from './humanController'
 
 function* handlePickPowerUps(playerName: string) {
   const tank: TankRecord = yield select(selectors.playerTank, playerName)
@@ -78,6 +80,7 @@ function* endStage(playerName: string) {
 }
 
 function* killed(playerName: string, tankColor: TankColor) {
+  // TODO 将bullet-saga中移除坦克的逻辑放到这里
   const { players }: State = yield select()
   const player = players.get(playerName)
   if (player.lives > 0) {
@@ -101,21 +104,27 @@ function* killed(playerName: string, tankColor: TankColor) {
 }
 
 export default function* humanPlayerSaga(playerName: string, tankColor: TankColor) {
-  yield put<Action>({
-    type: 'CREATE_PLAYER',
-    player: new PlayerRecord({
-      playerName,
-      lives: 3,
-      side: 'human',
-    }),
-  })
+  try {
+    yield put<Action>({
+      type: 'ADD_PLAYER',
+      player: new PlayerRecord({
+        playerName,
+        lives: 3,
+        side: 'human',
+      }),
+    })
 
-  yield takeEvery('AFTER_TICK', handlePickPowerUps, playerName)
-  yield takeEvery('START_STAGE', startStage, playerName, tankColor)
-  yield takeEvery('END_STAGE', endStage, playerName)
-  yield takeEvery(killedAction, killed, playerName, tankColor)
+    yield takeEvery('AFTER_TICK', handlePickPowerUps, playerName)
+    yield takeEvery('START_STAGE', startStage, playerName, tankColor)
+    yield takeEvery('BEFORE_END_STAGE', endStage, playerName)
+    yield takeEvery(killedAction, killed, playerName, tankColor)
 
-  function killedAction(action: Action) {
-    return action.type === 'KILL' && action.targetPlayer.playerName === playerName
+    function killedAction(action: Action) {
+      return action.type === 'KILL' && action.targetPlayer.playerName === playerName
+    }
+
+    yield humanController(playerName, CONTROL_CONFIG.player1)
+  } finally {
+    yield put<Action>({ type: 'REMOVE_PALYER', playerName })
   }
 }

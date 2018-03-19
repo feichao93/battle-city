@@ -32,8 +32,10 @@ declare global {
       | UpdateMapAction
       | UpdaetBulletsAction
       | LoadStageMapAction
+      | BeforeStartStage
       | StartStage
-      | EndStage
+      | Simple<'BEFORE_END_STAGE'>
+      | Simple<'END_STAGE'>
       | Simple<'BEFORE_GAMEOVER'>
       | Simple<'GAMEOVER'>
       | GameStart
@@ -47,7 +49,8 @@ declare global {
       | IncrementPlayerLifeAction
       | DecrementPlayerLifeAction
       | ActivatePlayer
-      | CreatePlayerAction
+      | AddPlayer
+      | RemovePlayer
       | DeactivatePlayer
       | Simple<'DEACTIVATE_ALL_PLAYERS'>
       | AddOrUpdateExplosion
@@ -130,6 +133,7 @@ declare global {
       tankId: TankId
     }
 
+    // TODO 改为 BEFORE_TICK 和 TICK
     export interface TickAction {
       type: 'TICK'
       delta: number
@@ -208,13 +212,14 @@ declare global {
       stageName: string
     }
 
-    export interface StartStage {
-      type: 'START_STAGE'
+    export interface BeforeStartStage {
+      type: 'BEFORE_START_STAGE'
       name: string
     }
 
-    export interface EndStage {
-      type: 'END_STAGE'
+    export interface StartStage {
+      type: 'START_STAGE'
+      name: string
     }
 
     export interface AddOrUpdateExplosion {
@@ -263,11 +268,17 @@ declare global {
       playerName: PlayerName
     }
 
-    export interface CreatePlayerAction {
-      type: 'CREATE_PLAYER'
+    export interface AddPlayer {
+      type: 'ADD_PLAYER'
       player: PlayerRecord
     }
 
+    export interface RemovePlayer {
+      type: 'REMOVE_PALYER'
+      playerName: PlayerName
+    }
+
+    // TODO 在action中使用TextRecord
     export interface SetTextAction {
       type: 'SET_TEXT'
       textId: TextId
@@ -297,6 +308,7 @@ declare global {
     export interface GameStart {
       type: 'GAMESTART'
       stageIndex: number
+      // TODO 需要指定是单人游戏还是双人游戏
     }
 
     export interface AddOrUpdatePowerUp {
@@ -365,6 +377,7 @@ declare global {
       type: 'CLEAR_TANKS'
     }
 
+    /** @deprecated */
     export interface ClearAIPlayers {
       type: 'CLEAR_AI_PLAYERS'
     }

@@ -36,7 +36,7 @@ export default function* AIMasterSaga() {
   function* worker(playerName: string) {
     const { game: { remainingEnemies } }: State = yield select()
     yield put<Action>({
-      type: 'CREATE_PLAYER',
+      type: 'ADD_PLAYER',
       player: new PlayerRecord({
         playerName,
         lives: Infinity,

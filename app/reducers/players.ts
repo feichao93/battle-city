@@ -10,8 +10,10 @@ export default function players(state = Map() as PlayersMap, action: Action) {
     return state.update(playerName, player =>
       player.set('activeTankId', tankId).set('active', true),
     )
-  } else if (action.type === 'CREATE_PLAYER') {
+  } else if (action.type === 'ADD_PLAYER') {
     return state.set(action.player.playerName, action.player)
+  } else if (action.type === 'REMOVE_PALYER') {
+    return state.remove(action.playerName)
   } else if (action.type === 'CLEAR_AI_PLAYERS') {
     return state.filterNot(player => player.side === 'ai')
   } else if (action.type === 'SET_REVERSED_TANK') {

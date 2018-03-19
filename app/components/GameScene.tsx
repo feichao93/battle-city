@@ -53,6 +53,7 @@ class GameScene extends React.Component<State & { dispatch: Dispatch<State>; mat
         stageNames.includes(stageName) &&
         stageName !== game.currentStage
       ) {
+        DEV.LOG && console.log('`stageName` in url changed. Restart game...')
         dispatch<Action>({
           type: 'GAMESTART',
           stageIndex: stageNames.indexOf(stageName),

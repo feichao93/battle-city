@@ -8,6 +8,6 @@ import rootSaga from 'sagas/index'
 
 const sagaMiddleware = createSgaMiddleware()
 
-export default createStore(reducer, applyMiddleware(sagaMiddleware, routerMiddleware(history)))
+export default createStore(reducer, applyMiddleware(routerMiddleware(history), sagaMiddleware))
 
 sagaMiddleware.run(rootSaga)

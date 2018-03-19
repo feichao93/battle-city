@@ -11,8 +11,11 @@ export default function* directionController(
   while (true) {
     const { delta }: Action.TickAction = yield take('TICK')
     const tank: TankRecord = yield select(selectors.playerTank, playerName)
+    if (tank == null || tank.frozenTimeout > 0) {
+      continue
+    }
     const { game: { AIFrozenTimeout } }: State = yield select()
-    if (tank == null || tank.frozenTimeout > 0 || (tank.side === 'ai' && AIFrozenTimeout > 0)) {
+    if (tank.side === 'ai' && AIFrozenTimeout > 0) {
       continue
     }
     const input: Input = getPlayerInput(tank, delta)

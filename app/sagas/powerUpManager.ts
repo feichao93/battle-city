@@ -1,5 +1,5 @@
 import * as _ from 'lodash'
-import { fork, put, select, take, takeEvery, takeLatest } from 'redux-saga/effects'
+import { fork, put, select, take, cancelled, takeEvery, takeLatest } from 'redux-saga/effects'
 import { MapRecord, ScoreRecord, State, PowerUpRecord } from 'types'
 import { destroyTanks, nonPauseDelay } from 'sagas/common'
 import powerUpSaga from 'sagas/powerUpSaga'
@@ -54,50 +54,58 @@ function convertToSteels(map: MapRecord) {
 }
 
 function* shovel() {
-  yield put<Action>({
-    type: 'UPDATE_MAP',
-    map: convertToSteels((yield select()).map),
-  })
-
-  yield nonPauseDelay(f(1076))
-
-  // 总共闪烁6次
-  for (let i = 0; i < 6; i++) {
-    yield put<Action>({
-      type: 'UPDATE_MAP',
-      map: convertToBricks((yield select()).map),
-    })
-    yield nonPauseDelay(f(16))
+  try {
     yield put<Action>({
       type: 'UPDATE_MAP',
       map: convertToSteels((yield select()).map),
     })
-    yield nonPauseDelay(f(16))
-  }
 
-  // 最后变回brick-wall
-  yield put<Action>({
-    type: 'UPDATE_MAP',
-    map: convertToBricks((yield select()).map),
-  })
+    yield nonPauseDelay(f(1076))
+
+    // 总共闪烁6次
+    for (let i = 0; i < 6; i++) {
+      yield put<Action>({
+        type: 'UPDATE_MAP',
+        map: convertToBricks((yield select()).map),
+      })
+      yield nonPauseDelay(f(16))
+      yield put<Action>({
+        type: 'UPDATE_MAP',
+        map: convertToSteels((yield select()).map),
+      })
+      yield nonPauseDelay(f(16))
+    }
+  } finally {
+    // 最后变回brick-wall
+    yield put<Action>({
+      type: 'UPDATE_MAP',
+      map: convertToBricks((yield select()).map),
+    })
+  }
 }
 
 function* timer() {
-  yield put<Action.SetAIFrozenTimeoutAction>({
-    type: 'SET_AI_FROZEN_TIMEOUT',
-    AIFrozenTimeout: 5e3,
-  })
-  while (true) {
-    const { delta }: Action.TickAction = yield take('TICK')
-    const { game: { AIFrozenTimeout } }: State = yield select()
-    if (AIFrozenTimeout === 0) {
-      break
-    }
-    const next = AIFrozenTimeout - delta
-    yield put<Action.SetAIFrozenTimeoutAction>({
+  try {
+    yield put<Action>({
       type: 'SET_AI_FROZEN_TIMEOUT',
-      AIFrozenTimeout: next <= 0 ? 0 : next,
+      AIFrozenTimeout: 5e3,
     })
+    while (true) {
+      const { delta }: Action.TickAction = yield take('TICK')
+      const { game: { AIFrozenTimeout } }: State = yield select()
+      if (AIFrozenTimeout === 0) {
+        break
+      }
+      const next = AIFrozenTimeout - delta
+      yield put<Action>({
+        type: 'SET_AI_FROZEN_TIMEOUT',
+        AIFrozenTimeout: next <= 0 ? 0 : next,
+      })
+    }
+  } finally {
+    if (yield cancelled()) {
+      yield put<Action>({ type: 'SET_AI_FROZEN_TIMEOUT', AIFrozenTimeout: 0 })
+    }
   }
 }
 
@@ -105,6 +113,7 @@ function* grenade(action: Action.PickPowerUpAction) {
   const { tanks: allTanks, players }: State = yield select()
   const activeAITanks = allTanks.filter(t => t.active && t.side === 'ai')
 
+  // TODO 不应该在这里调用destroy-tank
   yield* destroyTanks(activeAITanks)
 
   yield* activeAITanks

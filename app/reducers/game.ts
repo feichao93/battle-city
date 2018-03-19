@@ -69,6 +69,8 @@ export default function game(state = new GameRecord(), action: Action) {
       remainingEnemies: parseStageEnemies(stageConfigs[action.name].enemies),
       showTotalKillCount: false,
     })
+  } else if (action.type === 'END_STAGE') {
+    return state.set('currentStage', null)
   } else if (action.type === 'REMOVE_FIRST_REMAINING_ENEMY') {
     return state.update('remainingEnemies', enemies => enemies.shift())
   } else if (action.type === 'INC_KILL_COUNT') {

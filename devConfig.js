@@ -26,5 +26,5 @@ module.exports = dev => ({
   // 是否打印游戏日志
   'DEV.LOG': dev,
   // 是否跳过关卡选择
-  'DEV.SKIP_CHOOSE_STAGE': dev,
+  'DEV.SKIP_CHOOSE_STAGE': false,
 })

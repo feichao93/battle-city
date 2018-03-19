@@ -5,11 +5,8 @@ import statistics from 'sagas/stageStatistics'
 import { frame as f } from 'utils/common'
 import { replace } from 'react-router-redux'
 
-function* startStage(stageName: string) {
-  yield put<Action>({
-    type: 'UPDATE_COMING_STAGE_NAME',
-    stageName,
-  })
+function* animateCurtainAndLoadMap(stageName: string) {
+  yield put<Action>({ type: 'UPDATE_COMING_STAGE_NAME', stageName })
   yield put<Action>({
     type: 'UPDATE_CURTAIN',
     curtainName: 'stage-enter-cutain',
@@ -38,25 +35,28 @@ function* startStage(stageName: string) {
     }),
   )
   // todo 游戏开始的时候有一个 反色效果
+}
 
-  yield put<Action.StartStage>({
-    type: 'START_STAGE',
-    name: stageName,
-  })
+export interface StageResult {
+  pass: boolean
+  reason?: 'eagle-destroyed' | 'dead'
 }
 
 /**
  * stage-saga的一个实例对应一个关卡
  * 在关卡开始时, 一个stage-saga实例将会启动, 负责关卡地图生成
  * 在关卡过程中, 该saga负责统计该关卡中的战斗信息
- * 当玩家清空关卡时stage-saga退出, 并向game-saga返回该关卡相关信息
+ * 当玩家清空关卡时stage-saga退出, 并向game-saga返回该关卡结果
  */
 export default function* stageSaga(stageName: string) {
-  let shouldPutEndStage = false
   yield put(replace(`/stage/${stageName}`))
 
-  yield* startStage(stageName)
   try {
+    yield animateCurtainAndLoadMap(stageName)
+    yield put<Action>({ type: 'BEFORE_START_STAGE', name: stageName })
+    yield put<Action>({ type: 'SHOW_HUD' })
+    yield put<Action>({ type: 'START_STAGE', name: stageName })
+
     while (true) {
       const action: Action = yield take(['KILL', 'DESTROY_EAGLE'])
       if (action.type === 'KILL') {
@@ -82,8 +82,9 @@ export default function* stageSaga(stageName: string) {
               yield nonPauseDelay(5000)
             }
             yield* statistics()
-            shouldPutEndStage = true
-            return { status: 'clear' }
+            yield put<Action>({ type: 'BEFORE_END_STAGE' })
+            yield put<Action>({ type: 'END_STAGE' })
+            return { pass: true } as StageResult
           }
         } else {
           // ai击杀human
@@ -91,17 +92,17 @@ export default function* stageSaga(stageName: string) {
             // 所有的human player都挂了
             yield nonPauseDelay(1500)
             yield* statistics()
-            shouldPutEndStage = true
-            return { status: 'fail', reason: 'all-human-dead' }
+            // 因为 gameSaga 会 put GAMEOVER 所以这里不需要 put END_STAGE
+            return { pass: false, reason: 'dead' } as StageResult
           }
         }
       } else if (action.type === 'DESTROY_EAGLE') {
-        return { status: 'fail', reason: 'DESTROY_EAGLE' }
+        // 因为 gameSaga 会 put GAMEOVER 所以这里不需要 put END_STAGE
+        return { pass: false, reason: 'eagle-destroyed' } as StageResult
       }
     }
   } finally {
-    if (shouldPutEndStage) {
-      yield put<Action.EndStage>({ type: 'END_STAGE' })
-    }
+    // TODO cancel logic
+    yield put<Action>({ type: 'HIDE_HUD' })
   }
 }

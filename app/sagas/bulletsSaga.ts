@@ -299,6 +299,7 @@ function* handleAfterTick() {
     // 注意 必须先fork destroyTanks, 然后再put killAction
     // stageSaga中take KILL的逻辑, 依赖于"REMOVE_TANK已经被处理"
     yield fork(destroyTanks, IMap(kills.map(kill => [kill.targetTank.tankId, kill.targetTank])))
+    // TODO bulletSaga 是后台服务，destroyTanks不应该在这里被调用，而应该在生成tank的地方被调用
     yield* kills.map(kill => put<Action>(kill))
   }
 }
