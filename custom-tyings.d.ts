@@ -6,7 +6,7 @@ declare const DEV: Readonly<{
   RESTRICTED_AREA: boolean
   FAST: boolean
   TEST_STAGE: boolean
-  HIDE_BUILD_INFO: boolean
+  HIDE_ABOUT: boolean
   INSPECTOR: boolean
   SINGLE_AI_TANK: boolean
   LOG: boolean

@@ -18,26 +18,37 @@ import { GameRecord } from 'reducers/game'
 import { stageNames } from 'stages'
 import Editor from './editor'
 
-const BuildInfo = () => (
-  <div style={{ maxWidth: 200, marginLeft: 20 }}>
-    <p>当前版本 {COMPILE_VERSION}</p>
-    <p>编译时间 {COMPILE_DATE}</p>
+const About = () => (
+  <div
+    style={{
+      maxWidth: 200,
+      marginLeft: 20,
+      fontFamily: 'consolas, Microsoft Yahei, monospaced',
+      lineHeight: 1.5,
+    }}
+  >
     <p>
-      游戏仍在开发中，目前只支持单人进行游戏。 目前游戏仍有很多BUG，请见谅。
-      请使用最新的chrome浏览器。 整个游戏都使用了矢量图，可以适当放大浏览器的缩放比例。
-    </p>
-    <p>WASD 控制坦克方向</p>
-    <p>J 控制开火</p>
-    <p>
-      使用<a href="./editor.html" target="_blank">
-        编辑器
-      </a>创建自己喜欢的地图
+      当前版本 <br />
+      {COMPILE_VERSION}
     </p>
     <p>
-      在<a href="./stories.html" target="_blank">
-        stories页面
-      </a>浏览游戏中的组件/素材
+      编译时间 <br />
+      {COMPILE_DATE}
     </p>
+    <p>
+      游戏仍在开发中，目前只支持单人进行游戏，也包含许多
+      <a
+        href="https://github.com/shinima/battle-city/issues"
+        target="_blank"
+        style={{ color: 'red' }}
+      >
+        BUG
+      </a>。 整个游戏都采用了矢量图，请使用最新的 chrome
+      浏览器，并适当调整浏览器的缩放比例，以获得最好的游戏体验。
+    </p>
+    <p style={{ fontWeight: 'bold' }}>WASD 控制坦克方向</p>
+    <p style={{ fontWeight: 'bold' }}>J 控制开火</p>
+    <p style={{ fontWeight: 'bold' }}>请使用鼠标控制其他部分</p>
   </div>
 )
 
@@ -91,7 +102,7 @@ class App extends React.PureComponent<{ game: GameRecord }> {
                   <CurtainsContainer />
                   {game.paused ? <PauseIndicator /> : null}
                 </svg>
-                {DEV.HIDE_BUILD_INFO ? null : <BuildInfo />}
+                {DEV.HIDE_ABOUT ? null : <About />}
                 {DEV.INSPECTOR ? <Inspector /> : null}
               </div>
             )}

@@ -102,6 +102,7 @@ class GameTitleScene extends React.PureComponent<P, S> {
           x={5.5 * B}
           y={10.5 * B}
           textFill="white"
+          disabled
           onMouseOver={() => this.setState({ choice: 'gallery' })}
           onClick={() => this.props.dispatch(push('/gallery'))}
         />

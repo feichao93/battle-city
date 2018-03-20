@@ -17,8 +17,8 @@ module.exports = dev => ({
   'DEV.FAST': dev,
   // 是否使用测试关卡
   'DEV.TEST_STAGE': false,
-  // 是否显示 build 信息
-  'DEV.HIDE_BUILD_INFO': dev,
+  // 是否显示 About 信息
+  'DEV.HIDE_ABOUT': dev,
   // 是否启用 <Inspector />
   'DEV.INSPECTOR': false,
   // 是否将 AI 坦克同时出现的最大数量设置为 1
