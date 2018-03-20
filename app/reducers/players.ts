@@ -21,8 +21,6 @@ export default function players(state = Map() as PlayersMap, action: Action) {
     return state.update(playerName, p => p.set('reservedTank', reversedTank))
   } else if (action.type === 'REMOVE_TANK') {
     return state.map(p => (p.activeTankId === action.tankId ? p.set('activeTankId', 0) : p))
-  } else if (action.type === 'DEACTIVATE_PLAYER') {
-    return state.update(action.playerName, player => player.set('active', false))
   } else if (action.type === 'DEACTIVATE_ALL_PLAYERS') {
     return state.map(p => p.set('active', false))
   } else if (action.type === 'DECREMENT_PLAYER_LIFE') {

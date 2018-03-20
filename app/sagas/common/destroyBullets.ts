@@ -1,5 +1,5 @@
-import { delay } from 'redux-saga'
 import { all, put } from 'redux-saga/effects'
+import { nonPauseDelay } from 'sagas/common'
 import { BulletRecord, BulletsMap, ExplosionRecord } from 'types'
 import { frame as f, getNextId } from 'utils/common'
 
@@ -11,23 +11,25 @@ function* explosionFromBullet(bullet: BulletRecord) {
   ]
 
   const explosionId = getNextId('explosion')
-  for (const [shape, time] of bulletExplosionShapeTiming) {
-    yield put<Action.AddOrUpdateExplosion>({
-      type: 'ADD_OR_UPDATE_EXPLOSION',
-      explosion: new ExplosionRecord({
-        cx: bullet.x + 2,
-        cy: bullet.y + 2,
-        shape,
-        explosionId,
-      }),
+  try {
+    for (const [shape, time] of bulletExplosionShapeTiming) {
+      yield put<Action.AddOrUpdateExplosion>({
+        type: 'ADD_OR_UPDATE_EXPLOSION',
+        explosion: new ExplosionRecord({
+          cx: bullet.x + 2,
+          cy: bullet.y + 2,
+          shape,
+          explosionId,
+        }),
+      })
+      yield nonPauseDelay(time)
+    }
+  } finally {
+    yield put<Action.RemoveExplosionAction>({
+      type: 'REMOVE_EXPLOSION',
+      explosionId,
     })
-    yield delay(time) // TODO 考虑PAUSE的情况
   }
-
-  yield put<Action.RemoveExplosionAction>({
-    type: 'REMOVE_EXPLOSION',
-    explosionId,
-  })
 }
 
 /** 移除单个子弹, 调用explosionFromBullet来生成子弹爆炸(并在之后移除子弹爆炸效果) */
@@ -41,7 +43,7 @@ function* destroyBullet(bullet: BulletRecord, useExplosion: boolean) {
     bulletId: bullet.bulletId,
   })
   if (useExplosion) {
-    yield* explosionFromBullet(bullet)
+    yield explosionFromBullet(bullet)
   }
 }
 

@@ -51,7 +51,6 @@ declare global {
       | ActivatePlayer
       | AddPlayer
       | RemovePlayer
-      | DeactivatePlayer
       | Simple<'DEACTIVATE_ALL_PLAYERS'>
       | AddOrUpdateExplosion
       | RemoveExplosionAction
@@ -66,6 +65,7 @@ declare global {
       | RemoveTextAction
       | RemoveFlickerAction
       | AddOrUpdateFlickerAction
+      | Hit
       | Hurt
       | Kill
       | IncKillCount
@@ -97,10 +97,18 @@ declare global {
       tank: TankRecord
     }
 
+    export interface Hit {
+      type: 'HIT'
+      bullet: BulletRecord
+      targetTank: TankRecord
+      sourceTank: TankRecord
+      targetPlayer: PlayerRecord
+      sourcePlayer: PlayerRecord
+    }
+
     export interface Hurt {
       type: 'HURT'
       targetTank: TankRecord
-      hurt: number
     }
 
     export interface Kill {
@@ -261,11 +269,6 @@ declare global {
       type: 'ACTIVATE_PLAYER'
       playerName: PlayerName
       tankId: TankId
-    }
-
-    export interface DeactivatePlayer {
-      type: 'DEACTIVATE_PLAYER'
-      playerName: PlayerName
     }
 
     export interface AddPlayer {

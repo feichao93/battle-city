@@ -113,9 +113,6 @@ function* grenade(action: Action.PickPowerUpAction) {
   const { tanks: allTanks, players }: State = yield select()
   const activeAITanks = allTanks.filter(t => t.active && t.side === 'ai')
 
-  // TODO 不应该在这里调用destroy-tank
-  yield* destroyTanks(activeAITanks)
-
   yield* activeAITanks
     .map(targetTank =>
       put<Action.Kill>({
@@ -128,6 +125,9 @@ function* grenade(action: Action.PickPowerUpAction) {
       }),
     )
     .values()
+
+  // TODO 是否可以在这里调用 destroy-tank?
+  yield* destroyTanks(activeAITanks)
 }
 
 function* star({ tank }: Action.PickPowerUpAction) {
@@ -185,17 +185,12 @@ function* scoreFromPickPowerUp(action: Action.PickPowerUpAction) {
   })
 }
 
-function* spawnPowerUpIfNeccessary(action: Action.Hurt | Action.Kill) {
+function* spawnPowerUpIfNeccessary(action: Action.Hit) {
   if (action.targetTank.withPowerUp) {
-    if (action.type === 'HURT') {
-      yield put<Action.RemovePowerUpProperty>({
-        type: 'REMOVE_POWER_UP_PROPERTY',
-        tankId: action.targetTank.tankId,
-      })
-    } else if (action.method === 'grenade') {
-      // 如果是用手榴弹炸死的坦克, 那么也不生成powerUp
-      return
-    }
+    yield put<Action.RemovePowerUpProperty>({
+      type: 'REMOVE_POWER_UP_PROPERTY',
+      tankId: action.targetTank.tankId,
+    })
     const powerUpName = _.sample(POWER_UP_NAMES)
     const position: Point = _.sample(yield select(selectors.validPowerUpSpawnPositions))
     yield* powerUpSaga(
@@ -220,7 +215,7 @@ export default function* powerUpManager() {
   yield takeEvery('START_SPAWN_TANK', clearAllPowerUps)
 
   /** 处理道具掉落相关逻辑 */
-  yield takeEvery(['HURT', 'KILL'], spawnPowerUpIfNeccessary)
+  yield takeEvery('HIT', spawnPowerUpIfNeccessary)
 
   /** 处理道具拾取时触发的相应逻辑 */
   yield takeEvery('PICK_POWER_UP', scoreFromPickPowerUp)

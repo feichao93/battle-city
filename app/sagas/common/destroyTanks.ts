@@ -4,7 +4,7 @@ import { frame as f, getNextId } from 'utils/common'
 import { TANK_KILL_SCORE_MAP } from 'utils/constants'
 import { timing, nonPauseDelay } from 'sagas/common'
 
-function* scoreFromKillTank(tank: TankRecord) {
+export function* scoreFromKillTank(tank: TankRecord) {
   const scoreId: ScoreId = getNextId('score')
   yield put<Action.AddScoreAction>({
     type: 'ADD_SCORE',
@@ -22,7 +22,7 @@ function* scoreFromKillTank(tank: TankRecord) {
   })
 }
 
-function* explosionFromTank(tank: TankRecord) {
+export function* explosionFromTank(tank: TankRecord) {
   const tankExplosionShapeTiming: TimingConfig<ExplosionShape> = [
     { v: 's0', t: f(7) },
     { v: 's1', t: f(5) },
@@ -33,25 +33,27 @@ function* explosionFromTank(tank: TankRecord) {
   ]
 
   const explosionId = getNextId('explosion')
-  yield* timing(tankExplosionShapeTiming, function*(shape) {
-    yield put<Action.AddOrUpdateExplosion>({
-      type: 'ADD_OR_UPDATE_EXPLOSION',
-      explosion: new ExplosionRecord({
-        cx: tank.x + 8,
-        cy: tank.y + 8,
-        shape,
-        explosionId,
-      }),
+  try {
+    yield* timing(tankExplosionShapeTiming, function*(shape) {
+      yield put<Action.AddOrUpdateExplosion>({
+        type: 'ADD_OR_UPDATE_EXPLOSION',
+        explosion: new ExplosionRecord({
+          cx: tank.x + 8,
+          cy: tank.y + 8,
+          shape,
+          explosionId,
+        }),
+      })
     })
-  })
-
-  yield put<Action.RemoveExplosionAction>({
-    type: 'REMOVE_EXPLOSION',
-    explosionId,
-  })
+  } finally {
+    yield put<Action.RemoveExplosionAction>({
+      type: 'REMOVE_EXPLOSION',
+      explosionId,
+    })
+  }
 }
 
-function* killTank(tank: TankRecord) {
+export function* destroyTank(tank: TankRecord) {
   // 移除坦克
   yield put({
     type: 'REMOVE_TANK',
@@ -69,8 +71,8 @@ function* killTank(tank: TankRecord) {
 export default function* destroyTanks(tanks: TanksMap) {
   yield all(
     tanks
-      .toIndexedSeq()
-      .toArray()
-      .map(killTank),
+      .valueSeq()
+      .map(destroyTank)
+      .toArray(),
   )
 }

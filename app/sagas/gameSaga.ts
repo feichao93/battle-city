@@ -1,15 +1,16 @@
 import { replace } from 'react-router-redux'
-import { put, takeEvery, race } from 'redux-saga/effects'
-import { BLOCK_SIZE } from 'utils/constants'
-import { getNextId } from 'utils/common'
-import { stageNames } from 'stages'
-import stageSaga, { StageResult } from 'sagas/stageSaga'
-import { nonPauseDelay } from 'sagas/common'
-import humanPlayerSaga from 'sagas/humanPlayerSaga'
+import { delay } from 'redux-saga'
+import { put, race } from 'redux-saga/effects'
 import AIMasterSaga from 'sagas/AIMasterSaga'
 import bulletsSaga from 'sagas/bulletsSaga'
+import { nonPauseDelay } from 'sagas/common'
 import animateTexts from 'sagas/common/animateTexts'
+import humanPlayerSaga from 'sagas/humanPlayerSaga'
 import powerUpManager from 'sagas/powerUpManager'
+import stageSaga, { StageResult } from 'sagas/stageSaga'
+import { stageNames } from 'stages'
+import { getNextId } from 'utils/common'
+import { BLOCK_SIZE } from 'utils/constants'
 
 // 播放游戏结束的动画
 function* animateGameover() {
@@ -41,14 +42,6 @@ function* animateGameover() {
   yield put<Action>({ type: 'REMOVE_TEXT', textId: textId2 })
 }
 
-// TODO refactor
-/** @deprecated 清理的逻辑应该放在对应的saga的finally block中 */
-function* clear() {
-  yield put<Action>({ type: 'CLEAR_BULLETS' })
-  yield put<Action>({ type: 'CLEAR_TANKS' })
-  yield put<Action>({ type: 'CLEAR_AI_PLAYERS' })
-}
-
 function* stageFlow(startStageIndex: number) {
   for (const name of stageNames.slice(startStageIndex)) {
     const stageResult: StageResult = yield stageSaga(name)
@@ -66,9 +59,11 @@ function* stageFlow(startStageIndex: number) {
  *  并根据stage-saga返回的结果选择继续下一个关卡, 或是选择游戏结束
  */
 export default function* gameSaga({ stageIndex }: Action.GameStart) {
-  yield takeEvery(['END_STAGE', 'GAMEOVER'], clear)
+  // 这里的 delay(0) 是为了「异步执行」后续的代码
+  // 以保证后续代码执行前已有的cancel逻辑执行完毕
+  yield delay(0)
+  DEV.LOG && console.log('GAMESTART')
 
-  DEV.LOG && console.log('game-start')
   yield race<any>([
     humanPlayerSaga('player-1', 'yellow'),
     AIMasterSaga(),
@@ -80,11 +75,9 @@ export default function* gameSaga({ stageIndex }: Action.GameStart) {
   ])
 
   yield animateGameover()
-  DEV.LOG && console.log('gameover')
+  DEV.LOG && console.log('GAMESTART')
 
   yield put(replace('/'))
   yield put<Action>({ type: 'BEFORE_GAMEOVER' })
   yield put<Action>({ type: 'GAMEOVER' })
-
-  // TODO 处理被 cancel 的情况
 }

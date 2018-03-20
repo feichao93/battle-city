@@ -1,7 +1,7 @@
-import { Map as IMap, Set as ISet } from 'immutable'
-import { fork, put, select, take } from 'redux-saga/effects'
+import { Set as ISet } from 'immutable'
+import { takeEvery, all, fork, put, select, take } from 'redux-saga/effects'
 import { BULLET_SIZE, FIELD_SIZE, STEEL_POWER } from 'utils/constants'
-import { destroyBullets, destroyTanks } from 'sagas/common'
+import { destroyBullets } from 'sagas/common'
 import { BulletRecord, BulletsMap, State } from 'types'
 import { asRect, DefaultMap, getDirectionInfo, testCollide } from 'utils/common'
 import {
@@ -13,11 +13,9 @@ import {
 } from 'utils/bullet-utils'
 import IndexHelper from 'utils/IndexHelper'
 
-interface Context {
+interface Stat {
   /** 坦克被击中的统计 */
   readonly tankHitMap: DefaultMap<TankId, BulletRecord[]>
-  /** 移动冻结的坦克tankId集合 */
-  readonly frozenTankIdSet: Set<TankId>
   readonly bulletCollisionInfo: BulletCollisionInfo
 }
 
@@ -41,7 +39,7 @@ function* handleTick() {
   }
 }
 
-function handleBulletsCollidedWithBricks(context: Context, state: State) {
+function handleBulletsCollidedWithBricks(context: Stat, state: State) {
   // todo 需要考虑子弹强度
   const { bullets, map: { bricks } } = state
 
@@ -55,7 +53,7 @@ function handleBulletsCollidedWithBricks(context: Context, state: State) {
   })
 }
 
-function handleBulletsCollidedWithSteels({ bulletCollisionInfo }: Context, state: State) {
+function handleBulletsCollidedWithSteels({ bulletCollisionInfo }: Stat, state: State) {
   // TODO 需要考虑子弹强度
   const { bullets, map: { steels } } = state
 
@@ -69,7 +67,7 @@ function handleBulletsCollidedWithSteels({ bulletCollisionInfo }: Context, state
   })
 }
 
-function handleBulletsCollidedWithBorder({ bulletCollisionInfo }: Context, state: State) {
+function handleBulletsCollidedWithBorder({ bulletCollisionInfo }: Stat, state: State) {
   const { bullets } = state
   bullets.forEach(bullet => {
     if (bullet.x <= 0) {
@@ -142,7 +140,7 @@ function* destroyEagleIfNeeded(expBullets: BulletsMap) {
   }
 }
 
-function handleBulletsCollidedWithTanks(context: Context, state: State) {
+function handleBulletsCollidedWithTanks(stat: Stat, state: State) {
   const { bullets, tanks: allTanks } = state
   const activeTanks = allTanks.filter(t => t.active)
 
@@ -162,19 +160,17 @@ function handleBulletsCollidedWithTanks(context: Context, state: State) {
       if (testCollide(subject, mbr, -0.02)) {
         const bulletSide = allTanks.find(t => t.tankId === bullet.tankId).side
         const tankSide = tank.side
-        const infoRow = context.bulletCollisionInfo.get(bullet.bulletId)
+        const infoRow = stat.bulletCollisionInfo.get(bullet.bulletId)
 
-        if (bulletSide === 'human' && tankSide === 'human') {
-          infoRow.push({ type: 'tank', tank, shouldExplode: true })
-          context.frozenTankIdSet.add(tank.tankId)
-        } else if (bulletSide === 'human' && tankSide === 'ai') {
-          context.tankHitMap.get(tank.tankId).push(bullet)
+        if (bulletSide === 'human') {
+          // tankSide 是 human 还是 ai 都是相同的处理
+          stat.tankHitMap.get(tank.tankId).push(bullet)
           infoRow.push({ type: 'tank', tank, shouldExplode: true })
         } else if (bulletSide === 'ai' && tankSide === 'human') {
           if (tank.helmetDuration > 0) {
             infoRow.push({ type: 'tank', tank, shouldExplode: false })
           } else {
-            context.tankHitMap.get(tank.tankId).push(bullet)
+            stat.tankHitMap.get(tank.tankId).push(bullet)
             infoRow.push({ type: 'tank', tank, shouldExplode: true })
           }
         } else if (bulletSide === 'ai' && tankSide === 'ai') {
@@ -187,7 +183,7 @@ function handleBulletsCollidedWithTanks(context: Context, state: State) {
   }
 }
 
-function handleBulletsCollidedWithBullets(context: Context, state: State, delta: number) {
+function handleBulletsCollidedWithBullets(stat: Stat, state: State, delta: number) {
   const { bullets } = state
   for (const bullet of bullets.values()) {
     for (const other of bullets.values()) {
@@ -197,14 +193,14 @@ function handleBulletsCollidedWithBullets(context: Context, state: State, delta:
       const collisionInfo = getCollisionInfoBetweenBullets(bullet, other, delta)
       if (collisionInfo) {
         const [info1, info2] = collisionInfo
-        context.bulletCollisionInfo.get(bullet.bulletId).push(info1)
-        context.bulletCollisionInfo.get(other.bulletId).push(info2)
+        stat.bulletCollisionInfo.get(bullet.bulletId).push(info1)
+        stat.bulletCollisionInfo.get(other.bulletId).push(info2)
       }
     }
   }
 }
 
-function handleBulletsCollidedWithEagle({ bulletCollisionInfo }: Context, state: State) {
+function handleBulletsCollidedWithEagle({ bulletCollisionInfo }: Stat, state: State) {
   const { bullets, map: { eagle } } = state
   if (eagle == null || eagle.broken) {
     // 如果Eagle尚未加载, 或是已经被破坏, 那么直接返回
@@ -219,35 +215,21 @@ function handleBulletsCollidedWithEagle({ bulletCollisionInfo }: Context, state:
   }
 }
 
-function calculateHurtsAndKillsFromContext({ tanks, players }: State, context: Context) {
-  const kills: Action.Kill[] = []
-  const hurts: Action.Hurt[] = []
-
-  for (const [targetTankId, hitBullets] of context.tankHitMap.entries()) {
-    const hurt = hitBullets.length
-    const targetTank = tanks.get(targetTankId)
-    if (hurt >= targetTank.hp) {
-      // 击杀了目标坦克
-      const sourceTankId = hitBullets[0].tankId
-      const sourcePlayerName = hitBullets[0].playerName
-      kills.push({
-        type: 'KILL',
-        targetTank,
-        sourceTank: tanks.get(sourceTankId),
-        targetPlayer: players.find(p => p.activeTankId === targetTankId),
-        sourcePlayer: players.get(sourcePlayerName),
-        method: 'bullet',
-      })
-    } else {
-      hurts.push({
-        type: 'HURT',
-        targetTank,
-        hurt,
-      })
-    }
+function* spawnHitActions({ tanks, players }: State, stat: Stat) {
+  for (const [targetTankId, hitBullets] of stat.tankHitMap) {
+    // 这里假设一帧内最多只有一发子弹同时击中一架坦克
+    const bullet = hitBullets[0]
+    const sourceTankId = bullet.tankId
+    const sourcePlayerName = bullet.playerName
+    yield put<Action.Hit>({
+      type: 'HIT',
+      bullet,
+      sourcePlayer: players.get(sourcePlayerName),
+      sourceTank: tanks.get(sourceTankId),
+      targetPlayer: players.find(p => p.activeTankId === targetTankId),
+      targetTank: tanks.get(targetTankId),
+    })
   }
-
-  return { kills, hurts }
 }
 
 function* handleAfterTick() {
@@ -257,20 +239,19 @@ function* handleAfterTick() {
 
     // 新建一个统计对象(context), 用来存放这一个tick中的统计信息
     // 注意这里的Set是ES2015的原生Set
-    const context: Context = {
+    const stat: Stat = {
       tankHitMap: new DefaultMap(() => []),
-      frozenTankIdSet: new Set(),
       bulletCollisionInfo: new BulletCollisionInfo(state.bullets),
     }
 
-    handleBulletsCollidedWithEagle(context, state)
-    handleBulletsCollidedWithTanks(context, state)
-    handleBulletsCollidedWithBullets(context, state, delta)
-    handleBulletsCollidedWithBricks(context, state)
-    handleBulletsCollidedWithSteels(context, state)
-    handleBulletsCollidedWithBorder(context, state)
+    handleBulletsCollidedWithEagle(stat, state)
+    handleBulletsCollidedWithTanks(stat, state)
+    handleBulletsCollidedWithBullets(stat, state, delta)
+    handleBulletsCollidedWithBricks(stat, state)
+    handleBulletsCollidedWithSteels(stat, state)
+    handleBulletsCollidedWithBorder(stat, state)
 
-    const { expBullets, noExpBullets } = context.bulletCollisionInfo.getExplosionInfo()
+    const { expBullets, noExpBullets } = stat.bulletCollisionInfo.getExplosionInfo()
 
     // 产生爆炸效果, 并移除子弹
     yield fork(destroyBullets, expBullets, true)
@@ -279,32 +260,24 @@ function* handleAfterTick() {
 
     if (!expBullets.isEmpty()) {
       // 只有产生爆炸效果的子弹才会破坏附近的brickWall/steelWall/eagle
-      yield* destroyEagleIfNeeded(expBullets)
-      yield* destroyBricks(expBullets)
-      yield* destroySteels(expBullets)
+      yield destroyEagleIfNeeded(expBullets)
+      yield destroyBricks(expBullets)
+      yield destroySteels(expBullets)
     }
 
-    // 更新被友军击中的坦克的frozenTimeout
-    for (const tankId of context.frozenTankIdSet) {
-      yield put<Action.SetFrozenTimeoutAction>({
-        type: 'SET_FROZEN_TIMEOUT',
-        tankId,
-        frozenTimeout: 500,
-      })
-    }
-
-    const { kills, hurts } = calculateHurtsAndKillsFromContext(state, context)
-
-    yield* hurts.map(hurt => put<Action>(hurt))
-    // 注意 必须先fork destroyTanks, 然后再put killAction
-    // stageSaga中take KILL的逻辑, 依赖于"REMOVE_TANK已经被处理"
-    yield fork(destroyTanks, IMap(kills.map(kill => [kill.targetTank.tankId, kill.targetTank])))
-    // TODO bulletSaga 是后台服务，destroyTanks不应该在这里被调用，而应该在生成tank的地方被调用
-    yield* kills.map(kill => put<Action>(kill))
+    yield spawnHitActions(state, stat)
   }
 }
 
+function* clearBullets() {
+  yield put<Action>({ type: 'CLEAR_BULLETS' })
+}
+
 export default function* bulletsSaga() {
-  yield fork(handleTick)
-  yield fork(handleAfterTick)
+  try {
+    yield takeEvery(['GAMEOVER', 'END_STAGE'], clearBullets)
+    yield all([handleTick(), handleAfterTick()])
+  } finally {
+    yield put<Action>({ type: 'CLEAR_BULLETS' })
+  }
 }

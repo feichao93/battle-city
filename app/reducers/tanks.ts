@@ -9,7 +9,7 @@ export default function tanks(state = Map() as TanksMap, action: Action) {
     return state.set(action.tank.tankId, new TankRecord(action.tank))
   } else if (action.type === 'HURT') {
     const tankId = action.targetTank.tankId
-    return state.update(tankId, t => t.update('hp', hp => hp - action.hurt))
+    return state.update(tankId, t => t.update('hp', hp => hp - 1))
   } else if (action.type === 'CLEAR_TANKS') {
     return state.clear()
   } else if (action.type === 'MOVE') {
@@ -22,7 +22,7 @@ export default function tanks(state = Map() as TanksMap, action: Action) {
     // todo 当tank.level已经是armor 该怎么办?
     return state.update(action.tankId, incTankLevel)
   } else if (action.type === 'REMOVE_POWER_UP_PROPERTY') {
-    state.update(action.tankId, tank => tank.set('withPowerUp', false))
+    return state.update(action.tankId, tank => tank.set('withPowerUp', false))
   } else if (action.type === 'REMOVE_TANK') {
     // 不能在关卡进行过程中移除tank, 因为tank的子弹可能正在飞行
     // 防御式编程: tank设置为inactive的时候重置一些状态

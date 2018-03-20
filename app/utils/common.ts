@@ -170,6 +170,8 @@ export function getTankBulletSpeed(tank: TankRecord) {
   } else {
     if (tank.level === 'basic') {
       return 0.12
+    } else if (tank.level === 'power') {
+      return 0.36
     } else {
       return 0.24
     }

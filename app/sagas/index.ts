@@ -1,4 +1,4 @@
-import { fork, takeEvery, put } from 'redux-saga/effects'
+import { fork, put, takeLatest } from 'redux-saga/effects'
 import gameSaga from 'sagas/gameSaga'
 import tickEmitter from 'sagas/tickEmitter'
 
@@ -7,7 +7,7 @@ export default function* rootSaga() {
   // tickEmitter 是后台服务
   yield fork(tickEmitter)
 
-  yield takeEvery('GAMESTART', gameSaga)
+  yield takeLatest('GAMESTART', gameSaga)
 
   if (DEV.SKIP_CHOOSE_STAGE) {
     yield put<Action>({ type: 'GAMESTART', stageIndex: 0 })

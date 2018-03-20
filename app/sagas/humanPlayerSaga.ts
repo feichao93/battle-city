@@ -1,4 +1,4 @@
-import { put, select, takeEvery } from 'redux-saga/effects'
+import { take, fork, put, select, takeEvery } from 'redux-saga/effects'
 import { BLOCK_SIZE } from 'utils/constants'
 import { asRect, frame, testCollide } from 'utils/common'
 import { PlayerRecord, State, TankRecord } from 'types'
@@ -6,6 +6,8 @@ import { spawnTank } from 'sagas/common'
 import * as selectors from 'utils/selectors'
 import { CONTROL_CONFIG } from '../utils/constants'
 import humanController from './humanController'
+import { explosionFromTank } from 'sagas/common/destroyTanks'
+import { channel } from 'redux-saga'
 
 function* handlePickPowerUps(playerName: string) {
   const tank: TankRecord = yield select(selectors.playerTank, playerName)
@@ -51,7 +53,7 @@ function* startStage(playerName: string, tankColor: TankColor) {
         level: 'basic',
       })
 
-    const tankId = yield* spawnTank(
+    const tankId = yield spawnTank(
       tankPrototype.merge({
         active: true,
         x: 4 * BLOCK_SIZE,
@@ -68,7 +70,7 @@ function* startStage(playerName: string, tankColor: TankColor) {
   }
 }
 
-function* endStage(playerName: string) {
+function* beforeEndStage(playerName: string) {
   const tank = yield select(selectors.playerTank, playerName)
   if (tank) {
     yield put<Action.SetReversedTank>({
@@ -79,31 +81,8 @@ function* endStage(playerName: string) {
   }
 }
 
-function* killed(playerName: string, tankColor: TankColor) {
-  // TODO 将bullet-saga中移除坦克的逻辑放到这里
-  const { players }: State = yield select()
-  const player = players.get(playerName)
-  if (player.lives > 0) {
-    yield put({ type: 'DECREMENT_PLAYER_LIFE', playerName })
-    const tankId = yield* spawnTank(
-      new TankRecord({
-        x: 4 * BLOCK_SIZE,
-        y: 12 * BLOCK_SIZE,
-        side: 'human',
-        color: tankColor,
-        level: 'basic',
-        helmetDuration: frame(180),
-      }),
-    )
-    yield put({
-      type: 'ACTIVATE_PLAYER',
-      playerName,
-      tankId,
-    })
-  }
-}
-
 export default function* humanPlayerSaga(playerName: string, tankColor: TankColor) {
+  const newTankChannel = channel<'new-tank'>()
   try {
     yield put<Action>({
       type: 'ADD_PLAYER',
@@ -116,15 +95,76 @@ export default function* humanPlayerSaga(playerName: string, tankColor: TankColo
 
     yield takeEvery('AFTER_TICK', handlePickPowerUps, playerName)
     yield takeEvery('START_STAGE', startStage, playerName, tankColor)
-    yield takeEvery('BEFORE_END_STAGE', endStage, playerName)
-    yield takeEvery(killedAction, killed, playerName, tankColor)
-
-    function killedAction(action: Action) {
-      return action.type === 'KILL' && action.targetPlayer.playerName === playerName
-    }
+    yield takeEvery('BEFORE_END_STAGE', beforeEndStage, playerName)
+    yield takeEvery(hitPredicate, hitHandler)
+    yield fork(newTankHelper)
 
     yield humanController(playerName, CONTROL_CONFIG.player1)
   } finally {
+    const tank: TankRecord = yield select(selectors.playerTank, playerName)
+    if (tank != null) {
+      yield put<Action>({ type: 'REMOVE_TANK', tankId: tank.tankId })
+    }
     yield put<Action>({ type: 'REMOVE_PALYER', playerName })
+  }
+
+  // ----------- below are function definitions -----------
+
+  function hitPredicate(action: Action) {
+    return action.type === 'HIT' && action.targetPlayer.playerName === playerName
+  }
+
+  function* hitHandler(action: Action.Hit) {
+    const tank: TankRecord = yield select(selectors.playerTank, playerName)
+    DEV.ASSERT && console.assert(tank != null && tank.hp === 1)
+    if (action.sourcePlayer.side === 'human') {
+      yield put<Action.SetFrozenTimeoutAction>({
+        type: 'SET_FROZEN_TIMEOUT',
+        tankId: tank.tankId,
+        frozenTimeout: 500,
+      })
+    } else {
+      // 玩家的坦克 HP 始终为 1. 一旦被 AI 击中就需要派发 KILL
+      const { sourcePlayer, sourceTank, targetPlayer, targetTank } = action
+      yield put<Action.Kill>({
+        type: 'KILL',
+        method: 'bullet',
+        sourcePlayer,
+        sourceTank,
+        targetPlayer,
+        targetTank,
+      })
+
+      yield put({ type: 'REMOVE_TANK', tankId: tank.tankId })
+      yield explosionFromTank(tank)
+      // 唤醒新的human tank
+      yield put(newTankChannel, 'new-tank')
+    }
+  }
+
+  function* newTankHelper() {
+    while (true) {
+      yield take(newTankChannel)
+      const { players }: State = yield select()
+      const player = players.get(playerName)
+      if (player.lives > 0) {
+        yield put({ type: 'DECREMENT_PLAYER_LIFE', playerName })
+        const tankId = yield spawnTank(
+          new TankRecord({
+            x: 4 * BLOCK_SIZE,
+            y: 12 * BLOCK_SIZE,
+            side: 'human',
+            color: tankColor,
+            level: 'basic',
+            helmetDuration: frame(180),
+          }),
+        )
+        yield put({
+          type: 'ACTIVATE_PLAYER',
+          playerName,
+          tankId,
+        })
+      }
+    }
   }
 }
