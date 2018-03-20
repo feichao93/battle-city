@@ -16,7 +16,7 @@ function processDevConfig(config) {
   return result
 }
 
-// --env.prod --env.stories --env.editor
+// --env.prod --env.stories
 module.exports = function(env) {
   env = env || {}
 
@@ -26,9 +26,6 @@ module.exports = function(env) {
   entry.main = path.resolve(__dirname, 'app/main.tsx')
   if (env.stories) {
     entry.stories = path.resolve(__dirname, 'app/stories.tsx')
-  }
-  if (env.editor) {
-    entry.editor = path.resolve(__dirname, 'app/editor.tsx')
   }
 
   const plugins = []
@@ -57,16 +54,6 @@ module.exports = function(env) {
         filename: 'stories.html',
         template: path.resolve(__dirname, 'app/index.tmpl.html'),
         chunks: ['commons', 'stories'],
-      }),
-    )
-  }
-  if (env.editor) {
-    plugins.push(
-      new HtmlWebpackPlugin({
-        title: 'editor',
-        filename: 'editor.html',
-        template: path.resolve(__dirname, 'app/index.tmpl.html'),
-        chunks: ['commons', 'editor'],
       }),
     )
   }

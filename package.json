@@ -5,7 +5,7 @@
   "author": "Shi Feichao <842351815@qq.com> (http://shinima.pw)",
   "scripts": {
     "start": "webpack-dev-server",
-    "build": "webpack --env.prod --env.editor --env.stories"
+    "build": "webpack --env.prod --env.stories"
   },
   "dependencies": {
     "@types/history": "^4.6.2",

@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Dispatch } from 'redux'
 import { connect } from 'react-redux'
-import { replace } from 'react-router-redux'
+import { replace, push } from 'react-router-redux'
 import BrickWall from 'components/BrickWall'
 import Text from 'components/Text'
 import TextButton from 'components/TextButton'
@@ -95,7 +95,7 @@ class GameTitleScene extends React.PureComponent<P, S> {
           y={9.5 * B}
           textFill="white"
           onMouseOver={() => this.setState({ choice: 'editor' })}
-          onClick={() => window.open('editor.html')}
+          onClick={() => this.props.dispatch(push('/editor'))}
         />
         <TextButton
           content="gallery"
@@ -103,7 +103,7 @@ class GameTitleScene extends React.PureComponent<P, S> {
           y={10.5 * B}
           textFill="white"
           onMouseOver={() => this.setState({ choice: 'gallery' })}
-          onClick={() => window.open('gallery.html')}
+          onClick={() => this.props.dispatch(push('/gallery'))}
         />
         <Tank
           tank={

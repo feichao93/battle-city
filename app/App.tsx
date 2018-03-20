@@ -16,6 +16,7 @@ import Inspector from 'components/dev-only/Inspector'
 import { State } from 'types'
 import { GameRecord } from 'reducers/game'
 import { stageNames } from 'stages'
+import Editor from './editor'
 
 const BuildInfo = () => (
   <div style={{ maxWidth: 200, marginLeft: 20 }}>
@@ -50,43 +51,52 @@ class App extends React.PureComponent<{ game: GameRecord }> {
 
     return (
       <ConnectedRouter history={history}>
-        {/* TODO gallery-page and editor-page */}
-        <div style={{ display: 'flex' }}>
-          <svg
-            className="svg"
-            style={{ background: '#757575' }}
-            width={totalWidth * zoomLevel}
-            height={totalHeight * zoomLevel}
-            viewBox={`0 0 ${totalWidth} ${totalHeight}`}
-          >
-            <Switch>
-              <Route
-                exact
-                path="/choose-stage"
-                render={() => <Redirect to={`/choose-stage/${stageNames[0]}`} />}
-              />
-              <Route path="/choose-stage/:stageName" component={ChooseStageScene} />
-              <Route
-                exact
-                path="/stage"
-                render={() => <Redirect to={`/stage/${stageNames[0]}`} />}
-              />
-              <Route
-                path="/stage/:stageName"
-                render={({ match }) =>
-                  game.status === 'stat' ? <StatisticsScene /> : <GameScene match={match} />
-                }
-              />
-              <Route
-                render={() => (game.status === 'gameover' ? <GameoverScene /> : <GameTitleScene />)}
-              />
-            </Switch>
-            <CurtainsContainer />
-            {game.paused ? <PauseIndicator /> : null}
-          </svg>
-          {DEV.HIDE_BUILD_INFO ? null : <BuildInfo />}
-          {DEV.INSPECTOR ? <Inspector /> : null}
-        </div>
+        <Switch>
+          <Route path="/editor" component={Editor} />
+          {/* TODO <Route path="/gallery" component={Gallery} /> */}
+          <Route
+            render={() => (
+              <div style={{ display: 'flex' }}>
+                <svg
+                  className="svg"
+                  style={{ background: '#757575' }}
+                  width={totalWidth * zoomLevel}
+                  height={totalHeight * zoomLevel}
+                  viewBox={`0 0 ${totalWidth} ${totalHeight}`}
+                >
+                  <Switch>
+                    <Route
+                      exact
+                      path="/choose-stage"
+                      render={() => <Redirect to={`/choose-stage/${stageNames[0]}`} />}
+                    />
+                    <Route path="/choose-stage/:stageName" component={ChooseStageScene} />
+                    <Route
+                      exact
+                      path="/stage"
+                      render={() => <Redirect to={`/stage/${stageNames[0]}`} />}
+                    />
+                    <Route
+                      path="/stage/:stageName"
+                      render={({ match }) =>
+                        game.status === 'stat' ? <StatisticsScene /> : <GameScene match={match} />
+                      }
+                    />
+                    <Route
+                      render={() =>
+                        game.status === 'gameover' ? <GameoverScene /> : <GameTitleScene />
+                      }
+                    />
+                  </Switch>
+                  <CurtainsContainer />
+                  {game.paused ? <PauseIndicator /> : null}
+                </svg>
+                {DEV.HIDE_BUILD_INFO ? null : <BuildInfo />}
+                {DEV.INSPECTOR ? <Inspector /> : null}
+              </div>
+            )}
+          />
+        </Switch>
       </ConnectedRouter>
     )
   }

@@ -146,6 +146,7 @@ function rotate(bullet: BulletRecord) {
   })
 }
 
+// fixme 有的时候会发生 stack overflow
 function calculateHitTime(b1: BulletRecord, b2: BulletRecord): number {
   if (b1.direction === 'up') {
     if (b2.direction === 'down') {

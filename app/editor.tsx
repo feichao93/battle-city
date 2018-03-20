@@ -1,12 +1,10 @@
-import 'normalize.css'
+import { match, Route, Redirect } from 'react-router-dom'
+import { push } from 'react-router-redux'
 import { saveAs } from 'file-saver'
 import * as React from 'react'
-import * as ReactDOM from 'react-dom'
-import classNames from 'classnames'
-import createSagaMiddleware from 'redux-saga'
-import { applyMiddleware, combineReducers, createStore } from 'redux'
+import { Dispatch } from 'redux'
 import { is, List, Range, Record, Repeat } from 'immutable'
-import { Provider } from 'react-redux'
+import { connect } from 'react-redux'
 import { BLOCK_SIZE as B, FIELD_BLOCK_SIZE as FBZ } from 'utils/constants'
 import BrickLayer from 'components/BrickLayer'
 import SteelLayer from 'components/SteelLayer'
@@ -23,24 +21,16 @@ import BrickWall from 'components/BrickWall'
 import SteelWall from 'components/SteelWall'
 import TextInput from 'components/TextInput'
 import TextButton from 'components/TextButton'
-import tickEmitter from 'sagas/tickEmitter'
-import { time } from 'reducers/index'
-import game from 'reducers/game'
 import parseStageMap from 'utils/parseStageMap'
 import { TankRecord } from 'types'
 import { inc, dec } from 'utils/common'
-
-const simpleSagaMiddleware = createSagaMiddleware()
-const simpleReducer = combineReducers({ time, game })
-
-const simpleStore = createStore(simpleReducer, undefined, applyMiddleware(simpleSagaMiddleware))
-simpleSagaMiddleware.run(tickEmitter)
+import { State } from './reducers'
 
 const zoomLevel = 2
 const totalWidth = 16 * B
 const totalHeight = 15 * B
 
-function incTankLevel(record: EnemyConfigRecord) {
+function incTankLevel(record: EnemyConfig) {
   if (record.tankLevel === 'basic') {
     return record.set('tankLevel', 'fast')
   } else if (record.tankLevel === 'fast') {
@@ -50,7 +40,7 @@ function incTankLevel(record: EnemyConfigRecord) {
   }
 }
 
-function decTankLevel(record: EnemyConfigRecord) {
+function decTankLevel(record: EnemyConfig) {
   if (record.tankLevel === 'armor') {
     return record.set('tankLevel', 'power')
   } else if (record.tankLevel === 'power') {
@@ -106,25 +96,17 @@ const mapItemRecord = MapItemRecord()
 
 export type MapItemRecord = typeof mapItemRecord
 
-export type PopupType = 'none' | 'alert' | 'confirm'
+export type PopupType = 'alert' | 'confirm'
 
-export const PopupRecord = Record({
-  type: 'none' as PopupType,
+export class Popup extends Record({
+  type: 'alert' as PopupType,
   message: '',
-})
+}) {}
 
-const popupRecord = PopupRecord()
-
-export type PopupRecord = typeof popupRecord
-
-export const EnemyConfigRecord = Record({
+export class EnemyConfig extends Record({
   tankLevel: 'basic' as TankLevel,
   count: 0,
-})
-
-const enemyConfigRecord = EnemyConfigRecord()
-
-export type EnemyConfigRecord = typeof enemyConfigRecord
+}) {}
 
 type DashLinesProps = {
   t?: number
@@ -273,9 +255,12 @@ const positionMap = {
   E: 10 * B,
 }
 
-type EditorView = 'map' | 'config'
+export interface EditorProps {
+  match: match<any>
+  dispatch: Dispatch<State>
+}
 
-class Editor extends React.Component {
+class Editor extends React.Component<EditorProps> {
   private input: HTMLInputElement
   private resetButton: HTMLInputElement
   private form: HTMLFormElement
@@ -285,8 +270,7 @@ class Editor extends React.Component {
   private resolveAlert: () => void = null
 
   state = {
-    view: 'config' as EditorView,
-    popup: popupRecord,
+    popup: null as Popup,
     t: -1,
 
     // map-view
@@ -298,11 +282,11 @@ class Editor extends React.Component {
     // config-view
     stageName: '',
     difficulty: 1,
-    enemies: List<EnemyConfigRecord>([
-      EnemyConfigRecord({ tankLevel: 'basic', count: 10 }),
-      EnemyConfigRecord({ tankLevel: 'fast', count: 4 }),
-      EnemyConfigRecord({ tankLevel: 'power', count: 4 }),
-      EnemyConfigRecord({ tankLevel: 'armor', count: 2 }),
+    enemies: List<EnemyConfig>([
+      new EnemyConfig({ tankLevel: 'basic', count: 10 }),
+      new EnemyConfig({ tankLevel: 'fast', count: 4 }),
+      new EnemyConfig({ tankLevel: 'power', count: 4 }),
+      new EnemyConfig({ tankLevel: 'armor', count: 2 }),
     ]),
   }
 
@@ -352,14 +336,14 @@ class Editor extends React.Component {
     const enemies = List(
       stage.enemies.map(line => {
         const splited = line.split('*')
-        return EnemyConfigRecord({
+        return new EnemyConfig({
           count: Number(splited[0]),
           tankLevel: splited[1] as TankLevel,
         })
       }),
     )
       .setSize(4)
-      .map(v => (v ? v : enemyConfigRecord))
+      .map(v => (v ? v : new EnemyConfig()))
     const map = List(stage.map).flatMap(line => {
       const items = line.trim().split(/ +/)
       return items.map(item => {
@@ -419,28 +403,28 @@ class Editor extends React.Component {
     }
   }
 
-  onMouseDown = (event: React.MouseEvent<SVGSVGElement>) => {
-    const { view, popup } = this.state
-    if (view === 'map' && popup.type === 'none' && this.getT(event) !== -1) {
+  onMouseDown = (view: string, event: React.MouseEvent<SVGSVGElement>) => {
+    const { popup } = this.state
+    if (view === 'map' && popup == null && this.getT(event) !== -1) {
       this.pressed = true
     }
   }
 
-  onMouseMove = (event: React.MouseEvent<SVGSVGElement>) => {
-    const { view, popup, t: lastT } = this.state
+  onMouseMove = (view: string, event: React.MouseEvent<SVGSVGElement>) => {
+    const { popup, t: lastT } = this.state
     const t = this.getT(event)
     if (t !== lastT) {
       this.setState({ t })
     }
-    if (view === 'map' && popup.type === 'none' && this.pressed) {
+    if (view === 'map' && popup == null && this.pressed) {
       this.setAsCurrentItem(t)
     }
   }
 
-  onMouseUp = (event: React.MouseEvent<SVGSVGElement>) => {
+  onMouseUp = (view: string, event: React.MouseEvent<SVGSVGElement>) => {
     this.pressed = false
-    const { view, popup } = this.state
-    if (view === 'map' && popup.type === 'none') {
+    const { popup } = this.state
+    if (view === 'map' && popup == null) {
       this.setAsCurrentItem(this.getT(event))
     }
   }
@@ -449,8 +433,6 @@ class Editor extends React.Component {
     this.pressed = false
     this.setState({ t: -1 })
   }
-
-  onChangeView = (view: EditorView) => this.setState({ view })
 
   onIncDifficulty = () => {
     const { difficulty } = this.state
@@ -493,7 +475,7 @@ class Editor extends React.Component {
     // 检查stageName
     if (stageName === '') {
       await this.showAlertPopup('Please enter stage name.')
-      this.setState({ view: 'config' })
+      this.props.dispatch(push('/editor/config'))
       return
     }
     // 检查enemies数量
@@ -528,10 +510,7 @@ class Editor extends React.Component {
 
   showAlertPopup(message: string) {
     this.setState({
-      popup: PopupRecord({
-        type: 'alert',
-        message,
-      }),
+      popup: new Popup({ type: 'alert', message }),
     })
     return new Promise<boolean>(resolve => {
       this.resolveAlert = resolve
@@ -540,10 +519,7 @@ class Editor extends React.Component {
 
   showConfirmPopup(message: string) {
     this.setState({
-      popup: PopupRecord({
-        type: 'confirm',
-        message,
-      }),
+      popup: new Popup({ type: 'confirm', message }),
     })
     return new Promise<boolean>(resolve => {
       this.resolveConfirm = resolve
@@ -553,19 +529,19 @@ class Editor extends React.Component {
   onConfirm = () => {
     this.resolveConfirm(true)
     this.resolveConfirm = null
-    this.setState({ popup: popupRecord })
+    this.setState({ popup: null })
   }
 
   onCancel = () => {
     this.resolveConfirm(false)
     this.resolveConfirm = null
-    this.setState({ popup: popupRecord })
+    this.setState({ popup: null })
   }
 
   onClickOkOfAlert = () => {
     this.resolveAlert()
     this.resolveAlert = null
-    this.setState({ popup: popupRecord })
+    this.setState({ popup: null })
   }
 
   onShowHelpInfo = async () => {
@@ -780,6 +756,10 @@ class Editor extends React.Component {
 
   renderPopup() {
     const { popup } = this.state
+    if (popup == null) {
+      return null
+    }
+
     if (popup.type === 'alert') {
       return (
         <g role="popup-alert">
@@ -797,7 +777,9 @@ class Editor extends React.Component {
           </g>
         </g>
       )
-    } else if (popup.type === 'confirm') {
+    }
+
+    if (popup.type === 'confirm') {
       return (
         <g role="popup-confirm">
           <rect x={0} y={0} width={totalWidth} height={totalHeight} fill="transparent" />
@@ -821,56 +803,61 @@ class Editor extends React.Component {
           </g>
         </g>
       )
-    } else {
-      return null
     }
   }
 
   render() {
-    const { view } = this.state
+    const { match, dispatch } = this.props
 
     return (
-      <svg
-        ref={node => (this.svg = node)}
-        className="svg"
-        style={{ background: '#333' }}
-        width={totalWidth * zoomLevel}
-        height={totalHeight * zoomLevel}
-        viewBox={`0 0 ${totalWidth} ${totalHeight}`}
-        onMouseDown={this.onMouseDown}
-        onMouseUp={this.onMouseUp}
-        onMouseMove={this.onMouseMove}
-        onMouseLeave={this.onMouseLeave}
-      >
-        {view === 'map' ? this.renderMapView() : null}
-        {view === 'config' ? this.renderConfigView() : null}
-        <g role="menu" transform={`translate(0, ${13 * B})`}>
-          <TextButton
-            content="config"
-            x={0.5 * B}
-            y={0.5 * B}
-            selected={view === 'config'}
-            onClick={() => this.onChangeView('config')}
-          />
-          <TextButton
-            content="map"
-            x={4 * B}
-            y={0.5 * B}
-            selected={view === 'map'}
-            onClick={() => this.onChangeView('map')}
-          />
-          <TextButton content="load" x={7 * B} y={0.5 * B} onClick={this.onRequestLoad} />
-          <TextButton content="save" x={9.5 * B} y={0.5 * B} onClick={this.onSave} />
-        </g>
-        {this.renderPopup()}
-      </svg>
+      <Route
+        path={`${match.url}/:view`}
+        children={({ match }) => {
+          // match 在这里可能为 null
+          const view = match && match.params.view
+          if (!['map', 'config'].includes(view)) {
+            return <Redirect to="/editor/config" />
+          }
+          return (
+            <svg
+              ref={node => (this.svg = node)}
+              className="svg"
+              style={{ background: '#333' }}
+              width={totalWidth * zoomLevel}
+              height={totalHeight * zoomLevel}
+              viewBox={`0 0 ${totalWidth} ${totalHeight}`}
+              onMouseDown={e => this.onMouseDown(view, e)}
+              onMouseUp={e => this.onMouseUp(view, e)}
+              onMouseMove={e => this.onMouseMove(view, e)}
+              onMouseLeave={this.onMouseLeave}
+            >
+              {view === 'map' ? this.renderMapView() : null}
+              {view === 'config' ? this.renderConfigView() : null}
+              <g role="menu" transform={`translate(0, ${13 * B})`}>
+                <TextButton
+                  content="config"
+                  x={0.5 * B}
+                  y={0.5 * B}
+                  selected={view === 'config'}
+                  onClick={() => dispatch(push('/editor/config'))}
+                />
+                <TextButton
+                  content="map"
+                  x={4 * B}
+                  y={0.5 * B}
+                  selected={view === 'map'}
+                  onClick={() => dispatch(push('/editor/map'))}
+                />
+                <TextButton content="load" x={7 * B} y={0.5 * B} onClick={this.onRequestLoad} />
+                <TextButton content="save" x={9.5 * B} y={0.5 * B} onClick={this.onSave} />
+              </g>
+              {this.renderPopup()}
+            </svg>
+          )
+        }}
+      />
     )
   }
 }
 
-ReactDOM.render(
-  <Provider store={simpleStore}>
-    <Editor />
-  </Provider>,
-  document.getElementById('container'),
-)
+export default connect()(Editor)
