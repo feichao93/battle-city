@@ -9,7 +9,7 @@ import { getNextId } from 'utils/common'
 import { TANK_INDEX_THAT_WITH_POWER_UP } from 'utils/constants'
 import * as selectors from 'utils/selectors'
 
-const max = DEV.SINGLE_AI_TANK ? 1 : 3
+const max = DEV.SINGLE_AI_TANK ? 1 : 2
 
 /** AIMasterSaga用来管理AIWorkerSaga的启动和停止, 并处理和AI程序的数据交互 */
 export default function* AIMasterSaga() {
@@ -28,13 +28,27 @@ export default function* AIMasterSaga() {
       yield take(addChannel)
       const { game: { remainingEnemies } }: State = yield select()
       if (!remainingEnemies.isEmpty()) {
-        yield fork(worker, `AI-${getNextId('AI-player')}`)
+        const { x, y } = yield select(selectors.availableSpawnPosition)
+        yield put<Action>({ type: 'REMOVE_FIRST_REMAINING_ENEMY' })
+        const level = remainingEnemies.first()
+        const hp = level === 'armor' ? 4 : 1
+        const tankId = yield spawnTank(
+          new TankRecord({
+            x,
+            y,
+            side: 'ai',
+            level,
+            hp,
+            withPowerUp: TANK_INDEX_THAT_WITH_POWER_UP.includes(20 - remainingEnemies.count()),
+          }),
+          0.6,
+        ) // TODO 要根据关卡的难度来确定坦克的生成速度
+        yield fork(worker, `AI-${getNextId('AI-player')}`, tankId)
       }
     }
   }
 
-  function* worker(playerName: string) {
-    const { game: { remainingEnemies } }: State = yield select()
+  function* worker(playerName: string, tankId: TankId) {
     yield put<Action>({
       type: 'ADD_PLAYER',
       player: new PlayerRecord({
@@ -43,21 +57,7 @@ export default function* AIMasterSaga() {
         side: 'ai',
       }),
     })
-    const { x, y } = yield select(selectors.availableSpawnPosition)
-    yield put<Action>({ type: 'REMOVE_FIRST_REMAINING_ENEMY' })
-    const level = remainingEnemies.first()
-    const hp = level === 'armor' ? 4 : 1
-    const tankId = yield* spawnTank(
-      new TankRecord({
-        x,
-        y,
-        side: 'ai',
-        level,
-        hp,
-        withPowerUp: TANK_INDEX_THAT_WITH_POWER_UP.includes(20 - remainingEnemies.count()),
-      }),
-      0.6,
-    ) // TODO 要根据关卡的难度来确定坦克的生成速度
+
     yield race<any>([
       take(killed),
       take('GAMEOVER'),
