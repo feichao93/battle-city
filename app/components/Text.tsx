@@ -1,4 +1,4 @@
-import * as React from 'react'
+import React from 'react'
 
 // 该文件内每个字符的尺寸都是 8 * 8
 

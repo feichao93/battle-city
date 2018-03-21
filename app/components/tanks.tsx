@@ -1,5 +1,5 @@
-import * as React from 'react'
-import * as _ from 'lodash'
+import React from 'react'
+import _ from 'lodash'
 import { connect } from 'react-redux'
 import { Bitmap, Pixel } from 'components/elements'
 import { BLOCK_SIZE, TANK_COLOR_SCHEMES } from 'utils/constants'

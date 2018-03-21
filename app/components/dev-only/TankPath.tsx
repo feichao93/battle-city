@@ -1,4 +1,4 @@
-import * as React from 'react'
+import React from 'react'
 import { Map as IMap } from 'immutable'
 import { connect } from 'react-redux'
 import { State } from 'types'

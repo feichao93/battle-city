@@ -1,6 +1,6 @@
-import * as React from 'react'
+import React from 'react'
 import { connect } from 'react-redux'
-import * as _ from 'lodash'
+import _ from 'lodash'
 import { State, TanksMap, ScoresMap, TankRecord, PlayersMap, ExplosionsMap } from 'app/types'
 
 let connectedInspector: any = () => null as any

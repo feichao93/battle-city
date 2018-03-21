@@ -1,4 +1,4 @@
-import * as _ from 'lodash'
+import _ from 'lodash'
 import { fork, put, select, take, cancelled, takeEvery, takeLatest } from 'redux-saga/effects'
 import { MapRecord, ScoreRecord, State, PowerUpRecord } from 'types'
 import { destroyTanks, nonPauseDelay } from 'sagas/common'

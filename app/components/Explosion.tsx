@@ -1,4 +1,4 @@
-import * as React from 'react'
+import React from 'react'
 import { Bitmap } from 'components/elements'
 import { ExplosionRecord } from 'types'
 

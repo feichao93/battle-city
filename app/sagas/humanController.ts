@@ -1,4 +1,4 @@
-import * as _ from 'lodash'
+import _ from 'lodash'
 import { all, take } from 'redux-saga/effects'
 import directionController from 'sagas/directionController'
 import fireController from 'sagas/fireController'

@@ -1,4 +1,4 @@
-import * as React from 'react'
+import React from 'react'
 import { BLOCK_SIZE as B } from 'utils/constants'
 import Curtain from 'components/Curtain'
 import Text from 'components/Text'

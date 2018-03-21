@@ -1,5 +1,5 @@
-import * as React from 'react'
-import * as _ from 'lodash'
+import React from 'react'
+import _ from 'lodash'
 import { BLOCK_SIZE, FIELD_SIZE } from 'utils/constants'
 
 // <EnemyTankThumbnail />的尺寸为 8 * 8

@@ -1,6 +1,6 @@
-import * as React from 'react'
+import React from 'react'
+import _ from 'lodash'
 import { Pixel } from 'components/elements'
-import * as _ from 'lodash'
 
 const a = '#ffffff'
 const b = '#adadad'

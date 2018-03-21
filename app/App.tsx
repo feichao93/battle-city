@@ -1,4 +1,4 @@
-import * as React from 'react'
+import React from 'react'
 import { hot } from 'react-hot-loader'
 import { Route, Redirect, Switch } from 'react-router-dom'
 import { ConnectedRouter } from 'react-router-redux'

@@ -1,7 +1,7 @@
 import { match, Route, Redirect } from 'react-router-dom'
 import { push } from 'react-router-redux'
 import { saveAs } from 'file-saver'
-import * as React from 'react'
+import React from 'react'
 import { Dispatch } from 'redux'
 import { is, List, Range, Record, Repeat } from 'immutable'
 import { connect } from 'react-redux'

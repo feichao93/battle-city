@@ -14,7 +14,7 @@ import { MapRecord } from 'types'
 import devOnly from 'components/dev-only/reducer'
 
 export interface State {
-  router: any,
+  router: any
   game: GameRecord
   players: PlayersMap
   bullets: BulletsMap

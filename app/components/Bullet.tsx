@@ -1,4 +1,4 @@
-import * as React from 'react'
+import React from 'react'
 import { BulletRecord } from 'types'
 import { Pixel } from 'components/elements'
 

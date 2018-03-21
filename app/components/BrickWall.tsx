@@ -1,4 +1,4 @@
-import * as React from 'react'
+import React from 'react'
 import { ITEM_SIZE_MAP } from 'utils/constants'
 
 type P = {

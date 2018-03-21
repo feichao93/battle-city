@@ -1,4 +1,4 @@
-import * as React from 'react'
+import React from 'react'
 import { frame as f } from 'utils/common'
 import registerTick from 'hocs/registerTick'
 

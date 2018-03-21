@@ -1,4 +1,4 @@
-import * as React from 'react'
+import React from 'react'
 import { connect } from 'react-redux'
 import { State } from 'types'
 import StageEnterCurtain from 'components/StageEnterCurtain'

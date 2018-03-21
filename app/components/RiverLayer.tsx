@@ -1,4 +1,4 @@
-import * as React from 'react'
+import React from 'react'
 import { List } from 'immutable'
 import { getRowCol } from 'utils/common'
 import { N_MAP, ITEM_SIZE_MAP } from 'utils/constants'

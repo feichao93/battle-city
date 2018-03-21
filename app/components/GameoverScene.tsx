@@ -1,4 +1,4 @@
-import * as React from 'react'
+import React from 'react'
 import { ITEM_SIZE_MAP, BLOCK_SIZE as B } from 'utils/constants'
 import BrickWall from 'components/BrickWall'
 import Text from 'components/Text'

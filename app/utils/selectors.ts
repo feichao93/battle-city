@@ -1,4 +1,4 @@
-import * as _ from 'lodash'
+import _ from 'lodash'
 import { State, TankFireInfo } from 'types'
 import { asRect, getTankBulletLimit, testCollide } from 'utils/common'
 import { BLOCK_SIZE as B, FIELD_BLOCK_SIZE as FBZ, TANK_SIZE } from 'utils/constants'

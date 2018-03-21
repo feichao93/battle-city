@@ -1,8 +1,8 @@
 import { FireEstimate, getFireResist, mergeEstMap } from 'ai/fire-utils'
 import getAllSpots from 'ai/getAllSpots'
 import { around, getTankSpot } from 'ai/spot-utils'
-import * as _ from 'lodash'
-import * as React from 'react'
+import _ from 'lodash'
+import React from 'react'
 import { connect } from 'react-redux'
 import { State } from 'types'
 

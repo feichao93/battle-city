@@ -1,0 +1,42 @@
+* {
+  box-sizing: border-box;
+}
+
+.svg {
+  display: block;
+  user-select: none;
+  cursor: default;
+}
+
+.stories .svg {
+  background: #757575;
+}
+
+.area-button {
+  fill: transparent;
+  cursor: pointer;
+  transition: stroke 250ms;
+}
+
+.area-button:hover {
+  stroke: #e91e63;
+}
+
+.text-area {
+  fill: transparent;
+  cursor: pointer;
+}
+
+.text-area:hover {
+  fill: #865b69;
+}
+
+.text-area.selected,
+.text-area:active {
+  fill: #e91e63;
+}
+
+.text-area.disabled {
+  fill: transparent;
+  cursor: default;
+}
