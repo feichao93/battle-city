@@ -16,17 +16,11 @@ import Inspector from 'components/dev-only/Inspector'
 import { State } from 'types'
 import { GameRecord } from 'reducers/game'
 import { stageNames } from 'stages'
-import Editor from './editor'
+import Editor from './Editor'
+import Gallery from './Gallery'
 
 const About = () => (
-  <div
-    style={{
-      maxWidth: 200,
-      marginLeft: 20,
-      fontFamily: 'consolas, Microsoft Yahei, monospaced',
-      lineHeight: 1.5,
-    }}
-  >
+  <div className="about">
     <p>
       当前版本 <br />
       {COMPILE_VERSION}
@@ -46,9 +40,9 @@ const About = () => (
       </a>。 整个游戏都采用了矢量图，请使用最新的 chrome
       浏览器，并适当调整浏览器的缩放比例，以获得最好的游戏体验。
     </p>
-    <p style={{ fontWeight: 'bold' }}>WASD 控制坦克方向</p>
-    <p style={{ fontWeight: 'bold' }}>J 控制开火</p>
-    <p style={{ fontWeight: 'bold' }}>请使用鼠标控制其他部分</p>
+    <p className="bold">WASD 控制坦克方向</p>
+    <p className="bold">J 控制开火</p>
+    <p className="bold">请使用鼠标控制其他部分</p>
   </div>
 )
 
@@ -64,7 +58,7 @@ class App extends React.PureComponent<{ game: GameRecord }> {
       <ConnectedRouter history={history}>
         <Switch>
           <Route path="/editor" component={Editor} />
-          {/* TODO <Route path="/gallery" component={Gallery} /> */}
+          <Route path="/gallery" component={Gallery} />
           <Route
             render={() => (
               <div style={{ display: 'flex' }}>

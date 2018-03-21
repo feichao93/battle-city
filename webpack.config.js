@@ -16,17 +16,10 @@ function processDevConfig(config) {
   return result
 }
 
-// --env.prod --env.stories
 module.exports = function(env) {
   env = env || {}
 
   const prod = Boolean(env.prod)
-
-  const entry = {}
-  entry.main = path.resolve(__dirname, 'app/main.tsx')
-  if (env.stories) {
-    entry.stories = path.resolve(__dirname, 'app/stories.tsx')
-  }
 
   const plugins = []
 
@@ -38,25 +31,12 @@ module.exports = function(env) {
       // 将 devConfig.js 中的配置数据加入到 DefinePlugin 中
       ...processDevConfig(getDevConfig(!prod)),
     }),
-  )
-  plugins.push(
     new HtmlWebpackPlugin({
       title: 'battle-city',
       filename: 'index.html',
       template: path.resolve(__dirname, 'app/index.tmpl.html'),
-      chunks: ['commons', 'main'],
     }),
   )
-  if (env.stories) {
-    plugins.push(
-      new HtmlWebpackPlugin({
-        title: 'stories',
-        filename: 'stories.html',
-        template: path.resolve(__dirname, 'app/index.tmpl.html'),
-        chunks: ['commons', 'stories'],
-      }),
-    )
-  }
 
   if (prod) {
     plugins.push(new ExtractTextPlugin('[name]-[contenthash:6].css'))
@@ -69,7 +49,7 @@ module.exports = function(env) {
     context: __dirname,
     target: 'web',
 
-    entry,
+    entry: path.resolve(__dirname, 'app/main.tsx'),
 
     output: {
       path: path.resolve(__dirname, 'build', packageInfo.version),

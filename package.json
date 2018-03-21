@@ -5,7 +5,7 @@
   "author": "Shi Feichao <842351815@qq.com> (http://shinima.pw)",
   "scripts": {
     "start": "webpack-dev-server",
-    "build": "webpack --env.prod --env.stories"
+    "build": "webpack --env.prod"
   },
   "dependencies": {
     "@types/history": "^4.6.2",
@@ -48,7 +48,6 @@
     "prettier": "^1.11.1",
     "source-map-loader": "^0.2.1",
     "style-loader": "^0.20.3",
-    "stylus": "^0.54.5",
     "ts-loader": "^4.1.0",
     "typescript": "^2.2.2",
     "webpack": "^4.1.1",

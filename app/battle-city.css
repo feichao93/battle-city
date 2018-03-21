@@ -2,13 +2,24 @@
   box-sizing: border-box;
 }
 
+.about {
+  max-width: 200px;
+  margin-left: 20px;
+  font-family: consolas, Microsoft Yahei, monospace;
+  line-height: 1.5;
+}
+
+.about .bold{
+  font-weight: bold;
+}
+
 .svg {
   display: block;
   user-select: none;
   cursor: default;
 }
 
-.stories .svg {
+.gallery .svg {
   background: #757575;
 }
 
