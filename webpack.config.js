@@ -46,6 +46,7 @@ module.exports = function(env) {
 
   return {
     mode: prod ? 'production' : 'development',
+    devtool: prod ? false : 'source-map',
     context: __dirname,
     target: 'web',
 

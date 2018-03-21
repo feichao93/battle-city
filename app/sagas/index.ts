@@ -5,7 +5,7 @@ import tickEmitter from 'sagas/tickEmitter'
 export default function* rootSaga() {
   DEV.LOG && console.log('root saga started')
   // tickEmitter 是后台服务
-  yield fork(tickEmitter)
+  yield fork(tickEmitter, Infinity, true)
 
   yield takeLatest('GAMESTART', gameSaga)
 

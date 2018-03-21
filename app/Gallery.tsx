@@ -39,38 +39,42 @@ import {
 
 // 在 Gallery 页面使用简化的 galleryStore 代替全局 store
 // 简化版的 store 没有与 router 绑定，所以不用担心子组件 dispatch push/replace 会改变页面 url
-const gallerySagaMiddleware = createSagaMiddleware()
-const simpleActionLogMiddleware = () => (next: any) => (action: Action) => {
-  if (DEV.LOG && action.type !== 'TICK' && action.type !== 'AFTER_TICK') {
-    console.log(action)
+function initGalleryStoreAndTask() {
+  const gallerySagaMiddleware = createSagaMiddleware()
+  const simpleActionLogMiddleware = () => (next: any) => (action: Action) => {
+    if (DEV.LOG && action.type !== 'TICK' && action.type !== 'AFTER_TICK') {
+      console.log(action)
+    }
+    return next(action)
   }
-  return next(action)
-}
-const galleryReducer = combineReducers({
-  time,
-  players,
-  game,
-})
-const galleryInitState = {
-  time: undefined as number,
-  game: new GameRecord({ showHUD: true }),
-  players: Map({
-    'player-1': new PlayerRecord({
-      playerName: 'player-1',
-      lives: 3,
+  const galleryReducer = combineReducers({
+    time,
+    players,
+    game,
+  })
+  const galleryInitState = {
+    time: undefined as number,
+    game: new GameRecord({ showHUD: true }),
+    players: Map({
+      'player-1': new PlayerRecord({
+        playerName: 'player-1',
+        lives: 3,
+      }),
+      'player-2': new PlayerRecord({
+        playerName: 'player-2',
+        lives: 1,
+      }),
     }),
-    'player-2': new PlayerRecord({
-      playerName: 'player-2',
-      lives: 1,
-    }),
-  }),
+  }
+  const store = createStore(
+    galleryReducer,
+    galleryInitState,
+    applyMiddleware(gallerySagaMiddleware, simpleActionLogMiddleware),
+  )
+  const task = gallerySagaMiddleware.run(tickEmitter, Infinity, false)
+
+  return { store, task }
 }
-const galleryStore = createStore(
-  galleryReducer,
-  galleryInitState,
-  applyMiddleware(gallerySagaMiddleware, simpleActionLogMiddleware),
-)
-gallerySagaMiddleware.run(tickEmitter)
 
 const BulletExplosion = (registerTick as any)(666, 667, 667)(({ tickIndex, x, y }: any) => (
   <Explosion
@@ -164,8 +168,13 @@ const levels: TankLevel[] = ['basic', 'fast', 'power', 'armor']
 const powerUpNames: PowerUpName[] = ['tank', 'star', 'grenade', 'timer', 'helmet', 'shovel']
 
 export default class Gallery extends React.Component<{}, { stage: string }> {
+  storeAndTask = initGalleryStoreAndTask()
   state = {
     stage: Object.keys(stageConfigs)[0],
+  }
+
+  componentWillUnmount() {
+    this.storeAndTask.task.cancel()
   }
 
   render() {
@@ -176,7 +185,7 @@ export default class Gallery extends React.Component<{}, { stage: string }> {
     ).toObject()
 
     return (
-      <Provider store={galleryStore}>
+      <Provider store={this.storeAndTask.store}>
         <div className="gallery" style={{ fontFamily: 'monospace', margin: 8 }}>
           <FontLevel1>This page is still under construction.</FontLevel1>
           <details open>

@@ -80,7 +80,7 @@ export default function* gameSaga({ stageIndex }: Action.GameStart) {
   ])
 
   yield animateGameover()
-  DEV.LOG && console.log('GAMESTART')
+  DEV.LOG && console.log('GAMEOVER')
 
   yield put(replace('/'))
   yield put<Action>({ type: 'BEFORE_GAMEOVER' })
