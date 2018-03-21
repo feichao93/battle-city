@@ -73,11 +73,12 @@ function* startStage(playerName: string, tankColor: TankColor) {
 function* beforeEndStage(playerName: string) {
   const tank = yield select(selectors.playerTank, playerName)
   if (tank) {
-    yield put<Action.SetReversedTank>({
+    yield put<Action>({
       type: 'SET_REVERSED_TANK',
       playerName,
       reversedTank: tank,
     })
+    yield put<Action>({ type: 'REMOVE_TANK', tankId: tank.tankId })
   }
 }
 
@@ -108,7 +109,7 @@ export default function* humanPlayerSaga(playerName: string, tankColor: TankColo
     yield put<Action>({ type: 'REMOVE_PALYER', playerName })
   }
 
-  // ----------- below are function definitions -----------
+  /* ----------- below are function definitions ----------- */
 
   function hitPredicate(action: Action) {
     return action.type === 'HIT' && action.targetPlayer.playerName === playerName

@@ -74,7 +74,7 @@ declare global {
       | AddOrUpdatePowerUp
       | RemovePowerUp
       | RemovePowerUpProperty
-      | ClearAllPowerUps
+      | Simple<'CLEAR_ALL_POWER_UPS'>
       | PickPowerUpAction
       | AddScoreAction
       | RemoveScoreAction
@@ -82,15 +82,11 @@ declare global {
       | UpdateCurtainAction
       | SetReversedTank
       | ClearBullets
-      | ClearTanks
-      | ClearAIPlayers
       | UpdateComingStageName
       | AddRestrictedArea
       | RemoveRestrictedArea
       | SetAITankPath
       | RemoveAITankPath
-
-    export type ActionType = Action['type']
 
     export interface Move {
       type: 'MOVE'
@@ -141,7 +137,6 @@ declare global {
       tankId: TankId
     }
 
-    // TODO 改为 BEFORE_TICK 和 TICK
     export interface TickAction {
       type: 'TICK'
       delta: number
@@ -324,10 +319,6 @@ declare global {
       tankId: TankId
     }
 
-    export interface ClearAllPowerUps {
-      type: 'CLEAR_ALL_POWER_UPS'
-    }
-
     export interface PickPowerUpAction {
       type: 'PICK_POWER_UP'
       player: PlayerRecord
@@ -369,15 +360,6 @@ declare global {
 
     export interface ClearBullets {
       type: 'CLEAR_BULLETS'
-    }
-
-    export interface ClearTanks {
-      type: 'CLEAR_TANKS'
-    }
-
-    /** @deprecated */
-    export interface ClearAIPlayers {
-      type: 'CLEAR_AI_PLAYERS'
     }
 
     export interface Simple<T> {

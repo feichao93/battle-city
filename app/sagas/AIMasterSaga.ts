@@ -79,13 +79,13 @@ export default function* AIMasterSaga() {
       if (tank != null) {
         yield put<Action>({ type: 'REMOVE_TANK', tankId: tank.tankId })
       }
-      yield put<Action>({ type: 'REMOVE_PALYER', playerName })
+      // 我们在这里不移除 AI 玩家，因为 AI 玩家的子弹可能还处于活跃状态
       if (!(yield cancelled())) {
         addAIReqChannel.put('add')
       }
     }
 
-    // ----------- below are function definitions -----------
+    /* ----------- below are function definitions ----------- */
 
     function hitPredicate(action: Action) {
       return action.type === 'HIT' && action.targetPlayer.playerName === playerName

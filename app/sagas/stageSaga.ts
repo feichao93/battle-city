@@ -72,8 +72,10 @@ export default function* stageSaga(stageName: string) {
             level: targetTank.level,
           })
 
-          const activeAITanks = tanks.filter(t => t.active && t.side === 'ai')
-          if (remainingEnemies.isEmpty() && activeAITanks.isEmpty()) {
+          const otherActiveAITanks = tanks.filter(
+            t => t.active && t.side === 'ai' && t.tankId !== targetTank.tankId,
+          )
+          if (remainingEnemies.isEmpty() && otherActiveAITanks.isEmpty()) {
             // 剩余enemy数量为0, 且场上已经没有ai tank了
             yield nonPauseDelay(1500)
             const { powerUps }: State = yield select()

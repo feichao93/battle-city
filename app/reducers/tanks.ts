@@ -10,7 +10,7 @@ export default function tanks(state = Map() as TanksMap, action: Action) {
   } else if (action.type === 'HURT') {
     const tankId = action.targetTank.tankId
     return state.update(tankId, t => t.update('hp', hp => hp - 1))
-  } else if (action.type === 'CLEAR_TANKS') {
+  } else if (action.type === 'START_STAGE') {
     return state.clear()
   } else if (action.type === 'MOVE') {
     return state.set(action.tank.tankId, action.tank)
