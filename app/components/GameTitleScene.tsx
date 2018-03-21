@@ -6,10 +6,30 @@ import BrickWall from 'components/BrickWall'
 import Text from 'components/Text'
 import TextButton from 'components/TextButton'
 import { Tank } from 'components/tanks'
-import { BLOCK_SIZE as B, ITEM_SIZE_MAP } from 'utils/constants'
+import { BLOCK_SIZE as B, CONTROL_CONFIG, ITEM_SIZE_MAP } from 'utils/constants'
 import { State, TankRecord } from 'types'
 
 type Choice = '1-player' | 'editor' | 'gallery'
+
+function nextChoice(choice: Choice): Choice {
+  if (choice === '1-player') {
+    return 'editor'
+  } else if (choice === 'editor') {
+    return 'gallery'
+  } else {
+    return '1-player'
+  }
+}
+
+function prevChoice(choice: Choice): Choice {
+  if (choice === '1-player') {
+    return 'gallery'
+  } else if (choice === 'editor') {
+    return '1-player'
+  } else {
+    return 'editor'
+  }
+}
 
 function y(choice: Choice) {
   if (choice === '1-player') {
@@ -34,13 +54,44 @@ class GameTitleScene extends React.PureComponent<P, S> {
     choice: '1-player' as Choice,
   }
 
+  componentDidMount() {
+    document.addEventListener('keypress', this.handleKeyPress)
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('keypress', this.handleKeyPress)
+  }
+
+  handleKeyPress = (event: KeyboardEvent) => {
+    const { choice } = this.state
+    const config = CONTROL_CONFIG.player1
+    if (event.key === config.down) {
+      this.setState({ choice: nextChoice(choice) })
+    } else if (event.key === config.up) {
+      this.setState({ choice: prevChoice(choice) })
+    } else if (event.key === config.fire) {
+      this.onChoose(choice)
+    }
+  }
+
+  onChoose = (choice: Choice) => {
+    const { dispatch } = this.props
+    if (choice === 'editor') {
+      dispatch(push('/editor'))
+    } else if (choice === '1-player') {
+      dispatch(push('/choose-stage'))
+    } else {
+      // gallery
+      dispatch(push('/gallery'))
+    }
+  }
+
   render() {
     const size = ITEM_SIZE_MAP.BRICK
     const scale = 4
-    const { dispatch } = this.props
     const { choice } = this.state
     return (
-      <g role="game-title-scene">
+      <g className="game-title-scene">
         <defs>
           <pattern
             id="pattern-brickwall"
@@ -87,7 +138,7 @@ class GameTitleScene extends React.PureComponent<P, S> {
           y={8.5 * B}
           textFill="white"
           onMouseOver={() => this.setState({ choice: '1-player' })}
-          onClick={() => dispatch(push('/choose-stage'))}
+          onClick={() => this.onChoose('1-player')}
         />
         <TextButton
           content="editor"
@@ -95,7 +146,7 @@ class GameTitleScene extends React.PureComponent<P, S> {
           y={9.5 * B}
           textFill="white"
           onMouseOver={() => this.setState({ choice: 'editor' })}
-          onClick={() => this.props.dispatch(push('/editor'))}
+          onClick={() => this.onChoose('editor')}
         />
         <TextButton
           content="gallery"
@@ -103,7 +154,7 @@ class GameTitleScene extends React.PureComponent<P, S> {
           y={10.5 * B}
           textFill="white"
           onMouseOver={() => this.setState({ choice: 'gallery' })}
-          onClick={() => this.props.dispatch(push('/gallery'))}
+          onClick={() => this.onChoose('gallery')}
         />
         <Tank
           tank={

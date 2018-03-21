@@ -9,6 +9,7 @@ import { PlayerRecord, TankRecord } from 'types'
 import { getNextId } from 'utils/common'
 import { TANK_INDEX_THAT_WITH_POWER_UP } from 'utils/constants'
 import * as selectors from 'utils/selectors'
+import { frame } from 'utils/common'
 
 const max = DEV.SINGLE_AI_TANK ? 1 : 2
 
@@ -41,6 +42,7 @@ export default function* AIMasterSaga() {
             level,
             hp,
             withPowerUp: TANK_INDEX_THAT_WITH_POWER_UP.includes(20 - remainingEnemies.count()),
+            helmetDuration: frame(30),
           }),
           0.6,
         ) // TODO 要根据关卡的难度来确定坦克的生成速度
