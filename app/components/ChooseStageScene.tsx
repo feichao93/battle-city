@@ -1,6 +1,6 @@
 import React from 'react'
 import { connect, Dispatch } from 'react-redux'
-import { Switch, match, Redirect, Route } from 'react-router-dom'
+import { match, Redirect } from 'react-router-dom'
 import { replace } from 'react-router-redux'
 import Text from 'components/Text'
 import { stageConfigs, stageNames } from 'stages'
@@ -12,7 +12,7 @@ import ForestLayer from 'components/ForestLayer'
 import SnowLayer from 'components/SnowLayer'
 import Eagle from 'components/Eagle'
 import parseStageMap from 'utils/parseStageMap'
-import { BLOCK_SIZE as B } from 'utils/constants'
+import { BLOCK_SIZE as B, CONTROL_CONFIG } from 'utils/constants'
 import { State } from 'types'
 
 interface StagePreviewProps {
@@ -52,11 +52,53 @@ class ChooseStageScene extends React.PureComponent<{
   dispatch: Dispatch<State>
   match: match<{ stageName: string }>
 }> {
+  componentDidMount() {
+    document.addEventListener('keypress', this.handleKeyPress)
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('keypress', this.handleKeyPress)
+  }
+
+  handleKeyPress = (event: KeyboardEvent) => {
+    const config = CONTROL_CONFIG.player1
+    if (event.key === config.left) {
+      this.onChoosePrevStage()
+    } else if (event.key === config.right) {
+      this.onChooseNextStage()
+    } else if (event.key === config.fire) {
+      this.onStartPlay()
+    }
+  }
+
+  getCurrentStageIndex = () => {
+    const { match } = this.props
+    const { stageName } = match.params
+    const stageIndex = stageNames.indexOf(stageName)
+    DEV.ASSERT && console.assert(stageIndex !== -1)
+    return stageIndex
+  }
+
   onChoose = (stageName: string) => this.props.dispatch(replace(`/choose-stage/${stageName}`))
-  onStartPlay = (stageIndex: number) => {
+
+  onChoosePrevStage = () => {
+    const stageIndex = this.getCurrentStageIndex()
+    if (stageIndex > 0) {
+      this.onChoose(stageNames[stageIndex - 1])
+    }
+  }
+
+  onChooseNextStage = () => {
+    const stageIndex = this.getCurrentStageIndex()
+    if (stageIndex < stageNames.length - 1) {
+      this.onChoose(stageNames[stageIndex + 1])
+    }
+  }
+
+  onStartPlay = () => {
     this.props.dispatch<Action>({
       type: 'GAMESTART',
-      stageIndex,
+      stageIndex: this.getCurrentStageIndex(),
     })
   }
 
@@ -81,7 +123,7 @@ class ChooseStageScene extends React.PureComponent<{
             disabled={index === 0}
             x={0}
             y={0}
-            onClick={() => this.onChoose(stageNames[index - 1])}
+            onClick={this.onChoosePrevStage}
           />
           <TextButton
             content="next"
@@ -89,7 +131,7 @@ class ChooseStageScene extends React.PureComponent<{
             disabled={index === stageNames.length - 1}
             x={3 * B}
             y={0}
-            onClick={() => this.onChoose(stageNames[index + 1])}
+            onClick={this.onChooseNextStage}
           />
           <TextButton
             content="play"
@@ -97,7 +139,7 @@ class ChooseStageScene extends React.PureComponent<{
             stroke="#96d332"
             x={6 * B}
             y={0}
-            onClick={() => this.onStartPlay(index)}
+            onClick={this.onStartPlay}
           />
           <TextButton
             content="back"
