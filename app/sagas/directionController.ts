@@ -4,6 +4,10 @@ import canTankMove from 'utils/canTankMove'
 import * as selectors from 'utils/selectors'
 import { Input, TankRecord, State } from 'types'
 
+function move(tank: TankRecord): Action.Move {
+  return { type: 'MOVE', tankId: tank.tankId, x: tank.x, y: tank.y, direction: tank.direction }
+}
+
 export default function* directionController(
   playerName: string,
   getPlayerInput: (tank: TankRecord, delta: number) => Input,
@@ -51,10 +55,7 @@ export default function* directionController(
         // use-round
         movedTank = turned.set(xy, Math.round(n) * 8)
       }
-      yield put<Action.Move>({
-        type: 'MOVE',
-        tank: movedTank,
-      })
+      yield put(move(movedTank))
     } else if (input.type === 'forward') {
       const speed = getTankMoveSpeed(tank)
       const distance = Math.min(delta * speed, input.maxDistance || Infinity)
@@ -62,10 +63,7 @@ export default function* directionController(
       const { xy, updater } = getDirectionInfo(tank.direction)
       const movedTank = tank.update(xy, updater(distance))
       if (yield select(canTankMove, movedTank)) {
-        yield put<Action.Move>({
-          type: 'MOVE',
-          tank: movedTank,
-        })
+        yield put(move(movedTank))
         if (!tank.moving) {
           yield put({ type: 'START_MOVE', tankId: tank.tankId })
         }

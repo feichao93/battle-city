@@ -90,7 +90,10 @@ declare global {
 
     export interface Move {
       type: 'MOVE'
-      tank: TankRecord
+      tankId: TankId
+      x: number
+      y: number
+      direction: Direction
     }
 
     export interface Hit {
