@@ -45,7 +45,7 @@ export const availableSpawnPosition = (state: State): Rect => {
 export const validPowerUpSpawnPositions = ({
   map: { bricks, rivers, steels, eagle },
 }: State): Point[] => {
-  // notice powerUp的显示大小为16*16, 但是碰撞大小为中间的8*8
+  // 注意 powerUp 的显示大小为 16*16, 但是碰撞大小为中间的 8*8
   const validPositions: Point[] = []
   for (let y = 0; y < (FBZ - 1) * B; y += 0.5 * B) {
     for (let x = 0; x < (FBZ - 1) * B; x += 0.5 * B) {

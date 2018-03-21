@@ -118,7 +118,7 @@ const powerUpDataArray = {
     ' bbbbbbbbbbbbbb ',
     '                ',
   ],
-  // todo pistol是高级物品, 目前先暂时不实现相关功能
+  // pistol是高级物品, 目前先暂时不实现相关功能
   // pistol: [
   //   ' wwwwwwwwwwwwwg ',
   //   'w             wb',

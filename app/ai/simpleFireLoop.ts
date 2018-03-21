@@ -4,6 +4,7 @@ import { race, select } from 'redux-saga/effects'
 import { nonPauseDelay } from 'sagas/common'
 import { TankFireInfo } from 'types'
 import * as selectors from 'utils/selectors'
+import { waitFor } from '../utils/common'
 import AITankCtx from './AITankCtx'
 
 type Options = {
@@ -20,7 +21,7 @@ export default function* simpleFireLoop(ctx: AITankCtx, options?: Options) {
     } else {
       yield race({
         timeout: nonPauseDelay(interval),
-        // bulletComplete: waitFor(ctx.noteEmitter, 'bullet-complete'), // TODO
+        bulletComplete: waitFor(ctx.noteEmitter, 'bullet-complete'),
       })
     }
 

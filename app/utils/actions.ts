@@ -8,11 +8,11 @@ import {
   PowerUpRecord,
   ScoreRecord,
   TankRecord,
+  TextRecord,
 } from 'types'
 
 declare global {
   type Action = Action.Action
-  type ActionType = Action.ActionType
 
   namespace Action {
     export type Action =
@@ -54,7 +54,7 @@ declare global {
       | Simple<'DEACTIVATE_ALL_PLAYERS'>
       | AddOrUpdateExplosion
       | RemoveExplosionAction
-      | SetTextAction
+      | SetText
       | UpdateTextPositionAction
       | Simple<'DESTROY_EAGLE'>
       | StartSpawnTank
@@ -62,7 +62,7 @@ declare global {
       | StartMoveAction
       | RemoveTank
       | StopMoveAction
-      | RemoveTextAction
+      | RemoveText
       | RemoveFlickerAction
       | AddOrUpdateFlickerAction
       | Hit
@@ -281,17 +281,12 @@ declare global {
       playerName: PlayerName
     }
 
-    // TODO 在action中使用TextRecord
-    export interface SetTextAction {
+    export interface SetText {
       type: 'SET_TEXT'
-      textId: TextId
-      content: string
-      fill: string
-      x: number
-      y: number
+      text: TextRecord
     }
 
-    export interface RemoveTextAction {
+    export interface RemoveText {
       type: 'REMOVE_TEXT'
       textId: TextId
     }

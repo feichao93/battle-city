@@ -11,6 +11,7 @@ import stageSaga, { StageResult } from 'sagas/stageSaga'
 import { stageNames } from 'stages'
 import { getNextId } from 'utils/common'
 import { BLOCK_SIZE } from 'utils/constants'
+import TextRecord from 'types/TextRecord'
 
 // 播放游戏结束的动画
 function* animateGameover() {
@@ -18,19 +19,23 @@ function* animateGameover() {
   const textId2 = getNextId('text')
   yield put<Action>({
     type: 'SET_TEXT',
-    textId: textId1,
-    content: 'game',
-    fill: 'red',
-    x: BLOCK_SIZE * 6.5,
-    y: BLOCK_SIZE * 13,
+    text: new TextRecord({
+      textId: textId1,
+      content: 'game',
+      fill: 'red',
+      x: BLOCK_SIZE * 6.5,
+      y: BLOCK_SIZE * 13,
+    }),
   })
   yield put<Action>({
     type: 'SET_TEXT',
-    textId: textId2,
-    content: 'over',
-    fill: 'red',
-    x: BLOCK_SIZE * 6.5,
-    y: BLOCK_SIZE * 13.5,
+    text: new TextRecord({
+      textId: textId2,
+      content: 'over',
+      fill: 'red',
+      x: BLOCK_SIZE * 6.5,
+      y: BLOCK_SIZE * 13.5,
+    }),
   })
   yield* animateTexts([textId1, textId2], {
     direction: 'up',
