@@ -1,7 +1,12 @@
 import { Map as IMap } from 'immutable'
 import AITankCtx from 'ai/AITankCtx'
 import { getEnv, RelativePosition } from 'ai/env-utils'
-import { calculateFireEstimateMap, FireEstimate, getFireResist } from 'ai/fire-utils'
+import {
+  calculateFireEstimateMap,
+  FireEstimate,
+  getAIFireCount,
+  getFireResist,
+} from 'ai/fire-utils'
 import followPath from 'ai/followPath'
 import getAllSpots from 'ai/getAllSpots'
 import { logAI } from 'ai/logger'
@@ -78,7 +83,7 @@ function* attackEagle(ctx: AITankCtx, fireEstimate: FireEstimate) {
   const env = getEnv(map, tanks, tank)
   ctx.turn(env.tankPosition.eagle.getPrimaryDirection())
   yield take('TICK') // 等待一个 tick, 确保转向已经完成
-  let fireCount = Math.min(2, fireEstimate.brickCount + 1)
+  let fireCount = getAIFireCount(fireEstimate)
   while (fireCount > 0) {
     const fireInfo: TankFireInfo = yield select(selectors.fireInfo, ctx.playerName)
     if (fireInfo.canFire) {
@@ -175,21 +180,18 @@ export default function* AIWorkerSaga(playerName: string) {
     (action: Action) => action.type === 'ACTIVATE_PLAYER' && action.playerName === ctx.playerName,
   )
   yield fork(dangerDetectionLoop, ctx)
-  // TODO dodge attack from player.
+
+  let continuousWanderCount = 0
   while (true) {
-    yield race({
-      blocked: blocked(ctx),
-      mode: mode(),
-    })
+    yield race<any>([blocked(ctx), mode()])
   }
 
   function* mode() {
-    let continuousWanderModeCount = 0
-    if (Math.random() < 0.7 - continuousWanderModeCount * 0.1) {
-      continuousWanderModeCount++
+    if (Math.random() < 0.8 - continuousWanderCount * 0.05) {
+      continuousWanderCount++
       yield wanderMode(ctx)
     } else {
-      continuousWanderModeCount = 0
+      continuousWanderCount = 0
       yield attackEagleMode(ctx)
     }
   }

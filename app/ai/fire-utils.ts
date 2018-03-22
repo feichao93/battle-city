@@ -17,6 +17,17 @@ export interface FireEstimate {
   // }[]
 }
 
+/** 根据 FireEstimate 计算 AI 坦克开火的次数 */
+export function getAIFireCount(est: FireEstimate) {
+  if (est.brickCount <= 3) {
+    return 1
+  } else if (est.brickCount <= 5) {
+    return 2
+  } else {
+    return 3
+  }
+}
+
 export function getFireResist(est: FireEstimate) {
   return est.brickCount + est.steelCount * 100
 }

@@ -4,28 +4,29 @@ import { race, select } from 'redux-saga/effects'
 import { nonPauseDelay } from 'sagas/common'
 import { TankFireInfo } from 'types'
 import * as selectors from 'utils/selectors'
-import { waitFor } from '../utils/common'
+import TankRecord from '../types/TankRecord'
+import { getTankBulletInterval, waitFor } from '../utils/common'
 import AITankCtx from './AITankCtx'
 
 type Options = {
-  interval?: number
-  cooldown?: number
+  defualtInterval?: number
 }
 export default function* simpleFireLoop(ctx: AITankCtx, options?: Options) {
-  const { interval = 300, cooldown = 500 } = options || {}
+  const { defualtInterval = 300 } = options || {}
 
   let skipDelayAtFirstTime = true
   while (true) {
     if (skipDelayAtFirstTime) {
       skipDelayAtFirstTime = false
     } else {
+      const tank: TankRecord = yield select(selectors.playerTank, ctx.playerName)
       yield race({
-        timeout: nonPauseDelay(interval),
+        timeout: nonPauseDelay(tank ? getTankBulletInterval(tank) : defualtInterval),
         bulletComplete: waitFor(ctx.noteEmitter, 'bullet-complete'),
       })
     }
 
-    let tank = yield select(selectors.playerTank, ctx.playerName)
+    const tank: TankRecord = yield select(selectors.playerTank, ctx.playerName)
     if (tank == null) {
       continue
     }
@@ -36,7 +37,6 @@ export default function* simpleFireLoop(ctx: AITankCtx, options?: Options) {
       const env = getEnv(map, tanks, tank)
       if (determineFire(tank, env)) {
         ctx.fire()
-        yield nonPauseDelay(cooldown)
       }
     }
   }
