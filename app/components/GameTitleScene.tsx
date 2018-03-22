@@ -8,6 +8,7 @@ import TextButton from 'components/TextButton'
 import { Tank } from 'components/tanks'
 import { BLOCK_SIZE as B, CONTROL_CONFIG, ITEM_SIZE_MAP } from 'utils/constants'
 import { State, TankRecord } from 'types'
+import { GameRecord } from 'reducers/game'
 
 type Choice = '1-player' | 'editor' | 'gallery'
 
@@ -43,6 +44,7 @@ function y(choice: Choice) {
 
 interface P {
   dispatch: Dispatch<State>
+  game: GameRecord
 }
 
 interface S {
@@ -56,6 +58,10 @@ class GameTitleScene extends React.PureComponent<P, S> {
 
   componentDidMount() {
     document.addEventListener('keypress', this.handleKeyPress)
+    const { dispatch, game } = this.props
+    if (game.status !== 'idle') {
+      dispatch<Action>({ type: 'RESET_GAME' })
+    }
   }
 
   componentWillUnmount() {
@@ -176,4 +182,4 @@ class GameTitleScene extends React.PureComponent<P, S> {
   }
 }
 
-export default connect(undefined)(GameTitleScene)
+export default connect((state: State) => ({ game: state.game }))(GameTitleScene)

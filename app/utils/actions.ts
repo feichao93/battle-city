@@ -36,9 +36,10 @@ declare global {
       | StartStage
       | Simple<'BEFORE_END_STAGE'>
       | Simple<'END_STAGE'>
-      | Simple<'BEFORE_GAMEOVER'>
-      | Simple<'GAMEOVER'>
-      | GameStart
+      | Simple<'BEFORE_END_GAME'>
+      | Simple<'END_GAME'>
+      | StartGame
+      | Simple<'RESET_GAME'>
       | Simple<'GAMEPAUSE'>
       | Simple<'GAMERESUME'>
       | Simple<'SHOW_HUD'>
@@ -301,8 +302,8 @@ declare global {
       playerName: PlayerName
     }
 
-    export interface GameStart {
-      type: 'GAMESTART'
+    export interface StartGame {
+      type: 'START_GAME'
       stageIndex: number
       // TODO 需要指定是单人游戏还是双人游戏
     }

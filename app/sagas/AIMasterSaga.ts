@@ -66,7 +66,7 @@ export default function* AIMasterSaga() {
 
       yield race<any>([
         take(killedPredicate),
-        take('GAMEOVER'),
+        take('END_GAME'),
         all([
           AIWorkerSaga(playerName),
           put<Action>({

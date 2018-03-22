@@ -1,40 +1,50 @@
 import { State } from 'reducers'
-import { put, select, take } from 'redux-saga/effects'
+import { put, select, take, cancelled } from 'redux-saga/effects'
 import { nonPauseDelay, tween } from 'sagas/common'
 import statistics from 'sagas/stageStatistics'
 import { frame as f } from 'utils/common'
 import { replace } from 'react-router-redux'
 
 function* animateCurtainAndLoadMap(stageName: string) {
-  yield put<Action>({ type: 'UPDATE_COMING_STAGE_NAME', stageName })
-  yield put<Action>({
-    type: 'UPDATE_CURTAIN',
-    curtainName: 'stage-enter-cutain',
-    t: 0,
-  })
+  try {
+    yield put<Action>({ type: 'UPDATE_COMING_STAGE_NAME', stageName })
+    yield put<Action>({
+      type: 'UPDATE_CURTAIN',
+      curtainName: 'stage-enter-cutain',
+      t: 0,
+    })
 
-  yield* tween(f(30), t =>
-    put<Action>({
-      type: 'UPDATE_CURTAIN',
-      curtainName: 'stage-enter-cutain',
-      t,
-    }),
-  )
-  yield nonPauseDelay(f(20))
-  // 在幕布完全将舞台遮起来的时候载入地图
-  yield put<Action>({
-    type: 'LOAD_STAGE_MAP',
-    name: stageName,
-  })
-  yield nonPauseDelay(f(20))
-  yield* tween(f(30), t =>
-    put<Action>({
-      type: 'UPDATE_CURTAIN',
-      curtainName: 'stage-enter-cutain',
-      t: 1 - t,
-    }),
-  )
-  // todo 游戏开始的时候有一个 反色效果
+    yield* tween(f(30), t =>
+      put<Action>({
+        type: 'UPDATE_CURTAIN',
+        curtainName: 'stage-enter-cutain',
+        t,
+      }),
+    )
+
+    // 在幕布完全将舞台遮起来的时候载入地图
+    yield nonPauseDelay(f(20))
+    yield put<Action>({ type: 'LOAD_STAGE_MAP', name: stageName })
+    yield nonPauseDelay(f(20))
+
+    yield* tween(f(30), t =>
+      put<Action>({
+        type: 'UPDATE_CURTAIN',
+        curtainName: 'stage-enter-cutain',
+        t: 1 - t,
+      }),
+    )
+    // todo 游戏开始的时候有一个 反色效果
+  } finally {
+    if (yield cancelled()) {
+      // 将幕布隐藏起来
+      yield put<Action>({
+        type: 'UPDATE_CURTAIN',
+        curtainName: 'stage-enter-cutain',
+        t: 0,
+      })
+    }
+  }
 }
 
 export interface StageResult {
@@ -94,12 +104,12 @@ export default function* stageSaga(stageName: string) {
             // 所有的human player都挂了
             yield nonPauseDelay(1500)
             yield* statistics()
-            // 因为 gameSaga 会 put GAMEOVER 所以这里不需要 put END_STAGE
+            // 因为 gameSaga 会 put END_GAME 所以这里不需要 put END_STAGE
             return { pass: false, reason: 'dead' } as StageResult
           }
         }
       } else if (action.type === 'DESTROY_EAGLE') {
-        // 因为 gameSaga 会 put GAMEOVER 所以这里不需要 put END_STAGE
+        // 因为 gameSaga 会 put END_GAME 所以这里不需要 put END_STAGE
         return { pass: false, reason: 'eagle-destroyed' } as StageResult
       }
     }

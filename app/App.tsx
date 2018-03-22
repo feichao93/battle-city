@@ -87,11 +87,8 @@ class App extends React.PureComponent<{ game: GameRecord }> {
                         game.status === 'stat' ? <StatisticsScene /> : <GameScene match={match} />
                       }
                     />
-                    <Route
-                      render={() =>
-                        game.status === 'gameover' ? <GameoverScene /> : <GameTitleScene />
-                      }
-                    />
+                    <Route exact path="/gameover" component={GameoverScene} />
+                    <Route component={GameTitleScene} />
                   </Switch>
                   <CurtainsContainer />
                   {game.paused ? <PauseIndicator /> : null}

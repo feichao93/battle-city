@@ -7,9 +7,9 @@ export default function* rootSaga() {
   // tickEmitter 是后台服务
   yield fork(tickEmitter, Infinity, true)
 
-  yield takeLatest('GAMESTART', gameSaga)
+  yield takeLatest(['START_GAME', 'RESET_GAME'], gameSaga)
 
   if (DEV.SKIP_CHOOSE_STAGE) {
-    yield put<Action>({ type: 'GAMESTART', stageIndex: 0 })
+    yield put<Action>({ type: 'START_GAME', stageIndex: 0 })
   }
 }

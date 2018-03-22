@@ -97,7 +97,7 @@ class ChooseStageScene extends React.PureComponent<{
 
   onStartPlay = () => {
     this.props.dispatch<Action>({
-      type: 'GAMESTART',
+      type: 'START_GAME',
       stageIndex: this.getCurrentStageIndex(),
     })
   }

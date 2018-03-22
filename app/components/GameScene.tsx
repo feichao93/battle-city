@@ -25,7 +25,7 @@ import { State } from 'types'
 import { BLOCK_SIZE } from 'utils/constants'
 import { stageNames } from 'stages'
 
-class GameScene extends React.Component<State & { dispatch: Dispatch<State>; match: match<any> }> {
+class GameScene extends React.PureComponent<State & { dispatch: Dispatch<State>; match: match<any> }> {
   componentDidMount() {
     this.didMountOrUpdate()
   }
@@ -41,7 +41,7 @@ class GameScene extends React.Component<State & { dispatch: Dispatch<State>; mat
       const stageName = match.params.stageName
       const stageIndex = stageNames.indexOf(stageName)
       dispatch<Action>({
-        type: 'GAMESTART',
+        type: 'START_GAME',
         stageIndex: stageIndex === -1 ? 0 : stageIndex,
       })
     } else {
@@ -55,7 +55,7 @@ class GameScene extends React.Component<State & { dispatch: Dispatch<State>; mat
       ) {
         DEV.LOG && console.log('`stageName` in url changed. Restart game...')
         dispatch<Action>({
-          type: 'GAMESTART',
+          type: 'START_GAME',
           stageIndex: stageNames.indexOf(stageName),
         })
       }

@@ -26,6 +26,8 @@ const GameRecordBase = Record(
     status: 'idle' as GameStatus,
     /** 游戏是否暂停 */
     paused: false,
+    /** 上次进行的关卡名 */
+    lastStage: null as string,
     /** 当前的关卡名 */
     currentStage: null as string,
     /** 即将开始的关卡的名称 */
@@ -53,14 +55,19 @@ const GameRecordBase = Record(
 export class GameRecord extends GameRecordBase {}
 
 export default function game(state = new GameRecord(), action: Action) {
-  if (action.type === 'GAMESTART') {
+  if (action.type === 'START_GAME') {
     return state.set('status', 'on').set('currentStage', null)
+  } else if (action.type === 'RESET_GAME') {
+    return state.set('status', 'idle').set('currentStage', null)
   } else if (action.type === 'SHOW_STATISTICS') {
     return state.set('status', 'stat')
   } else if (action.type === 'HIDE_STATISTICS') {
     return state.set('status', 'on')
-  } else if (action.type === 'GAMEOVER') {
-    return state.set('status', 'gameover').set('currentStage', null)
+  } else if (action.type === 'END_GAME') {
+    return state
+      .set('status', 'gameover')
+      .set('lastStage', state.currentStage)
+      .set('currentStage', null)
   } else if (action.type === 'START_STAGE') {
     return state.merge({
       currentStage: action.name,

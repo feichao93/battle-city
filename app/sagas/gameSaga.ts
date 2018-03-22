@@ -63,11 +63,16 @@ function* stageFlow(startStageIndex: number) {
  *  game-stage调用stage-saga来运行不同的关卡
  *  并根据stage-saga返回的结果选择继续下一个关卡, 或是选择游戏结束
  */
-export default function* gameSaga({ stageIndex }: Action.GameStart) {
+export default function* gameSaga(action: Action.StartGame | { type: 'RESET_GAME' }) {
+  if (action.type === 'RESET_GAME') {
+    console.log('GAME RESET')
+    return
+  }
+
   // 这里的 delay(0) 是为了「异步执行」后续的代码
   // 以保证后续代码执行前已有的cancel逻辑执行完毕
   yield delay(0)
-  DEV.LOG && console.log('GAMESTART')
+  DEV.LOG && console.log('GAME STARTED')
 
   yield race<any>([
     humanPlayerSaga('player-1', 'yellow'),
@@ -76,13 +81,13 @@ export default function* gameSaga({ stageIndex }: Action.GameStart) {
     bulletsSaga(),
     // 上面几个 saga 在一个 gameSaga 的生命周期内被认为是后台服务
     // 当 stage-flow 退出的时候，自动取消上面几个后台服务
-    stageFlow(stageIndex),
+    stageFlow(action.stageIndex),
   ])
 
   yield animateGameover()
-  DEV.LOG && console.log('GAMEOVER')
+  DEV.LOG && console.log('GAME ENDED')
 
-  yield put(replace('/'))
-  yield put<Action>({ type: 'BEFORE_GAMEOVER' })
-  yield put<Action>({ type: 'GAMEOVER' })
+  yield put(replace('/gameover'))
+  yield put<Action>({ type: 'BEFORE_END_GAME' })
+  yield put<Action>({ type: 'END_GAME' })
 }
