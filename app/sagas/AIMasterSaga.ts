@@ -31,6 +31,7 @@ export default function* AIMasterSaga() {
       const { game: { remainingEnemies } }: State = yield select()
       if (!remainingEnemies.isEmpty()) {
         const { x, y } = yield select(selectors.availableSpawnPosition)
+        const { game: { AIFrozenTimeout } }: State = yield select()
         yield put<Action>({ type: 'REMOVE_FIRST_REMAINING_ENEMY' })
         const level = remainingEnemies.first()
         const hp = level === 'armor' ? 4 : 1
@@ -43,6 +44,7 @@ export default function* AIMasterSaga() {
             hp,
             withPowerUp: TANK_INDEX_THAT_WITH_POWER_UP.includes(20 - remainingEnemies.count()),
             helmetDuration: frame(30),
+            frozenTimeout: AIFrozenTimeout,
           }),
           0.6,
         ) // TODO 要根据关卡的难度来确定坦克的生成速度

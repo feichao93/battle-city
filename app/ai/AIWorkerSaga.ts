@@ -146,9 +146,12 @@ function* dangerDetectionLoop(ctx: AITankCtx) {
 function* blocked(ctx: AITankCtx) {
   let counter = 0
   let lastTank = yield select(selectors.playerTank, ctx.playerName)
-  while (counter < 30) {
+  while (counter < 10) {
     yield take('TICK')
     const tank: TankRecord = yield select(selectors.playerTank, ctx.playerName)
+    if (tank.frozenTimeout > 0) {
+      continue
+    }
     if (Math.abs(tank.x - lastTank.x) + Math.abs(tank.y - lastTank.y) <= 0.01) {
       counter++
     } else {

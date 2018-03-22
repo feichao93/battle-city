@@ -40,7 +40,12 @@ export default function tanks(state = Map() as TanksMap, action: Action) {
   } else if (action.type === 'SET_COOLDOWN') {
     return state.update(action.tankId, tank => tank.set('cooldown', action.cooldown))
   } else if (action.type === 'SET_AI_FROZEN_TIMEOUT') {
-    return state.map(tank => (tank.side === 'ai' ? tank.set('moving', false) : tank))
+    return state.map(
+      tank =>
+        tank.side === 'ai'
+          ? tank.set('moving', false).set('frozenTimeout', action.AIFrozenTimeout)
+          : tank,
+    )
   } else if (action.type === 'SET_FROZEN_TIMEOUT') {
     return state.update(action.tankId, tank =>
       tank

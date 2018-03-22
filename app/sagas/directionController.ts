@@ -2,7 +2,7 @@ import { put, select, take } from 'redux-saga/effects'
 import { getDirectionInfo, getTankMoveSpeed } from 'utils/common'
 import canTankMove from 'utils/canTankMove'
 import * as selectors from 'utils/selectors'
-import { Input, TankRecord, State } from 'types'
+import { Input, TankRecord } from 'types'
 
 function move(tank: TankRecord): Action.Move {
   return { type: 'MOVE', tankId: tank.tankId, x: tank.x, y: tank.y, direction: tank.direction }
@@ -16,10 +16,6 @@ export default function* directionController(
     const { delta }: Action.TickAction = yield take('TICK')
     const tank: TankRecord = yield select(selectors.playerTank, playerName)
     if (tank == null || tank.frozenTimeout > 0) {
-      continue
-    }
-    const { game: { AIFrozenTimeout } }: State = yield select()
-    if (tank.side === 'ai' && AIFrozenTimeout > 0) {
       continue
     }
     const input: Input = getPlayerInput(tank, delta)
