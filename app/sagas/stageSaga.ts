@@ -1,9 +1,9 @@
 import { State } from 'reducers'
 import { put, select, take, cancelled } from 'redux-saga/effects'
-import { nonPauseDelay, tween } from 'sagas/common'
 import statistics from 'sagas/stageStatistics'
 import { frame as f } from 'utils/common'
 import { replace } from 'react-router-redux'
+import Timing from '../utils/Timing'
 
 function* animateCurtainAndLoadMap(stageName: string) {
   try {
@@ -14,7 +14,7 @@ function* animateCurtainAndLoadMap(stageName: string) {
       t: 0,
     })
 
-    yield* tween(f(30), t =>
+    yield* Timing.tween(f(30), t =>
       put<Action>({
         type: 'UPDATE_CURTAIN',
         curtainName: 'stage-enter-cutain',
@@ -23,11 +23,11 @@ function* animateCurtainAndLoadMap(stageName: string) {
     )
 
     // 在幕布完全将舞台遮起来的时候载入地图
-    yield nonPauseDelay(f(20))
+    yield Timing.delay(f(20))
     yield put<Action>({ type: 'LOAD_STAGE_MAP', name: stageName })
-    yield nonPauseDelay(f(20))
+    yield Timing.delay(f(20))
 
-    yield* tween(f(30), t =>
+    yield* Timing.tween(f(30), t =>
       put<Action>({
         type: 'UPDATE_CURTAIN',
         curtainName: 'stage-enter-cutain',
@@ -87,11 +87,11 @@ export default function* stageSaga(stageName: string) {
           )
           if (remainingEnemies.isEmpty() && otherActiveAITanks.isEmpty()) {
             // 剩余enemy数量为0, 且场上已经没有ai tank了
-            yield nonPauseDelay(1500)
+            yield Timing.delay(1500)
             const { powerUps }: State = yield select()
             if (!powerUps.isEmpty()) {
               // 如果场上有powerup, 则适当延长结束时间
-              yield nonPauseDelay(5000)
+              yield Timing.delay(5000)
             }
             yield* statistics()
             yield put<Action>({ type: 'BEFORE_END_STAGE' })
@@ -102,7 +102,7 @@ export default function* stageSaga(stageName: string) {
           // ai击杀human
           if (!players.some(ply => ply.side === 'human' && ply.lives > 0)) {
             // 所有的human player都挂了
-            yield nonPauseDelay(1500)
+            yield Timing.delay(1500)
             yield* statistics()
             // 因为 gameSaga 会 put END_GAME 所以这里不需要 put END_STAGE
             return { pass: false, reason: 'dead' } as StageResult

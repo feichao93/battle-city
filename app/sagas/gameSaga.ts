@@ -3,7 +3,6 @@ import { delay } from 'redux-saga'
 import { put, race } from 'redux-saga/effects'
 import AIMasterSaga from 'sagas/AIMasterSaga'
 import bulletsSaga from 'sagas/bulletsSaga'
-import { nonPauseDelay } from 'sagas/common'
 import animateTexts from 'sagas/common/animateTexts'
 import humanPlayerSaga from 'sagas/humanPlayerSaga'
 import powerUpManager from 'sagas/powerUpManager'
@@ -12,6 +11,7 @@ import { stageNames } from 'stages'
 import { getNextId } from 'utils/common'
 import { BLOCK_SIZE } from 'utils/constants'
 import TextRecord from 'types/TextRecord'
+import Timing from '../utils/Timing'
 
 // 播放游戏结束的动画
 function* animateGameover() {
@@ -42,7 +42,7 @@ function* animateGameover() {
     distance: BLOCK_SIZE * 6,
     duration: 2000,
   })
-  yield nonPauseDelay(500)
+  yield Timing.delay(500)
   yield put<Action>({ type: 'REMOVE_TEXT', textId: textId1 })
   yield put<Action>({ type: 'REMOVE_TEXT', textId: textId2 })
 }

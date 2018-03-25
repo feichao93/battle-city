@@ -2,7 +2,7 @@ import { all, put } from 'redux-saga/effects'
 import { ExplosionRecord, ScoreRecord, TankRecord, TanksMap } from 'types'
 import { frame as f, getNextId } from 'utils/common'
 import { TANK_KILL_SCORE_MAP } from 'utils/constants'
-import { timing, nonPauseDelay } from 'sagas/common'
+import Timing from 'utils/Timing'
 
 export function* scoreFromKillTank(tank: TankRecord) {
   const scoreId: ScoreId = getNextId('score')
@@ -16,7 +16,7 @@ export function* scoreFromKillTank(tank: TankRecord) {
         y: tank.y,
       }),
     })
-    yield nonPauseDelay(f(48))
+    yield Timing.delay(f(48))
   } finally {
     yield put<Action.RemoveScoreAction>({
       type: 'REMOVE_SCORE',
@@ -25,19 +25,18 @@ export function* scoreFromKillTank(tank: TankRecord) {
   }
 }
 
+const tankExplosionShapeTiming = new Timing<ExplosionShape>([
+  { v: 's0', t: f(7) },
+  { v: 's1', t: f(5) },
+  { v: 's2', t: f(7) },
+  { v: 'b0', t: f(5) },
+  { v: 'b1', t: f(7) },
+  { v: 's2', t: f(5) },
+])
 export function* explosionFromTank(tank: TankRecord) {
-  const tankExplosionShapeTiming: TimingConfig<ExplosionShape> = [
-    { v: 's0', t: f(7) },
-    { v: 's1', t: f(5) },
-    { v: 's2', t: f(7) },
-    { v: 'b0', t: f(5) },
-    { v: 'b1', t: f(7) },
-    { v: 's2', t: f(5) },
-  ]
-
   const explosionId = getNextId('explosion')
   try {
-    yield* timing(tankExplosionShapeTiming, function*(shape) {
+    yield* tankExplosionShapeTiming.iter(function*(shape) {
       yield put<Action.AddOrUpdateExplosion>({
         type: 'ADD_OR_UPDATE_EXPLOSION',
         explosion: new ExplosionRecord({

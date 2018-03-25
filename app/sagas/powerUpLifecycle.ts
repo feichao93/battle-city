@@ -1,11 +1,11 @@
 import { select, put, race, take } from 'redux-saga/effects'
 import { PowerUpRecord, State } from 'types'
 import { frame as f } from 'utils/common'
-import { nonPauseDelay } from 'sagas/common'
+import Timing from '../utils/Timing'
 
 function* blink(powerUpId: PowerUpId) {
   while (true) {
-    yield nonPauseDelay(f(8))
+    yield Timing.delay(f(8))
     const { powerUps }: State = yield select()
     const powerUp = powerUps.get(powerUpId)
     yield put<Action>({

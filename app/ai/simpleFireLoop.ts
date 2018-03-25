@@ -1,11 +1,11 @@
 import { determineFire, getEnv } from 'ai/env-utils'
 import { State } from 'reducers'
 import { race, select } from 'redux-saga/effects'
-import { nonPauseDelay } from 'sagas/common'
 import { TankFireInfo } from 'types'
 import * as selectors from 'utils/selectors'
 import TankRecord from '../types/TankRecord'
 import { getTankBulletInterval, waitFor } from '../utils/common'
+import Timing from '../utils/Timing'
 import AITankCtx from './AITankCtx'
 
 type Options = {
@@ -21,7 +21,7 @@ export default function* simpleFireLoop(ctx: AITankCtx, options?: Options) {
     } else {
       const tank: TankRecord = yield select(selectors.playerTank, ctx.playerName)
       yield race({
-        timeout: nonPauseDelay(tank ? getTankBulletInterval(tank) : defualtInterval),
+        timeout: Timing.delay(tank ? getTankBulletInterval(tank) : defualtInterval),
         bulletComplete: waitFor(ctx.noteEmitter, 'bullet-complete'),
       })
     }

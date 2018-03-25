@@ -1,12 +1,13 @@
 import _ from 'lodash'
 import { fork, put, select, take, cancelled, takeEvery, takeLatest } from 'redux-saga/effects'
 import { MapRecord, ScoreRecord, State, PowerUpRecord } from 'types'
-import { destroyTanks, nonPauseDelay } from 'sagas/common'
+import { destroyTanks } from 'sagas/common'
 import powerUpLifecycle from 'sagas/powerUpLifecycle'
 import { N_MAP, POWER_UP_NAMES } from 'utils/constants'
 import { asRect, frame as f, getNextId } from 'utils/common'
 import * as selectors from 'utils/selectors'
 import IndexHelper from 'utils/IndexHelper'
+import Timing from '../utils/Timing'
 
 function convertToBricks(map: MapRecord) {
   const { eagle, steels, bricks } = map
@@ -60,7 +61,7 @@ function* shovel() {
       map: convertToSteels((yield select()).map),
     })
 
-    yield nonPauseDelay(f(1076))
+    yield Timing.delay(f(1076))
 
     // 总共闪烁6次
     for (let i = 0; i < 6; i++) {
@@ -68,12 +69,12 @@ function* shovel() {
         type: 'UPDATE_MAP',
         map: convertToBricks((yield select()).map),
       })
-      yield nonPauseDelay(f(16))
+      yield Timing.delay(f(16))
       yield put<Action>({
         type: 'UPDATE_MAP',
         map: convertToSteels((yield select()).map),
       })
-      yield nonPauseDelay(f(16))
+      yield Timing.delay(f(16))
     }
   } finally {
     // 最后变回brick-wall
@@ -180,7 +181,7 @@ function* scoreFromPickPowerUp(action: Action.PickPowerUpAction) {
         y,
       }),
     })
-    yield nonPauseDelay(f(48))
+    yield Timing.delay(f(48))
   } finally {
     yield put<Action.RemoveScoreAction>({
       type: 'REMOVE_SCORE',

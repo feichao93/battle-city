@@ -249,6 +249,7 @@ declare global {
       flickerId: FlickerId
     }
 
+    /** 坦克开始生成的信号，用于清理场上的 power-ups */
     export interface StartSpawnTank {
       type: 'START_SPAWN_TANK'
       tank: TankRecord

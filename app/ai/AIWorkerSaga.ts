@@ -18,12 +18,12 @@ import EventEmitter from 'events'
 import { State } from 'reducers'
 import { Task } from 'redux-saga'
 import { fork, select, take, race } from 'redux-saga/effects'
-import { nonPauseDelay } from 'sagas/common'
 import directionController from 'sagas/directionController'
 import fireController from 'sagas/fireController'
 import { TankFireInfo, TankRecord } from 'types'
 import { randint, waitFor } from 'utils/common'
 import * as selectors from 'utils/selectors'
+import Timing from 'utils/Timing'
 import * as dodgeUtils from 'ai/dodge-utils'
 
 function getRandomPassablePos(posInfoArray: Spot[]) {
@@ -46,7 +46,7 @@ function* wanderMode(ctx: AITankCtx) {
   if (path != null) {
     yield followPath(ctx, path)
   } else {
-    yield nonPauseDelay(200)
+    yield Timing.delay(200)
   }
   simpleFireLoopTask.cancel()
 }
@@ -71,7 +71,7 @@ function* attackEagleMode(ctx: AITankCtx) {
     yield attackEagle(ctx, estMap.get(target))
   } else {
     simpleFireLoopTask.cancel()
-    yield nonPauseDelay(200)
+    yield Timing.delay(200)
   }
 }
 
@@ -91,7 +91,7 @@ function* attackEagle(ctx: AITankCtx, fireEstimate: FireEstimate) {
       yield waitFor(ctx.noteEmitter, 'bullet-complete')
       fireCount--
     } else {
-      yield nonPauseDelay(fireInfo.cooldown)
+      yield Timing.delay(fireInfo.cooldown)
     }
   }
 }
@@ -138,7 +138,7 @@ function* dangerDetectionLoop(ctx: AITankCtx) {
       // 2. 向前开火以抵消攻击
       // 3. 找到一个附近的 passable spot，然后开到那个位置
     }
-    yield nonPauseDelay(200)
+    yield Timing.delay(200)
   }
 }
 

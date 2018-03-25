@@ -4,50 +4,76 @@ import { connect } from 'react-redux'
 import { Bitmap, Pixel } from 'components/elements'
 import { BLOCK_SIZE, TANK_COLOR_SCHEMES } from 'utils/constants'
 import { frame as f } from 'utils/common'
-import { TankRecord } from 'types'
-import { State } from 'reducers'
+import Timing from 'utils/Timing'
+import { TankRecord, State } from 'types'
 
 interface TankComponent {
   (props: { transform: string; color: string; shape: number }): JSX.Element
 }
 
-function resolveTankColorConfig(tank: TankRecord): TimingConfig<TankColor> {
-  if (tank.color !== 'auto') {
-    return [{ v: tank.color, t: Infinity }]
+namespace TankColorConfig {
+  export const green = new Timing<TankColor>([{ v: 'green', t: Infinity }])
+  export const yellow = new Timing<TankColor>([{ v: 'yellow', t: Infinity }])
+  export const silver = new Timing<TankColor>([{ v: 'silver', t: Infinity }])
+  export const red = new Timing<TankColor>([{ v: 'red', t: Infinity }])
+  export const withPowerUp = new Timing<TankColor>([
+    { v: 'red', t: f(8) },
+    { v: 'silver', t: f(8) },
+  ])
+  export const basic = new Timing<TankColor>([{ v: 'silver', t: Infinity }])
+  export const fast = new Timing<TankColor>([{ v: 'silver', t: Infinity }])
+  export const power = new Timing<TankColor>([{ v: 'silver', t: Infinity }])
+  export const armor1 = new Timing<TankColor>([{ v: 'silver', t: Infinity }])
+  export const armor2 = new Timing<TankColor>([
+    { v: 'green', t: f(3) },
+    { v: 'yellow', t: f(1) },
+    { v: 'green', t: f(1) },
+    { v: 'yellow', t: f(1) },
+  ])
+  export const armor3 = new Timing<TankColor>([
+    { v: 'silver', t: f(3) },
+    { v: 'yellow', t: f(1) },
+    { v: 'silver', t: f(1) },
+    { v: 'yellow', t: f(1) },
+  ])
+  export const armor4 = new Timing<TankColor>([
+    { v: 'silver', t: f(3) },
+    { v: 'green', t: f(1) },
+    { v: 'silver', t: f(1) },
+    { v: 'green', t: f(1) },
+  ])
+}
+
+function resolveTankColorConfig(tank: TankRecord): Timing<TankColor> {
+  if (tank.color == 'green') {
+    return TankColorConfig.green
+  } else if (tank.color === 'yellow') {
+    return TankColorConfig.yellow
+  } else if (tank.color === 'silver') {
+    return TankColorConfig.silver
+  } else if (tank.color === 'red') {
+    return TankColorConfig.red
   }
+  // else tank.color === 'auto'
   if (tank.withPowerUp) {
-    return [{ v: 'red', t: f(8) }, { v: 'silver', t: f(8) }]
+    return TankColorConfig.withPowerUp
   }
   if (tank.level === 'basic') {
-    return [{ v: 'silver', t: Infinity }]
+    return TankColorConfig.basic
   } else if (tank.level === 'fast') {
-    return [{ v: 'silver', t: Infinity }]
+    return TankColorConfig.fast
   } else if (tank.level === 'power') {
-    return [{ v: 'silver', t: Infinity }]
-  } else {
-    const map: { [key: number]: TimingConfig<TankColor> } = {
-      1: [{ v: 'silver', t: Infinity }],
-      2: [
-        { v: 'green', t: f(3) },
-        { v: 'yellow', t: f(1) },
-        { v: 'green', t: f(1) },
-        { v: 'yellow', t: f(1) },
-      ],
-      3: [
-        { v: 'silver', t: f(3) },
-        { v: 'yellow', t: f(1) },
-        { v: 'silver', t: f(1) },
-        { v: 'yellow', t: f(1) },
-      ],
-      4: [
-        { v: 'silver', t: f(3) },
-        { v: 'green', t: f(1) },
-        { v: 'silver', t: f(1) },
-        { v: 'green', t: f(1) },
-      ],
-    }
-    return map[tank.hp]
+    return TankColorConfig.power
+  } else if (tank.hp === 1) {
+    return TankColorConfig.armor1
+  } else if (tank.hp === 2) {
+    return TankColorConfig.armor2
+  } else if (tank.hp === 3) {
+    return TankColorConfig.armor3
+  } else if (tank.hp === 4) {
+    return TankColorConfig.armor4
   }
+  throw new Error('Can not resolve tank color timing')
 }
 
 function resolveTankComponent(side: Side, level: TankLevel): TankComponent {
@@ -76,20 +102,7 @@ function resolveTankComponent(side: Side, level: TankLevel): TankComponent {
   return component
 }
 
-const tireShapeConfig: TimingConfig<number> = [{ v: 0, t: 80 }, { v: 1, t: 80 }]
-
-const add = (x: number, y: number) => x + y
-
-function calculate<V>(config: TimingConfig<V>, startTime: number, time: number): V {
-  const sum = config.map(item => item.t).reduce(add)
-  let t = (time - startTime) % sum
-  let index = 0
-  while (config[index].t < t) {
-    t -= config[index].t
-    index += 1
-  }
-  return config[index].v
-}
+const tireShapeTiming = new Timing([{ t: 80, v: 0 }, { t: 80, v: 1 }])
 
 function calculateTankTransform(tank: TankRecord) {
   let rotate
@@ -137,9 +150,8 @@ export class TankClassBase extends React.Component<P, S> {
 
   componentWillReceiveProps(nextProps: P) {
     if (this.props.tank.moving && !nextProps.tank.moving) {
-      this.setState({
-        lastTireShape: calculate(tireShapeConfig, this.startTime, nextProps.time),
-      })
+      const lastTireShape = tireShapeTiming.find(nextProps.time - this.startTime)
+      this.setState({ lastTireShape })
     }
   }
 
@@ -149,8 +161,8 @@ export class TankClassBase extends React.Component<P, S> {
 
     return React.createElement(resolveTankComponent(tank.side, tank.level), {
       transform: calculateTankTransform(tank),
-      color: calculate(resolveTankColorConfig(tank), this.startTime, time),
-      shape: tank.moving ? calculate(tireShapeConfig, this.startTime, time) : lastTireShape,
+      color: resolveTankColorConfig(tank).find(time - this.startTime),
+      shape: tank.moving ? tireShapeTiming.find(time - this.startTime) : lastTireShape,
     })
   }
 }
@@ -163,12 +175,12 @@ const TankHumanBasic: TankComponent = ({ transform, color, shape }) => {
   const scheme = TANK_COLOR_SCHEMES[color]
   const { a, b, c } = scheme
   return (
-    <g role="tank" transform={transform}>
-      <g role="left-tire">
+    <g className="tank" transform={transform}>
+      <g className="left-tire">
         <rect x={1} y={5} width={3} height={9} fill={a} />
         <rect x={2} y={5} width={1} height={9} fill={b} />
         {shape === 0 ? (
-          <g role="left-tire-shape-0">
+          <g className="left-tire-shape-0">
             <Bitmap x={1} y={4} d={['abb']} scheme={scheme} />
             <Bitmap x={1} y={14} d={['abb']} scheme={scheme} />
             {_.range(5).map(i => (
@@ -176,7 +188,7 @@ const TankHumanBasic: TankComponent = ({ transform, color, shape }) => {
             ))}
           </g>
         ) : (
-          <g role="left-tire-shape-1">
+          <g className="left-tire-shape-1">
             <Bitmap x={1} y={4} d={['acc']} scheme={scheme} />
             <Bitmap x={1} y={14} d={['bcc']} scheme={scheme} />
             {_.range(4).map(i => (
@@ -186,18 +198,18 @@ const TankHumanBasic: TankComponent = ({ transform, color, shape }) => {
         )}
       </g>
 
-      <g role="right-tire">
+      <g className="right-tire">
         <rect x={11} y={4} width={3} height={11} fill={c} />
         <Pixel x={11} y={4} fill={a} />
 
         {shape === 0 ? (
-          <g role="right-tire-shape-0">
+          <g className="right-tire-shape-0">
             {_.range(6).map(i => (
               <rect key={i} x={12} width={2} y={4 + 2 * i} height={1} fill={b} />
             ))}
           </g>
         ) : (
-          <g role="right-tire-shape-1">
+          <g className="right-tire-shape-1">
             {_.range(5).map(i => (
               <rect key={i} x={12} width={2} y={5 + 2 * i} height={1} fill={b} />
             ))}
@@ -205,7 +217,7 @@ const TankHumanBasic: TankComponent = ({ transform, color, shape }) => {
         )}
       </g>
 
-      <g role="tank-body">
+      <g className="tank-body">
         <path d="M4,7 h1 v-1 h1 v2 h-1 v3 h1 v1 h1 v1 h-2 v-1 h-1 v-5" fill={a} />
         <Pixel x={4} y={12} fill={c} />
         <path d="M6,6 h1 v1 h3 v1 h1 v4 h-1 v1 h-3 v-1 h-1 v-1 h-1 v-3 h1 v-2" fill={b} />
@@ -216,7 +228,7 @@ const TankHumanBasic: TankComponent = ({ transform, color, shape }) => {
         <path d="M6,8 h2 v1 h-1 v2 h-1 v-3" fill={a} />
         <path d="M8,9 h1 v3 h-2 v-1 h1 v-2" fill={c} />
       </g>
-      <rect role="gun" x={7} y={2} width={1} height={5} fill={a} />
+      <rect className="gun" x={7} y={2} width={1} height={5} fill={a} />
     </g>
   )
 }
@@ -225,14 +237,14 @@ const TankHumanFast: TankComponent = ({ transform, color, shape }) => {
   const scheme = TANK_COLOR_SCHEMES[color]
   const { a, b, c } = scheme
   return (
-    <g role="tank" transform={transform}>
-      <g role="left-tire">
+    <g className="tank" transform={transform}>
+      <g className="left-tire">
         <rect x={1} y={5} width={3} height={11} fill={a} />
         <rect x={2} y={5} width={2} height={11} fill={b} />
         <Pixel x={3} y={5} fill={a} />
         <Pixel x={3} y={14} fill={a} />
         {shape === 0 ? (
-          <g role="left-tire-shape-0">
+          <g className="left-tire-shape-0">
             <Bitmap x={1} y={4} d={['abb']} scheme={scheme} />
             <Bitmap x={1} y={15} d={['ccc']} scheme={scheme} />
             {_.range(5).map(i => (
@@ -240,7 +252,7 @@ const TankHumanFast: TankComponent = ({ transform, color, shape }) => {
             ))}
           </g>
         ) : (
-          <g role="left-tire-shape-1">
+          <g className="left-tire-shape-1">
             <Bitmap x={1} y={4} d={['bcc']} scheme={scheme} />
             <Bitmap x={1} y={15} d={['abb']} scheme={scheme} />
             {_.range(5).map(i => (
@@ -250,17 +262,17 @@ const TankHumanFast: TankComponent = ({ transform, color, shape }) => {
         )}
       </g>
 
-      <g role="right-tire">
+      <g className="right-tire">
         <rect x={11} y={4} width={3} height={12} fill={c} />
         <Pixel x={11} y={4} fill={a} />
         {shape === 0 ? (
-          <g role="right-tire-shape-0">
+          <g className="right-tire-shape-0">
             {_.range(6).map(i => (
               <rect key={i} x={12} width={2} y={4 + 2 * i} height={1} fill={b} />
             ))}
           </g>
         ) : (
-          <g role="right-tire-shape-1">
+          <g className="right-tire-shape-1">
             {_.range(6).map(i => (
               <rect key={i} x={12} width={2} y={5 + 2 * i} height={1} fill={b} />
             ))}
@@ -269,7 +281,7 @@ const TankHumanFast: TankComponent = ({ transform, color, shape }) => {
         )}
       </g>
 
-      <g role="tank-body">
+      <g className="tank-body">
         <path d="M4,5 h2 v3 h-1 v5 h1 v1 h-2 v-9" fill={a} />
         <rect x={6} y={4} width={1} height={2} fill={c} />
         <path d="M8,4 h1 v1 h2 v10 h-7 v-1 h5 v-1 h1 v-5 h-1 v-2 h-1 v-2" fill={c} />
@@ -277,7 +289,7 @@ const TankHumanFast: TankComponent = ({ transform, color, shape }) => {
         <path d="M6,8 h2 v1 h-1 v3 h-1 v-4" fill={a} />
         <path d="M8,9 h1 v4 h-2 v-1 h1 v-3" fill={c} />
       </g>
-      <rect role="gun" x={7} y={0} width={1} height={7} fill={a} />
+      <rect className="gun" x={7} y={0} width={1} height={7} fill={a} />
     </g>
   )
 }
@@ -286,19 +298,19 @@ const TankHumanPower: TankComponent = ({ transform, color, shape }) => {
   const scheme = TANK_COLOR_SCHEMES[color]
   const { a, b, c } = scheme
   return (
-    <g role="tank" transform={transform}>
-      <g role="left-tire">
+    <g className="tank" transform={transform}>
+      <g className="left-tire">
         <rect x={1} y={3} width={1} height={12} fill={a} />
         <rect x={2} y={3} width={2} height={12} fill={b} />
         {shape === 0 ? (
-          <g role="left-tire-shape-0">
+          <g className="left-tire-shape-0">
             <Bitmap x={1} y={3} d={['bcc']} scheme={scheme} />
             {_.range(5).map(i => (
               <rect key={i} x={1} width={1} y={5 + 2 * i} height={1} fill={c} />
             ))}
           </g>
         ) : (
-          <g role="left-tire-shape-1">
+          <g className="left-tire-shape-1">
             <Bitmap x={1} y={3} d={['aaa']} scheme={scheme} />
             {_.range(5).map(i => (
               <rect key={i} x={1} width={1} y={4 + 2 * i} height={1} fill={c} />
@@ -307,17 +319,17 @@ const TankHumanPower: TankComponent = ({ transform, color, shape }) => {
         )}
       </g>
 
-      <g role="right-tire">
+      <g className="right-tire">
         <rect x={11} y={3} width={3} height={12} fill={c} />
         {shape === 0 ? (
-          <g role="right-tire-shape-0">
+          <g className="right-tire-shape-0">
             <Bitmap x={11} y={3} d={['a']} scheme={scheme} />
             {_.range(6).map(i => (
               <rect key={i} x={13} width={1} y={4 + 2 * i} height={1} fill={b} />
             ))}
           </g>
         ) : (
-          <g role="right-tire-shape-1">
+          <g className="right-tire-shape-1">
             <Bitmap x={11} y={3} d={['ab']} scheme={scheme} />
             {_.range(6).map(i => (
               <rect key={i} x={13} width={1} y={3 + 2 * i} height={1} fill={b} />
@@ -326,7 +338,7 @@ const TankHumanPower: TankComponent = ({ transform, color, shape }) => {
         )}
       </g>
 
-      <g role="tank-body">
+      <g className="tank-body">
         <path d="M3,5 h2 v1 h-1 v5 h1 v1 h1 v1 h-2 v-1 h-1 v-7" fill={a} />
         <Pixel x={4} y={4} fill={c} />
         <rect x={5} y={3} width={1} height={2} fill={a} />
@@ -337,7 +349,7 @@ const TankHumanPower: TankComponent = ({ transform, color, shape }) => {
         <path d="M6,6 h2 v1 h-1 v4 h-1 v-5" fill={a} />
         <path d="M8,7 h1 v5 h-2 v-1 h1 v-4" fill={c} />
       </g>
-      <g role="gun">
+      <g className="gun">
         <path d="M6,0 h3 v2 h-1 v3 h-1 v-3 h-1 v-2" fill={a} />
         <path d="M8,0 h1 v2 h-2 v-1 h1 v-1" fill={b} />
       </g>
@@ -349,19 +361,19 @@ const TankHumanArmor: TankComponent = ({ transform, color, shape }) => {
   const scheme = TANK_COLOR_SCHEMES[color]
   const { a, b, c } = scheme
   return (
-    <g role="tank3" transform={transform}>
-      <g role="left-tire">
+    <g className="tank3" transform={transform}>
+      <g className="left-tire">
         <rect x={1} y={1} width={1} height={14} fill={a} />
         <rect x={2} y={1} width={2} height={14} fill={b} />
         {shape === 0 ? (
-          <g role="left-tire-shape0">
+          <g className="left-tire-shape0">
             {_.range(7).map(i => (
               <rect key={i} x={1} y={2 * i + 2} width={1} height={1} fill={c} />
             ))}
             <rect x={2} y={14} width={2} height={1} fill={c} />
           </g>
         ) : (
-          <g role="left-tire-shape1">
+          <g className="left-tire-shape1">
             <Bitmap x={1} y={1} d={['bcc']} scheme={scheme} />
             {_.range(6).map(i => (
               <rect key={i} x={1} y={2 * i + 3} width={1} height={1} fill={c} />
@@ -369,18 +381,18 @@ const TankHumanArmor: TankComponent = ({ transform, color, shape }) => {
           </g>
         )}
       </g>
-      <g role="right-tire">
+      <g className="right-tire">
         <rect x={12} y={1} width={3} height={14} fill={b} />
         <Pixel x={12} y={1} fill={a} />
         {shape === 0 ? (
-          <g role="right-tire-shape0">
+          <g className="right-tire-shape0">
             {_.range(6).map(i => (
               <rect key={i} x={14} y={2 * i + 2} width={1} height={1} fill={c} />
             ))}
             <rect x={13} y={14} width={2} height={1} fill={c} />
           </g>
         ) : (
-          <g role="right-tire-shape1">
+          <g className="right-tire-shape1">
             {_.range(7).map(i => (
               <rect key={i} x={14} y={2 * i + 1} width={1} height={1} fill={c} />
             ))}
@@ -388,7 +400,7 @@ const TankHumanArmor: TankComponent = ({ transform, color, shape }) => {
           </g>
         )}
       </g>
-      <g role="tank-body">
+      <g className="tank-body">
         <path d="M4,2 h3 v-2 h2 v2 h3 v3 h-1 v7 h-7 v-10" fill={b} />
         <path d="M3,2 h3 v3 h1 v-5 h1 v6 h-3 v6 h-1 v-9 h-1 v-1" fill={a} />
         <rect x={9} y={2} width={1} height={3} fill={c} />
@@ -410,18 +422,18 @@ const TankAIBasic: TankComponent = ({ transform, color, shape }) => {
   const scheme = TANK_COLOR_SCHEMES[color]
   const { a, b, c } = scheme
   return (
-    <g role="tank4" transform={transform}>
-      <g role="left-tire">
+    <g className="tank4" transform={transform}>
+      <g className="left-tire">
         <rect x={1} y={3} width={1} height={11} fill={a} />
         <rect x={2} y={3} width={2} height={11} fill={b} />
         {shape === 0 ? (
-          <g role="left-tire-shape0">
+          <g className="left-tire-shape0">
             {_.range(5).map(i => (
               <rect key={i} x={1} y={2 * i + 4} width={2} height={1} fill={c} />
             ))}
           </g>
         ) : (
-          <g role="left-tire-shape1">
+          <g className="left-tire-shape1">
             <Bitmap x={1} y={3} d={['bcc']} scheme={scheme} />
             {_.range(5).map(i => (
               <rect key={i} x={1} y={2 * i + 5} width={2} height={1} fill={c} />
@@ -429,18 +441,18 @@ const TankAIBasic: TankComponent = ({ transform, color, shape }) => {
           </g>
         )}
       </g>
-      <g role="right-tire">
+      <g className="right-tire">
         <rect x={11} y={3} width={3} height={11} fill={b} />
         <Pixel x={11} y={3} fill={a} />
         {shape === 0 ? (
-          <g role="right-tire-shape0">
+          <g className="right-tire-shape0">
             {_.range(5).map(i => (
               <rect key={i} x={12} y={2 * i + 4} width={2} height={1} fill={c} />
             ))}
             <Pixel x={7} y={14} fill={b} />
           </g>
         ) : (
-          <g role="right-tire-shape1">
+          <g className="right-tire-shape1">
             {_.range(6).map(i => (
               <rect key={i} x={12} y={2 * i + 3} width={2} height={1} fill={c} />
             ))}
@@ -448,7 +460,7 @@ const TankAIBasic: TankComponent = ({ transform, color, shape }) => {
           </g>
         )}
       </g>
-      <g role="tank-body">
+      <g className="tank-body">
         <path d="M5,4 h1 v3 h-1 v4 h1 v2 h-1 v-1 h-1 v-7 h1 v-1" fill={a} />
         <path
           d="M8,3 h1 v1 h1 v1 h1 v7 h-1 v1 h-1 v1 h-3 v-1 h2 v-1 h1 v-1 h1 v-4 h-1 v-1 h-1 v-3"
@@ -458,7 +470,7 @@ const TankAIBasic: TankComponent = ({ transform, color, shape }) => {
         <path d="M7,7 h1 v2 h-1 v1 h-1 v-2 h1 v-1" fill={c} />
         <path d="M8,8 h1 v2 h-2 v-1 h1 v-1" fill={a} />
       </g>
-      <g role="tank-gun">
+      <g className="tank-gun">
         <rect x={7} y={0} width={1} height={6} fill={a} />
       </g>
     </g>
@@ -469,38 +481,38 @@ const TankAIFast: TankComponent = ({ transform, color, shape }) => {
   const scheme = TANK_COLOR_SCHEMES[color]
   const { a, b, c } = scheme
   return (
-    <g role="tank5" transform={transform}>
-      <g role="left-tire">
+    <g className="tank5" transform={transform}>
+      <g className="left-tire">
         <rect x={1} y={2} width={2} height={3} fill={c} />
         <rect x={1} y={7} width={2} height={3} fill={c} />
         <rect x={1} y={12} width={2} height={3} fill={c} />
         {shape === 0 ? (
-          <g role="left-tire-shape0">
+          <g className="left-tire-shape0">
             {_.range(3).map(i => (
               <rect key={i} x={1} y={5 * i + 2} width={1} height={1} fill={b} />
             ))}
           </g>
         ) : (
-          <g role="left-tire-shape1">
+          <g className="left-tire-shape1">
             {_.range(3).map(i => (
               <rect key={i} x={1} y={5 * i + 3} width={1} height={1} fill={b} />
             ))}
           </g>
         )}
       </g>
-      <g role="right-tire">
+      <g className="right-tire">
         <rect x={12} y={2} width={2} height={3} fill={c} />
         <rect x={12} y={7} width={2} height={3} fill={c} />
         <rect x={12} y={12} width={2} height={3} fill={c} />
         {shape === 0 ? (
-          <g role="right-tire-shape0">
+          <g className="right-tire-shape0">
             {_.range(3).map(i => (
               <rect key={i} x={12} y={5 * i + 2} width={1} height={1} fill={b} />
             ))}
             <Pixel x={7} y={14} fill={a} />
           </g>
         ) : (
-          <g role="right-tire-shape1">
+          <g className="right-tire-shape1">
             {_.range(3).map(i => (
               <rect key={i} x={12} y={5 * i + 3} width={1} height={1} fill={b} />
             ))}
@@ -508,7 +520,7 @@ const TankAIFast: TankComponent = ({ transform, color, shape }) => {
           </g>
         )}
       </g>
-      <g role="tank-body">
+      <g className="tank-body">
         <path d="M4,2 h2 v4 h-1 v5 h1 v1 h3 v1 h-5 v1 h-1 v-11 h1 v-1" fill={a} />
         <Pixel x={9} y={11} fill={a} />
         <path d="M3,4 h1 v1 h1 v1 h-1 v6 h2 v1 h-2 v1 h-1 v-10" fill={b} />
@@ -520,7 +532,7 @@ const TankAIFast: TankComponent = ({ transform, color, shape }) => {
         <path d="M7,7 h1 v2 h-1 v1 h-1 v-2 h1 v-1" fill={c} />
         <path d="M8,8 h1 v2 h-2 v-1 h1 v-1" fill={a} />
       </g>
-      <g role="tank-gun">
+      <g className="tank-gun">
         <rect x={7} y={0} width={1} height={6} fill={a} />
       </g>
     </g>
@@ -531,18 +543,18 @@ const TankAIPower: TankComponent = ({ transform, color, shape }) => {
   const scheme = TANK_COLOR_SCHEMES[color]
   const { a, b, c } = scheme
   return (
-    <g role="tank6" transform={transform}>
-      <g role="left-tire">
+    <g className="tank6" transform={transform}>
+      <g className="left-tire">
         <rect x={1} y={3} width={1} height={12} fill={a} />
         <rect x={2} y={3} width={2} height={12} fill={b} />
         {shape === 0 ? (
-          <g role="left-tire-shape0">
+          <g className="left-tire-shape0">
             {_.range(6).map(i => (
               <rect key={i} x={1} y={2 * i + 4} width={2} height={1} fill={c} />
             ))}
           </g>
         ) : (
-          <g role="left-tire-shape1">
+          <g className="left-tire-shape1">
             <Bitmap x={1} y={3} d={['bcc']} scheme={scheme} />
             {_.range(5).map(i => (
               <rect key={i} x={1} y={2 * i + 5} width={2} height={1} fill={c} />
@@ -550,18 +562,18 @@ const TankAIPower: TankComponent = ({ transform, color, shape }) => {
           </g>
         )}
       </g>
-      <g role="right-tire">
+      <g className="right-tire">
         <rect x={11} y={3} width={3} height={12} fill={b} />
         <Pixel x={11} y={3} fill={a} />
         {shape === 0 ? (
-          <g role="right-tire-shape0">
+          <g className="right-tire-shape0">
             {_.range(6).map(i => (
               <rect key={i} x={12} y={2 * i + 4} width={2} height={1} fill={c} />
             ))}
             <Pixel x={7} y={14} fill={a} />
           </g>
         ) : (
-          <g role="right-tire-shape1">
+          <g className="right-tire-shape1">
             {_.range(6).map(i => (
               <rect key={i} x={12} y={2 * i + 3} width={2} height={1} fill={c} />
             ))}
@@ -569,7 +581,7 @@ const TankAIPower: TankComponent = ({ transform, color, shape }) => {
           </g>
         )}
       </g>
-      <g role="tank-body">
+      <g className="tank-body">
         <path d="M5,4 h1 v3 h-1 v4 h1 v1 h1 v2 h-2 v-2 h-1 v-7 h1 v-1" fill={a} />
         <Pixel x={6} y={14} fill={b} />
         <path d="M6,3 h1 v3 h2 v1 h1 v4 h-1 v1 h-1 v1 h-1 v-1 h-1 v-1 h-1 v-4 h1 v-4" fill={b} />
@@ -580,7 +592,7 @@ const TankAIPower: TankComponent = ({ transform, color, shape }) => {
         <path d="M7,7 h1 v2 h-1 v1 h-1 v-2 h1 v-1" fill={c} />
         <path d="M8,8 h1 v2 h-2 v-1 h1 v-1" fill={a} />
       </g>
-      <g role="tank-gun">
+      <g className="tank-gun">
         <path d="M6,0 h2 v6 h-1 v-5 h-1 v-1" fill={a} />
         <Pixel x={8} y={0} fill={b} />
       </g>
@@ -592,18 +604,18 @@ const TankAIArmor: TankComponent = ({ transform, color, shape }) => {
   const scheme = TANK_COLOR_SCHEMES[color]
   const { a, b, c } = scheme
   return (
-    <g role="tank7" transform={transform}>
-      <g role="left-tire">
+    <g className="tank7" transform={transform}>
+      <g className="left-tire">
         <rect x={1} y={0} width={1} height={15} fill={a} />
         <rect x={2} y={0} width={2} height={15} fill={b} />
         {shape === 0 ? (
-          <g role="left-tire-shape0">
+          <g className="left-tire-shape0">
             {_.range(7).map(i => (
               <rect key={i} x={1} y={2 * i + 1} width={2} height={1} fill={c} />
             ))}
           </g>
         ) : (
-          <g role="left-tire-shape1">
+          <g className="left-tire-shape1">
             <Bitmap x={1} y={0} d={['bc']} scheme={scheme} />
             {_.range(7).map(i => (
               <rect key={i} x={1} y={2 * i + 2} width={2} height={1} fill={c} />
@@ -611,25 +623,25 @@ const TankAIArmor: TankComponent = ({ transform, color, shape }) => {
           </g>
         )}
       </g>
-      <g role="right-tire">
+      <g className="right-tire">
         <rect x={11} y={0} width={3} height={15} fill={b} />
         <Pixel x={11} y={0} fill={a} />
         <Pixel x={11} y={14} fill={c} />
         {shape === 0 ? (
-          <g role="right-tire-shape0">
+          <g className="right-tire-shape0">
             {_.range(7).map(i => (
               <rect key={i} x={12} y={2 * i + 1} width={2} height={1} fill={c} />
             ))}
             <Pixel x={7} y={14} fill={b} />
           </g>
         ) : (
-          <g role="right-tire-shape1">
+          <g className="right-tire-shape1">
             {_.range(8).map(i => <rect key={i} x={12} y={2 * i} width={2} height={1} fill={c} />)}
             <Pixel x={7} y={14} fill={a} />
           </g>
         )}
       </g>
-      <g role="tank-body">
+      <g className="tank-body">
         <path d="M4,1 h2 v-1 h3 v1 h2 v4 h-1 v7 h-5 v1 h-1 v-12" fill={b} />
         <path d="M6,0 h2 v6 h1 v-2 h1 v3 h-5 v5 h-1 v-9 h1 v2 h1 v1 h1 v-4 h-1 v-2" fill={a} />
         <Pixel x={5} y={1} fill={c} />

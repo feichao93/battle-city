@@ -1,7 +1,7 @@
 import { all, put } from 'redux-saga/effects'
-import { nonPauseDelay } from 'sagas/common'
 import { BulletRecord, BulletsMap, ExplosionRecord } from 'types'
 import { frame as f, getNextId } from 'utils/common'
+import Timing from '../../utils/Timing'
 
 function* explosionFromBullet(bullet: BulletRecord) {
   const bulletExplosionShapeTiming: [ExplosionShape, number][] = [
@@ -22,7 +22,7 @@ function* explosionFromBullet(bullet: BulletRecord) {
           explosionId,
         }),
       })
-      yield nonPauseDelay(time)
+      yield Timing.delay(time)
     }
   } finally {
     yield put<Action.RemoveExplosionAction>({

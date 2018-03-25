@@ -48,11 +48,6 @@ declare global {
     y: number
   }
 
-  type TimingConfig<V> = Array<{
-    v: V
-    t: number
-  }>
-
   interface StageConfig {
     name: string
     difficulty: number
