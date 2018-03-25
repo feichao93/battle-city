@@ -6,20 +6,23 @@ import { timing, nonPauseDelay } from 'sagas/common'
 
 export function* scoreFromKillTank(tank: TankRecord) {
   const scoreId: ScoreId = getNextId('score')
-  yield put<Action.AddScoreAction>({
-    type: 'ADD_SCORE',
-    score: new ScoreRecord({
-      score: TANK_KILL_SCORE_MAP[tank.level],
+  try {
+    yield put<Action.AddScoreAction>({
+      type: 'ADD_SCORE',
+      score: new ScoreRecord({
+        score: TANK_KILL_SCORE_MAP[tank.level],
+        scoreId,
+        x: tank.x,
+        y: tank.y,
+      }),
+    })
+    yield nonPauseDelay(f(48))
+  } finally {
+    yield put<Action.RemoveScoreAction>({
+      type: 'REMOVE_SCORE',
       scoreId,
-      x: tank.x,
-      y: tank.y,
-    }),
-  })
-  yield nonPauseDelay(f(48))
-  yield put<Action.RemoveScoreAction>({
-    type: 'REMOVE_SCORE',
-    scoreId,
-  })
+    })
+  }
 }
 
 export function* explosionFromTank(tank: TankRecord) {

@@ -72,7 +72,7 @@ declare global {
       | IncKillCount
       | UpdateTransientKillInfo
       | Simple<'SHOW_TOTAL_KILL_COUNT'>
-      | AddOrUpdatePowerUp
+      | SetPowerUp
       | RemovePowerUp
       | RemovePowerUpProperty
       | Simple<'CLEAR_ALL_POWER_UPS'>
@@ -308,8 +308,8 @@ declare global {
       // TODO 需要指定是单人游戏还是双人游戏
     }
 
-    export interface AddOrUpdatePowerUp {
-      type: 'ADD_OR_UPDATE_POWER_UP'
+    export interface SetPowerUp {
+      type: 'SET_POWER_UP'
       powerUp: PowerUpRecord
     }
 

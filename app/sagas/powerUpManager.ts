@@ -2,7 +2,7 @@ import _ from 'lodash'
 import { fork, put, select, take, cancelled, takeEvery, takeLatest } from 'redux-saga/effects'
 import { MapRecord, ScoreRecord, State, PowerUpRecord } from 'types'
 import { destroyTanks, nonPauseDelay } from 'sagas/common'
-import powerUpSaga from 'sagas/powerUpSaga'
+import powerUpLifecycle from 'sagas/powerUpLifecycle'
 import { N_MAP, POWER_UP_NAMES } from 'utils/constants'
 import { asRect, frame as f, getNextId } from 'utils/common'
 import * as selectors from 'utils/selectors'
@@ -149,6 +149,7 @@ function* helmet({ tank }: Action.PickPowerUpAction) {
 const is = (name: PowerUpName) => (action: Action) =>
   action.type === 'PICK_POWER_UP' && action.powerUp.powerUpName === name
 
+/** 在每个 TICK 的时候，更新坦克的 telmet 持续时间 */
 function* handleHelmetDuration() {
   while (true) {
     const { delta }: Action.TickAction = yield take('TICK')
@@ -167,22 +168,25 @@ function* handleHelmetDuration() {
 }
 
 function* scoreFromPickPowerUp(action: Action.PickPowerUpAction) {
-  const { powerUp: { x, y } } = action
   const scoreId = getNextId('score')
-  yield put<Action.AddScoreAction>({
-    type: 'ADD_SCORE',
-    score: new ScoreRecord({
+  try {
+    const { powerUp: { x, y } } = action
+    yield put<Action.AddScoreAction>({
+      type: 'ADD_SCORE',
+      score: new ScoreRecord({
+        scoreId,
+        score: 500,
+        x,
+        y,
+      }),
+    })
+    yield nonPauseDelay(f(48))
+  } finally {
+    yield put<Action.RemoveScoreAction>({
+      type: 'REMOVE_SCORE',
       scoreId,
-      score: 500,
-      x,
-      y,
-    }),
-  })
-  yield nonPauseDelay(f(48))
-  yield put<Action.RemoveScoreAction>({
-    type: 'REMOVE_SCORE',
-    scoreId,
-  })
+    })
+  }
 }
 
 function* spawnPowerUpIfNeccessary(action: Action.Hit) {
@@ -193,7 +197,7 @@ function* spawnPowerUpIfNeccessary(action: Action.Hit) {
     })
     const powerUpName = _.sample(POWER_UP_NAMES)
     const position: Point = _.sample(yield select(selectors.validPowerUpSpawnPositions))
-    yield* powerUpSaga(
+    yield powerUpLifecycle(
       new PowerUpRecord({
         powerUpId: getNextId('power-up'),
         powerUpName,
