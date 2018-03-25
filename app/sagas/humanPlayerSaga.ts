@@ -1,6 +1,6 @@
 import { take, fork, put, select, takeEvery } from 'redux-saga/effects'
 import { BLOCK_SIZE } from 'utils/constants'
-import { asRect, frame, testCollide } from 'utils/common'
+import { asRect, frame, getNextId, testCollide } from 'utils/common'
 import { PlayerRecord, State, TankRecord } from 'types'
 import { spawnTank } from 'sagas/common'
 import * as selectors from 'utils/selectors'
@@ -53,8 +53,10 @@ function* startStage(playerName: string, tankColor: TankColor) {
         level: 'basic',
       })
 
-    const tankId = yield spawnTank(
+    const tankId = getNextId('tank')
+    yield spawnTank(
       tankPrototype.merge({
+        tankId,
         active: true,
         x: 4 * BLOCK_SIZE,
         y: 12 * BLOCK_SIZE,
@@ -150,8 +152,10 @@ export default function* humanPlayerSaga(playerName: string, tankColor: TankColo
       const player = players.get(playerName)
       if (player.lives > 0) {
         yield put({ type: 'DECREMENT_PLAYER_LIFE', playerName })
-        const tankId = yield spawnTank(
+        const tankId = getNextId('tank')
+        yield spawnTank(
           new TankRecord({
+            tankId,
             x: 4 * BLOCK_SIZE,
             y: 12 * BLOCK_SIZE,
             side: 'human',

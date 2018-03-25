@@ -96,3 +96,20 @@ export const POWER_UP_NAMES: PowerUpName[] = [
 
 /** 每一关中包含powerUp的tank的下标(从0开始计数) */
 export const TANK_INDEX_THAT_WITH_POWER_UP = [3, 10, 17]
+
+/** AI 坦克检测自己是否无法移动的超时时间 */
+export const BLOCK_TIMEOUT = 200
+/** AI 坦克检测自己是否无法移动的距离阈值 */
+export const BLOCK_DISTANCE_THRESHOLD = 0.01
+
+// TODO 该项需要重新测量
+/** 不同难度关卡下的 AI 坦克生成速度 */
+export const AI_SPAWN_SPEED_MAP = {
+  1: 0.7,
+  2: 0.85,
+  3: 1,
+  4: 1.15,
+}
+
+/** AI 坦克在场上的最大数量 */
+export const MAX_AI_TANK_COUNT = 3

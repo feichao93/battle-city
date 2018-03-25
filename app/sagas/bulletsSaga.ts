@@ -237,7 +237,7 @@ function* handleAfterTick() {
     const { delta }: Action.AfterTickAction = yield take('AFTER_TICK')
     const state: State = yield select()
 
-    // 新建一个统计对象(context), 用来存放这一个tick中的统计信息
+    // 新建一个统计对象(stat), 用来存放这一个tick中的统计信息
     // 注意这里的Set是ES2015的原生Set
     const stat: Stat = {
       tankHitMap: new DefaultMap(() => []),

@@ -8,7 +8,6 @@ declare const DEV: Readonly<{
   TEST_STAGE: boolean
   HIDE_ABOUT: boolean
   INSPECTOR: boolean
-  SINGLE_AI_TANK: boolean
   LOG: boolean
   SKIP_CHOOSE_STAGE: boolean
 }>

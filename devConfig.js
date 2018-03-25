@@ -21,8 +21,6 @@ module.exports = dev => ({
   'DEV.HIDE_ABOUT': dev,
   // 是否启用 <Inspector />
   'DEV.INSPECTOR': false,
-  // 是否将 AI 坦克同时出现的最大数量设置为 1
-  'DEV.SINGLE_AI_TANK': dev,
   // 是否打印游戏日志
   'DEV.LOG': dev,
   // 是否跳过关卡选择

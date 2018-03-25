@@ -25,8 +25,9 @@ import { randint, waitFor } from 'utils/common'
 import * as selectors from 'utils/selectors'
 import Timing from 'utils/Timing'
 import * as dodgeUtils from 'ai/dodge-utils'
+import { BLOCK_DISTANCE_THRESHOLD, BLOCK_TIMEOUT } from '../utils/constants'
 
-function getRandomPassablePos(posInfoArray: Spot[]) {
+function getRandomPassableSpot(posInfoArray: Spot[]) {
   while (true) {
     const t = randint(0, 26 ** 2)
     if (posInfoArray[t].canPass) {
@@ -42,7 +43,7 @@ function* wanderMode(ctx: AITankCtx) {
   DEV.ASSERT && console.assert(tank != null)
   const { map }: State = yield select()
   const allSpots = getAllSpots(map)
-  const path = findPath(allSpots, getTankSpot(tank), getRandomPassablePos(allSpots))
+  const path = findPath(allSpots, getTankSpot(tank), getRandomPassableSpot(allSpots))
   if (path != null) {
     yield followPath(ctx, path)
   } else {
@@ -142,20 +143,19 @@ function* dangerDetectionLoop(ctx: AITankCtx) {
   }
 }
 
-// fixme 在玩家触发 timer powerUp 的时候 blocked 被触发
 function* blocked(ctx: AITankCtx) {
-  let counter = 0
+  let acc = 0
   let lastTank = yield select(selectors.playerTank, ctx.playerName)
-  while (counter < 10) {
-    yield take('TICK')
+  while (acc < BLOCK_TIMEOUT) {
+    const { delta }: Action.TickAction = yield take('TICK')
     const tank: TankRecord = yield select(selectors.playerTank, ctx.playerName)
     if (tank.frozenTimeout > 0) {
       continue
     }
-    if (Math.abs(tank.x - lastTank.x) + Math.abs(tank.y - lastTank.y) <= 0.01) {
-      counter++
+    if (Math.abs(tank.x - lastTank.x) + Math.abs(tank.y - lastTank.y) <= BLOCK_DISTANCE_THRESHOLD) {
+      acc += delta
     } else {
-      counter = 0
+      acc = 0
     }
     lastTank = tank
   }

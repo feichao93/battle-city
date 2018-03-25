@@ -7,6 +7,7 @@ import animateTexts from 'sagas/common/animateTexts'
 import humanPlayerSaga from 'sagas/humanPlayerSaga'
 import powerUpManager from 'sagas/powerUpManager'
 import stageSaga, { StageResult } from 'sagas/stageSaga'
+import { concat } from 'sagas/helper'
 import { stageNames } from 'stages'
 import { getNextId } from 'utils/common'
 import { BLOCK_SIZE } from 'utils/constants'
@@ -81,10 +82,9 @@ export default function* gameSaga(action: Action.StartGame | { type: 'RESET_GAME
     bulletsSaga(),
     // 上面几个 saga 在一个 gameSaga 的生命周期内被认为是后台服务
     // 当 stage-flow 退出的时候，自动取消上面几个后台服务
-    stageFlow(action.stageIndex),
+    concat(stageFlow(action.stageIndex), animateGameover()),
   ])
 
-  yield animateGameover()
   DEV.LOG && console.log('GAME ENDED')
 
   yield put(replace('/gameover'))

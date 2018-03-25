@@ -7,11 +7,14 @@ import { spawnTank } from 'sagas/common'
 import { explosionFromTank, scoreFromKillTank } from 'sagas/common/destroyTanks'
 import { PlayerRecord, TankRecord } from 'types'
 import { getNextId } from 'utils/common'
-import { TANK_INDEX_THAT_WITH_POWER_UP } from 'utils/constants'
+import {
+  AI_SPAWN_SPEED_MAP,
+  MAX_AI_TANK_COUNT,
+  TANK_INDEX_THAT_WITH_POWER_UP,
+} from 'utils/constants'
 import * as selectors from 'utils/selectors'
 import { frame } from 'utils/common'
-
-const max = DEV.SINGLE_AI_TANK ? 1 : 2
+import { stageConfigs } from '../stages'
 
 /** AIMasterSaga用来管理AIWorkerSaga的启动和停止, 并处理和AI程序的数据交互 */
 export default function* AIMasterSaga() {
@@ -20,7 +23,7 @@ export default function* AIMasterSaga() {
 
   while (true) {
     yield take('START_STAGE')
-    for (const i in _.range(0, max)) {
+    for (const i in _.range(0, MAX_AI_TANK_COUNT)) {
       addAIReqChannel.put('add')
     }
   }
@@ -28,26 +31,27 @@ export default function* AIMasterSaga() {
   function* addWorkerHelper() {
     while (true) {
       yield take(addAIReqChannel)
-      const { game: { remainingEnemies } }: State = yield select()
-      if (!remainingEnemies.isEmpty()) {
+      const { game }: State = yield select()
+      if (!game.remainingEnemies.isEmpty()) {
         const { x, y } = yield select(selectors.availableSpawnPosition)
-        const { game: { AIFrozenTimeout } }: State = yield select()
         yield put<Action>({ type: 'REMOVE_FIRST_REMAINING_ENEMY' })
-        const level = remainingEnemies.first()
+        const level = game.remainingEnemies.first()
         const hp = level === 'armor' ? 4 : 1
-        const tankId = yield spawnTank(
+        const tankId = getNextId('tank')
+        yield spawnTank(
           new TankRecord({
+            tankId,
             x,
             y,
             side: 'ai',
             level,
             hp,
-            withPowerUp: TANK_INDEX_THAT_WITH_POWER_UP.includes(20 - remainingEnemies.count()),
+            withPowerUp: TANK_INDEX_THAT_WITH_POWER_UP.includes(20 - game.remainingEnemies.count()),
             helmetDuration: frame(30),
-            frozenTimeout: AIFrozenTimeout,
+            frozenTimeout: game.AIFrozenTimeout,
           }),
-          0.6,
-        ) // TODO 要根据关卡的难度来确定坦克的生成速度
+          AI_SPAWN_SPEED_MAP[stageConfigs[game.currentStage].difficulty],
+        )
         yield fork(AIWorkerWrapper, `AI-${getNextId('AI-player')}`, tankId)
       }
     }
