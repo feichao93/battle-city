@@ -114,7 +114,6 @@ export default function* stageSaga(stageName: string) {
       }
     }
   } finally {
-    // TODO cancel logic
     yield put<Action>({ type: 'HIDE_HUD' })
   }
 }

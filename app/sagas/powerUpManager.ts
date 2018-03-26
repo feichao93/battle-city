@@ -127,7 +127,6 @@ function* grenade(action: Action.PickPowerUpAction) {
     )
     .values()
 
-  // TODO 是否可以在这里调用 destroy-tank?
   yield* destroyTanks(activeAITanks)
 }
 

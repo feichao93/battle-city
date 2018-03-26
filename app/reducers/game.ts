@@ -46,7 +46,7 @@ const GameRecordBase = Record(
     /** 是否显示HUD */
     showHUD: false,
 
-    /** stage-enter-curtain相关字段 TODO 这个字段需要移动到其他的reducer中 */
+    /** stage-enter-curtain相关字段 */
     stageEnterCurtainT: 0,
   },
   'GameRecord',

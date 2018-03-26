@@ -28,7 +28,6 @@ export default function* followPath(ctx: AITankCtx, path: number[]) {
       }
       index += step
       yield* ctx.moveTo(path[index])
-      // TODO 需要考虑移动失败（例如碰到了障碍物）的情况
       yield waitFor(ctx.noteEmitter, 'reach')
     }
   } finally {
