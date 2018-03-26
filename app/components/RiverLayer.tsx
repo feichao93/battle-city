@@ -5,17 +5,17 @@ import { N_MAP, ITEM_SIZE_MAP } from 'utils/constants'
 import River from 'components/River'
 import registerTick from 'hocs/registerTick'
 
-type P = {
+interface RiverLayerProps {
   rivers: List<boolean>
   tickIndex: number
 }
 
-class RiverLayer extends React.PureComponent<P, {}> {
+class RiverLayer extends React.PureComponent<RiverLayerProps> {
   render() {
     const { rivers, tickIndex } = this.props
 
     return (
-      <g role="river-layer">
+      <g className="river-layer">
         {rivers.map((set, t) => {
           if (set) {
             const [row, col] = getRowCol(t, N_MAP.RIVER)
@@ -24,7 +24,7 @@ class RiverLayer extends React.PureComponent<P, {}> {
                 key={t}
                 x={col * ITEM_SIZE_MAP.RIVER}
                 y={row * ITEM_SIZE_MAP.RIVER}
-                shape={tickIndex}
+                shape={tickIndex as 0 | 1}
               />
             )
           } else {

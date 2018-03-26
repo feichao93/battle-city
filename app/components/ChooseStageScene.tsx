@@ -3,50 +3,11 @@ import { connect, Dispatch } from 'react-redux'
 import { match, Redirect } from 'react-router-dom'
 import { replace } from 'react-router-redux'
 import Text from 'components/Text'
-import { stageConfigs, stageNames } from 'stages'
+import { stageNames } from 'stages'
 import TextButton from 'components/TextButton'
-import RiverLayer from 'components/RiverLayer'
-import SteelLayer from 'components/SteelLayer'
-import BrickLayer from 'components/BrickLayer'
-import ForestLayer from 'components/ForestLayer'
-import SnowLayer from 'components/SnowLayer'
-import Eagle from 'components/Eagle'
-import parseStageMap from 'utils/parseStageMap'
 import { BLOCK_SIZE as B, CONTROL_CONFIG } from 'utils/constants'
 import { State } from 'types'
-
-interface StagePreviewProps {
-  stageName: string
-  x: number
-  y: number
-  scale: number
-}
-
-class StagePreview extends React.PureComponent<StagePreviewProps> {
-  render() {
-    const { x, y, scale, stageName } = this.props
-    if (stageConfigs[stageName] == null) {
-      return (
-        <g className="stage-preview empty" transform={`translate(${x}, ${y}) scale(${scale})`}>
-          <rect width={13 * B} height={13 * B} fill="#000000" />
-        </g>
-      )
-    }
-    const map = parseStageMap(stageConfigs[stageName].map)
-    const { rivers, steels, bricks, snows, eagle, forests } = map
-    return (
-      <g className="stage-preview" transform={`translate(${x}, ${y}) scale(${scale})`}>
-        <rect width={13 * B} height={13 * B} fill="#000000" />
-        <RiverLayer rivers={rivers} />
-        <SteelLayer steels={steels} />
-        <BrickLayer bricks={bricks} />
-        <SnowLayer snows={snows} />
-        {eagle ? <Eagle x={eagle.x} y={eagle.y} broken={eagle.broken} /> : null}
-        <ForestLayer forests={forests} />
-      </g>
-    )
-  }
-}
+import StagePreview from './StagePreview'
 
 class ChooseStageScene extends React.PureComponent<{
   dispatch: Dispatch<State>

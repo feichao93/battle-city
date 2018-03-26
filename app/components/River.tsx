@@ -1,5 +1,6 @@
 import React from 'react'
 import { Pixel } from 'components/elements'
+import ImageComponent from './ImageComponent'
 
 const coordinates = [
   [[5, 0], [0, 2], [1, 3], [4, 3], [3, 4], [5, 4], [1, 6], [2, 7], [6, 7]],
@@ -9,20 +10,31 @@ const coordinates = [
 const riverPart = (shape: number, dx: number, dy: number) => (
   <g transform={`translate(${dx},${dy})`}>
     <rect width={8} height={8} fill="#4242FF" />
-    {coordinates[shape % 2].map(([x, y], i) => <Pixel key={i} x={x} y={y} fill="#B5EFEF" />)}
+    {coordinates[shape].map(([x, y], i) => <Pixel key={i} x={x} y={y} fill="#B5EFEF" />)}
   </g>
 )
 
-type P = {
+type RiverProps = {
   x: number
   y: number
-  shape: number
+  shape: 0 | 1
 }
-export default class River extends React.PureComponent<P, {}> {
-  render() {
+
+export default class River extends ImageComponent<RiverProps> {
+  getConfig() {
     const { x, y, shape } = this.props
+    return {
+      key: `River/${shape}`,
+      transform: `translate(${x},${y})`,
+      width: 16,
+      height: 16,
+    }
+  }
+
+  renderImageContent() {
+    const { shape } = this.props
     return (
-      <g transform={`translate(${x},${y})`}>
+      <g>
         {riverPart(shape, 0, 0)}
         {riverPart(shape, 8, 0)}
         {riverPart(shape, 8, 8)}
