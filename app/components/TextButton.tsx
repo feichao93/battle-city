@@ -33,7 +33,7 @@ const TextButton = ({
   stroke = 'none',
 }: TextButtonProps) => {
   return (
-    <g role="text-button">
+    <g className="text-button">
       <rect
         className={classNames('text-area', { selected, disabled })}
         x={x - spreadX}

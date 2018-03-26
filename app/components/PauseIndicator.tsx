@@ -23,7 +23,7 @@ export default class PauseIndicator extends React.PureComponent<object, S> {
 
   render() {
     return (
-      <g role="pause-indicator">
+      <g className="pause-indicator">
         <Text
           content="pause"
           x={6.25 * B}

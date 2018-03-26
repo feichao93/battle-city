@@ -12,7 +12,7 @@ export default class ForestLayer extends React.PureComponent<P, {}> {
   render() {
     const { forests } = this.props
     return (
-      <g role="forest-layer">
+      <g className="forest-layer">
         {forests.map((set, t) => {
           if (set) {
             const [row, col] = getRowCol(t, N_MAP.FOREST)

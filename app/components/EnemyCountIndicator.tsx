@@ -22,7 +22,7 @@ export default class EnemyCountIndicator extends React.PureComponent<P, {}> {
   render() {
     const { count } = this.props
     return (
-      <g role="remaining-enemy-count-indicator" transform={transform}>
+      <g className="remaining-enemy-count-indicator" transform={transform}>
         {_.range(count).map(t => (
           <EnemyTankThumbnail key={t} x={8 * (t % 2)} y={8 * Math.floor(t / 2)} />
         ))}

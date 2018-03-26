@@ -13,7 +13,7 @@ export default class BrickLayer extends React.PureComponent<P, {}> {
     const { bricks } = this.props
 
     return (
-      <g role="brick-layer">
+      <g className="brick-layer">
         {bricks.map((set, t) => {
           if (set) {
             const [row, col] = getRowCol(t, N_MAP.BRICK)

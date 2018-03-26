@@ -19,7 +19,7 @@ export default class Eagle extends React.PureComponent<P, {}> {
 
     if (broken) {
       return (
-        <g role="eagle" transform={`translate(${x},${y})`}>
+        <g className="eagle" transform={`translate(${x},${y})`}>
           <path
             fill="#9C4A00"
             d="M1,8 h1 v-2 h1 v-1 h1 v-2 h1 v-1 h1 v2 h-1 v1 h-1 v2 h-1 v2 h-1 v7 h-1 v-8"
@@ -32,7 +32,7 @@ export default class Eagle extends React.PureComponent<P, {}> {
       )
     } else {
       return (
-        <g role="eagle" transform={`translate(${x},${y})`}>
+        <g className="eagle" transform={`translate(${x},${y})`}>
           <path
             fill="#636363"
             d="M0,1 h2 v1 h1 v1 h1 v2 h2 v1 h1 v-3 h-1 v-1 h3 v1 h1 v1 h-1 v2 h1 v-1 h2 v-2 h1 v-1 h1 v-1 h2 v1 h-1 v1 h1 v1 h-1 v1 h1 v1 h-2 v1 h1 v1 h-1 v2 h-1 v1 h-3 v-1 h-1 v2 h1 v1 h2 v2 h-2 v-1 h-1 v1 h-2 v-1 h-1 v1 h-2 v-2 h2 v-1 h1 v-2 h-1 v1 h-3 v-1 h-1 v-2 h-1 v-1 h1 v-1 h-2 v-1 h1 v-1 h-1 v-1 h1 v-1 h-1 v-1"

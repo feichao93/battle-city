@@ -7,7 +7,7 @@ export default class TextLayer extends React.PureComponent<{ texts: TextsMap }, 
     const { texts } = this.props
 
     return (
-      <g role="text-layer">
+      <g className="text-layer">
         {texts
           .map(t => <Text key={t.textId} content={t.content} fill={t.fill} x={t.x} y={t.y} />)
           .toArray()}

@@ -13,7 +13,7 @@ export default class SteelLayer extends React.PureComponent<P, {}> {
     const { steels } = this.props
 
     return (
-      <g role="steel-layer">
+      <g className="steel-layer">
         {steels.map((set, t) => {
           if (set) {
             const [row, col] = getRowCol(t, N_MAP.STEEL)

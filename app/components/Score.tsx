@@ -7,7 +7,7 @@ interface P {
 }
 
 const Zero = ({ x, y }: Point) => (
-  <g role="zero" transform={`translate(${x}, ${y})`}>
+  <g className="zero" transform={`translate(${x}, ${y})`}>
     <rect x="1" y="0" width="2" height="1" />
     <rect x="1" y="6" width="2" height="1" />
     <rect x="0" y="1" width="1" height="5" />
@@ -16,7 +16,7 @@ const Zero = ({ x, y }: Point) => (
 )
 
 const One = ({ x, y }: Point) => (
-  <g role="one" transform={`translate(${x}, ${y})`}>
+  <g className="one" transform={`translate(${x}, ${y})`}>
     <rect x="1" y="1" width="1" height="1" />
     <rect x="1" y="6" width="3" height="1" />
     <rect x="2" y="0" width="1" height="7" />
@@ -24,7 +24,7 @@ const One = ({ x, y }: Point) => (
 )
 
 const Two = ({ x, y }: Point) => (
-  <g role="two" transform={`translate(${x}, ${y})`}>
+  <g className="two" transform={`translate(${x}, ${y})`}>
     <rect x="0" y="1" width="1" height="1" />
     <rect x="1" y="0" width="2" height="1" />
     <rect x="3" y="1" width="1" height="2" />
@@ -37,7 +37,7 @@ const Two = ({ x, y }: Point) => (
 
 const Three = ({ x, y }: Point) => (
   <path
-    role="three"
+    className="three"
     d={`M${x},${y +
       1} h1 v-1 h2 v1 h1 v2 h-1 v1 h1 v2 h-1 v1 h-2 v-1 h-1 v-1 h1 v1 h2 v-2 h-2 v-1 h2 v-2 h-2 v1 h-1 v-1`}
   />
@@ -45,14 +45,14 @@ const Three = ({ x, y }: Point) => (
 
 const Four = ({ x, y }: Point) => (
   <path
-    role="four"
+    className="four"
     d={`M${x + 1},${y + 2} v-1 h1 v-1 h1 v4 h-1 v-2 h-1 v2 h3 v1 h-1 v2 h-1 v-2 h-2 v-3 h1`}
   />
 )
 
 const Five = ({ x, y }: Point) => (
   <path
-    role="five"
+    className="five"
     d={`M${x},${y} h4 v1 h-3 v1 h2 v1 h1 v3 h-1 v1 h-2 v-1 h-1 v-1 h1 v1 h2 v-3 h-3 v-3`}
   />
 )

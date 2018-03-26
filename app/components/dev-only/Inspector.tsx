@@ -58,7 +58,7 @@ if (DEV.INSPECTOR) {
       const { players } = this.props
       const { allPlayers } = this.state
       return (
-        <div role="players-view">
+        <div className="players-view">
           {allPlayers.isEmpty() ? <p> EMPTY PLAYERS </p> : null}
           {allPlayers
             .map(p => (
@@ -80,7 +80,7 @@ if (DEV.INSPECTOR) {
       const { explosions } = this.props
       const { allExplosions } = this.state
       return (
-        <div role="explosions-view">
+        <div className="explosions-view">
           {allExplosions.isEmpty() ? <p>EMPTY EXPLOSIONS</p> : null}
           {allExplosions
             .map(exp => (
@@ -102,7 +102,7 @@ if (DEV.INSPECTOR) {
       const { tanks } = this.props
       const { allTanks } = this.state
       return (
-        <div role="tanks-view">
+        <div className="tanks-view">
           {allTanks.isEmpty() ? <p>EMPTY TANKS</p> : null}
           {allTanks
             .map(t => (

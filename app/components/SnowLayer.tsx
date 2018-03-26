@@ -13,7 +13,7 @@ export default class SnowLayer extends React.PureComponent<P, {}> {
     const { snows } = this.props
 
     return (
-      <g role="snow-layer">
+      <g className="snow-layer">
         {snows.map((set, t) => {
           if (set) {
             const [row, col] = getRowCol(t, N_MAP.SNOW)

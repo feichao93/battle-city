@@ -46,7 +46,7 @@ class StatisticsScene extends React.PureComponent<P> {
     }
 
     return (
-      <g role="statistics-scene">
+      <g className="statistics-scene">
         <rect fill="#000000" x={0} y={0} width={16 * B} height={16 * B} />
         <g transform={`translate(${-0.5 * B}, ${-1.5 * B})`}>
           <Text content="HI-SCORE" x={4.5 * B} y={3.5 * B} fill="#e44437" />

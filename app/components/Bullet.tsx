@@ -18,7 +18,7 @@ const Bullet = ({ bullet }: { bullet: BulletRecord }) => {
     head = <Pixel x={3} y={1} fill={fill} />
   }
   return (
-    <g role="bullet" transform={`translate(${x},${y})`}>
+    <g className="bullet" transform={`translate(${x},${y})`}>
       <rect width={3} height={3} fill={fill} />
       {head}
     </g>

@@ -12,7 +12,7 @@ if (DEV.RESTRICTED_AREA) {
     render() {
       const { areas } = this.props
       return (
-        <g role="restricted-area-layer">
+        <g className="restricted-area-layer">
           {areas.map((area, areaId) => <rect key={areaId} {...area} fill="red" />).toArray()}
         </g>
       )

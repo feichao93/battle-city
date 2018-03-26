@@ -150,7 +150,7 @@ class DashLines extends React.PureComponent<DashLinesProps> {
 }
 
 const HexBrickWall = ({ x, y, hex }: { x: number; y: number; hex: number }) => (
-  <g role="hex-brick-wall">
+  <g className="hex-brick-wall">
     {[[0b0001, 0, 0], [0b0010, 8, 0], [0b0100, 0, 8], [0b1000, 8, 8]].map(
       ([mask, dx, dy], index) => (
         <g
@@ -169,11 +169,19 @@ const HexBrickWall = ({ x, y, hex }: { x: number; y: number; hex: number }) => (
 )
 
 const HexSteelWall = ({ x, y, hex }: { x: number; y: number; hex: number }) => (
-  <g role="hex-steel-wall">
-    <SteelWall x={x} y={y} gstyle={{ opacity: hex & 0b0001 ? 1 : 0.3 }} />
-    <SteelWall x={x + 8} y={y} gstyle={{ opacity: hex & 0b0010 ? 1 : 0.3 }} />
-    <SteelWall x={x} y={y + 8} gstyle={{ opacity: hex & 0b0100 ? 1 : 0.3 }} />
-    <SteelWall x={x + 8} y={y + 8} gstyle={{ opacity: hex & 0b1000 ? 1 : 0.3 }} />
+  <g className="hex-steel-wall">
+    <g style={{ opacity: hex & 0b0001 ? 1 : 0.3 }}>
+      <SteelWall x={x} y={y} />
+    </g>
+    <g style={{ opacity: hex & 0b0010 ? 1 : 0.3 }}>
+      <SteelWall x={x + 8} y={y} />
+    </g>
+    <g style={{ opacity: hex & 0b0100 ? 1 : 0.3 }}>
+      <SteelWall x={x} y={y + 8} />
+    </g>
+    <g style={{ opacity: hex & 0b1000 ? 1 : 0.3 }}>
+      <SteelWall x={x + 8} y={y + 8} />
+    </g>
   </g>
 )
 
@@ -230,7 +238,7 @@ const TextWithLineWrap = ({
   content,
   lineSpacing = 0.25 * B,
 }: TextWithLineWrapProps) => (
-  <g role="text-with-line-wrap">
+  <g className="text-with-line-wrap">
     {Range(0, Math.ceil(content.length / maxLength))
       .map(index => (
         <Text
@@ -552,7 +560,7 @@ class Editor extends React.Component<EditorProps> {
 
   renderItemSwitchButtons() {
     return (
-      <g role="item-switch-buttons">
+      <g className="item-switch-buttons">
         {Object.entries(positionMap).map(([type, y]: [MapItemType, number]) => (
           <AreaButton
             key={type}
@@ -601,7 +609,7 @@ class Editor extends React.Component<EditorProps> {
       ))
     }
     return (
-      <g role="hex-adjust-buttons">
+      <g className="hex-adjust-buttons">
         {brickHexAdjustButtons}
         {steelHexAdjustButtons}
         {itemType === 'B' ? (
@@ -631,8 +639,8 @@ class Editor extends React.Component<EditorProps> {
     const { rivers, steels, bricks, snows, forests, eagle } = parseStageMap(toString(map))
 
     return (
-      <g role="map-view">
-        <g role="board">
+      <g className="map-view">
+        <g className="board">
           <rect width={FBZ * B} height={FBZ * B} fill="#000000" />
           <RiverLayer rivers={rivers} />
           <SteelLayer steels={steels} />
@@ -642,7 +650,7 @@ class Editor extends React.Component<EditorProps> {
           <ForestLayer forests={forests} />
         </g>
         <DashLines t={t} />
-        <g role="tools" transform={`translate(${13 * B},0)`}>
+        <g className="tools" transform={`translate(${13 * B},0)`}>
           <TextButton
             content="?"
             x={2.25 * B}
@@ -678,7 +686,7 @@ class Editor extends React.Component<EditorProps> {
     const totalEnemyCount = enemies.map(e => e.count).reduce((x: number, y) => x + y)
 
     return (
-      <g role="config-view">
+      <g className="config-view">
         <DashLines t={t} />
         <Text content="name:" x={3.5 * B} y={1 * B} fill="#ccc" />
         <TextInput
@@ -707,7 +715,7 @@ class Editor extends React.Component<EditorProps> {
         />
 
         <Text content="enemies:" x={2 * B} y={4 * B} fill="#ccc" />
-        <g role="enemies-config" transform={`translate(${6 * B}, ${4 * B})`}>
+        <g className="enemies-config" transform={`translate(${6 * B}, ${4 * B})`}>
           {enemies.map(({ tankLevel, count }, index) => (
             <g key={index} transform={`translate(0, ${1.5 * B * index})`}>
               <TextButton
@@ -762,7 +770,7 @@ class Editor extends React.Component<EditorProps> {
 
     if (popup.type === 'alert') {
       return (
-        <g role="popup-alert">
+        <g className="popup-alert">
           <rect x={0} y={0} width={totalWidth} height={totalHeight} fill="transparent" />
           <g transform={`translate(${2.5 * B}, ${4.5 * B})`}>
             <rect x={-0.5 * B} y={-0.5 * B} width={12 * B} height={4 * B} fill="#e91e63" />
@@ -781,7 +789,7 @@ class Editor extends React.Component<EditorProps> {
 
     if (popup.type === 'confirm') {
       return (
-        <g role="popup-confirm">
+        <g className="popup-confirm">
           <rect x={0} y={0} width={totalWidth} height={totalHeight} fill="transparent" />
           <g transform={`translate(${2.5 * B}, ${4.5 * B})`}>
             <rect x={-0.5 * B} y={-0.5 * B} width={12 * B} height={4 * B} fill="#e91e63" />
@@ -833,7 +841,7 @@ class Editor extends React.Component<EditorProps> {
             >
               {view === 'map' ? this.renderMapView() : null}
               {view === 'config' ? this.renderConfigView() : null}
-              <g role="menu" transform={`translate(0, ${13 * B})`}>
+              <g className="menu" transform={`translate(0, ${13 * B})`}>
                 <TextButton
                   content="config"
                   x={0.5 * B}

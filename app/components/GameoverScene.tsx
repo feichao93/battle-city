@@ -42,7 +42,7 @@ class GameoverScene extends React.PureComponent<{ dispatch: Dispatch<State>; gam
     const size = ITEM_SIZE_MAP.BRICK
     const scale = 4
     return (
-      <g role="gameover-scene">
+      <g className="gameover-scene">
         <defs>
           <pattern
             id="pattern-brickwall"
