@@ -190,7 +190,7 @@ export default function* AIWorkerSaga(playerName: string) {
   }
 
   function* mode() {
-    if (Math.random() < 0.8 - continuousWanderCount * 0.05) {
+    if (Math.random() < 0.9 - continuousWanderCount * 0.02) {
       continuousWanderCount++
       yield wanderMode(ctx)
     } else {

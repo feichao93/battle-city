@@ -113,3 +113,5 @@ export const AI_SPAWN_SPEED_MAP = {
 
 /** AI 坦克在场上的最大数量 */
 export const MAX_AI_TANK_COUNT = 2
+
+export const SIMPLE_FIRE_LOOP_INTERVAL = 300

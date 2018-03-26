@@ -124,21 +124,6 @@ export function getDirectionInfo(direction: Direction, flipxy = false) {
   return result
 }
 
-export function reverseDirection(direction: Direction): Direction {
-  if (direction === 'up') {
-    return 'down'
-  }
-  if (direction === 'down') {
-    return 'up'
-  }
-  if (direction === 'left') {
-    return 'right'
-  }
-  if (direction === 'right') {
-    return 'left'
-  }
-}
-
 export function incTankLevel(tank: TankRecord) {
   if (tank.level === 'basic') {
     return tank.set('level', 'fast')
@@ -193,12 +178,13 @@ export function getTankMoveSpeed(tank: TankRecord) {
   if (tank.side === 'human') {
     return DEV.FAST ? 0.06 : 0.045
   } else {
-    if (tank.level === 'basic') {
-      return 0.03
+    if (tank.level === 'power') {
+      return 0.045
     } else if (tank.level === 'fast') {
       return 0.06
     } else {
-      return 0.045
+      // baisc or armor
+      return 0.03
     }
   }
 }
@@ -214,11 +200,8 @@ export function getTankBulletPower(tank: TankRecord) {
 }
 
 export class DefaultMap<K, V> extends Map<K, V> {
-  private defaulter: () => V
-
-  constructor(defaulter: () => V) {
+  constructor(readonly defaulter: () => V) {
     super()
-    this.defaulter = defaulter
   }
 
   get(key: K) {
@@ -226,12 +209,6 @@ export class DefaultMap<K, V> extends Map<K, V> {
       this.set(key, this.defaulter())
     }
     return super.get(key)!
-  }
-}
-
-export function* alwaysYield<T>(v: T) {
-  while (true) {
-    yield v
   }
 }
 

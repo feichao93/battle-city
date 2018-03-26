@@ -97,26 +97,26 @@ export const FireThreshhold = {
   eagle(forwardLength: number) {
     logAhead('eagle:', forwardLength)
     if (forwardLength < 0) {
-      return 0.2
+      return 0.1
     } else if (forwardLength <= 6 * BLOCK_SIZE) {
-      return 0.8
+      return 0.6
     }
   },
   humanTank(forwardLength: number) {
     logAhead('human-tank:', forwardLength)
     if (forwardLength < 0) {
-      return 0.2
+      return 0.1
     } else if (forwardLength <= 6 * BLOCK_SIZE) {
-      return 0.6
+      return 0.5
     }
   },
   destroyable(forwardLength: number) {
     logAhead('destroyable:', forwardLength)
-    // 随着距离增加fire概率减小; 距离0时, 一定fire; 距离 320 (20*BLOCK_SIZE) 时, 不fire
-    return 1 - forwardLength / 320
+    // 随着距离增加fire概率减小; 距离0时, fire 概率最高; 距离 180 时, 不fire
+    return 0.6 - forwardLength / 300
   },
   idle() {
-    return 0.1
+    return 0.05
   },
 }
 
@@ -189,11 +189,7 @@ export function determineFire(tank: TankRecord, { barrierInfo, tankPosition: pos
     }
   }
 
-  if (random < FireThreshhold.idle()) {
-    return true
-  }
-
-  return false
+  return random < FireThreshhold.idle()
 }
 
 /** 向前观察，返回前方的障碍物类型与距离 */
