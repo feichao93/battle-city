@@ -1,6 +1,4 @@
 import { Map, Record, Repeat } from 'immutable'
-import parseStageEnemies from 'utils/parseStageEnemies'
-import { stageConfigs } from 'stages'
 
 const emptyTransientKillInfo = Map({
   'player-1': Map({
@@ -27,9 +25,9 @@ const GameRecordBase = Record(
     /** 游戏是否暂停 */
     paused: false,
     /** 上次进行的关卡名 */
-    lastStage: null as string,
+    lastStageName: null as string,
     /** 当前的关卡名 */
-    currentStage: null as string,
+    currentStageName: null as string,
     /** 即将开始的关卡的名称 */
     comingStageName: null as string,
     /** 当前关卡剩余的敌人的类型列表 */
@@ -56,9 +54,9 @@ export class GameRecord extends GameRecordBase {}
 
 export default function game(state = new GameRecord(), action: Action) {
   if (action.type === 'START_GAME') {
-    return state.set('status', 'on').set('currentStage', null)
+    return state.set('status', 'on').set('currentStageName', null)
   } else if (action.type === 'RESET_GAME') {
-    return state.set('status', 'idle').set('currentStage', null)
+    return state.set('status', 'idle').set('currentStageName', null)
   } else if (action.type === 'SHOW_STATISTICS') {
     return state.set('status', 'stat')
   } else if (action.type === 'HIDE_STATISTICS') {
@@ -66,18 +64,18 @@ export default function game(state = new GameRecord(), action: Action) {
   } else if (action.type === 'END_GAME') {
     return state
       .set('status', 'gameover')
-      .set('lastStage', state.currentStage)
-      .set('currentStage', null)
+      .set('lastStageName', state.currentStageName)
+      .set('currentStageName', null)
   } else if (action.type === 'START_STAGE') {
     return state.merge({
-      currentStage: action.name,
+      currentStageName: action.stage.name,
       transientKillInfo: emptyTransientKillInfo,
       killInfo: Map(),
-      remainingEnemies: parseStageEnemies(stageConfigs[action.name].enemies),
+      remainingEnemies: action.stage.enemies,
       showTotalKillCount: false,
     })
   } else if (action.type === 'END_STAGE') {
-    return state.set('currentStage', null)
+    return state.set('currentStageName', null)
   } else if (action.type === 'REMOVE_FIRST_REMAINING_ENEMY') {
     return state.update('remainingEnemies', enemies => enemies.shift())
   } else if (action.type === 'INC_KILL_COUNT') {

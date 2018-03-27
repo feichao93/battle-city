@@ -1,5 +1,6 @@
 import { combineReducers } from 'redux'
 import { routerReducer } from 'react-router-redux'
+import { List } from 'immutable'
 import game, { GameRecord } from 'reducers/game'
 import players, { PlayersMap } from 'reducers/players'
 import bullets, { BulletsMap } from 'reducers/bullets'
@@ -10,7 +11,8 @@ import tanks, { TanksMap } from 'reducers/tanks'
 import texts, { TextsMap } from 'reducers/texts'
 import powerUps, { PowerUpsMap } from 'reducers/powerUps'
 import scores, { ScoresMap } from 'reducers/scores'
-import { MapRecord } from 'types'
+import stages from 'reducers/stages'
+import { MapRecord, StageConfig } from 'types'
 import devOnly from 'components/dev-only/reducer'
 
 export interface State {
@@ -26,6 +28,7 @@ export interface State {
   texts: TextsMap
   powerUps: PowerUpsMap
   scores: ScoresMap
+  stages: List<StageConfig>
   devOnly: any
 }
 
@@ -50,5 +53,6 @@ export default combineReducers<State>({
   texts,
   powerUps,
   scores,
+  stages,
   devOnly,
 })

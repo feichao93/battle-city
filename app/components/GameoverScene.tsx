@@ -31,8 +31,8 @@ class GameoverScene extends React.PureComponent<{ dispatch: Dispatch<State>; gam
 
   onRestart = () => {
     const { game, dispatch } = this.props
-    if (game.lastStage) {
-      dispatch(replace(`/choose-stage/${game.lastStage}`))
+    if (game.lastStageName) {
+      dispatch(replace(`/choose-stage/${game.lastStageName}`))
     } else {
       dispatch(replace(`/choose-stage`))
     }

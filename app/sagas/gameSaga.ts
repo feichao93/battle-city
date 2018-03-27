@@ -1,6 +1,6 @@
 import { replace } from 'react-router-redux'
 import { delay } from 'redux-saga'
-import { put, race } from 'redux-saga/effects'
+import { put, race, select } from 'redux-saga/effects'
 import AIMasterSaga from 'sagas/AIMasterSaga'
 import bulletsSaga from 'sagas/bulletsSaga'
 import animateTexts from 'sagas/common/animateTexts'
@@ -8,10 +8,10 @@ import humanPlayerSaga from 'sagas/humanPlayerSaga'
 import powerUpManager from 'sagas/powerUpManager'
 import stageSaga, { StageResult } from 'sagas/stageSaga'
 import { concat } from 'sagas/helper'
-import { stageNames } from 'stages'
 import { getNextId } from 'utils/common'
 import { BLOCK_SIZE } from 'utils/constants'
 import TextRecord from 'types/TextRecord'
+import { State } from '../reducers'
 import Timing from '../utils/Timing'
 
 // 播放游戏结束的动画
@@ -49,8 +49,9 @@ function* animateGameover() {
 }
 
 function* stageFlow(startStageIndex: number) {
-  for (const name of stageNames.slice(startStageIndex)) {
-    const stageResult: StageResult = yield stageSaga(name)
+  const { stages }: State = yield select()
+  for (const stage of stages.slice(startStageIndex)) {
+    const stageResult: StageResult = yield stageSaga(stage)
     DEV.LOG && console.log('stageResult:', stageResult)
     if (!stageResult.pass) {
       break

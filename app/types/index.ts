@@ -8,6 +8,7 @@ export { default as BulletRecord } from 'types/BulletRecord'
 export { default as PlayerRecord } from 'types/PlayerRecord'
 export { default as MapRecord } from 'types/MapRecord'
 export { default as EagleRecord } from 'types/EagleRecord'
+export { default as StageConfig, RawStageConfig, StageDifficulty } from 'types/StageConfig'
 export { State } from 'reducers/index'
 export { PlayersMap } from 'reducers/players'
 export { BulletsMap } from 'reducers/bullets'
@@ -46,14 +47,6 @@ declare global {
   interface Point {
     x: number
     y: number
-  }
-
-  interface StageConfig {
-    name: string
-    difficulty: 1 | 2 | 3 | 4
-    map: string[]
-    /** 敌人描述, 例如: 20\*basic, 10\*fast */
-    enemies: string[]
   }
 
   type PowerUpName = 'tank' | 'star' | 'grenade' | 'timer' | 'helmet' | 'shovel'

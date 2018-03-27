@@ -1,7 +1,6 @@
 import React from 'react'
-import { stageConfigs } from '../stages'
+import StageConfig from '../types/StageConfig'
 import { BLOCK_SIZE as B } from '../utils/constants'
-import parseStageMap from '../utils/parseStageMap'
 import BrickLayer from './BrickLayer'
 import Eagle from './Eagle'
 import ForestLayer from './ForestLayer'
@@ -11,7 +10,7 @@ import ImageComponent from './ImageComponent'
 import SteelLayer from './SteelLayer'
 
 interface StagePreviewProps {
-  stageName: string
+  stage: StageConfig
   x: number
   y: number
   scale: number
@@ -19,11 +18,12 @@ interface StagePreviewProps {
 
 export default class StagePreview extends ImageComponent<StagePreviewProps> {
   getConfig() {
-    const { stageName, x, y, scale } = this.props
+    const { stage, x, y, scale } = this.props
+    const name = stage != null ? stage.name : 'empty'
     return {
       /* StagePreview 需要用 ImageComponent 么 */
       disabled: true,
-      key: `StagePreview/${stageName}`,
+      key: `StagePreview/${name}`,
       transform: `translate(${x}, ${y}) scale(${scale})`,
       width: 13 * B,
       height: 13 * B,
@@ -31,16 +31,15 @@ export default class StagePreview extends ImageComponent<StagePreviewProps> {
   }
 
   renderImageContent() {
-    const { stageName } = this.props
-    if (stageConfigs[stageName] == null) {
+    const { stage } = this.props
+    if (stage == null) {
       return (
         <g className="stage-preview empty">
           <rect width={13 * B} height={13 * B} fill="#000000" />
         </g>
       )
     }
-    const map = parseStageMap(stageConfigs[stageName].map)
-    const { rivers, steels, bricks, snows, eagle, forests } = map
+    const { rivers, steels, bricks, snows, eagle, forests } = stage.map
     return (
       <g>
         <rect width={13 * B} height={13 * B} fill="#000000" />

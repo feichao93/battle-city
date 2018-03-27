@@ -98,10 +98,11 @@ class StatisticsScene extends React.PureComponent<P> {
   }
 }
 
-function mapStateToProps({ game: { transientKillInfo, currentStage, showTotalKillCount } }: State) {
+function mapStateToProps(state: State) {
+  const { transientKillInfo, currentStageName, showTotalKillCount } = state.game
   return {
     transientKillInfo,
-    stageName: currentStage,
+    stageName: currentStageName,
     showTotalKillCount,
   }
 }

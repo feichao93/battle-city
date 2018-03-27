@@ -23,9 +23,10 @@ import React from 'react'
 import { connect } from 'react-redux'
 import { State } from 'types'
 import { BLOCK_SIZE } from 'utils/constants'
-import { stageNames } from 'stages'
 
-class GameScene extends React.PureComponent<State & { dispatch: Dispatch<State>; match: match<any> }> {
+class GameScene extends React.PureComponent<
+  State & { dispatch: Dispatch<State>; match: match<any> }
+> {
   componentDidMount() {
     this.didMountOrUpdate()
   }
@@ -35,11 +36,11 @@ class GameScene extends React.PureComponent<State & { dispatch: Dispatch<State>;
   }
 
   didMountOrUpdate() {
-    const { game, dispatch, match } = this.props
+    const { game, dispatch, match, stages } = this.props
     if (game.status === 'idle' || game.status === 'gameover') {
       // 如果游戏还没开始或已经结束 则开始游戏
       const stageName = match.params.stageName
-      const stageIndex = stageNames.indexOf(stageName)
+      const stageIndex = stages.findIndex(s => s.name === stageName)
       dispatch<Action>({
         type: 'START_GAME',
         stageIndex: stageIndex === -1 ? 0 : stageIndex,
@@ -49,14 +50,14 @@ class GameScene extends React.PureComponent<State & { dispatch: Dispatch<State>;
       // 用户在地址栏中手动输入了新的关卡名称
       const stageName = match.params.stageName
       if (
-        game.currentStage != null &&
-        stageNames.includes(stageName) &&
-        stageName !== game.currentStage
+        game.currentStageName != null &&
+        stages.some(s => s.name === stageName) &&
+        stageName !== game.currentStageName
       ) {
         DEV.LOG && console.log('`stageName` in url changed. Restart game...')
         dispatch<Action>({
           type: 'START_GAME',
-          stageIndex: stageNames.indexOf(stageName),
+          stageIndex: stages.findIndex(s => s.name === stageName),
         })
       }
     }

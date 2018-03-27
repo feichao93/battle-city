@@ -9,6 +9,7 @@ import {
   ScoreRecord,
   TankRecord,
   TextRecord,
+  StageConfig,
 } from 'types'
 
 declare global {
@@ -211,7 +212,7 @@ declare global {
 
     export interface LoadStageMapAction {
       type: 'LOAD_STAGE_MAP'
-      name: string
+      stage: StageConfig
     }
 
     export interface UpdateComingStageName {
@@ -221,12 +222,12 @@ declare global {
 
     export interface BeforeStartStage {
       type: 'BEFORE_START_STAGE'
-      name: string
+      stage: StageConfig
     }
 
     export interface StartStage {
       type: 'START_STAGE'
-      name: string
+      stage: StageConfig
     }
 
     export interface AddOrUpdateExplosion {

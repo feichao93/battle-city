@@ -6,4 +6,3 @@ export function concat(...iterators: IterableIterator<any>[]): IterableIterator<
     }
   })()
 }
-

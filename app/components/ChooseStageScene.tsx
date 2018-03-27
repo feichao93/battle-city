@@ -1,15 +1,16 @@
 import React from 'react'
+import { List } from 'immutable'
 import { connect, Dispatch } from 'react-redux'
 import { match, Redirect } from 'react-router-dom'
 import { replace } from 'react-router-redux'
 import Text from 'components/Text'
-import { stageNames } from 'stages'
 import TextButton from 'components/TextButton'
 import { BLOCK_SIZE as B, CONTROL_CONFIG } from 'utils/constants'
-import { State } from 'types'
+import { State, StageConfig } from 'types'
 import StagePreview from './StagePreview'
 
 class ChooseStageScene extends React.PureComponent<{
+  stages: List<StageConfig>
   dispatch: Dispatch<State>
   match: match<{ stageName: string }>
 }> {
@@ -33,9 +34,9 @@ class ChooseStageScene extends React.PureComponent<{
   }
 
   getCurrentStageIndex = () => {
-    const { match } = this.props
+    const { stages, match } = this.props
     const { stageName } = match.params
-    const stageIndex = stageNames.indexOf(stageName)
+    const stageIndex = stages.findIndex(s => s.name === stageName)
     DEV.ASSERT && console.assert(stageIndex !== -1)
     return stageIndex
   }
@@ -43,16 +44,18 @@ class ChooseStageScene extends React.PureComponent<{
   onChoose = (stageName: string) => this.props.dispatch(replace(`/choose-stage/${stageName}`))
 
   onChoosePrevStage = () => {
+    const { stages } = this.props
     const stageIndex = this.getCurrentStageIndex()
     if (stageIndex > 0) {
-      this.onChoose(stageNames[stageIndex - 1])
+      this.onChoose(stages.get(stageIndex - 1).name)
     }
   }
 
   onChooseNextStage = () => {
+    const { stages } = this.props
     const stageIndex = this.getCurrentStageIndex()
-    if (stageIndex < stageNames.length - 1) {
-      this.onChoose(stageNames[stageIndex + 1])
+    if (stageIndex < stages.size - 1) {
+      this.onChoose(stages.get(stageIndex + 1).name)
     }
   }
 
@@ -64,18 +67,19 @@ class ChooseStageScene extends React.PureComponent<{
   }
 
   render() {
-    const { match, dispatch } = this.props
+    const { match, dispatch, stages } = this.props
+    const stageNames = stages.map(s => s.name)
     const { stageName } = match.params
     if (!stageNames.includes(stageName)) {
-      return <Redirect to={`${match.url}/${stageNames[0]}`} />
+      return <Redirect to={`${match.url}/${stageNames.first()}`} />
     }
     const index = stageNames.indexOf(stageName)
     return (
       <g className="choose-stage-scene">
         <Text content="choose stage:" x={0.5 * B} y={0.5 * B} />
-        <StagePreview stageName={stageNames[index - 1]} x={0.75 * B} y={3.375 * B} scale={1 / 4} />
-        <StagePreview stageName={stageName} x={4.75 * B} y={1.75 * B} scale={1 / 2} />
-        <StagePreview stageName={stageNames[index + 1]} x={12 * B} y={3.375 * B} scale={1 / 4} />
+        <StagePreview stage={stages.get(index - 1)} x={0.75 * B} y={3.375 * B} scale={1 / 4} />
+        <StagePreview stage={stages.get(index)} x={4.75 * B} y={1.75 * B} scale={1 / 2} />
+        <StagePreview stage={stages.get(index + 1)} x={12 * B} y={3.375 * B} scale={1 / 4} />
         <Text content={`stage ${stageName}`} x={6.5 * B} y={8.5 * B} />
         <g className="button-areas" transform={`translate(${2.5 * B}, ${11 * B})`}>
           <TextButton
@@ -89,7 +93,7 @@ class ChooseStageScene extends React.PureComponent<{
           <TextButton
             content="next"
             textFill="white"
-            disabled={index === stageNames.length - 1}
+            disabled={index === stageNames.size - 1}
             x={3 * B}
             y={0}
             onClick={this.onChooseNextStage}
@@ -118,4 +122,6 @@ class ChooseStageScene extends React.PureComponent<{
   }
 }
 
-export default connect(undefined)(ChooseStageScene)
+const mapStateToProps = (state: State) => ({ stages: state.stages })
+
+export default connect(mapStateToProps)(ChooseStageScene)

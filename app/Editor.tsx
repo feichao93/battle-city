@@ -21,8 +21,7 @@ import BrickWall from 'components/BrickWall'
 import SteelWall from 'components/SteelWall'
 import TextInput from 'components/TextInput'
 import TextButton from 'components/TextButton'
-import parseStageMap from 'utils/parseStageMap'
-import { TankRecord } from 'types'
+import { TankRecord, StageConfig, RawStageConfig } from 'types'
 import { inc, dec } from 'utils/common'
 import { State } from './reducers'
 
@@ -50,7 +49,8 @@ function decTankLevel(record: EnemyConfig) {
   }
 }
 
-function toString(list: List<MapItemRecord>): StageConfig['map'] {
+// TODO 该文件中的部分函数移动到 StageConfig 中
+function toString(list: List<MapItemRecord>): RawStageConfig['map'] {
   const result: string[] = []
   for (let row = 0; row < FBZ; row += 1) {
     const array: string[] = []
@@ -329,7 +329,7 @@ class Editor extends React.Component<EditorProps> {
     fileReader.readAsText(file)
     fileReader.onloadend = () => {
       try {
-        const stage: StageConfig = JSON.parse(fileReader.result)
+        const stage: RawStageConfig = JSON.parse(fileReader.result)
         this.loadStateFromFileContent(stage)
       } catch (error) {
         this.showAlertPopup('Failed to open file.')
@@ -338,7 +338,7 @@ class Editor extends React.Component<EditorProps> {
     }
   }
 
-  async loadStateFromFileContent(stage: StageConfig) {
+  async loadStateFromFileContent(stage: RawStageConfig) {
     const stageName = stage.name
     const difficulty = stage.difficulty
     const enemies = List(
@@ -636,7 +636,9 @@ class Editor extends React.Component<EditorProps> {
 
   renderMapView() {
     const { map, brickHex, steelHex, itemType, t } = this.state
-    const { rivers, steels, bricks, snows, forests, eagle } = parseStageMap(toString(map))
+    const { rivers, steels, bricks, snows, forests, eagle } = StageConfig.parseStageMap(
+      toString(map),
+    )
 
     return (
       <g className="map-view">

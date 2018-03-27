@@ -1,5 +1,5 @@
 import AIWorkerSaga from 'ai/AIWorkerSaga'
-import _ from 'lodash'
+import { Repeat } from 'immutable'
 import { State } from 'reducers'
 import { channel as makeChannel } from 'redux-saga'
 import { all, cancelled, fork, put, race, select, take, takeEvery } from 'redux-saga/effects'
@@ -14,7 +14,6 @@ import {
 } from 'utils/constants'
 import * as selectors from 'utils/selectors'
 import { frame } from 'utils/common'
-import { stageConfigs } from '../stages'
 
 /** AIMasterSaga用来管理AIWorkerSaga的启动和停止, 并处理和AI程序的数据交互 */
 export default function* AIMasterSaga() {
@@ -23,15 +22,13 @@ export default function* AIMasterSaga() {
 
   while (true) {
     yield take('START_STAGE')
-    for (const i in _.range(0, MAX_AI_TANK_COUNT)) {
-      addAIReqChannel.put('add')
-    }
+    Repeat<'add'>('add', MAX_AI_TANK_COUNT).forEach(addAIReqChannel.put)
   }
 
   function* addWorkerHelper() {
     while (true) {
       yield take(addAIReqChannel)
-      const { game }: State = yield select()
+      const { game, stages }: State = yield select()
       if (!game.remainingEnemies.isEmpty()) {
         const { x, y } = yield select(selectors.availableSpawnPosition)
         yield put<Action>({ type: 'REMOVE_FIRST_REMAINING_ENEMY' })
@@ -50,7 +47,7 @@ export default function* AIMasterSaga() {
             helmetDuration: frame(30),
             frozenTimeout: game.AIFrozenTimeout,
           }),
-          AI_SPAWN_SPEED_MAP[stageConfigs[game.currentStage].difficulty],
+          AI_SPAWN_SPEED_MAP[stages.find(s => s.name === game.currentStageName).difficulty],
         )
         yield fork(AIWorkerWrapper, `AI-${getNextId('AI-player')}`, tankId)
       }

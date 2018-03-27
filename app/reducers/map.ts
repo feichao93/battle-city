@@ -1,13 +1,10 @@
-import { stageConfigs } from 'stages'
 import { MapRecord } from 'types'
-import parseStageMap from 'utils/parseStageMap'
 
 const initState = new MapRecord({ eagle: null })
 
 export default function mapReducer(state = initState, action: Action) {
   if (action.type === 'LOAD_STAGE_MAP') {
-    const { name } = action
-    return parseStageMap(stageConfigs[name].map)
+    return action.stage.map
   } else if (action.type === 'DESTROY_EAGLE') {
     return state.setIn(['eagle', 'broken'], true)
   } else if (action.type === 'REMOVE_BRICKS') {

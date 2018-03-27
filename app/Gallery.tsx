@@ -25,9 +25,8 @@ import game, { GameRecord } from 'reducers/game'
 import { time } from 'reducers'
 import players from 'reducers/players'
 import tickEmitter from 'sagas/tickEmitter'
-import { stageConfigs } from 'stages'
+import defaultStages from 'stages'
 import { BLOCK_SIZE as B, FIELD_BLOCK_SIZE as FBZ } from 'utils/constants'
-import parseStageMap from 'utils/parseStageMap'
 import {
   BulletRecord,
   FlickerRecord,
@@ -167,22 +166,18 @@ const sides: Side[] = ['ai', 'human']
 const levels: TankLevel[] = ['basic', 'fast', 'power', 'armor']
 const powerUpNames: PowerUpName[] = ['tank', 'star', 'grenade', 'timer', 'helmet', 'shovel']
 
-export default class Gallery extends React.Component<{}, { stage: string }> {
+export default class Gallery extends React.Component<{}, { stageIndex: number }> {
   storeAndTask = initGalleryStoreAndTask()
-  state = {
-    stage: Object.keys(stageConfigs)[0],
-  }
+  state = { stageIndex: 0 }
 
   componentWillUnmount() {
     this.storeAndTask.task.cancel()
   }
 
   render() {
-    const stageNames = Object.keys(stageConfigs)
-    const { stage } = this.state
-    const { bricks, steels, rivers, snows, forests, eagle } = parseStageMap(
-      stageConfigs[stage].map,
-    ).toObject()
+    const stageNames = defaultStages.map(s => s.name)
+    const { stageIndex } = this.state
+    const { bricks, steels, rivers, snows, forests, eagle } = defaultStages.get(stageIndex).map
 
     return (
       <Provider store={this.storeAndTask.store}>
@@ -254,9 +249,12 @@ export default class Gallery extends React.Component<{}, { stage: string }> {
             <summary>
               <p style={{ fontSize: 30, lineHeight: '50px', margin: 0 }}>
                 Stage:
-                <select value={stage} onChange={e => this.setState({ stage: e.target.value })}>
-                  {stageNames.map(name => (
-                    <option key={name} value={name}>
+                <select
+                  value={defaultStages.get(stageIndex).name}
+                  onChange={e => this.setState({ stageIndex: Number(e.target.value) })}
+                >
+                  {stageNames.map((name, index) => (
+                    <option key={index} value={index}>
                       stage-{name}
                     </option>
                   ))}

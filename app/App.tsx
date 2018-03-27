@@ -15,7 +15,7 @@ import CurtainsContainer from 'components/CurtainsContainer'
 import Inspector from 'components/dev-only/Inspector'
 import { State } from 'types'
 import { GameRecord } from 'reducers/game'
-import { stageNames } from 'stages'
+import { firstStageName } from 'stages'
 import Editor from './Editor'
 import Gallery from './Gallery'
 
@@ -73,13 +73,13 @@ class App extends React.PureComponent<{ game: GameRecord }> {
                     <Route
                       exact
                       path="/choose-stage"
-                      render={() => <Redirect to={`/choose-stage/${stageNames[0]}`} />}
+                      render={() => <Redirect to={`/choose-stage/${firstStageName}`} />}
                     />
                     <Route path="/choose-stage/:stageName" component={ChooseStageScene} />
                     <Route
                       exact
                       path="/stage"
-                      render={() => <Redirect to={`/stage/${stageNames[0]}`} />}
+                      render={() => <Redirect to={`/stage/${firstStageName}`} />}
                     />
                     <Route
                       path="/stage/:stageName"

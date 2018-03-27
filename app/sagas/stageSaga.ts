@@ -3,11 +3,12 @@ import { put, select, take, cancelled } from 'redux-saga/effects'
 import statistics from 'sagas/stageStatistics'
 import { frame as f } from 'utils/common'
 import { replace } from 'react-router-redux'
+import StageConfig from '../types/StageConfig'
 import Timing from '../utils/Timing'
 
-function* animateCurtainAndLoadMap(stageName: string) {
+function* animateCurtainAndLoadMap(stage: StageConfig) {
   try {
-    yield put<Action>({ type: 'UPDATE_COMING_STAGE_NAME', stageName })
+    yield put<Action>({ type: 'UPDATE_COMING_STAGE_NAME', stageName: stage.name })
     yield put<Action>({
       type: 'UPDATE_CURTAIN',
       curtainName: 'stage-enter-cutain',
@@ -24,7 +25,7 @@ function* animateCurtainAndLoadMap(stageName: string) {
 
     // 在幕布完全将舞台遮起来的时候载入地图
     yield Timing.delay(f(20))
-    yield put<Action>({ type: 'LOAD_STAGE_MAP', name: stageName })
+    yield put<Action>({ type: 'LOAD_STAGE_MAP', stage })
     yield Timing.delay(f(20))
 
     yield* Timing.tween(f(30), t =>
@@ -58,14 +59,14 @@ export interface StageResult {
  * 在关卡过程中, 该saga负责统计该关卡中的战斗信息
  * 当玩家清空关卡时stage-saga退出, 并向game-saga返回该关卡结果
  */
-export default function* stageSaga(stageName: string) {
-  yield put(replace(`/stage/${stageName}`))
+export default function* stageSaga(stage: StageConfig) {
+  yield put(replace(`/stage/${stage.name}`))
 
   try {
-    yield animateCurtainAndLoadMap(stageName)
-    yield put<Action>({ type: 'BEFORE_START_STAGE', name: stageName })
+    yield animateCurtainAndLoadMap(stage)
+    yield put<Action>({ type: 'BEFORE_START_STAGE', stage })
     yield put<Action>({ type: 'SHOW_HUD' })
-    yield put<Action>({ type: 'START_STAGE', name: stageName })
+    yield put<Action>({ type: 'START_STAGE', stage })
 
     while (true) {
       const action: Action = yield take(['KILL', 'DESTROY_EAGLE'])
