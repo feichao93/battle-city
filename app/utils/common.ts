@@ -89,7 +89,7 @@ export function asRect(
       height: BLOCK_SIZE * (1 + enlargement),
     }
   } else if (item instanceof PowerUpRecord) {
-    console.assert(enlargement === -0.5)
+    DEV.ASSERT && console.assert(enlargement === -0.5)
     return {
       x: item.x - BLOCK_SIZE / 2 * enlargement,
       y: item.y - BLOCK_SIZE / 2 * enlargement,
@@ -104,6 +104,7 @@ export function asRect(
 type UpdaterMaker = (amount: number) => (x: number) => number
 export const inc: UpdaterMaker = amount => x => x + amount
 export const dec: UpdaterMaker = amount => x => x - amount
+export const add = (x: number, y: number) => x + y
 
 export function getDirectionInfo(direction: Direction, flipxy = false) {
   let result: { xy: 'x' | 'y'; updater: UpdaterMaker }

@@ -11,6 +11,10 @@ export const BULLET_SIZE = 3
 /** 摧毁steel的最低子弹power值 */
 export const STEEL_POWER = 3
 
+export const ZOOM_LEVEL = 2
+export const SCREEN_WIDTH = 16 * BLOCK_SIZE
+export const SCREEN_HEIGHT = 15 * BLOCK_SIZE
+
 /**
  * 坦克的配色方案
  * 共有4种配色方案: 黄色方案, 绿色方案, 银色方案, 红色方案

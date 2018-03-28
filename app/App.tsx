@@ -3,7 +3,7 @@ import { hot } from 'react-hot-loader'
 import { Route, Redirect, Switch } from 'react-router-dom'
 import { ConnectedRouter } from 'react-router-redux'
 import { connect } from 'react-redux'
-import { BLOCK_SIZE as B } from 'utils/constants'
+import { SCREEN_WIDTH, SCREEN_HEIGHT, ZOOM_LEVEL } from 'utils/constants'
 import history from 'utils/history'
 import GameScene from 'components/GameScene'
 import GameoverScene from 'components/GameoverScene'
@@ -46,10 +46,6 @@ const About = () => (
   </div>
 )
 
-const zoomLevel = 2
-const totalWidth = 16 * B
-const totalHeight = 15 * B
-
 class App extends React.PureComponent<{ game: GameRecord }> {
   render() {
     const { game } = this.props
@@ -65,9 +61,9 @@ class App extends React.PureComponent<{ game: GameRecord }> {
                 <svg
                   className="svg"
                   style={{ background: '#757575' }}
-                  width={totalWidth * zoomLevel}
-                  height={totalHeight * zoomLevel}
-                  viewBox={`0 0 ${totalWidth} ${totalHeight}`}
+                  width={SCREEN_WIDTH * ZOOM_LEVEL}
+                  height={SCREEN_HEIGHT * ZOOM_LEVEL}
+                  viewBox={`0 0 ${SCREEN_WIDTH} ${SCREEN_HEIGHT}`}
                 >
                   <Switch>
                     <Route

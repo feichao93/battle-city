@@ -1,4 +1,5 @@
 import { Map, Record, Repeat } from 'immutable'
+import { EnemyGroupConfig } from '../types/StageConfig'
 
 const emptyTransientKillInfo = Map({
   'player-1': Map({
@@ -71,7 +72,7 @@ export default function game(state = new GameRecord(), action: Action) {
       currentStageName: action.stage.name,
       transientKillInfo: emptyTransientKillInfo,
       killInfo: Map(),
-      remainingEnemies: action.stage.enemies,
+      remainingEnemies: action.stage.enemies.flatMap(EnemyGroupConfig.unwind),
       showTotalKillCount: false,
     })
   } else if (action.type === 'END_STAGE') {

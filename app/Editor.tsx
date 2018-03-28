@@ -5,12 +5,13 @@ import React from 'react'
 import { Dispatch } from 'redux'
 import { is, List, Range, Record, Repeat } from 'immutable'
 import { connect } from 'react-redux'
-import { BLOCK_SIZE as B, FIELD_BLOCK_SIZE as FBZ } from 'utils/constants'
-import BrickLayer from 'components/BrickLayer'
-import SteelLayer from 'components/SteelLayer'
-import RiverLayer from 'components/RiverLayer'
-import SnowLayer from 'components/SnowLayer'
-import ForestLayer from 'components/ForestLayer'
+import {
+  BLOCK_SIZE as B,
+  FIELD_BLOCK_SIZE as FBZ,
+  ZOOM_LEVEL,
+  SCREEN_WIDTH,
+  SCREEN_HEIGHT,
+} from 'utils/constants'
 import Eagle from 'components/Eagle'
 import Text from 'components/Text'
 import River from 'components/River'
@@ -21,36 +22,13 @@ import BrickWall from 'components/BrickWall'
 import SteelWall from 'components/SteelWall'
 import TextInput from 'components/TextInput'
 import TextButton from 'components/TextButton'
-import { TankRecord, StageConfig, RawStageConfig } from 'types'
-import { inc, dec } from 'utils/common'
+import { TankRecord, RawStageConfig } from 'types'
+import { inc, dec, add } from 'utils/common'
+import StagePreview from './components/StagePreview'
+import StageConfig from './types/StageConfig'
 import { State } from './reducers'
 
-const zoomLevel = 2
-const totalWidth = 16 * B
-const totalHeight = 15 * B
-
-function incTankLevel(record: EnemyConfig) {
-  if (record.tankLevel === 'basic') {
-    return record.set('tankLevel', 'fast')
-  } else if (record.tankLevel === 'fast') {
-    return record.set('tankLevel', 'power')
-  } else {
-    return record.set('tankLevel', 'armor')
-  }
-}
-
-function decTankLevel(record: EnemyConfig) {
-  if (record.tankLevel === 'armor') {
-    return record.set('tankLevel', 'power')
-  } else if (record.tankLevel === 'power') {
-    return record.set('tankLevel', 'fast')
-  } else {
-    return record.set('tankLevel', 'basic')
-  }
-}
-
-// TODO 该文件中的部分函数移动到 StageConfig 中
-function toString(list: List<MapItemRecord>): RawStageConfig['map'] {
+function serializeMapItemList(list: List<MapItemRecord>): RawStageConfig['map'] {
   const result: string[] = []
   for (let row = 0; row < FBZ; row += 1) {
     const array: string[] = []
@@ -87,14 +65,10 @@ function toString(list: List<MapItemRecord>): RawStageConfig['map'] {
 
 export type MapItemType = 'X' | 'E' | 'B' | 'T' | 'R' | 'S' | 'F'
 
-export const MapItemRecord = Record({
+export class MapItemRecord extends Record({
   type: 'X' as MapItemType,
   hex: 0xf,
-})
-
-const mapItemRecord = MapItemRecord()
-
-export type MapItemRecord = typeof mapItemRecord
+}) {}
 
 export type PopupType = 'alert' | 'confirm'
 
@@ -103,16 +77,7 @@ export class Popup extends Record({
   message: '',
 }) {}
 
-export class EnemyConfig extends Record({
-  tankLevel: 'basic' as TankLevel,
-  count: 0,
-}) {}
-
-type DashLinesProps = {
-  t?: number
-}
-
-class DashLines extends React.PureComponent<DashLinesProps> {
+class DashLines extends React.PureComponent<{ t?: number }> {
   render() {
     const { t } = this.props
     const hrow = Math.floor(t / FBZ)
@@ -127,7 +92,7 @@ class DashLines extends React.PureComponent<DashLinesProps> {
               x1={B * col}
               y1={0}
               x2={B * col}
-              y2={totalHeight}
+              y2={SCREEN_HEIGHT}
               strokeOpacity={hcol === col || hcol === col - 1 ? 1 : 0.3}
             />
           ))
@@ -138,7 +103,7 @@ class DashLines extends React.PureComponent<DashLinesProps> {
               key={row}
               x1={0}
               y1={B * row}
-              x2={totalWidth}
+              x2={SCREEN_WIDTH}
               y2={B * row}
               strokeOpacity={hrow === row || hrow === row - 1 ? 1 : 0.3}
             />
@@ -280,22 +245,12 @@ class Editor extends React.Component<EditorProps> {
   state = {
     popup: null as Popup,
     t: -1,
-
-    // map-view
-    map: Repeat(mapItemRecord, FBZ ** 2).toList(),
+    // 地图数据使用 itemList，其他关卡配置数据使用 stage 中的数据
+    stage: new StageConfig(),
+    itemList: Repeat(new MapItemRecord(), FBZ ** 2).toList(),
     itemType: 'X' as MapItemType,
     brickHex: 0xf,
     steelHex: 0xf,
-
-    // config-view
-    stageName: '',
-    difficulty: 1,
-    enemies: List<EnemyConfig>([
-      new EnemyConfig({ tankLevel: 'basic', count: 10 }),
-      new EnemyConfig({ tankLevel: 'fast', count: 4 }),
-      new EnemyConfig({ tankLevel: 'power', count: 4 }),
-      new EnemyConfig({ tankLevel: 'armor', count: 2 }),
-    ]),
   }
 
   componentDidMount() {
@@ -327,43 +282,32 @@ class Editor extends React.Component<EditorProps> {
     }
     const fileReader = new FileReader()
     fileReader.readAsText(file)
-    fileReader.onloadend = () => {
+    fileReader.onloadend = async () => {
       try {
         const stage: RawStageConfig = JSON.parse(fileReader.result)
-        this.loadStateFromFileContent(stage)
+        await this.loadStateFromFileContent(stage)
       } catch (error) {
-        this.showAlertPopup('Failed to open file.')
+        console.error(error)
+        this.showAlertPopup('Failed to parse stage config file.')
       }
       this.resetButton.click()
     }
   }
 
-  async loadStateFromFileContent(stage: RawStageConfig) {
-    const stageName = stage.name
-    const difficulty = stage.difficulty
-    const enemies = List(
-      stage.enemies.map(line => {
-        const splited = line.split('*')
-        return new EnemyConfig({
-          count: Number(splited[0]),
-          tankLevel: splited[1] as TankLevel,
-        })
-      }),
-    )
-      .setSize(4)
-      .map(v => (v ? v : new EnemyConfig()))
-    const map = List(stage.map).flatMap(line => {
+  async loadStateFromFileContent(rawStageConfig: RawStageConfig) {
+    const itemList = List(rawStageConfig.map).flatMap(line => {
       const items = line.trim().split(/ +/)
       return items.map(item => {
         const hex = parseInt(item[1], 16)
-        return MapItemRecord({
+        return new MapItemRecord({
           type: item[0] as MapItemType,
           hex: isNaN(hex) ? 0 : hex,
         })
       })
     })
+    const stage = StageConfig.fromJS(rawStageConfig)
     if (await this.showConfirmPopup('This will override current config and map. Continue?')) {
-      this.setState({ stageName, difficulty, enemies, map })
+      this.setState({ stage, itemList })
     }
   }
 
@@ -376,8 +320,8 @@ class Editor extends React.Component<EditorProps> {
       totalLeft += node.scrollLeft + node.clientLeft
       node = node.parentElement
     }
-    const row = Math.floor((event.clientY + totalTop - this.svg.clientTop) / zoomLevel / B)
-    const col = Math.floor((event.clientX + totalLeft - this.svg.clientLeft) / zoomLevel / B)
+    const row = Math.floor((event.clientY + totalTop - this.svg.clientTop) / ZOOM_LEVEL / B)
+    const col = Math.floor((event.clientX + totalLeft - this.svg.clientLeft) / ZOOM_LEVEL / B)
     if (row >= 0 && row < FBZ && col >= 0 && col < FBZ) {
       return row * FBZ + col
     } else {
@@ -388,26 +332,26 @@ class Editor extends React.Component<EditorProps> {
   getCurrentItem() {
     const { itemType, brickHex, steelHex } = this.state
     if (itemType === 'B') {
-      return MapItemRecord({ type: 'B', hex: brickHex })
+      return new MapItemRecord({ type: 'B', hex: brickHex })
     } else if (itemType === 'T') {
-      return MapItemRecord({ type: 'T', hex: steelHex })
+      return new MapItemRecord({ type: 'T', hex: steelHex })
     } else {
-      return MapItemRecord({ type: itemType })
+      return new MapItemRecord({ type: itemType })
     }
   }
 
   setAsCurrentItem(t: number) {
-    const { map } = this.state
+    const { itemList } = this.state
     const item = this.getCurrentItem()
-    if (t == -1 || is(map.get(t), item)) {
+    if (t == -1 || is(itemList.get(t), item)) {
       return
     }
     if (item.type === 'E') {
       // 先将已存在的eagle移除 保证Eagle最多出现一次
-      const eagleRemoved = map.map(item => (item.type === 'E' ? mapItemRecord : item))
-      this.setState({ map: eagleRemoved.set(t, item) })
+      const eagleRemoved = itemList.map(item => (item.type === 'E' ? new MapItemRecord() : item))
+      this.setState({ itemList: eagleRemoved.set(t, item) })
     } else {
-      this.setState({ map: map.set(t, item) })
+      this.setState({ itemList: itemList.set(t, item) })
     }
   }
 
@@ -443,33 +387,41 @@ class Editor extends React.Component<EditorProps> {
   }
 
   onIncDifficulty = () => {
-    const { difficulty } = this.state
-    this.setState({ difficulty: difficulty + 1 })
+    const { stage } = this.state
+    this.setState({ stage: stage.update('difficulty', inc(1) as any) })
   }
 
   onDecDifficulty = () => {
-    const { difficulty } = this.state
-    this.setState({ difficulty: difficulty - 1 })
+    const { stage } = this.state
+    this.setState({ stage: stage.update('difficulty', dec(1) as any) })
   }
 
   onIncEnemyLevel = (index: number) => {
-    const { enemies } = this.state
-    this.setState({ enemies: enemies.update(index, incTankLevel) })
+    const { stage } = this.state
+    this.setState({
+      stage: stage.updateIn(['enemies', index], e => e.incTankLevel()),
+    })
   }
 
   onDecEnemyLevel = (index: number) => {
-    const { enemies } = this.state
-    this.setState({ enemies: enemies.update(index, decTankLevel) })
+    const { stage } = this.state
+    this.setState({
+      stage: stage.updateIn(['enemies', index], e => e.decTankLevel()),
+    })
   }
 
   onIncEnemyCount = (index: number) => {
-    const { enemies } = this.state
-    this.setState({ enemies: enemies.updateIn([index, 'count'], inc(1)) })
+    const { stage } = this.state
+    this.setState({
+      stage: stage.updateIn(['enemies', index], e => e.incCount()),
+    })
   }
 
   onDecEnemyCount = (index: number) => {
-    const { enemies } = this.state
-    this.setState({ enemies: enemies.updateIn([index, 'count'], dec(1)) })
+    const { stage } = this.state
+    this.setState({
+      stage: stage.updateIn(['enemies', index], e => e.decCount()),
+    })
   }
 
   onRequestLoad = () => {
@@ -477,11 +429,12 @@ class Editor extends React.Component<EditorProps> {
   }
 
   onSave = async () => {
-    const { map, stageName, enemies, difficulty } = this.state
-    const totalEnemyCount = enemies.map(e => e.count).reduce((x: number, y) => x + y)
+    const { stage, itemList } = this.state
+    const { enemies, name } = stage
+    const totalEnemyCount = enemies.map(e => e.count).reduce(add)
 
     // 检查stageName
-    if (stageName === '') {
+    if (name === '') {
       await this.showAlertPopup('Please enter stage name.')
       this.props.dispatch(push('/editor/config'))
       return
@@ -498,22 +451,23 @@ class Editor extends React.Component<EditorProps> {
     }
 
     // 检查地图
-    const hasEagle = map.some(mapItem => mapItem.type === 'E')
+    const hasEagle = itemList.some(mapItem => mapItem.type === 'E')
     if (!hasEagle && !await this.showConfirmPopup('no eagle. continue?')) {
       return
     }
 
     const content = JSON.stringify(
       {
-        name: stageName.toLowerCase(),
-        difficulty,
-        map: toString(map),
+        name: name.toLowerCase(),
+        difficulty: stage.difficulty,
+        map: serializeMapItemList(itemList),
         enemies: enemies.filter(e => e.count > 0).map(e => `${e.count}*${e.tankLevel}`),
       },
       null,
       2,
     )
-    saveAs(new Blob([content], { type: 'text/plain;charset=utf-8' }), `stage-${stageName}.json`)
+
+    saveAs(new Blob([content], { type: 'text/plain;charset=utf-8' }), `stage-${name}.json`)
   }
 
   showAlertPopup(message: string) {
@@ -635,22 +589,12 @@ class Editor extends React.Component<EditorProps> {
   }
 
   renderMapView() {
-    const { map, brickHex, steelHex, itemType, t } = this.state
-    const { rivers, steels, bricks, snows, forests, eagle } = StageConfig.parseStageMap(
-      toString(map),
-    )
+    const { stage, itemList, brickHex, steelHex, itemType, t } = this.state
+    const stageMap = StageConfig.parseStageMap(serializeMapItemList(itemList))
 
     return (
       <g className="map-view">
-        <g className="board">
-          <rect width={FBZ * B} height={FBZ * B} fill="#000000" />
-          <RiverLayer rivers={rivers} />
-          <SteelLayer steels={steels} />
-          <BrickLayer bricks={bricks} />
-          <SnowLayer snows={snows} />
-          {eagle ? <Eagle x={eagle.x} y={eagle.y} broken={eagle.broken} /> : null}
-          <ForestLayer forests={forests} />
-        </g>
+        <StagePreview stage={stage.set('map', stageMap)} x={0} y={0} scale={1} />
         <DashLines t={t} />
         <g className="tools" transform={`translate(${13 * B},0)`}>
           <TextButton
@@ -684,8 +628,9 @@ class Editor extends React.Component<EditorProps> {
   }
 
   renderConfigView() {
-    const { enemies, difficulty, stageName, t } = this.state
-    const totalEnemyCount = enemies.map(e => e.count).reduce((x: number, y) => x + y)
+    const { stage, t } = this.state
+    const { enemies, name, difficulty } = stage
+    const totalEnemyCount = enemies.map(e => e.count).reduce(add)
 
     return (
       <g className="config-view">
@@ -695,8 +640,8 @@ class Editor extends React.Component<EditorProps> {
           x={6.5 * B}
           y={B}
           maxLength={12}
-          value={stageName}
-          onChange={stageName => this.setState({ stageName })}
+          value={name}
+          onChange={name => this.setState({ stage: stage.set('name', name) })}
         />
 
         <Text content="difficulty:" x={0.5 * B} y={2.5 * B} fill="#ccc" />
@@ -773,7 +718,7 @@ class Editor extends React.Component<EditorProps> {
     if (popup.type === 'alert') {
       return (
         <g className="popup-alert">
-          <rect x={0} y={0} width={totalWidth} height={totalHeight} fill="transparent" />
+          <rect x={0} y={0} width={SCREEN_WIDTH} height={SCREEN_HEIGHT} fill="transparent" />
           <g transform={`translate(${2.5 * B}, ${4.5 * B})`}>
             <rect x={-0.5 * B} y={-0.5 * B} width={12 * B} height={4 * B} fill="#e91e63" />
             <TextWithLineWrap x={0} y={0} fill="#333" maxLength={22} content={popup.message} />
@@ -792,7 +737,7 @@ class Editor extends React.Component<EditorProps> {
     if (popup.type === 'confirm') {
       return (
         <g className="popup-confirm">
-          <rect x={0} y={0} width={totalWidth} height={totalHeight} fill="transparent" />
+          <rect x={0} y={0} width={SCREEN_WIDTH} height={SCREEN_HEIGHT} fill="transparent" />
           <g transform={`translate(${2.5 * B}, ${4.5 * B})`}>
             <rect x={-0.5 * B} y={-0.5 * B} width={12 * B} height={4 * B} fill="#e91e63" />
             <TextWithLineWrap x={0} y={0} fill="#333" maxLength={22} content={popup.message} />
@@ -833,9 +778,9 @@ class Editor extends React.Component<EditorProps> {
               ref={node => (this.svg = node)}
               className="svg"
               style={{ background: '#333' }}
-              width={totalWidth * zoomLevel}
-              height={totalHeight * zoomLevel}
-              viewBox={`0 0 ${totalWidth} ${totalHeight}`}
+              width={SCREEN_WIDTH * ZOOM_LEVEL}
+              height={SCREEN_HEIGHT * ZOOM_LEVEL}
+              viewBox={`0 0 ${SCREEN_WIDTH} ${SCREEN_HEIGHT}`}
               onMouseDown={e => this.onMouseDown(view, e)}
               onMouseUp={e => this.onMouseUp(view, e)}
               onMouseMove={e => this.onMouseMove(view, e)}

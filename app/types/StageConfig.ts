@@ -1,6 +1,7 @@
 import { List, Record, Repeat } from 'immutable'
 import { BLOCK_SIZE, FIELD_BLOCK_SIZE, N_MAP } from 'utils/constants'
 import { MapRecord, EagleRecord } from '../types'
+import { dec, inc } from '../utils/common'
 
 export type StageDifficulty = 1 | 2 | 3 | 4
 
@@ -12,11 +13,59 @@ export interface RawStageConfig {
   enemies: string[]
 }
 
+export class EnemyGroupConfig extends Record({
+  tankLevel: 'basic' as TankLevel,
+  count: 0,
+}) {
+  static fromJS(object: any) {
+    return new EnemyGroupConfig(object)
+  }
+
+  static unwind(enemyGroupConfig: EnemyGroupConfig) {
+    return Repeat(enemyGroupConfig.tankLevel, enemyGroupConfig.count)
+  }
+
+  incCount() {
+    return this.update('count', inc(1))
+  }
+
+  decCount() {
+    return this.update('count', dec(1))
+  }
+
+  incTankLevel() {
+    if (this.tankLevel === 'basic') {
+      return this.set('tankLevel', 'fast')
+    } else if (this.tankLevel === 'fast') {
+      return this.set('tankLevel', 'power')
+    } else {
+      return this.set('tankLevel', 'armor')
+    }
+  }
+
+  decTankLevel() {
+    if (this.tankLevel === 'armor') {
+      return this.set('tankLevel', 'power')
+    } else if (this.tankLevel === 'power') {
+      return this.set('tankLevel', 'fast')
+    } else {
+      return this.set('tankLevel', 'basic')
+    }
+  }
+}
+
+const defaultEnemiesConfig = List<EnemyGroupConfig>([
+  new EnemyGroupConfig({ tankLevel: 'basic', count: 10 }),
+  new EnemyGroupConfig({ tankLevel: 'fast', count: 4 }),
+  new EnemyGroupConfig({ tankLevel: 'power', count: 4 }),
+  new EnemyGroupConfig({ tankLevel: 'armor', count: 2 }),
+])
+
 const StageConfigRecord = Record({
   name: '',
   difficulty: 1 as StageDifficulty,
   map: new MapRecord(),
-  enemies: List<TankLevel>(),
+  enemies: defaultEnemiesConfig,
 })
 
 export default class StageConfig extends StageConfigRecord {
@@ -79,33 +128,33 @@ export default class StageConfig extends StageConfigRecord {
         if (item[0] === 'b') {
           // brick
           const bits = StageConfig.parseBrickBits(item.substring(1))
-          const rowrow = 4 * row
-          const colcol = 4 * col
+          const brickRow = 4 * row
+          const brickCol = 4 * col
           const N = 52
 
           const part0 = (bits >> 12) & 0xf
-          part0 & 0b0001 && bricks.add(rowrow * N + colcol + 0)
-          part0 & 0b0010 && bricks.add(rowrow * N + colcol + 1)
-          part0 & 0b0100 && bricks.add(rowrow * N + colcol + N)
-          part0 & 0b1000 && bricks.add(rowrow * N + colcol + N + 1)
+          part0 & 0b0001 && bricks.add(brickRow * N + brickCol + 0)
+          part0 & 0b0010 && bricks.add(brickRow * N + brickCol + 1)
+          part0 & 0b0100 && bricks.add(brickRow * N + brickCol + N)
+          part0 & 0b1000 && bricks.add(brickRow * N + brickCol + N + 1)
 
           const part1 = (bits >> 8) & 0xf
-          part1 & 0b0001 && bricks.add(rowrow * N + colcol + 2 + 0)
-          part1 & 0b0010 && bricks.add(rowrow * N + colcol + 2 + 1)
-          part1 & 0b0100 && bricks.add(rowrow * N + colcol + 2 + N)
-          part1 & 0b1000 && bricks.add(rowrow * N + colcol + 2 + N + 1)
+          part1 & 0b0001 && bricks.add(brickRow * N + brickCol + 2 + 0)
+          part1 & 0b0010 && bricks.add(brickRow * N + brickCol + 2 + 1)
+          part1 & 0b0100 && bricks.add(brickRow * N + brickCol + 2 + N)
+          part1 & 0b1000 && bricks.add(brickRow * N + brickCol + 2 + N + 1)
 
           const part2 = (bits >> 4) & 0xf
-          part2 & 0b0001 && bricks.add((rowrow + 2) * N + colcol + 0)
-          part2 & 0b0010 && bricks.add((rowrow + 2) * N + colcol + 1)
-          part2 & 0b0100 && bricks.add((rowrow + 2) * N + colcol + N)
-          part2 & 0b1000 && bricks.add((rowrow + 2) * N + colcol + N + 1)
+          part2 & 0b0001 && bricks.add((brickRow + 2) * N + brickCol + 0)
+          part2 & 0b0010 && bricks.add((brickRow + 2) * N + brickCol + 1)
+          part2 & 0b0100 && bricks.add((brickRow + 2) * N + brickCol + N)
+          part2 & 0b1000 && bricks.add((brickRow + 2) * N + brickCol + N + 1)
 
           const part3 = (bits >> 0) & 0xf
-          part3 & 0b0001 && bricks.add((rowrow + 2) * N + colcol + 2 + 0)
-          part3 & 0b0010 && bricks.add((rowrow + 2) * N + colcol + 2 + 1)
-          part3 & 0b0100 && bricks.add((rowrow + 2) * N + colcol + 2 + N)
-          part3 & 0b1000 && bricks.add((rowrow + 2) * N + colcol + 2 + N + 1)
+          part3 & 0b0001 && bricks.add((brickRow + 2) * N + brickCol + 2 + 0)
+          part3 & 0b0010 && bricks.add((brickRow + 2) * N + brickCol + 2 + 1)
+          part3 & 0b0100 && bricks.add((brickRow + 2) * N + brickCol + 2 + N)
+          part3 & 0b1000 && bricks.add((brickRow + 2) * N + brickCol + 2 + N + 1)
         } else if (item[0] === 't') {
           const bits = parseInt(item[1], 16)
           DEV.ASSERT && console.assert(0 < bits && bits < 16)
@@ -169,20 +218,20 @@ export default class StageConfig extends StageConfigRecord {
   }
 
   static parseStageEnemies(enemies: RawStageConfig['enemies']) {
-    const array: TankLevel[] = []
+    const array: EnemyGroupConfig[] = []
     for (const descriptor of enemies) {
       const splited = descriptor.split('*').map(s => s.trim())
       DEV.ASSERT && console.assert(splited.length === 2)
 
-      const number = Number(splited[0])
+      const count = Number(splited[0])
       const tankLevel = splited[1] as TankLevel
-      DEV.ASSERT && console.assert(!isNaN(number))
+      DEV.ASSERT && console.assert(!isNaN(count))
       DEV.ASSERT && console.assert(['basic', 'fast', 'power', 'armor'].includes(tankLevel))
 
-      for (let i = 0; i < number; i += 1) {
-        array.push(tankLevel)
-      }
+      array.push(new EnemyGroupConfig({ tankLevel, count }))
     }
     return List(array)
+      .setSize(4)
+      .map(v => (v ? v : new EnemyGroupConfig()))
   }
 }
