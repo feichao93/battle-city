@@ -23,8 +23,8 @@ URL 列表：
   * 按下 `R` 跳转到上次关卡的选择页面的，以便重新开始游戏
   * 直接打开该地址的行为：自动跳转到主页面
 * 选择关卡界面
-  * `/choose-stage/:stageName`
-  * 地址自动跳转 `/choose-stage --> /choose-stage/1`
+  * `/choose/:stageName`
+  * 地址自动跳转 `/choose --> /choose/1`
   * 渲染组件 `<ChooseStageScene />`
   * 直接打开该地址的行为：_重置游戏状态_，并渲染 ChooseStageScene
 * 游戏进行中

@@ -4,5 +4,6 @@ export function concat(...iterators: IterableIterator<any>[]): IterableIterator<
     for (const iter of iterators) {
       yield* iter
     }
+    return true // TODO 这里 直接返回 true 其实不太合理
   })()
 }

@@ -7,6 +7,7 @@ import Text from 'components/Text'
 import TextButton from 'components/TextButton'
 import { BLOCK_SIZE as B, CONTROL_CONFIG } from 'utils/constants'
 import { State, StageConfig } from 'types'
+import Screen from './Screen'
 import StagePreview from './StagePreview'
 
 class ChooseStageScene extends React.PureComponent<{
@@ -41,7 +42,7 @@ class ChooseStageScene extends React.PureComponent<{
     return stageIndex
   }
 
-  onChoose = (stageName: string) => this.props.dispatch(replace(`/choose-stage/${stageName}`))
+  onChoose = (stageName: string) => this.props.dispatch(replace(`/choose/${stageName}`))
 
   onChoosePrevStage = () => {
     const { stages } = this.props
@@ -75,49 +76,56 @@ class ChooseStageScene extends React.PureComponent<{
     }
     const index = stageNames.indexOf(stageName)
     return (
-      <g className="choose-stage-scene">
-        <Text content="choose stage:" x={0.5 * B} y={0.5 * B} />
-        <StagePreview stage={stages.get(index - 1)} x={0.75 * B} y={3.375 * B} scale={1 / 4} />
-        <StagePreview stage={stages.get(index)} x={4.75 * B} y={1.75 * B} scale={1 / 2} />
-        <StagePreview stage={stages.get(index + 1)} x={12 * B} y={3.375 * B} scale={1 / 4} />
-        <Text content={`stage ${stageName}`} x={6.5 * B} y={8.5 * B} />
-        <g className="button-areas" transform={`translate(${2.5 * B}, ${11 * B})`}>
-          <TextButton
-            content="prev"
-            textFill="white"
-            disabled={index === 0}
-            x={0}
-            y={0}
-            onClick={this.onChoosePrevStage}
+      <Screen>
+        <g className="choose-stage-scene">
+          <Text content="choose stage:" x={0.5 * B} y={0.5 * B} />
+          <StagePreview
+            stage={index === 0 ? null : stages.get(index - 1)}
+            x={0.75 * B}
+            y={3.375 * B}
+            scale={1 / 4}
           />
-          <TextButton
-            content="next"
-            textFill="white"
-            disabled={index === stageNames.size - 1}
-            x={3 * B}
-            y={0}
-            onClick={this.onChooseNextStage}
-          />
-          <TextButton
-            content="play"
-            textFill="#96d332"
-            stroke="#96d332"
-            x={6 * B}
-            y={0}
-            onClick={this.onStartPlay}
-          />
-          <TextButton
-            content="back"
-            textFill="white"
-            x={9 * B}
-            y={0}
-            onClick={() => dispatch(replace('/'))}
-          />
+          <StagePreview stage={stages.get(index)} x={4.75 * B} y={1.75 * B} scale={1 / 2} />
+          <StagePreview stage={stages.get(index + 1)} x={12 * B} y={3.375 * B} scale={1 / 4} />
+          <Text content={`stage ${stageName}`} x={6.5 * B} y={8.5 * B} />
+          <g className="button-areas" transform={`translate(${2.5 * B}, ${11 * B})`}>
+            <TextButton
+              content="prev"
+              textFill="white"
+              disabled={index === 0}
+              x={0}
+              y={0}
+              onClick={this.onChoosePrevStage}
+            />
+            <TextButton
+              content="next"
+              textFill="white"
+              disabled={index === stageNames.size - 1}
+              x={3 * B}
+              y={0}
+              onClick={this.onChooseNextStage}
+            />
+            <TextButton
+              content="play"
+              textFill="#96d332"
+              stroke="#96d332"
+              x={6 * B}
+              y={0}
+              onClick={this.onStartPlay}
+            />
+            <TextButton
+              content="back"
+              textFill="white"
+              x={9 * B}
+              y={0}
+              onClick={() => dispatch(replace('/'))}
+            />
+          </g>
+          <g className="hint" transform={`translate(${0.5 * B},${14 * B}) scale(0.5)`}>
+            <Text fill="#ccc" content="This page is a little janky. Keep patient." x={0} y={0} />
+          </g>
         </g>
-        <g className="hint" transform={`translate(${0.5 * B},${14 * B}) scale(0.5)`}>
-          <Text fill="#ccc" content="This page is a little janky. Keep patient." x={0} y={0} />
-        </g>
-      </g>
+      </Screen>
     )
   }
 }

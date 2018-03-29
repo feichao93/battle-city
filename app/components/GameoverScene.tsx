@@ -8,6 +8,7 @@ import Text from 'components/Text'
 import TextButton from 'components/TextButton'
 import { GameRecord } from 'reducers/game'
 import { State } from 'reducers'
+import Screen from './Screen'
 
 class GameoverScene extends React.PureComponent<{ dispatch: Dispatch<State>; game: GameRecord }> {
   componentDidMount() {
@@ -32,9 +33,9 @@ class GameoverScene extends React.PureComponent<{ dispatch: Dispatch<State>; gam
   onRestart = () => {
     const { game, dispatch } = this.props
     if (game.lastStageName) {
-      dispatch(replace(`/choose-stage/${game.lastStageName}`))
+      dispatch(replace(`/choose/${game.lastStageName}`))
     } else {
-      dispatch(replace(`/choose-stage`))
+      dispatch(replace(`/choose`))
     }
   }
 
@@ -42,37 +43,49 @@ class GameoverScene extends React.PureComponent<{ dispatch: Dispatch<State>; gam
     const size = ITEM_SIZE_MAP.BRICK
     const scale = 4
     return (
-      <g className="gameover-scene">
-        <defs>
-          <pattern
-            id="pattern-brickwall"
-            width={size * 2 / scale}
-            height={size * 2 / scale}
-            patternUnits="userSpaceOnUse"
-          >
-            <g transform={`scale(${1 / scale})`}>
-              <BrickWall x={0} y={0} />
-              <BrickWall x={0} y={size} />
-              <BrickWall x={size} y={0} />
-              <BrickWall x={size} y={size} />
-            </g>
-          </pattern>
-        </defs>
-        <rect fill="#000000" x={0} y={0} width={16 * B} height={15 * B} />
-        <g transform={`scale(${scale})`}>
-          <Text content="game" x={4 * B / scale} y={4 * B / scale} fill="url(#pattern-brickwall)" />
-          <Text content="over" x={4 * B / scale} y={7 * B / scale} fill="url(#pattern-brickwall)" />
+      <Screen>
+        <g className="gameover-scene">
+          <defs>
+            <pattern
+              id="pattern-brickwall"
+              width={size * 2 / scale}
+              height={size * 2 / scale}
+              patternUnits="userSpaceOnUse"
+            >
+              <g transform={`scale(${1 / scale})`}>
+                <BrickWall x={0} y={0} />
+                <BrickWall x={0} y={size} />
+                <BrickWall x={size} y={0} />
+                <BrickWall x={size} y={size} />
+              </g>
+            </pattern>
+          </defs>
+          <rect fill="#000000" x={0} y={0} width={16 * B} height={15 * B} />
+          <g transform={`scale(${scale})`}>
+            <Text
+              content="game"
+              x={4 * B / scale}
+              y={4 * B / scale}
+              fill="url(#pattern-brickwall)"
+            />
+            <Text
+              content="over"
+              x={4 * B / scale}
+              y={7 * B / scale}
+              fill="url(#pattern-brickwall)"
+            />
+          </g>
+          <g transform={`translate(${5.75 * B}, ${13 * B}) scale(0.5)`}>
+            <TextButton
+              content="press R to restart"
+              x={0}
+              y={0}
+              textFill="#9ed046"
+              onClick={this.onRestart}
+            />
+          </g>
         </g>
-        <g transform={`translate(${5.75 * B}, ${13 * B}) scale(0.5)`}>
-          <TextButton
-            content="press R to restart"
-            x={0}
-            y={0}
-            textFill="#9ed046"
-            onClick={this.onRestart}
-          />
-        </g>
-      </g>
+      </Screen>
     )
   }
 }

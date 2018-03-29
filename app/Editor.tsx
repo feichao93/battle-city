@@ -24,6 +24,7 @@ import TextInput from 'components/TextInput'
 import TextButton from 'components/TextButton'
 import { TankRecord, RawStageConfig, StageDifficulty } from 'types'
 import { add } from 'utils/common'
+import Screen from './components/Screen'
 import StagePreview from './components/StagePreview'
 import StageConfig, { defaultEnemiesConfig } from './types/StageConfig'
 import { State } from './reducers'
@@ -445,7 +446,7 @@ class Editor extends React.Component<EditorProps> {
     }
     // 检查enemies数量
     if (totalEnemyCount === 0) {
-      this.showAlertPopup('no enemy')
+      await this.showAlertPopup('no enemy')
       return false
     } else if (
       totalEnemyCount !== 20 &&
@@ -456,7 +457,8 @@ class Editor extends React.Component<EditorProps> {
 
     // 检查地图
     const hasEagle = itemList.some(mapItem => mapItem.type === 'E')
-    if (!hasEagle && !await this.showConfirmPopup('no eagle. continue?')) {
+    if (!hasEagle) {
+      await this.showAlertPopup('no eagle.')
       return false
     }
     return true
@@ -800,13 +802,9 @@ class Editor extends React.Component<EditorProps> {
             return <Redirect to="/editor/config" />
           }
           return (
-            <svg
-              ref={node => (this.svg = node)}
-              className="svg"
-              style={{ background: '#333' }}
-              width={SCREEN_WIDTH * ZOOM_LEVEL}
-              height={SCREEN_HEIGHT * ZOOM_LEVEL}
-              viewBox={`0 0 ${SCREEN_WIDTH} ${SCREEN_HEIGHT}`}
+            <Screen
+              background="#333"
+              refFn={node => (this.svg = node)}
               onMouseDown={e => this.onMouseDown(view, e)}
               onMouseUp={e => this.onMouseUp(view, e)}
               onMouseMove={e => this.onMouseMove(view, e)}
@@ -834,7 +832,7 @@ class Editor extends React.Component<EditorProps> {
                 <TextButton content="play" x={12 * B} y={0.5 * B} onClick={this.onPlay} />
               </g>
               {this.renderPopup()}
-            </svg>
+            </Screen>
           )
         }}
       />

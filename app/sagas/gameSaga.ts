@@ -1,6 +1,6 @@
 import { replace } from 'react-router-redux'
 import { delay } from 'redux-saga'
-import { put, race, select } from 'redux-saga/effects'
+import { put, race, select, take } from 'redux-saga/effects'
 import AIMasterSaga from 'sagas/AIMasterSaga'
 import bulletsSaga from 'sagas/bulletsSaga'
 import animateTexts from 'sagas/common/animateTexts'
@@ -76,19 +76,27 @@ export default function* gameSaga(action: Action.StartGame | { type: 'RESET_GAME
   yield delay(0)
   DEV.LOG && console.log('GAME STARTED')
 
-  yield race<any>([
-    humanPlayerSaga('player-1', 'yellow'),
-    AIMasterSaga(),
-    powerUpManager(),
-    bulletsSaga(),
+  const result = yield race<any>({
+    human: humanPlayerSaga('player-1', 'yellow'),
+    ai: AIMasterSaga(),
+    powerUp: powerUpManager(),
+    bullets: bulletsSaga(),
     // 上面几个 saga 在一个 gameSaga 的生命周期内被认为是后台服务
-    // 当 stage-flow 退出的时候，自动取消上面几个后台服务
-    concat(stageFlow(action.stageIndex), animateGameover()),
-  ])
+    // 当 stage-flow 退出（或者是用户直接离开了game-scene）的时候，自动取消上面几个后台服务
+    flow: concat(stageFlow(action.stageIndex), animateGameover()),
+    leave: take('LEAVE_GAME_SCENE'),
+  })
 
-  DEV.LOG && console.log('GAME ENDED')
+  if (DEV.LOG) {
+    if (result.leave) {
+      console.log('LEAVE GAME SCENE')
+    }
+  }
 
-  yield put(replace('/gameover'))
+  if (result.flow) {
+    DEV.LOG && console.log('GAME ENDED')
+    yield put(replace('/gameover'))
+  }
   yield put<Action>({ type: 'BEFORE_END_GAME' })
   yield put<Action>({ type: 'END_GAME' })
 }

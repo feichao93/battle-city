@@ -90,6 +90,7 @@ declare global {
       | SetAITankPath
       | RemoveAITankPath
       | AddCustomStage
+      | Simple<'LEAVE_GAME_SCENE'>
 
     export interface Move {
       type: 'MOVE'
