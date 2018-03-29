@@ -231,6 +231,7 @@ const positionMap = {
 export interface EditorProps {
   match: match<any>
   dispatch: Dispatch<State>
+  stages: List<StageConfig>
 }
 
 class Editor extends React.Component<EditorProps> {
@@ -246,7 +247,7 @@ class Editor extends React.Component<EditorProps> {
     popup: null as Popup,
     t: -1,
 
-    name: '',
+    name: 'custom',
     difficulty: 1 as StageDifficulty,
     enemies: defaultEnemiesConfig,
 
@@ -431,45 +432,64 @@ class Editor extends React.Component<EditorProps> {
     this.input.click()
   }
 
-  onSave = async () => {
-    const { name, enemies, difficulty, itemList } = this.state
+  /** 检查当前编辑器中的关卡配置是否合理. 返回 true 表示关卡配置合理 */
+  async check() {
+    const { name, enemies, itemList } = this.state
     const totalEnemyCount = enemies.map(e => e.count).reduce(add)
 
     // 检查stageName
     if (name === '') {
       await this.showAlertPopup('Please enter stage name.')
       this.props.dispatch(push('/editor/config'))
-      return
+      return false
     }
     // 检查enemies数量
     if (totalEnemyCount === 0) {
       this.showAlertPopup('no enemy')
-      return
+      return false
     } else if (
       totalEnemyCount !== 20 &&
       !await this.showConfirmPopup('total enemy count is not 20. continue?')
     ) {
-      return
+      return false
     }
 
     // 检查地图
     const hasEagle = itemList.some(mapItem => mapItem.type === 'E')
     if (!hasEagle && !await this.showConfirmPopup('no eagle. continue?')) {
-      return
+      return false
     }
+    return true
+  }
 
-    const content = JSON.stringify(
-      {
+  onSave = async () => {
+    if (await this.check()) {
+      const { name, enemies, difficulty, itemList } = this.state
+      const object = {
         name: name.toLowerCase(),
         difficulty,
         map: serializeMapItemList(itemList),
         enemies: enemies.filter(e => e.count > 0).map(e => `${e.count}*${e.tankLevel}`),
-      },
-      null,
-      2,
-    )
+      }
+      const content = JSON.stringify(object, null, 2)
+      saveAs(new Blob([content], { type: 'text/plain;charset=utf-8' }), `stage-${name}.json`)
+    }
+  }
 
-    saveAs(new Blob([content], { type: 'text/plain;charset=utf-8' }), `stage-${name}.json`)
+  onPlay = async () => {
+    const { dispatch, stages } = this.props
+    if (await this.check()) {
+      const stage = this.getStage()
+      if (stages.some(s => s.name === stage.name)) {
+        await this.showAlertPopup(`stage ${stage.name} already exists.`)
+        return
+      }
+      dispatch<Action.AddCustomStage>({
+        type: 'ADD_CUSTOME_STAGE',
+        stage,
+      })
+      dispatch(push(`/stage/${stage.name}`))
+    }
   }
 
   showAlertPopup(message: string) {
@@ -811,6 +831,7 @@ class Editor extends React.Component<EditorProps> {
                 />
                 <TextButton content="load" x={7 * B} y={0.5 * B} onClick={this.onRequestLoad} />
                 <TextButton content="save" x={9.5 * B} y={0.5 * B} onClick={this.onSave} />
+                <TextButton content="play" x={12 * B} y={0.5 * B} onClick={this.onPlay} />
               </g>
               {this.renderPopup()}
             </svg>
@@ -821,4 +842,4 @@ class Editor extends React.Component<EditorProps> {
   }
 }
 
-export default connect()(Editor)
+export default connect((s: State) => ({ stages: s.stages }))(Editor)

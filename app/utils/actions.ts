@@ -89,6 +89,7 @@ declare global {
       | RemoveRestrictedArea
       | SetAITankPath
       | RemoveAITankPath
+      | AddCustomStage
 
     export interface Move {
       type: 'MOVE'
@@ -392,6 +393,11 @@ declare global {
     export interface RemoveAITankPath {
       type: 'REMOVE_AI_TANK_PATH'
       playerName: string
+    }
+
+    export interface AddCustomStage {
+      type: 'ADD_CUSTOME_STAGE'
+      stage: StageConfig
     }
   }
 }

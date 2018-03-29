@@ -4,8 +4,7 @@ import { Map } from 'immutable'
 import Text from 'components/Text'
 import { Tank } from 'components/tanks'
 import { BLOCK_SIZE as B } from 'utils/constants'
-import { State } from 'reducers/index'
-import { TankRecord } from 'types'
+import { State, TankRecord } from 'types'
 
 type P = {
   stageName: string

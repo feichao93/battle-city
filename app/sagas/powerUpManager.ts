@@ -3,8 +3,8 @@ import { fork, put, select, take, cancelled, takeEvery, takeLatest } from 'redux
 import { MapRecord, ScoreRecord, State, PowerUpRecord } from 'types'
 import { destroyTanks } from 'sagas/common'
 import powerUpLifecycle from 'sagas/powerUpLifecycle'
-import { N_MAP, POWER_UP_NAMES } from 'utils/constants'
-import { asRect, frame as f, getNextId } from 'utils/common'
+import { BLOCK_SIZE, N_MAP, POWER_UP_NAMES } from 'utils/constants'
+import { asRect, frame as f, getNextId, randint } from 'utils/common'
 import * as selectors from 'utils/selectors'
 import IndexHelper from 'utils/IndexHelper'
 import Timing from '../utils/Timing'
@@ -196,7 +196,10 @@ function* spawnPowerUpIfNeccessary(action: Action.Hit) {
       tankId: action.targetTank.tankId,
     })
     const powerUpName = _.sample(POWER_UP_NAMES)
-    const position: Point = _.sample(yield select(selectors.validPowerUpSpawnPositions))
+    const position: Point = _.sample(yield select(selectors.validPowerUpSpawnPositions)) || {
+      x: randint(0, 25) / 2 * BLOCK_SIZE,
+      y: randint(0, 25) / 2 * BLOCK_SIZE,
+    }
     yield powerUpLifecycle(
       new PowerUpRecord({
         powerUpId: getNextId('power-up'),
