@@ -1,6 +1,7 @@
 import React from 'react'
 import _ from 'lodash'
 import { Pixel } from 'components/elements'
+import ImageComponent from './ImageComponent'
 
 const a = '#ffffff'
 const b = '#adadad'
@@ -21,15 +22,19 @@ const snowPart = (dx: number, dy: number) => (
   </g>
 )
 
-type P = {
-  x: number
-  y: number
-}
-export default class Snow extends React.PureComponent<P, {}> {
-  render() {
+export default class Snow extends ImageComponent<Point> {
+  getConfig() {
     const { x, y } = this.props
+    return {
+      key: 'Snow',
+      transform: `translate(${x}, ${y})`,
+      width: 16,
+      height: 16,
+    }
+  }
+  renderImageContent() {
     return (
-      <g transform={`translate(${x},${y})`}>
+      <g>
         {snowPart(0, 0)}
         {snowPart(8, 0)}
         {snowPart(8, 8)}

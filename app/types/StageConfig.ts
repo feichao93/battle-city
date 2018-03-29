@@ -54,7 +54,7 @@ export class EnemyGroupConfig extends Record({
   }
 }
 
-const defaultEnemiesConfig = List<EnemyGroupConfig>([
+export const defaultEnemiesConfig = List<EnemyGroupConfig>([
   new EnemyGroupConfig({ tankLevel: 'basic', count: 10 }),
   new EnemyGroupConfig({ tankLevel: 'fast', count: 4 }),
   new EnemyGroupConfig({ tankLevel: 'power', count: 4 }),

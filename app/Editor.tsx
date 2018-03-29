@@ -22,10 +22,10 @@ import BrickWall from 'components/BrickWall'
 import SteelWall from 'components/SteelWall'
 import TextInput from 'components/TextInput'
 import TextButton from 'components/TextButton'
-import { TankRecord, RawStageConfig } from 'types'
-import { inc, dec, add } from 'utils/common'
+import { TankRecord, RawStageConfig, StageDifficulty } from 'types'
+import { add } from 'utils/common'
 import StagePreview from './components/StagePreview'
-import StageConfig from './types/StageConfig'
+import StageConfig, { defaultEnemiesConfig } from './types/StageConfig'
 import { State } from './reducers'
 
 function serializeMapItemList(list: List<MapItemRecord>): RawStageConfig['map'] {
@@ -245,8 +245,11 @@ class Editor extends React.Component<EditorProps> {
   state = {
     popup: null as Popup,
     t: -1,
-    // 地图数据使用 itemList，其他关卡配置数据使用 stage 中的数据
-    stage: new StageConfig(),
+
+    name: '',
+    difficulty: 1 as StageDifficulty,
+    enemies: defaultEnemiesConfig,
+
     itemList: Repeat(new MapItemRecord(), FBZ ** 2).toList(),
     itemType: 'X' as MapItemType,
     brickHex: 0xf,
@@ -387,40 +390,40 @@ class Editor extends React.Component<EditorProps> {
   }
 
   onIncDifficulty = () => {
-    const { stage } = this.state
-    this.setState({ stage: stage.update('difficulty', inc(1) as any) })
+    const { difficulty } = this.state
+    this.setState({ difficulty: difficulty + 1 })
   }
 
   onDecDifficulty = () => {
-    const { stage } = this.state
-    this.setState({ stage: stage.update('difficulty', dec(1) as any) })
+    const { difficulty } = this.state
+    this.setState({ difficulty: difficulty - 1 })
   }
 
   onIncEnemyLevel = (index: number) => {
-    const { stage } = this.state
+    const { enemies } = this.state
     this.setState({
-      stage: stage.updateIn(['enemies', index], e => e.incTankLevel()),
+      enemies: enemies.update(index, e => e.incTankLevel()),
     })
   }
 
   onDecEnemyLevel = (index: number) => {
-    const { stage } = this.state
+    const { enemies } = this.state
     this.setState({
-      stage: stage.updateIn(['enemies', index], e => e.decTankLevel()),
+      enemies: enemies.update(index, e => e.decTankLevel()),
     })
   }
 
   onIncEnemyCount = (index: number) => {
-    const { stage } = this.state
+    const { enemies } = this.state
     this.setState({
-      stage: stage.updateIn(['enemies', index], e => e.incCount()),
+      enemies: enemies.update(index, e => e.incCount()),
     })
   }
 
   onDecEnemyCount = (index: number) => {
-    const { stage } = this.state
+    const { enemies } = this.state
     this.setState({
-      stage: stage.updateIn(['enemies', index], e => e.decCount()),
+      enemies: enemies.update(index, e => e.decCount()),
     })
   }
 
@@ -429,8 +432,7 @@ class Editor extends React.Component<EditorProps> {
   }
 
   onSave = async () => {
-    const { stage, itemList } = this.state
-    const { enemies, name } = stage
+    const { name, enemies, difficulty, itemList } = this.state
     const totalEnemyCount = enemies.map(e => e.count).reduce(add)
 
     // 检查stageName
@@ -459,7 +461,7 @@ class Editor extends React.Component<EditorProps> {
     const content = JSON.stringify(
       {
         name: name.toLowerCase(),
-        difficulty: stage.difficulty,
+        difficulty,
         map: serializeMapItemList(itemList),
         enemies: enemies.filter(e => e.count > 0).map(e => `${e.count}*${e.tankLevel}`),
       },
@@ -510,6 +512,12 @@ class Editor extends React.Component<EditorProps> {
     await this.showAlertPopup('1. Choose an item type below.')
     await this.showAlertPopup('2. Click or pan in the left.')
     await this.showAlertPopup('3. After selecting Brick or Steel you can change the item shape')
+  }
+
+  getStage() {
+    const { name, difficulty, enemies, itemList } = this.state
+    const map = StageConfig.parseStageMap(serializeMapItemList(itemList))
+    return new StageConfig({ name, difficulty, map, enemies })
   }
 
   renderItemSwitchButtons() {
@@ -589,12 +597,11 @@ class Editor extends React.Component<EditorProps> {
   }
 
   renderMapView() {
-    const { stage, itemList, brickHex, steelHex, itemType, t } = this.state
-    const stageMap = StageConfig.parseStageMap(serializeMapItemList(itemList))
+    const { brickHex, steelHex, itemType, t } = this.state
 
     return (
       <g className="map-view">
-        <StagePreview stage={stage.set('map', stageMap)} x={0} y={0} scale={1} />
+        <StagePreview stage={this.getStage()} x={0} y={0} scale={1} />
         <DashLines t={t} />
         <g className="tools" transform={`translate(${13 * B},0)`}>
           <TextButton
@@ -628,8 +635,7 @@ class Editor extends React.Component<EditorProps> {
   }
 
   renderConfigView() {
-    const { stage, t } = this.state
-    const { enemies, name, difficulty } = stage
+    const { enemies, name, difficulty, t } = this.state
     const totalEnemyCount = enemies.map(e => e.count).reduce(add)
 
     return (
@@ -641,7 +647,7 @@ class Editor extends React.Component<EditorProps> {
           y={B}
           maxLength={12}
           value={name}
-          onChange={name => this.setState({ stage: stage.set('name', name) })}
+          onChange={name => this.setState({ name })}
         />
 
         <Text content="difficulty:" x={0.5 * B} y={2.5 * B} fill="#ccc" />

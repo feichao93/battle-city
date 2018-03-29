@@ -5,7 +5,7 @@ export default class SteelWall extends ImageComponent<Point> {
   getConfig() {
     const { x, y } = this.props
     return {
-      key: `StellWall`,
+      key: 'StellWall',
       transform: `translate(${x}, ${y})`,
       width: 8,
       height: 8,
