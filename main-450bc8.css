@@ -350,17 +350,18 @@ template {
   line-height: 1.5;
 }
 
-.about .bold{
+.about .bold {
   font-weight: bold;
 }
 
-.svg {
+.screen {
   display: block;
   user-select: none;
   cursor: default;
 }
 
-.gallery .svg {
+.gallery .svg,
+.gallery .screen {
   background: #757575;
 }
 
