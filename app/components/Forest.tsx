@@ -1,6 +1,6 @@
 import React from 'react'
 import { Bitmap } from 'components/elements'
-import ImageComponent from './ImageComponent'
+import Image from '../hocs/Image'
 
 const scheme = {
   a: '#8CD600',
@@ -20,25 +20,16 @@ const d = [
   'daacaaad',
 ]
 
-export default class Forest extends ImageComponent<Point> {
-  getConfig() {
+export default class Forest extends React.PureComponent<Point> {
+  render() {
     const { x, y } = this.props
-    return {
-      key: 'Forest',
-      transform: `translate(${x},${y})`,
-      width: 16,
-      height: 16,
-    }
-  }
-
-  renderImageContent() {
     return (
-      <g>
+      <Image imageKey="Forest" transform={`translate(${x},${y})`} width="16" height="16">
         <Bitmap x={0} y={0} d={d} scheme={scheme} />
         <Bitmap x={8} y={0} d={d} scheme={scheme} />
         <Bitmap x={0} y={8} d={d} scheme={scheme} />
         <Bitmap x={8} y={8} d={d} scheme={scheme} />
-      </g>
+      </Image>
     )
   }
 }

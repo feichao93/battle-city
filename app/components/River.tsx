@@ -1,6 +1,6 @@
 import React from 'react'
 import { Pixel } from 'components/elements'
-import ImageComponent from './ImageComponent'
+import Image from '../hocs/Image'
 
 const coordinates = [
   [[5, 0], [0, 2], [1, 3], [4, 3], [3, 4], [5, 4], [1, 6], [2, 7], [6, 7]],
@@ -20,26 +20,16 @@ type RiverProps = {
   shape: 0 | 1
 }
 
-export default class River extends ImageComponent<RiverProps> {
-  getConfig() {
+export default class River extends React.PureComponent<RiverProps> {
+  render() {
     const { x, y, shape } = this.props
-    return {
-      key: `River/${shape}`,
-      transform: `translate(${x},${y})`,
-      width: 16,
-      height: 16,
-    }
-  }
-
-  renderImageContent() {
-    const { shape } = this.props
     return (
-      <g>
+      <Image imageKey={`River/${shape}`} transform={`translate(${x},${y})`} width="16" height="16">
         {riverPart(shape, 0, 0)}
         {riverPart(shape, 8, 0)}
         {riverPart(shape, 8, 8)}
         {riverPart(shape, 0, 8)}
-      </g>
+      </Image>
     )
   }
 }

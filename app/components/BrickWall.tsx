@@ -1,33 +1,26 @@
 import React from 'react'
 import { ITEM_SIZE_MAP } from 'utils/constants'
-import ImageComponent from './ImageComponent'
+import Image from '../hocs/Image'
 
-export default class BrickWall extends ImageComponent<Point> {
-  getConfig() {
-    const { x, y } = this.props
-    const row = Math.floor(y / ITEM_SIZE_MAP.BRICK)
-    const col = Math.floor(x / ITEM_SIZE_MAP.BRICK)
-    const shape = (row + col) % 2 === 0
-    return {
-      key: `BrickWall/${shape}`,
-      transform: `translate(${x}, ${y})`,
-      width: 4,
-      height: 4,
-    }
-  }
-
-  renderImageContent() {
+export default class BrickWall extends React.PureComponent<Point> {
+  render() {
     const { x, y } = this.props
     const row = Math.floor(y / ITEM_SIZE_MAP.BRICK)
     const col = Math.floor(x / ITEM_SIZE_MAP.BRICK)
     const shape = (row + col) % 2 === 0
 
     return (
-      <g className="brickwall">
+      <Image
+        className="brickwall"
+        imageKey={`BrickWall/${shape}`}
+        transform={`translate(${x}, ${y})`}
+        width="4"
+        height="4"
+      >
         <rect width={4} height={4} fill="#636363" />
         <rect x={shape ? 0 : 1} y={0} width={shape ? 4 : 3} height={3} fill="#6B0800" />
         <rect x={shape ? 0 : 2} y={1} width={shape ? 4 : 2} height={2} fill="#9C4A00" />
-      </g>
+      </Image>
     )
   }
 }
