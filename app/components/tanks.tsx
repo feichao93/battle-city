@@ -6,9 +6,10 @@ import { BLOCK_SIZE, TANK_COLOR_SCHEMES } from 'utils/constants'
 import { frame as f } from 'utils/common'
 import Timing from 'utils/Timing'
 import { TankRecord, State } from 'types'
+import Image from '../hocs/Image'
 
 interface TankComponent {
-  (props: { transform: string; color: string; shape: number }): JSX.Element
+  (props: { transform?: string; color: string; shape: number }): JSX.Element
 }
 
 namespace TankColorConfig {
@@ -159,11 +160,14 @@ export class TankClassBase extends React.Component<P, S> {
     const { tank, time } = this.props
     const { lastTireShape } = this.state
 
-    return React.createElement(resolveTankComponent(tank.side, tank.level), {
-      transform: calculateTankTransform(tank),
-      color: resolveTankColorConfig(tank).find(time - this.startTime),
-      shape: tank.moving ? tireShapeTiming.find(time - this.startTime) : lastTireShape,
-    })
+    const color = resolveTankColorConfig(tank).find(time - this.startTime)
+    const shape = tank.moving ? tireShapeTiming.find(time - this.startTime) : lastTireShape
+    const imageKey = `Tank/${tank.side}/${tank.level}/${color}/${shape}`
+    return (
+      <Image imageKey={imageKey} transform={calculateTankTransform(tank)} width="16" height="16">
+        {React.createElement(resolveTankComponent(tank.side, tank.level), { color, shape })}
+      </Image>
+    )
   }
 }
 

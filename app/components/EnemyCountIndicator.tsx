@@ -1,6 +1,7 @@
 import React from 'react'
 import _ from 'lodash'
 import { BLOCK_SIZE, FIELD_SIZE } from 'utils/constants'
+import Image from '../hocs/Image'
 
 // <EnemyTankThumbnail />的尺寸为 8 * 8
 const EnemyTankThumbnail = ({ x, y }: { x: number; y: number }) => (
@@ -17,16 +18,21 @@ const EnemyTankThumbnail = ({ x, y }: { x: number; y: number }) => (
 
 const transform = `translate(${1.5 * BLOCK_SIZE + FIELD_SIZE}, ${1.5 * BLOCK_SIZE})`
 
-type P = { count: number }
-export default class EnemyCountIndicator extends React.PureComponent<P, {}> {
+export default class EnemyCountIndicator extends React.PureComponent<{ count: number }> {
   render() {
     const { count } = this.props
     return (
-      <g className="remaining-enemy-count-indicator" transform={transform}>
+      <Image
+        imageKey={`EnemyCountIndicator/${count}`}
+        className="remaining-enemy-count-indicator"
+        transform={transform}
+        width="16"
+        height="72"
+      >
         {_.range(count).map(t => (
           <EnemyTankThumbnail key={t} x={8 * (t % 2)} y={8 * Math.floor(t / 2)} />
         ))}
-      </g>
+      </Image>
     )
   }
 }

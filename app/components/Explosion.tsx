@@ -1,7 +1,6 @@
 import React from 'react'
 import { Bitmap } from 'components/elements'
 import { ExplosionRecord } from 'types'
-import Image from '../hocs/Image'
 
 const schema = {
   ' ': 'none',
@@ -139,16 +138,14 @@ export default class Explosion extends React.PureComponent<{ explosion: Explosio
   render() {
     const { explosion: { cx, cy, shape } } = this.props
     const smallShape = shape === 's0' || shape === 's1' || shape === 's2'
-    const size = smallShape ? 16 : 32
     return (
-      <Image
-        imageKey={`Explosion/${shape}`}
-        transform={`translate(${cx - size / 2}, ${cy - size / 2})`}
-        width={size}
-        height={size}
-      >
-        <Bitmap x={0} y={0} d={data[shape]} scheme={schema} />
-      </Image>
+      <Bitmap
+        useImage
+        x={cx - (smallShape ? 8 : 16)}
+        y={cy - (smallShape ? 8 : 16)}
+        d={data[shape]}
+        scheme={schema}
+      />
     )
   }
 }

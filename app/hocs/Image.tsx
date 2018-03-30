@@ -19,6 +19,7 @@ export interface ImageProps {
   height: string | number
   children?: React.ReactNode
   className?: string
+  style?: any
 }
 
 export default class Image extends React.PureComponent<ImageProps> {
@@ -56,7 +57,14 @@ export default class Image extends React.PureComponent<ImageProps> {
         const url = URL.createObjectURL(blob)
         cache.set(imageKey, url)
       }
-      return <image transform={transform} href={cache.get(imageKey)} />
+      return (
+        <image
+          data-imageKey={imageKey}
+          transform={transform}
+          href={cache.get(imageKey)}
+          {...other}
+        />
+      )
     }
   }
 }

@@ -139,15 +139,12 @@ const powerUpDataArray = {
   // ]
 }
 
-type P = {
-  powerUp: PowerUpRecord
-}
-
-export default class PowerUp extends React.PureComponent<P> {
+export default class PowerUp extends React.PureComponent<{ powerUp: PowerUpRecord }> {
   render() {
     const { powerUp: { visible, x, y, powerUpName } } = this.props
     return (
       <Bitmap
+        useImage
         style={{ visibility: visible ? 'visible' : 'hidden' }}
         x={x}
         y={y}

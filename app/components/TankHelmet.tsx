@@ -1,14 +1,15 @@
 import React from 'react'
 import { frame as f } from 'utils/common'
 import registerTick from 'hocs/registerTick'
+import Image from '../hocs/Image'
 
-interface P {
+interface TankHelmetProps {
   x: number
   y: number
   tickIndex: number
 }
 
-class TankHelmet extends React.PureComponent<P> {
+class TankHelmet extends React.PureComponent<TankHelmetProps> {
   render() {
     const { x, y, tickIndex } = this.props
 
@@ -18,12 +19,20 @@ class TankHelmet extends React.PureComponent<P> {
     ]
 
     return (
-      <g className="tank-helmet" transform={`translate(${x}, ${y})`} fill="white">
-        <path d={ds[tickIndex]} />
-        <path transform="translate(16,0)rotate(90)" d={ds[tickIndex]} />
-        <path transform="translate(16, 16)rotate(180)" d={ds[tickIndex]} />
-        <path transform="translate(0, 16)rotate(270)" d={ds[tickIndex]} />
-      </g>
+      <Image
+        imageKey={`TankHelmet/${tickIndex}`}
+        className="tank-helmet"
+        transform={`translate(${x}, ${y})`}
+        width="16"
+        height="16"
+      >
+        <g fill="white">
+          <path d={ds[tickIndex]} />
+          <path transform="translate(16,0)rotate(90)" d={ds[tickIndex]} />
+          <path transform="translate(16, 16)rotate(180)" d={ds[tickIndex]} />
+          <path transform="translate(0, 16)rotate(270)" d={ds[tickIndex]} />
+        </g>
+      </Image>
     )
   }
 }
