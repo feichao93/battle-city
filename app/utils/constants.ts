@@ -98,8 +98,10 @@ export const POWER_UP_NAMES: PowerUpName[] = [
   'shovel',
 ]
 
-/** 每一关中包含powerUp的tank的下标(从0开始计数) */
-export const TANK_INDEX_THAT_WITH_POWER_UP = [3, 10, 17]
+/** 游戏原版：每一关中包含powerUp的tank的下标(从0开始计数) */
+// export const TANK_INDEX_THAT_WITH_POWER_UP = [3, 10, 17]
+/** 复刻版：每一关中包含powerUp的tank的下标(从0开始计数) */
+export const TANK_INDEX_THAT_WITH_POWER_UP = [3, 7, 12, 17]
 
 /** AI 坦克检测自己是否无法移动的超时时间 */
 export const BLOCK_TIMEOUT = 200

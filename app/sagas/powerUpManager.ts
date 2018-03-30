@@ -7,6 +7,9 @@ import { BLOCK_SIZE, N_MAP, POWER_UP_NAMES } from 'utils/constants'
 import { asRect, frame as f, getNextId, randint } from 'utils/common'
 import * as selectors from 'utils/selectors'
 import IndexHelper from 'utils/IndexHelper'
+import { calculateFireEstimateMap, getFireResist } from '../ai/fire-utils'
+import getAllSpots from '../ai/getAllSpots'
+import { around, getTankSpot } from '../ai/spot-utils'
 import Timing from '../utils/Timing'
 
 function convertToBricks(map: MapRecord) {
@@ -44,14 +47,14 @@ function convertToSteels(map: MapRecord) {
   }
   const surroundingTTSet = new Set(IndexHelper.iter('steel', eagleSurroundingBox))
   const eagleTTSet = new Set(IndexHelper.iter('steel', asRect(eagle, -0.1)))
-  const steels2 = steels.map(
+  const nextSteels = steels.map(
     (set, t) => (surroundingTTSet.has(t) && !eagleTTSet.has(t) ? true : set),
   )
 
   const surroundBTSet = new Set(IndexHelper.iter('brick', eagleSurroundingBox))
-  const bricks2 = bricks.map((set, t) => (surroundBTSet.has(t) ? false : set))
+  const nextBricks = bricks.map((set, t) => (surroundBTSet.has(t) ? false : set))
 
-  return map.set('steels', steels2).set('bricks', bricks2)
+  return map.set('steels', nextSteels).set('bricks', nextBricks)
 }
 
 function* shovel() {
@@ -189,14 +192,38 @@ function* scoreFromPickPowerUp(action: Action.PickPowerUpAction) {
   }
 }
 
+function determineWhichPowerUpToSpawn(state: State): PowerUpName {
+  // 如果我方老鹰因为周围墙较少 可以被直接击中的话 增加 shovel 的概率
+  const eagleSpot = getTankSpot(state.map.eagle)
+  const estMap = calculateFireEstimateMap(around(eagleSpot), getAllSpots(state.map), state.map)
+  if (Array.from(estMap.keys()).some(t => t !== eagleSpot && getFireResist(estMap.get(t)) === 0)) {
+    if (Math.random() < 0.5) {
+      return 'shovel'
+    }
+  }
+
+  // 如果玩家坦克仍然是 BASIC 增加 star 的概率
+  const humanPlayer = state.players.find(ply => ply.side === 'human')
+  if (humanPlayer != null && humanPlayer.active) {
+    const tank = selectors.playerTank(state, humanPlayer.playerName)
+    if (tank != null && (tank.level === 'basic' || tank.level === 'fast')) {
+      if (Math.random() < 0.5) {
+        return 'star'
+      }
+    }
+  }
+  return _.sample(POWER_UP_NAMES)
+}
+
 function* spawnPowerUpIfNeccessary(action: Action.Hit) {
   if (action.targetTank.withPowerUp) {
+    const state: State = yield select()
     yield put<Action.RemovePowerUpProperty>({
       type: 'REMOVE_POWER_UP_PROPERTY',
       tankId: action.targetTank.tankId,
     })
-    const powerUpName = _.sample(POWER_UP_NAMES)
-    const position: Point = _.sample(yield select(selectors.validPowerUpSpawnPositions)) || {
+    const powerUpName = determineWhichPowerUpToSpawn(state)
+    const position: Point = _.sample(selectors.validPowerUpSpawnPositions(state)) || {
       x: randint(0, 25) / 2 * BLOCK_SIZE,
       y: randint(0, 25) / 2 * BLOCK_SIZE,
     }

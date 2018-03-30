@@ -11,7 +11,7 @@ export const playerTank = (state: State, playerName: string) => {
   if (!active) {
     return null
   }
-  return state.tanks.get(activeTankId, null)
+  return state.tanks.get(activeTankId)
 }
 
 export function fireInfo(state: State, playerName: string): TankFireInfo {
