@@ -18,34 +18,37 @@ import Timing from '../utils/Timing'
 function* animateGameover() {
   const textId1 = getNextId('text')
   const textId2 = getNextId('text')
-  yield put<Action>({
-    type: 'SET_TEXT',
-    text: new TextRecord({
-      textId: textId1,
-      content: 'game',
-      fill: 'red',
-      x: BLOCK_SIZE * 6.5,
-      y: BLOCK_SIZE * 13,
-    }),
-  })
-  yield put<Action>({
-    type: 'SET_TEXT',
-    text: new TextRecord({
-      textId: textId2,
-      content: 'over',
-      fill: 'red',
-      x: BLOCK_SIZE * 6.5,
-      y: BLOCK_SIZE * 13.5,
-    }),
-  })
-  yield* animateTexts([textId1, textId2], {
-    direction: 'up',
-    distance: BLOCK_SIZE * 6,
-    duration: 2000,
-  })
-  yield Timing.delay(500)
-  yield put<Action>({ type: 'REMOVE_TEXT', textId: textId1 })
-  yield put<Action>({ type: 'REMOVE_TEXT', textId: textId2 })
+  try {
+    yield put<Action>({
+      type: 'SET_TEXT',
+      text: new TextRecord({
+        textId: textId1,
+        content: 'game',
+        fill: 'red',
+        x: BLOCK_SIZE * 6.5,
+        y: BLOCK_SIZE * 13,
+      }),
+    })
+    yield put<Action>({
+      type: 'SET_TEXT',
+      text: new TextRecord({
+        textId: textId2,
+        content: 'over',
+        fill: 'red',
+        x: BLOCK_SIZE * 6.5,
+        y: BLOCK_SIZE * 13.5,
+      }),
+    })
+    yield* animateTexts([textId1, textId2], {
+      direction: 'up',
+      distance: BLOCK_SIZE * 6,
+      duration: 2000,
+    })
+    yield Timing.delay(500)
+  } finally {
+    yield put<Action>({ type: 'REMOVE_TEXT', textId: textId1 })
+    yield put<Action>({ type: 'REMOVE_TEXT', textId: textId2 })
+  }
 }
 
 function* stageFlow(startStageIndex: number) {
