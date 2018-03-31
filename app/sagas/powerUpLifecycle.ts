@@ -26,10 +26,9 @@ export default function* powerUpLifecycle(powerUp: PowerUpRecord) {
       powerUp,
     })
     yield race<any>([
-      take(pickThisPowerUp),
-      take('START_STAGE'),
-      take('CLEAR_ALL_POWER_UPS'),
+      take(['END_STAGE', 'CLEAR_ALL_POWER_UPS']),
       blink(powerUp.powerUpId),
+      take(pickThisPowerUp),
     ])
   } finally {
     yield put<Action>({

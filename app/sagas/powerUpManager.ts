@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { fork, put, select, take, cancelled, takeEvery, takeLatest } from 'redux-saga/effects'
+import { fork, put, select, take, race, cancelled, takeEvery, takeLatest } from 'redux-saga/effects'
 import { MapRecord, ScoreRecord, State, PowerUpRecord } from 'types'
 import { destroyTanks } from 'sagas/common'
 import powerUpLifecycle from 'sagas/powerUpLifecycle'
@@ -245,6 +245,12 @@ function* clearAllPowerUps({ tank }: Action.StartSpawnTank) {
   }
 }
 
+function raceEndStage(handler: any) {
+  return function*() {
+    yield race<any>([take('END_STAGE'), handler()])
+  }
+}
+
 export default function* powerUpManager() {
   yield takeEvery('START_SPAWN_TANK', clearAllPowerUps)
 
@@ -254,8 +260,8 @@ export default function* powerUpManager() {
   /** 处理道具拾取时触发的相应逻辑 */
   yield takeEvery('PICK_POWER_UP', scoreFromPickPowerUp)
 
-  yield takeLatest(is('shovel'), shovel)
-  yield takeLatest(is('timer'), timer)
+  yield takeLatest(is('shovel'), raceEndStage(shovel))
+  yield takeLatest(is('timer'), raceEndStage(timer))
 
   yield takeEvery(is('grenade'), grenade)
   yield takeEvery(is('star'), star)
