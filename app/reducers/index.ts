@@ -12,8 +12,9 @@ import texts, { TextsMap } from 'reducers/texts'
 import powerUps, { PowerUpsMap } from 'reducers/powerUps'
 import scores, { ScoresMap } from 'reducers/scores'
 import stages from 'reducers/stages'
-import { MapRecord, StageConfig } from 'types'
 import devOnly from 'components/dev-only/reducer'
+import MapRecord from '../types/MapRecord'
+import StageConfig from '../types/StageConfig'
 
 export interface State {
   router: any
@@ -29,12 +30,21 @@ export interface State {
   powerUps: PowerUpsMap
   scores: ScoresMap
   stages: List<StageConfig>
+  editor: StageConfig
   devOnly: any
 }
 
 export function time(state = 0, action: Action) {
   if (action.type === 'TICK') {
     return state + action.delta
+  } else {
+    return state
+  }
+}
+
+export function editor(state = new StageConfig(), action: Action) {
+  if (action.type === 'SET_EDITOR_CONTENT') {
+    return action.stage
   } else {
     return state
   }
@@ -55,4 +65,5 @@ export default combineReducers<State>({
   scores,
   stages,
   devOnly,
+  editor,
 })

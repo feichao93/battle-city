@@ -1,9 +1,8 @@
 import { match, Route, Redirect } from 'react-router-dom'
-import { push } from 'react-router-redux'
-import { saveAs } from 'file-saver'
+import { replace, goBack } from 'react-router-redux'
 import React from 'react'
 import { Dispatch } from 'redux'
-import { is, List, Range, Record, Repeat } from 'immutable'
+import { is, List, Range, Repeat } from 'immutable'
 import { connect } from 'react-redux'
 import {
   BLOCK_SIZE as B,
@@ -22,61 +21,19 @@ import BrickWall from 'components/BrickWall'
 import SteelWall from 'components/SteelWall'
 import TextInput from 'components/TextInput'
 import TextButton from 'components/TextButton'
-import { TankRecord, RawStageConfig, StageDifficulty } from 'types'
-import { add } from 'utils/common'
-import Screen from './components/Screen'
-import StagePreview from './components/StagePreview'
-import StageConfig, { defaultEnemiesConfig } from './types/StageConfig'
-import { State } from './reducers'
-
-function serializeMapItemList(list: List<MapItemRecord>): RawStageConfig['map'] {
-  const result: string[] = []
-  for (let row = 0; row < FBZ; row += 1) {
-    const array: string[] = []
-    for (let col = 0; col < FBZ; col += 1) {
-      const { type, hex } = list.get(row * FBZ + col)
-      if (type === 'B') {
-        if (hex > 0) {
-          array.push('B' + hex.toString(16))
-        } else {
-          array.push('X')
-        }
-      } else if (type === 'E') {
-        array.push('E')
-      } else if (type === 'R') {
-        array.push('R')
-      } else if (type === 'S') {
-        array.push('S')
-      } else if (type === 'T') {
-        if (hex > 0) {
-          array.push('T' + hex.toString(16))
-        } else {
-          array.push('X')
-        }
-      } else if (type === 'F') {
-        array.push('F')
-      } else {
-        array.push('X')
-      }
-    }
-    result.push(array.map(s => s.padEnd(3)).join(''))
-  }
-  return result
-}
-
-export type MapItemType = 'X' | 'E' | 'B' | 'T' | 'R' | 'S' | 'F'
-
-export class MapItemRecord extends Record({
-  type: 'X' as MapItemType,
-  hex: 0xf,
-}) {}
-
-export type PopupType = 'alert' | 'confirm'
-
-export class Popup extends Record({
-  type: 'alert' as PopupType,
-  message: '',
-}) {}
+import { TankRecord, StageDifficulty, StageConfig, State } from 'types/index'
+import { add, dec, inc } from 'utils/common'
+import Popup from '../types/Popup'
+import AreaButton from './AreaButton'
+import Screen from './Screen'
+import StagePreview from './StagePreview'
+import {
+  defaultEnemiesConfig,
+  MapItemType,
+  MapItem,
+  StageConfigConverter,
+} from '../types/StageConfig'
+import TextWithLineWrap from './TextWithLineWrap'
 
 class DashLines extends React.PureComponent<{ t?: number }> {
   render() {
@@ -151,74 +108,6 @@ const HexSteelWall = ({ x, y, hex }: { x: number; y: number; hex: number }) => (
   </g>
 )
 
-type AreaButtonProps = {
-  x: number
-  y: number
-  width: number
-  height: number
-  onClick: () => void
-  strokeWidth?: number
-  spreadX?: number
-  spreadY?: number
-}
-
-const AreaButton = ({
-  x,
-  y,
-  width,
-  height,
-  onClick,
-  strokeWidth = 1,
-  spreadX = 2,
-  spreadY = 1,
-}: AreaButtonProps) => {
-  return (
-    <rect
-      className="area-button"
-      x={x - spreadX}
-      y={y - spreadY}
-      width={width + 2 * spreadX}
-      height={height + 2 * spreadY}
-      onClick={onClick}
-      stroke="transparent"
-      strokeWidth={strokeWidth}
-    />
-  )
-}
-
-type TextWithLineWrapProps = {
-  x: number
-  y: number
-  fill?: string
-  maxLength: number
-  content: string
-  lineSpacing?: number
-}
-
-// todo 针对单词进行换行
-const TextWithLineWrap = ({
-  x,
-  y,
-  fill,
-  maxLength,
-  content,
-  lineSpacing = 0.25 * B,
-}: TextWithLineWrapProps) => (
-  <g className="text-with-line-wrap">
-    {Range(0, Math.ceil(content.length / maxLength))
-      .map(index => (
-        <Text
-          key={index}
-          x={x}
-          y={y + (0.5 * B + lineSpacing) * index}
-          fill={fill}
-          content={content.substring(index * maxLength, (index + 1) * maxLength)}
-        />
-      ))
-      .toArray()}
-  </g>
-)
-
 const positionMap = {
   X: B,
   B: 2.5 * B,
@@ -232,13 +121,11 @@ const positionMap = {
 export interface EditorProps {
   match: match<any>
   dispatch: Dispatch<State>
+  editor: StageConfig
   stages: List<StageConfig>
 }
 
 class Editor extends React.Component<EditorProps> {
-  private input: HTMLInputElement
-  private resetButton: HTMLInputElement
-  private form: HTMLFormElement
   private svg: SVGSVGElement
   private pressed = false
   private resolveConfirm: (ok: boolean) => void = null
@@ -248,72 +135,20 @@ class Editor extends React.Component<EditorProps> {
     popup: null as Popup,
     t: -1,
 
-    name: 'custom',
+    name: '',
     difficulty: 1 as StageDifficulty,
     enemies: defaultEnemiesConfig,
 
-    itemList: Repeat(new MapItemRecord(), FBZ ** 2).toList(),
+    itemList: Repeat(new MapItem(), FBZ ** 2).toList(),
     itemType: 'X' as MapItemType,
     brickHex: 0xf,
     steelHex: 0xf,
   }
 
   componentDidMount() {
-    this.form = document.createElement('form')
-    this.resetButton = document.createElement('input')
-    this.input = document.createElement('input')
-
-    this.resetButton.type = 'reset'
-    this.input.type = 'file'
-
-    this.form.style.display = 'none'
-
-    this.input.addEventListener('change', this.onLoadFile)
-
-    this.form.appendChild(this.input)
-    this.form.appendChild(this.resetButton)
-    document.body.appendChild(this.form)
-  }
-
-  componentWillUnmount() {
-    this.input.removeEventListener('change', this.onLoadFile)
-    this.form.remove()
-  }
-
-  onLoadFile = () => {
-    const file = this.input.files[0]
-    if (file == null) {
-      return
-    }
-    const fileReader = new FileReader()
-    fileReader.readAsText(file)
-    fileReader.onloadend = async () => {
-      try {
-        const stage: RawStageConfig = JSON.parse(fileReader.result)
-        await this.loadStateFromFileContent(stage)
-      } catch (error) {
-        console.error(error)
-        this.showAlertPopup('Failed to parse stage config file.')
-      }
-      this.resetButton.click()
-    }
-  }
-
-  async loadStateFromFileContent(rawStageConfig: RawStageConfig) {
-    const itemList = List(rawStageConfig.map).flatMap(line => {
-      const items = line.trim().split(/ +/)
-      return items.map(item => {
-        const hex = parseInt(item[1], 16)
-        return new MapItemRecord({
-          type: item[0] as MapItemType,
-          hex: isNaN(hex) ? 0 : hex,
-        })
-      })
-    })
-    const stage = StageConfig.fromJS(rawStageConfig)
-    if (await this.showConfirmPopup('This will override current config and map. Continue?')) {
-      this.setState({ stage, itemList })
-    }
+    // custom 在这里不需要取出来，因为 custom 永远为 true
+    const { name, difficulty, itemList, enemies } = StageConfigConverter.s2e(this.props.editor)
+    this.setState({ name, difficulty, itemList, enemies })
   }
 
   getT(event: React.MouseEvent<SVGSVGElement>) {
@@ -337,11 +172,11 @@ class Editor extends React.Component<EditorProps> {
   getCurrentItem() {
     const { itemType, brickHex, steelHex } = this.state
     if (itemType === 'B') {
-      return new MapItemRecord({ type: 'B', hex: brickHex })
+      return new MapItem({ type: 'B', hex: brickHex })
     } else if (itemType === 'T') {
-      return new MapItemRecord({ type: 'T', hex: steelHex })
+      return new MapItem({ type: 'T', hex: steelHex })
     } else {
-      return new MapItemRecord({ type: itemType })
+      return new MapItem({ type: itemType })
     }
   }
 
@@ -353,7 +188,7 @@ class Editor extends React.Component<EditorProps> {
     }
     if (item.type === 'E') {
       // 先将已存在的eagle移除 保证Eagle最多出现一次
-      const eagleRemoved = itemList.map(item => (item.type === 'E' ? new MapItemRecord() : item))
+      const eagleRemoved = itemList.map(item => (item.type === 'E' ? new MapItem() : item))
       this.setState({ itemList: eagleRemoved.set(t, item) })
     } else {
       this.setState({ itemList: itemList.set(t, item) })
@@ -418,79 +253,73 @@ class Editor extends React.Component<EditorProps> {
   onIncEnemyCount = (index: number) => {
     const { enemies } = this.state
     this.setState({
-      enemies: enemies.update(index, e => e.incCount()),
+      enemies: enemies.updateIn([index, 'count'], inc(1)),
     })
   }
 
   onDecEnemyCount = (index: number) => {
     const { enemies } = this.state
     this.setState({
-      enemies: enemies.update(index, e => e.decCount()),
+      enemies: enemies.updateIn([index, 'count'], dec(1)),
     })
-  }
-
-  onRequestLoad = () => {
-    this.input.click()
   }
 
   /** 检查当前编辑器中的关卡配置是否合理. 返回 true 表示关卡配置合理 */
   async check() {
+    const { stages } = this.props
     const { name, enemies, itemList } = this.state
     const totalEnemyCount = enemies.map(e => e.count).reduce(add)
 
     // 检查stageName
     if (name === '') {
       await this.showAlertPopup('Please enter stage name.')
-      this.props.dispatch(push('/editor/config'))
+      this.props.dispatch(replace('/editor/config'))
       return false
     }
+
+    // 检查是否与已有的default-stage 重名
+    if (stages.some(s => !s.custom && s.name === name)) {
+      await this.showAlertPopup(`Stage ${name} already exists.`)
+      return false
+    }
+
     // 检查enemies数量
     if (totalEnemyCount === 0) {
       await this.showAlertPopup('no enemy')
       return false
-    } else if (
-      totalEnemyCount !== 20 &&
-      !await this.showConfirmPopup('total enemy count is not 20. continue?')
-    ) {
-      return false
     }
 
-    // 检查地图
+    // 检查老鹰是否存在
     const hasEagle = itemList.some(mapItem => mapItem.type === 'E')
     if (!hasEagle) {
       await this.showAlertPopup('no eagle.')
       return false
     }
+
+    // 检查是否与已有的custom-stage 重名
+    if (stages.some(s => s.custom && s.name === name)) {
+      const confirmed = await this.showConfirmPopup('Override exsiting stage. continue?')
+      if (!confirmed) {
+        return false
+      }
+    }
+
+    if (totalEnemyCount !== 20) {
+      const confirmed = await this.showConfirmPopup('total enemy count is not 20. continue?')
+      if (!confirmed) {
+        return false
+      }
+    }
+
     return true
   }
 
   onSave = async () => {
     if (await this.check()) {
-      const { name, enemies, difficulty, itemList } = this.state
-      const object = {
-        name: name.toLowerCase(),
-        difficulty,
-        map: serializeMapItemList(itemList),
-        enemies: enemies.filter(e => e.count > 0).map(e => `${e.count}*${e.tankLevel}`),
-      }
-      const content = JSON.stringify(object, null, 2)
-      saveAs(new Blob([content], { type: 'text/plain;charset=utf-8' }), `stage-${name}.json`)
-    }
-  }
-
-  onPlay = async () => {
-    const { dispatch, stages } = this.props
-    if (await this.check()) {
-      const stage = this.getStage()
-      if (stages.some(s => s.name === stage.name)) {
-        await this.showAlertPopup(`stage ${stage.name} already exists.`)
-        return
-      }
-      dispatch<Action.AddCustomStage>({
-        type: 'ADD_CUSTOME_STAGE',
-        stage,
-      })
-      dispatch(push(`/stage/${stage.name}`))
+      const { dispatch } = this.props
+      const stage = StageConfigConverter.e2s(Object.assign({ custom: true }, this.state))
+      dispatch<Action>({ type: 'SET_CUSTOM_STAGE', stage })
+      dispatch(replace('/list/custom'))
     }
   }
 
@@ -537,9 +366,7 @@ class Editor extends React.Component<EditorProps> {
   }
 
   getStage() {
-    const { name, difficulty, enemies, itemList } = this.state
-    const map = StageConfig.parseStageMap(serializeMapItemList(itemList))
-    return new StageConfig({ name, difficulty, map, enemies })
+    return StageConfigConverter.e2s(Object.assign({ custom: false }, this.state))
   }
 
   renderItemSwitchButtons() {
@@ -623,7 +450,7 @@ class Editor extends React.Component<EditorProps> {
 
     return (
       <g className="map-view">
-        <StagePreview stage={this.getStage()} x={0} y={0} scale={1} />
+        <StagePreview disableImageCache stage={this.getStage()} />
         <DashLines t={t} />
         <g className="tools" transform={`translate(${13 * B},0)`}>
           <TextButton
@@ -818,18 +645,22 @@ class Editor extends React.Component<EditorProps> {
                   x={0.5 * B}
                   y={0.5 * B}
                   selected={view === 'config'}
-                  onClick={() => dispatch(push('/editor/config'))}
+                  onClick={() => dispatch(replace('/editor/config'))}
                 />
                 <TextButton
                   content="map"
                   x={4 * B}
                   y={0.5 * B}
                   selected={view === 'map'}
-                  onClick={() => dispatch(push('/editor/map'))}
+                  onClick={() => dispatch(replace('/editor/map'))}
                 />
-                <TextButton content="load" x={7 * B} y={0.5 * B} onClick={this.onRequestLoad} />
-                <TextButton content="save" x={9.5 * B} y={0.5 * B} onClick={this.onSave} />
-                <TextButton content="play" x={12 * B} y={0.5 * B} onClick={this.onPlay} />
+                <TextButton
+                  content="back"
+                  x={9.5 * B}
+                  y={0.5 * B}
+                  onClick={() => dispatch(goBack())}
+                />
+                <TextButton content="save" x={12 * B} y={0.5 * B} onClick={this.onSave} />
               </g>
               {this.renderPopup()}
             </Screen>
@@ -840,4 +671,6 @@ class Editor extends React.Component<EditorProps> {
   }
 }
 
-export default connect((s: State) => ({ stages: s.stages }))(Editor)
+const mapStateToProps = (s: State) => ({ editor: s.editor, stages: s.stages })
+
+export default connect(mapStateToProps)(Editor)

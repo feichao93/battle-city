@@ -14,7 +14,7 @@ class SimpleWrapper extends React.Component {
 export interface ImageProps {
   disabled?: boolean
   imageKey: string
-  transform: string
+  transform?: string
   width: string | number
   height: string | number
   children?: React.ReactNode
@@ -41,6 +41,7 @@ export default class Image extends React.PureComponent<ImageProps> {
       )
     } else {
       if (!cache.has(imageKey)) {
+        DEV.LOG && console.time(`Image: loading content of ${imageKey}`)
         const open = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">`
         const enhancer = withContext(
           { underImageComponent: PropTypes.bool, store: PropTypes.any },
@@ -56,6 +57,7 @@ export default class Image extends React.PureComponent<ImageProps> {
         const blob = new Blob([markup], { type: 'image/svg+xml' })
         const url = URL.createObjectURL(blob)
         cache.set(imageKey, url)
+        DEV.LOG && console.timeEnd(`Image: loading content of ${imageKey}`)
       }
       return (
         <image

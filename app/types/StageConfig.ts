@@ -1,12 +1,68 @@
 import { List, Record, Repeat } from 'immutable'
 import { BLOCK_SIZE, FIELD_BLOCK_SIZE, N_MAP } from 'utils/constants'
 import { MapRecord, EagleRecord } from '../types'
-import { dec, inc } from '../utils/common'
+import { or } from '../utils/common'
+import IndexHelper from '../utils/IndexHelper'
+
+export type MapItemType = 'X' | 'E' | 'B' | 'T' | 'R' | 'S' | 'F'
+
+const MapItemRecord = Record({
+  type: 'X' as MapItemType,
+  hex: 0xf,
+})
+
+export interface EditorStageConfig {
+  name: string
+  difficulty: StageDifficulty
+  custom: boolean
+  itemList: List<MapItem>
+  enemies: List<EnemyGroupConfig>
+}
+
+function serializeMapItemList(list: List<MapItem>): string[] {
+  const result: string[] = []
+  for (let row = 0; row < FIELD_BLOCK_SIZE; row += 1) {
+    const array: string[] = []
+    for (let col = 0; col < FIELD_BLOCK_SIZE; col += 1) {
+      const { type, hex } = list.get(row * FIELD_BLOCK_SIZE + col)
+      if (type === 'B') {
+        if (hex > 0) {
+          array.push('B' + hex.toString(16))
+        } else {
+          array.push('X')
+        }
+      } else if (type === 'E') {
+        array.push('E')
+      } else if (type === 'R') {
+        array.push('R')
+      } else if (type === 'S') {
+        array.push('S')
+      } else if (type === 'T') {
+        if (hex > 0) {
+          array.push('T' + hex.toString(16))
+        } else {
+          array.push('X')
+        }
+      } else if (type === 'F') {
+        array.push('F')
+      } else {
+        array.push('X')
+      }
+    }
+    result.push(array.map(s => s.padEnd(3)).join(''))
+  }
+  return result
+}
+
+export class MapItem extends MapItemRecord {}
 
 export type StageDifficulty = 1 | 2 | 3 | 4
 
+/** 关卡配置文件的格式 */
 export interface RawStageConfig {
   name: string
+  // 是否为自定义的关卡
+  custom: boolean
   difficulty: StageDifficulty
   map: string[]
   /** 敌人描述, 例如: 20\*basic, 10\*fast */
@@ -23,14 +79,6 @@ export class EnemyGroupConfig extends Record({
 
   static unwind(enemyGroupConfig: EnemyGroupConfig) {
     return Repeat(enemyGroupConfig.tankLevel, enemyGroupConfig.count)
-  }
-
-  incCount() {
-    return this.update('count', inc(1))
-  }
-
-  decCount() {
-    return this.update('count', dec(1))
   }
 
   incTankLevel() {
@@ -63,15 +111,18 @@ export const defaultEnemiesConfig = List<EnemyGroupConfig>([
 
 const StageConfigRecord = Record({
   name: '',
+  custom: false,
   difficulty: 1 as StageDifficulty,
   map: new MapRecord(),
   enemies: defaultEnemiesConfig,
 })
 
 export default class StageConfig extends StageConfigRecord {
+  /* TODO 这个名字取得不好 */
   static fromJS(object: RawStageConfig) {
     return new StageConfig({
       name: object.name,
+      custom: object.custom,
       difficulty: object.difficulty,
       map: StageConfig.parseStageMap(object.map),
       enemies: StageConfig.parseStageEnemies(object.enemies),
@@ -186,7 +237,7 @@ export default class StageConfig extends StageConfigRecord {
             }
           }
         } else if (item[0] !== 'x') {
-          throw new Error('Invalid map')
+          throw new Error(`Invalid map at row:${row} col:${col}`)
         }
       }
     }
@@ -233,5 +284,99 @@ export default class StageConfig extends StageConfigRecord {
     return List(array)
       .setSize(4)
       .map(v => (v ? v : new EnemyGroupConfig()))
+  }
+}
+
+export namespace StageConfigConverter {
+  // stage-to-editor
+  export function s2e(stage: StageConfig): EditorStageConfig {
+    const items = new Array<MapItem>(FIELD_BLOCK_SIZE ** 2)
+    items.fill(new MapItem())
+    const { bricks, steels, snows, forests, rivers, eagle } = stage.map
+    bricks.forEach((set, brickT) => {
+      if (set) {
+        const [brickRow, brickCol] = IndexHelper.getRowCol('brick', brickT)
+        const t = Math.floor(brickRow / 4) * FIELD_BLOCK_SIZE + Math.floor(brickCol / 4)
+        const hex = 0b0001 << (2 * (Math.floor(brickRow / 2) % 2) + Math.floor(brickCol / 2) % 2)
+        if (items[t].type === 'B') {
+          items[t] = items[t].update('hex', or(hex))
+        } else {
+          items[t] = new MapItem({ type: 'B', hex })
+        }
+      }
+    })
+    steels.forEach((set, steelT) => {
+      if (set) {
+        const [steelRow, steelCol] = IndexHelper.getRowCol('steel', steelT)
+        const t = Math.floor(steelRow / 2) * FIELD_BLOCK_SIZE + Math.floor(steelCol / 2)
+        const hex = 0b0001 << (2 * (steelRow % 2) + steelCol % 2)
+        if (items[t].type === 'T') {
+          items[t] = items[t].update('hex', or(hex))
+        } else {
+          items[t] = new MapItem({ type: 'T', hex })
+        }
+      }
+    })
+    rivers.forEach((set, t) => {
+      if (set) items[t] = new MapItem({ type: 'R' })
+    })
+    forests.forEach((set, t) => {
+      if (set) items[t] = new MapItem({ type: 'F' })
+    })
+    snows.forEach((set, t) => {
+      if (set) items[t] = new MapItem({ type: 'S' })
+    })
+
+    if (eagle != null) {
+      const { x, y } = eagle
+      const row = Math.floor(y / BLOCK_SIZE)
+      const col = Math.floor(x / BLOCK_SIZE)
+      items[row * FIELD_BLOCK_SIZE + col] = new MapItem({ type: 'E' })
+    }
+
+    return {
+      name: stage.name,
+      custom: stage.custom,
+      difficulty: stage.difficulty,
+      itemList: List(items),
+      enemies: stage.enemies,
+    }
+  }
+
+  // stage-to-raw
+  export function s2r(stage: StageConfig): RawStageConfig {
+    return e2r(s2e(stage))
+  }
+
+  // editor-to-stage
+  export function e2s(editorStageConfig: EditorStageConfig): StageConfig {
+    const { name, custom, difficulty, itemList, enemies } = editorStageConfig
+    const map = StageConfig.parseStageMap(serializeMapItemList(itemList))
+    return new StageConfig({ name, difficulty, custom, map, enemies })
+  }
+
+  // editor-to-raw
+  export function e2r(editorStageConfig: EditorStageConfig): RawStageConfig {
+    const { name, custom, enemies, difficulty, itemList } = editorStageConfig
+    return {
+      name: name.toLowerCase(),
+      custom,
+      difficulty,
+      map: serializeMapItemList(itemList),
+      enemies: enemies
+        .filter(e => e.count > 0)
+        .map(e => `${e.count}*${e.tankLevel}`)
+        .toArray(),
+    }
+  }
+
+  // raw-to-stage
+  export function r2s(raw: RawStageConfig): StageConfig {
+    return StageConfig.fromJS(raw)
+  }
+
+  // raw-to-editor
+  export function r2e(raw: RawStageConfig): EditorStageConfig {
+    return s2e(r2s(raw))
   }
 }

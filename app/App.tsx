@@ -8,10 +8,11 @@ import GameScene from 'components/GameScene'
 import GameoverScene from 'components/GameoverScene'
 import GameTitleScene from 'components/GameTitleScene'
 import ChooseStageScene from 'components/ChooseStageScene'
+import Editor from './components/Editor'
+import StageListPageWrapper from './components/StageList'
 import { State } from 'types'
 import { GameRecord } from 'reducers/game'
 import { firstStageName as fsn } from 'stages'
-import Editor from './Editor'
 import Gallery from './Gallery'
 
 class App extends React.PureComponent<{ game: GameRecord }> {
@@ -19,6 +20,7 @@ class App extends React.PureComponent<{ game: GameRecord }> {
     return (
       <ConnectedRouter history={history}>
         <Switch>
+          <Route path="/list" component={StageListPageWrapper} />
           <Route path="/editor" component={Editor} />
           <Route path="/gallery" component={Gallery} />
           <Route exact path="/gameover" component={GameoverScene} />

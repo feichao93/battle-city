@@ -1,9 +1,16 @@
 import defaultStages from 'stages'
 
 export default function stages(state = defaultStages, action: Action) {
-  // FIXME 使用自定义关卡开始游戏有 BUG
-  if (action.type === 'ADD_CUSTOME_STAGE') {
-    return state.push(action.stage.set('name', 'custom'))
+  if (action.type === 'SET_CUSTOM_STAGE') {
+    // 更新或是新增 stage
+    const index = state.findIndex(s => s.name === action.stage.name)
+    if (index === -1) {
+      return state.push(action.stage)
+    } else {
+      return state.set(index, action.stage)
+    }
+  } else if (action.type === 'REMOVE_CUSTOM_STAGE') {
+    return state.filterNot(s => s.custom && s.name === action.stageName)
   } else {
     return state
   }

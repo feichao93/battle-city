@@ -308,9 +308,25 @@ const chars: Chars = {
       d="M1,3 h1 v-1 h1 v-1 h1 v-1 h1 v2 h3 v3 h-3 v2 h-1 v-1 h-1 v-1 h-1 v-1 h-1 v-1"
     />
   ),
+  ['\u2191'.toLowerCase()]: ({ fill }) => (
+    <path
+      className="character-upwards-arrow"
+      transform="translate(8,-1) rotate(90)"
+      fill={fill}
+      d="M1,3 h1 v-1 h1 v-1 h1 v-1 h1 v2 h3 v3 h-3 v2 h-1 v-1 h-1 v-1 h-1 v-1 h-1 v-1"
+    />
+  ),
   ['\u2192'.toLowerCase()]: ({ fill }) => (
     <path
       className="character-rightwards-arrow"
+      fill={fill}
+      d="M1,2 h3 v-2 h1 v1 h1 v1 h1 v1 h1 v1 h-1 v1 h-1 v1 h-1 v1 h-1 v-2 h-3 v-3"
+    />
+  ),
+  ['\u2193'.toLowerCase()]: ({ fill }) => (
+    <path
+      className="character-downwards-arrow"
+      transform="translate(8,-1) rotate(90)"
       fill={fill}
       d="M1,2 h3 v-2 h1 v1 h1 v1 h1 v1 h1 v1 h-1 v1 h-1 v1 h-1 v1 h-1 v-2 h-3 v-3"
     />
@@ -332,8 +348,8 @@ const chars: Chars = {
 
 type Props = {
   content: string
-  x: number
-  y: number
+  x?: number
+  y?: number
   fill?: string
   style?: React.CSSProperties
 }
@@ -344,7 +360,7 @@ export default class Text extends React.PureComponent<Props> {
   }
 
   render() {
-    const { content, x, y, fill = 'white', style = {} } = this.props
+    const { content, x = 0, y = 0, fill = 'white', style = {} } = this.props
     return (
       <g className="text" transform={`translate(${x},${y})`} style={style}>
         {Array.from(content.toLowerCase()).map((char, i) => {

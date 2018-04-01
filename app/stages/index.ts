@@ -14,6 +14,7 @@ if (DEV.TEST_STAGE) {
   defaultStages = defaultStages.push(
     StageConfig.fromJS({
       name: '1',
+      custom: true,
       difficulty: 1,
       map: [
         'X  X  X  X  X  X  X  X  X  X  X  X  X  ',

@@ -13,12 +13,12 @@ import About from './About'
 import FlexDiv from './FlexDiv'
 import Screen from './Screen'
 
-type Choice = '1-player' | 'editor' | 'gallery'
+type Choice = '1-player' | 'stage-list' | 'gallery'
 
 function nextChoice(choice: Choice): Choice {
   if (choice === '1-player') {
-    return 'editor'
-  } else if (choice === 'editor') {
+    return 'stage-list'
+  } else if (choice === 'stage-list') {
     return 'gallery'
   } else {
     return '1-player'
@@ -28,17 +28,17 @@ function nextChoice(choice: Choice): Choice {
 function prevChoice(choice: Choice): Choice {
   if (choice === '1-player') {
     return 'gallery'
-  } else if (choice === 'editor') {
+  } else if (choice === 'stage-list') {
     return '1-player'
   } else {
-    return 'editor'
+    return 'stage-list'
   }
 }
 
 function y(choice: Choice) {
   if (choice === '1-player') {
     return 8.25 * B
-  } else if (choice === 'editor') {
+  } else if (choice === 'stage-list') {
     return 9.25 * B
   } else {
     return 10.25 * B
@@ -81,12 +81,11 @@ class GameTitleScene extends React.PureComponent<P, S> {
 
   onChoose = (choice: Choice) => {
     const { dispatch } = this.props
-    if (choice === 'editor') {
-      dispatch(push('/editor'))
+    if (choice === 'stage-list') {
+      dispatch(push('/list'))
     } else if (choice === '1-player') {
       dispatch(push('/choose'))
     } else {
-      // gallery
       dispatch(push('/gallery'))
     }
   }
@@ -148,12 +147,12 @@ class GameTitleScene extends React.PureComponent<P, S> {
               onClick={() => this.onChoose('1-player')}
             />
             <TextButton
-              content="editor"
+              content="stage list"
               x={5.5 * B}
               y={9.5 * B}
               textFill="white"
-              onMouseOver={() => this.setState({ choice: 'editor' })}
-              onClick={() => this.onChoose('editor')}
+              onMouseOver={() => this.setState({ choice: 'stage-list' })}
+              onClick={() => this.onChoose('stage-list')}
             />
             <TextButton
               content="gallery"

@@ -89,7 +89,9 @@ declare global {
       | RemoveRestrictedArea
       | SetAITankPath
       | RemoveAITankPath
-      | AddCustomStage
+      | SetCustomStage
+      | RemoveCustomStage
+      | SetEditorContent
       | Simple<'LEAVE_GAME_SCENE'>
 
     export interface Move {
@@ -396,8 +398,18 @@ declare global {
       playerName: string
     }
 
-    export interface AddCustomStage {
-      type: 'ADD_CUSTOME_STAGE'
+    export interface SetCustomStage {
+      type: 'SET_CUSTOM_STAGE'
+      stage: StageConfig
+    }
+
+    export interface RemoveCustomStage {
+      type: 'REMOVE_CUSTOM_STAGE'
+      stageName: string
+    }
+
+    export interface SetEditorContent {
+      type: 'SET_EDITOR_CONTENT'
       stage: StageConfig
     }
   }

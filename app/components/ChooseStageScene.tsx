@@ -77,53 +77,64 @@ class ChooseStageScene extends React.PureComponent<{
     const index = stageNames.indexOf(stageName)
     return (
       <Screen>
-        <g className="choose-stage-scene">
-          <Text content="choose stage:" x={0.5 * B} y={0.5 * B} />
-          <StagePreview
-            stage={index === 0 ? null : stages.get(index - 1)}
-            x={0.75 * B}
-            y={3.375 * B}
-            scale={1 / 4}
+        <Text content="choose stage:" x={0.5 * B} y={0.5 * B} />
+        <StagePreview
+          key={index - 1}
+          stage={index === 0 ? null : stages.get(index - 1)}
+          x={0.75 * B}
+          y={3.375 * B}
+          scale={1 / 4}
+        />
+        <StagePreview
+          key={index}
+          stage={stages.get(index)}
+          x={4.75 * B}
+          y={1.75 * B}
+          scale={1 / 2}
+        />
+        <StagePreview
+          key={index + 1}
+          stage={stages.get(index + 1)}
+          x={12 * B}
+          y={3.375 * B}
+          scale={1 / 4}
+        />
+        <Text content={`stage ${stageName}`} x={6.5 * B} y={8.5 * B} />
+        <g className="button-areas" transform={`translate(${2.5 * B}, ${11 * B})`}>
+          <TextButton
+            content="prev"
+            textFill="white"
+            disabled={index === 0}
+            x={0}
+            y={0}
+            onClick={this.onChoosePrevStage}
           />
-          <StagePreview stage={stages.get(index)} x={4.75 * B} y={1.75 * B} scale={1 / 2} />
-          <StagePreview stage={stages.get(index + 1)} x={12 * B} y={3.375 * B} scale={1 / 4} />
-          <Text content={`stage ${stageName}`} x={6.5 * B} y={8.5 * B} />
-          <g className="button-areas" transform={`translate(${2.5 * B}, ${11 * B})`}>
-            <TextButton
-              content="prev"
-              textFill="white"
-              disabled={index === 0}
-              x={0}
-              y={0}
-              onClick={this.onChoosePrevStage}
-            />
-            <TextButton
-              content="next"
-              textFill="white"
-              disabled={index === stageNames.size - 1}
-              x={3 * B}
-              y={0}
-              onClick={this.onChooseNextStage}
-            />
-            <TextButton
-              content="play"
-              textFill="#96d332"
-              stroke="#96d332"
-              x={6 * B}
-              y={0}
-              onClick={this.onStartPlay}
-            />
-            <TextButton
-              content="back"
-              textFill="white"
-              x={9 * B}
-              y={0}
-              onClick={() => dispatch(replace('/'))}
-            />
-          </g>
-          <g className="hint" transform={`translate(${0.5 * B},${14 * B}) scale(0.5)`}>
-            <Text fill="#ccc" content="This page is a little janky. Keep patient." x={0} y={0} />
-          </g>
+          <TextButton
+            content="next"
+            textFill="white"
+            disabled={index === stageNames.size - 1}
+            x={3 * B}
+            y={0}
+            onClick={this.onChooseNextStage}
+          />
+          <TextButton
+            content="play"
+            textFill="#96d332"
+            stroke="#96d332"
+            x={6 * B}
+            y={0}
+            onClick={this.onStartPlay}
+          />
+          <TextButton
+            content="back"
+            textFill="white"
+            x={9 * B}
+            y={0}
+            onClick={() => dispatch(replace('/'))}
+          />
+        </g>
+        <g className="hint" transform={`translate(${0.5 * B},${14 * B}) scale(0.5)`}>
+          <Text fill="#ccc" content="This page is a little janky. Keep patient." x={0} y={0} />
         </g>
       </Screen>
     )

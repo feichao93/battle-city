@@ -104,6 +104,7 @@ export function asRect(
 type UpdaterMaker = (amount: number) => (x: number) => number
 export const inc: UpdaterMaker = amount => x => x + amount
 export const dec: UpdaterMaker = amount => x => x - amount
+export const or: UpdaterMaker = amount => x => x | amount
 export const add = (x: number, y: number) => x + y
 
 export function getDirectionInfo(direction: Direction, flipxy = false) {
