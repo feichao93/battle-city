@@ -298,7 +298,7 @@ class Editor extends React.Component<EditorProps> {
 
     // 检查是否与已有的custom-stage 重名
     if (stages.some(s => s.custom && s.name === name)) {
-      const confirmed = await this.showConfirmPopup('Override exsiting stage. continue?')
+      const confirmed = await this.showConfirmPopup('Override exsiting custome stage. continue?')
       if (!confirmed) {
         return false
       }
@@ -314,11 +314,18 @@ class Editor extends React.Component<EditorProps> {
     return true
   }
 
+  onBack = async () => {
+    if (await this.showConfirmPopup('Unsaved change may be lost. continue?')) {
+      this.props.dispatch(goBack())
+    }
+  }
+
   onSave = async () => {
     if (await this.check()) {
       const { dispatch } = this.props
       const stage = StageConfigConverter.e2s(Object.assign({ custom: true }, this.state))
       dispatch<Action>({ type: 'SET_CUSTOM_STAGE', stage })
+      dispatch<Action>({ type: 'SYNC_CUSTOM_STAGES' })
       dispatch(replace('/list/custom'))
     }
   }
@@ -654,13 +661,8 @@ class Editor extends React.Component<EditorProps> {
                   selected={view === 'map'}
                   onClick={() => dispatch(replace('/editor/map'))}
                 />
-                <TextButton
-                  content="back"
-                  x={9.5 * B}
-                  y={0.5 * B}
-                  onClick={() => dispatch(goBack())}
-                />
-                <TextButton content="save" x={12 * B} y={0.5 * B} onClick={this.onSave} />
+                <TextButton content="save" x={10 * B} y={0.5 * B} onClick={this.onSave} />
+                <TextButton content="back" x={12.5 * B} y={0.5 * B} onClick={this.onBack} />
               </g>
               {this.renderPopup()}
             </Screen>

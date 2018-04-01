@@ -92,6 +92,7 @@ declare global {
       | SetCustomStage
       | RemoveCustomStage
       | SetEditorContent
+      | Simple<'SYNC_CUSTOM_STAGES'>
       | Simple<'LEAVE_GAME_SCENE'>
 
     export interface Move {

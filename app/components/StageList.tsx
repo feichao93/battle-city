@@ -192,19 +192,29 @@ class StageListPageUnconncted extends React.PureComponent<StageListProps & State
         const raw: RawStageConfig = JSON.parse(fileReader.result)
         const stage = StageConfigConverter.r2s(raw).set('custom', true)
         const { dispatch, stages, tab } = this.props
-        if (stages.some(s => s.name === stage.name)) {
+        if (stages.some(s => !s.custom && s.name === stage.name)) {
           this.showAlertPopup(`Stage ${stage.name} already exists.`)
-        } else {
-          dispatch<Action>({ type: 'SET_CUSTOM_STAGE', stage })
-          if (tab !== 'custom') {
-            dispatch(replace('/list/custom'))
+          return
+        }
+        if (stages.some(s => s.custom && s.name === stage.name)) {
+          const confirmed = await this.showConfirmPopup(
+            'Override exsiting custome stage. continue?',
+          )
+          if (!confirmed) {
+            return
           }
+        }
+        dispatch<Action>({ type: 'SET_CUSTOM_STAGE', stage })
+        dispatch<Action>({ type: 'SYNC_CUSTOM_STAGES' })
+        if (tab !== 'custom') {
+          dispatch(replace('/list/custom'))
         }
       } catch (error) {
         console.error(error)
         this.showAlertPopup('Failed to parse stage config file.')
+      } finally {
+        this.resetButton.click()
       }
-      this.resetButton.click()
     }
   }
 
@@ -248,6 +258,7 @@ class StageListPageUnconncted extends React.PureComponent<StageListProps & State
         type: 'REMOVE_CUSTOM_STAGE',
         stageName,
       })
+      this.props.dispatch<Action>({ type: 'SYNC_CUSTOM_STAGES' })
     }
   }
 
@@ -300,7 +311,7 @@ class StageListPageUnconncted extends React.PureComponent<StageListProps & State
               const y = 70 * Math.floor(index / 3)
               return (
                 <g key={stage.name} transform={`translate(${x}, ${y}) `}>
-                  <StagePreview stage={stage} scale={0.25} />
+                  <StagePreview disableImageCache={tab === 'custom'} stage={stage} scale={0.25} />
                   <g transform="scale(0.5)">
                     <Text content={stage.name} fill="#dd2664" />
                   </g>
@@ -355,22 +366,9 @@ class StageListPageUnconncted extends React.PureComponent<StageListProps & State
           />
         </g>
         <g className="button-areas" transform={`translate(${7 * B}, ${13.5 * B})`}>
-          <TextButton content="new" textFill="white" x={0 * B} y={0} onClick={this.onNewStage} />
-          {/* TODO upload a stage file */}
-          <TextButton
-            content="upload"
-            textFill="white"
-            x={2 * B}
-            y={0}
-            onClick={() => this.input.click()}
-          />
-          <TextButton
-            content="back"
-            textFill="white"
-            x={5.5 * B}
-            y={0}
-            onClick={() => dispatch(goBack())}
-          />
+          <TextButton content="new" x={0 * B} y={0} onClick={this.onNewStage} />
+          <TextButton content="upload" x={2 * B} y={0} onClick={() => this.input.click()} />
+          <TextButton content="back" x={5.5 * B} y={0} onClick={() => dispatch(goBack())} />
         </g>
         {this.renderPopup()}
       </Screen>
