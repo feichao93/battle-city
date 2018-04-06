@@ -30,7 +30,7 @@ export interface State {
   powerUps: PowerUpsMap
   scores: ScoresMap
   stages: List<StageConfig>
-  editor: StageConfig
+  editorContent: StageConfig
   devOnly: any
 }
 
@@ -42,7 +42,7 @@ export function time(state = 0, action: Action) {
   }
 }
 
-export function editor(state = new StageConfig(), action: Action) {
+export function editorContent(state = new StageConfig(), action: Action) {
   if (action.type === 'SET_EDITOR_CONTENT') {
     return action.stage
   } else {
@@ -65,5 +65,5 @@ export default combineReducers<State>({
   scores,
   stages,
   devOnly,
-  editor,
+  editorContent,
 })

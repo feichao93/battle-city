@@ -52,6 +52,7 @@ declare global {
       | DecrementPlayerLifeAction
       | ActivatePlayer
       | AddPlayer
+      | ReqAddPlayerTank
       | RemovePlayer
       | Simple<'DEACTIVATE_ALL_PLAYERS'>
       | AddOrUpdateExplosion
@@ -280,6 +281,11 @@ declare global {
     export interface AddPlayer {
       type: 'ADD_PLAYER'
       player: PlayerRecord
+    }
+
+    export interface ReqAddPlayerTank {
+      type: 'REQ_ADD_PLAYER_TANK'
+      playerName: PlayerName
     }
 
     export interface RemovePlayer {

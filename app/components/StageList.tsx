@@ -9,7 +9,7 @@ import { State } from 'types/index'
 import { BLOCK_SIZE as B } from 'utils/constants'
 import { RawStageConfig } from '../types'
 import Popup from '../types/Popup'
-import { default as StageConfig, StageConfigConverter } from '../types/StageConfig'
+import { StageConfigConverter } from '../types/StageConfig'
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from '../utils/constants'
 import Screen from './Screen'
 import StagePreview from './StagePreview'
@@ -271,12 +271,6 @@ class StageListPageUnconncted extends React.PureComponent<StageListProps & State
     saveAs(new Blob([content], { type: 'text/plain;charset=utf-8' }), `stage-${stage.name}.json`)
   }
 
-  onNewStage = () => {
-    const { dispatch } = this.props
-    dispatch<Action>({ type: 'SET_EDITOR_CONTENT', stage: new StageConfig() })
-    dispatch(push('/editor'))
-  }
-
   render() {
     const { tab, page, dispatch, stages: allStages } = this.props
     const filteredStages = allStages.filter(
@@ -365,10 +359,10 @@ class StageListPageUnconncted extends React.PureComponent<StageListProps & State
             disabled={page >= this.getMaxPage()}
           />
         </g>
-        <g className="button-areas" transform={`translate(${7 * B}, ${13.5 * B})`}>
-          <TextButton content="new" x={0 * B} y={0} onClick={this.onNewStage} />
-          <TextButton content="upload" x={2 * B} y={0} onClick={() => this.input.click()} />
-          <TextButton content="back" x={5.5 * B} y={0} onClick={() => dispatch(goBack())} />
+        <g className="button-areas" transform={`translate(${5.5 * B}, ${13.5 * B})`}>
+          <TextButton content="editor" x={0 * B} y={0} onClick={() => dispatch(push('/editor'))} />
+          <TextButton content="upload" x={3.5 * B} y={0} onClick={() => this.input.click()} />
+          <TextButton content="back" x={7 * B} y={0} onClick={() => dispatch(goBack())} />
         </g>
         {this.renderPopup()}
       </Screen>

@@ -1,8 +1,8 @@
-# ~~用 React 与 Redux-saga 实现坦克大战~~
+# 用 React 与 Redux-saga 实现的高质量坦克大战复刻版
 
 _TODO 坦克大战介绍_
 
-游戏主要包括几个方面的内容：一素材 二数据与展现 三逻辑 四电脑玩家（AI-player）
+游戏主要包括几个方面的内容：一素材 二数据 三展现 四逻辑 五电脑玩家
 
 ## 一、素材
 
@@ -51,7 +51,7 @@ _TODO 坦克大战介绍_
 
 一部分数值配置比较明显，多玩几遍原版游戏就可以找到规律，例如玩家的坦克数量、坦克升级过程、不同类型坦克子弹效果、击毁不同类型坦克的得分等。其他数值配置的获取较为繁琐，例如子弹飞行速度、坦克移动速度、爆炸效果各帧的持续时间，这一部分大都从原版游戏录像中获取。[该文件](/docs/values.md) 中记录了一些我已经测量好的数值，可供参考。随着游戏的不断完善，该文件也会不断完善。
 
-#### **游戏场景**
+#### 游戏场景
 
 坦克大战中的不同场景的区分度很大，而同一场景的变化较小，对原版游戏中不同场景进行截图，复刻版根据这些截图进行开发即可。
 
@@ -61,11 +61,11 @@ _TODO 坦克大战介绍_
 
 ## 二、展现
 
-经过第一步之后，游戏的素材被封装成了相应的组件或数据项，以方便后续的调用，这一步中利用这些元素创建出游戏界面。坦克大战游戏包括了若干页面（游戏页面、标题页面、关卡选择页面、关卡列表页面、关卡编辑页面等），在 *app/App.tsx* 中我使用了 react-router 来管理这些页面组件，这样一来玩家也可以通过手动在地址栏上输入地址直接执行操作（例如[直接开始某个关卡](http://shinima.pw/battle-city/#/stage/3)）。
+经过第一步之后，游戏的素材被封装成了相应的组件或数据项，以方便后续的调用，这一步中利用这些元素创建出游戏界面。坦克大战游戏包括了若干页面（游戏页面、标题页面、关卡选择页面、关卡列表页面、关卡编辑页面等），在 _app/App.tsx_ 中我使用了 react-router 来管理这些页面组件，这样一来玩家也可以通过手动在地址栏上输入地址直接执行操作（例如[直接开始某个关卡](http://shinima.pw/battle-city/#/stage/2)）。
 
 React 的组件非常容易被组合，整个游戏的展现过程也是 react 组件不断组合的过程。下图是游戏中主要场景`BattleField` 的结构，可以看出 `BattleField` 组件由许多不同的组件组合而成，游戏中的其他组件也类似，归根结底由第一步中的素材组合而成。
 
-![fffo](battle-field-layers.jpg)
+![battle-field-structure](battle-field-layers.jpg)
 
 **React 性能优化**
 
@@ -73,45 +73,40 @@ React 的组件非常容易被组合，整个游戏的展现过程也是 react �
 
 优化一：应用 [`React.PureComponent`](https://reactjs.org/docs/react-api.html#reactpurecomponent) 来过滤掉不需要的 re-render。游戏运行时，只有一小部分的组件会不断更新（坦克/子弹），大部分的组件（游戏中的地形元素）保持不变。这些不怎么变化的组件，在很多时候，前后两次接收到的 props 是相等的（shallow-equal）。让组件继承自 `React.PureComponent` ，就可以跳过该组件大部分额外的 re-render 。经过该步优化后，整个游戏的帧率大幅上升，大部分情况下可以到达 60 FPS。对于那些一直在变化的组件（例如子弹等），应用 PureComponent 的收益很小，也许 React.Component 更为合适。不过我在实际编程中也没考虑那么多，全盘使用了 PureComponent。
 
-优化二：经过 *优化一* 之后游戏在**短时间内生成大量组件**的情况下仍会出现掉帧的现象，例如坦克爆炸效果出现的时候。优化一避免了组件更新时重复渲染，但无法优化组件加载时的初次渲染过程，当组件复杂的时候，组件初次渲染就会有较大的开销。[该文章中提到了使用离屏画布提升 canvas 性能](https://www.html5rocks.com/zh/tutorials/canvas/performance/)，*优化二* 的思路也是类似：将组件渲染的内容保存到 SVG 图片中，下次渲染时直接使用准备好的图片。游戏中的爆炸效果、地形元素等组件的内容较为固定，其内容保存为图片后可以被多次复用。该优化实现代码如下：（[完整版代码](https://github.com/shinima/battle-city/blob/master/app/hocs/Image.tsx)）
+优化二：经过 _优化一_ 之后游戏在**短时间内生成大量组件**的情况下仍会出现掉帧的现象，例如坦克爆炸效果出现的时候。优化一避免了组件更新时重复渲染，但无法优化组件加载时的初次渲染过程，当组件复杂的时候，组件初次渲染就会有较大的开销。[该文章中提到了使用离屏画布提升 canvas 性能](https://www.html5rocks.com/zh/tutorials/canvas/performance/)，_优化二_ 的思路也是类似：将组件渲染的内容保存到 SVG 图片中，下次渲染时直接使用准备好的图片。游戏中的爆炸效果、地形元素等组件的内容较为固定，其内容保存为图片后可以被多次复用。该优化实现代码如下：（[完整版代码](https://github.com/shinima/battle-city/blob/master/app/hocs/Image.tsx)）
 
 ```jsx
 import { renderToString } from 'react-dom/server'
 
-const svgns = "http://www.w3.org/2000/svg"
+const svgns = 'http://www.w3.org/2000/svg'
 // imageKey 到 object-url 的映射，一个 imageKey 对应了一张保存好的图片
 const cache = new Map()
 
 class Image extends React.PureComponent {
-    render() {
-        const { imageKey, width, height, transform, children } = this.props
-        if (!cache.has(imageKey)) {
-            const open = `<svg xmlns="${svgns}" width="${width}" height="${height}">`
-            const string = renderToString(<g>children</g>)
-            const close = '</svg>'
-            const markup = open + string + close
-            const blob = new Blob([markup], { type: 'image/svg+xml' })
-            const url = URL.createObjectURL(blob)
-            cache.set(imageKey, url)
-        }
-        return <image transform={transform} href={cache.get(imageKey)} />
+  render() {
+    const { imageKey, width, height, transform, children } = this.props
+    if (!cache.has(imageKey)) {
+      const open = `<svg xmlns="${svgns}" width="${width}" height="${height}">`
+      const string = renderToString(<g>children</g>)
+      const close = '</svg>'
+      const markup = open + string + close
+      const blob = new Blob([markup], { type: 'image/svg+xml' })
+      const url = URL.createObjectURL(blob)
+      cache.set(imageKey, url)
     }
+    return <image transform={transform} href={cache.get(imageKey)} />
+  }
 }
 
-// 其实地方像这样使用 <Image />
+// 其他地方像这样使用 <Image />
 class OtherComponentUsingImage extends React.PureComponent {
-    render() {
-        return (
-            <Image
-                imageKey="Forest"
-                transform="translate(32, 0)"
-                width="16"
-                height="16"
-            >
-                {imageContent}
-      		</Image>
-		)
-    }
+  render() {
+    return (
+      <Image imageKey="Forest" transform="translate(32, 0)" width="16" height="16">
+        {imageContent}
+      </Image>
+    )
+  }
 }
 ```
 
@@ -119,7 +114,7 @@ class OtherComponentUsingImage extends React.PureComponent {
 
 ## 三、数据
 
-该复刻版使用 redux 来管理数据，数据结构使用来自 Immutable.js 的 Map、List 等。reducer 层级整体较为扁平，不同方面的数据由各自的 reducer 进行维护，root reducer 将多个子reducer 合并起来。下面是整个游戏的数据结构，`time` 是整个游戏的时钟，`game` 记录了若干游戏状态（当前关卡名称、是否暂停、玩家的击杀统计等），`players` 记录了游戏中所有的玩家。除了上述三个字段，其他各个字段存放的数据都直接对应了**场景中出现的内容**，这点从字段名称中应该也能看出来。
+该复刻版使用 redux 来管理数据，数据结构使用来自 Immutable.js 的 Map、List 等。reducer 层级整体较为扁平，不同方面的数据由各自的 reducer 进行维护，root reducer 将多个子 reducer 合并起来。下面是整个游戏大致的数据结构，`time` 是整个游戏的时钟，`game` 记录了若干游戏状态（当前关卡名称、是否暂停、玩家的击杀统计等），`players` 记录了游戏中所有的玩家。除了上述三个字段，其他各个字段存放的数据都直接对应了**游戏场景中出现的内容**，这点从字段名称中应该也能看出来。
 
 ```typescript
 // 整个游戏的数据结构
@@ -140,34 +135,12 @@ interface State {
 }
 ```
 
-该复刻版使用 TypeScript 来进行开发，所有数据结构都有静态类型，在 VSCode 中将鼠标悬停在变量上方就可以直接看到变量的类型。
-
-```typescript
-// types/TankRecord.ts  坦克的数据结构
-const TankRecordType = Record({
-  active: true,
-  tankId: 0,
-  x: 0,
-  y: 0,
-  side: 'human' as Side,
-  direction: 'up' as Direction,
-  moving: false,
-  level: 'basic' as TankLevel,
-  color: 'auto' as TankColor,
-  hp: 1,
-  withPowerUp: false,
-
-  // 该字段用来记录tank的helmet的剩余的持续时间
-  helmetDuration: 0,
-  // 该字段小于等于0表示可以进行移动, 大于0表示还需要等待x毫秒才能进行移动
-  frozenTimeout: 0,
-  // 该字段小于等于0表示可以进行开火, 大于0表示还需要等待x毫秒才能进行开火
-  cooldown: 0,
-})
-```
+该复刻版使用 TypeScript 来进行开发，所有数据结构都包含了静态类型，在 VSCode 中将鼠标悬停在变量上方就可以直接看到变量的类型。游戏还包含了许许多多其他类型的数据，这里不进行展开解释，感兴趣的同学可以直接查看[源代码](https://github.com/shinima/battle-city/blob/master/app/types/index.ts)。Redux 中，我们需要使用 Action 来封装「修改 store 中的状态」，复刻版中的 action 列表可以查看[该文件](https://github.com/shinima/battle-city/blob/master/app/utils/actions.ts)，大部分 action 的含义可以直接从其命名中看出来，该文件中的 action 的抽象层级比较低，描述的内容较为简单，游中发生的某个事件需要使用多个 action 才能描述，这也是使用 redux-saga 的原因之一。
 
 ## 四、逻辑
 
-介绍游戏使用了哪些 saga; 不同的 saga 分别对应什么功能; 画出一棵"saga 树"
+从上面 BattleField 的渲染代码中也可以看出，游戏的展现取决于游戏的数据，数据发生变化时，游戏会更新视图来反映最新的数据，而游戏逻辑的目标就是 **根据用户输入和游戏规则维护 Store 中的游戏数据**。游戏的逻辑完全基于 redux-saga 实现，入口位于[文件 sagas/index.ts](../app/sagas/index.ts)。游戏逻辑较为复杂，我画了一棵 saga 树。
+
+TODO saga-tree
 
 ## 五 电脑玩家

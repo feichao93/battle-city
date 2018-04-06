@@ -121,7 +121,7 @@ const positionMap = {
 export interface EditorProps {
   match: match<any>
   dispatch: Dispatch<State>
-  editor: StageConfig
+  initialCotnent: StageConfig
   stages: List<StageConfig>
 }
 
@@ -147,7 +147,9 @@ class Editor extends React.Component<EditorProps> {
 
   componentDidMount() {
     // custom 在这里不需要取出来，因为 custom 永远为 true
-    const { name, difficulty, itemList, enemies } = StageConfigConverter.s2e(this.props.editor)
+    const { name, difficulty, itemList, enemies } = StageConfigConverter.s2e(
+      this.props.initialCotnent,
+    )
     this.setState({ name, difficulty, itemList, enemies })
   }
 
@@ -315,9 +317,9 @@ class Editor extends React.Component<EditorProps> {
   }
 
   onBack = async () => {
-    if (await this.showConfirmPopup('Unsaved change may be lost. continue?')) {
-      this.props.dispatch(goBack())
-    }
+    const { dispatch } = this.props
+    dispatch<Action>({ type: 'SET_EDITOR_CONTENT', stage: this.getStage() })
+    dispatch(goBack())
   }
 
   onSave = async () => {
@@ -673,6 +675,6 @@ class Editor extends React.Component<EditorProps> {
   }
 }
 
-const mapStateToProps = (s: State) => ({ editor: s.editor, stages: s.stages })
+const mapStateToProps = (s: State) => ({ initialCotnent: s.editorContent, stages: s.stages })
 
 export default connect(mapStateToProps)(Editor)

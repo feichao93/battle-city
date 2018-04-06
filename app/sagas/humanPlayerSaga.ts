@@ -7,7 +7,6 @@ import * as selectors from 'utils/selectors'
 import { CONTROL_CONFIG } from '../utils/constants'
 import humanController from './humanController'
 import { explosionFromTank } from 'sagas/common/destroyTanks'
-import { channel } from 'redux-saga'
 
 function* handlePickPowerUps(playerName: string) {
   const tank: TankRecord = yield select(selectors.playerTank, playerName)
@@ -85,7 +84,6 @@ function* beforeEndStage(playerName: string) {
 }
 
 export default function* humanPlayerSaga(playerName: string, tankColor: TankColor) {
-  const newTankChannel = channel<'new-tank'>()
   try {
     yield put<Action>({
       type: 'ADD_PLAYER',
@@ -141,13 +139,16 @@ export default function* humanPlayerSaga(playerName: string, tankColor: TankColo
       yield put({ type: 'REMOVE_TANK', tankId: tank.tankId })
       yield explosionFromTank(tank)
       // 唤醒新的human tank
-      yield put(newTankChannel, 'new-tank')
+      yield put<Action>({ type: 'REQ_ADD_PLAYER_TANK', playerName })
     }
   }
 
   function* newTankHelper() {
     while (true) {
-      yield take(newTankChannel)
+      yield take(
+        (action: Action) =>
+          action.type === 'REQ_ADD_PLAYER_TANK' && action.playerName === playerName,
+      )
       const { players }: State = yield select()
       const player = players.get(playerName)
       if (player.lives > 0) {
