@@ -1,7 +1,12 @@
 import { Map, Range } from 'immutable'
 import React from 'react'
 import { Redirect, Route } from 'react-router'
-import { GameRecord } from '../reducers/game'
+import { combineReducers } from 'redux'
+import { all } from 'redux-saga/effects'
+import saga from '../hocs/saga'
+import game, { GameRecord } from '../reducers/game'
+import statistics from '../sagas/stageStatistics'
+import tickEmitter from '../sagas/tickEmitter'
 import { BulletRecord, PlayerRecord, PowerUpRecord, TankRecord } from '../types'
 import {
   BLOCK_SIZE as B,
@@ -24,6 +29,12 @@ import TextButton from './TextButton'
 import TextWithLineWrap from './TextWithLineWrap'
 
 const noop = () => 0
+
+function ticked(fn: any) {
+  return function*() {
+    yield all([tickEmitter(Infinity, false), fn()])
+  }
+}
 
 namespace GalleryContent {
   const powerUpNames: PowerUpName[] = ['tank', 'star', 'grenade', 'timer', 'helmet', 'shovel']
@@ -142,14 +153,15 @@ namespace GalleryContent {
     }
   }
 
-  // TODO 让这个场景动起来
+  const player1KillInfo = Map([['basic', 10], ['fast', 4], ['power', 4], ['armor', 2]])
+  @saga(
+    combineReducers({ game }),
+    { game: new GameRecord({ killInfo: Map({ 'player-1': player1KillInfo as any }) }) },
+    ticked(statistics),
+  )
   export class Statistics extends React.PureComponent {
-    state = {
-      game: new GameRecord(),
-    }
-
     render() {
-      const { game } = this.state
+      const { game } = this.props as { game: GameRecord }
       return (
         <g>
           <Text x={8} y={8} content="Statistics" fill="#dd2664" />
