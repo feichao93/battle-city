@@ -8,9 +8,9 @@ import { GameRecord } from '../reducers/game'
 import PauseIndicator from './PauseIndicator'
 import Screen from './Screen'
 
-class StatisticsScene extends React.PureComponent<{ game: GameRecord }> {
+export class StatisticsSceneContent extends React.PureComponent<{ game: GameRecord }> {
   render() {
-    const { game: { transientKillInfo, paused, currentStageName, showTotalKillCount } } = this.props
+    const { game: { transientKillInfo, currentStageName, showTotalKillCount } } = this.props
     const player1KillInfo = transientKillInfo.get('player-1')
 
     const basic = player1KillInfo.get('basic')
@@ -40,8 +40,8 @@ class StatisticsScene extends React.PureComponent<{ game: GameRecord }> {
     }
 
     return (
-      <Screen>
-        <rect fill="#000000" x={0} y={0} width={16 * B} height={16 * B} />
+      <g>
+        <rect fill="#000000" width={16 * B} height={15 * B} />
         <g transform={`translate(${-0.5 * B}, ${-1.5 * B})`}>
           <Text content="HI-SCORE" x={4.5 * B} y={3.5 * B} fill="#e44437" />
           <Text content="20000" x={10 * B} y={3.5 * B} fill="#feac4e" />
@@ -87,7 +87,20 @@ class StatisticsScene extends React.PureComponent<{ game: GameRecord }> {
           {/* total信息 */}
           <Text content={`TOTAL ${player1Total}`} x={3.5 * B} y={13.5 * B} fill="white" />
         </g>
-        {paused ? <PauseIndicator /> : null}
+      </g>
+    )
+  }
+}
+
+class StatisticsScene extends React.PureComponent<{ game: GameRecord }> {
+  render() {
+    const { game } = this.props
+
+    return (
+      <Screen>
+        <rect fill="#000000" x={0} y={0} width={16 * B} height={16 * B} />
+        <StatisticsSceneContent game={game} />
+        {game.paused ? <PauseIndicator /> : null}
       </Screen>
     )
   }

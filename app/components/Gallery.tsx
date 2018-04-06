@@ -1,35 +1,29 @@
 import { Map, Range } from 'immutable'
-import PropTypes from 'prop-types'
 import React from 'react'
 import { Redirect, Route } from 'react-router'
-import { applyMiddleware, combineReducers, createStore } from 'redux'
-import createSagaMiddleware from 'redux-saga'
-import { time } from '../reducers'
-import game, { GameRecord } from '../reducers/game'
-import players from '../reducers/players'
-import tickEmitter from '../sagas/tickEmitter'
+import { GameRecord } from '../reducers/game'
 import { BulletRecord, PlayerRecord, PowerUpRecord, TankRecord } from '../types'
 import {
   BLOCK_SIZE as B,
   FIELD_BLOCK_SIZE as FBZ,
-  ITEM_SIZE_MAP,
   SCREEN_HEIGHT,
   SCREEN_WIDTH,
 } from '../utils/constants'
 import history from '../utils/history'
-import BrickWall from './BrickWall'
 import Bullet from './Bullet'
-import HUD from './HUD'
+import { GameoverSceneContent } from './GameoverScene'
+import { GameTitleSceneContent } from './GameTitleScene'
+import { HUDContent } from './HUD'
 import PowerUp from './PowerUp'
 import Score from './Score'
 import Screen from './Screen'
-import StatisticsScene from './StatisticsScene'
+import { StatisticsSceneContent } from './StatisticsScene'
 import { Tank } from './tanks'
 import Text from './Text'
 import TextButton from './TextButton'
 import TextWithLineWrap from './TextWithLineWrap'
 
-const withContext = require('recompose/withContext').default
+const noop = () => 0
 
 namespace GalleryContent {
   const powerUpNames: PowerUpName[] = ['tank', 'star', 'grenade', 'timer', 'helmet', 'shovel']
@@ -121,6 +115,7 @@ namespace GalleryContent {
     }
   }
 
+  // TODO 让这个场景动起来
   export class Fire extends React.PureComponent {
     render() {
       return (
@@ -134,93 +129,13 @@ namespace GalleryContent {
     }
   }
 
-  // TODO 让这个场景动起来
   export class TitleScene extends React.PureComponent {
     render() {
-      const size = ITEM_SIZE_MAP.BRICK
-      const scale = 4
       return (
         <g>
           <Text x={8} y={8} content="title-scene" fill="#dd2664" />
           <Transform k={0.8} x={25} y={32}>
-            <g className="game-title-scene">
-              <defs>
-                <pattern
-                  id="pattern-brickwall"
-                  width={size * 2 / scale}
-                  height={size * 2 / scale}
-                  patternUnits="userSpaceOnUse"
-                >
-                  <g transform={`scale(${1 / scale})`}>
-                    <BrickWall x={0} y={0} />
-                    <BrickWall x={0} y={size} />
-                    <BrickWall x={size} y={0} />
-                    <BrickWall x={size} y={size} />
-                  </g>
-                </pattern>
-              </defs>
-              <rect fill="#000000" width={16 * B} height={15 * B} />
-              <g transform="scale(0.5)">
-                <TextButton
-                  textFill="#96d332"
-                  x={22 * B}
-                  y={B}
-                  content="star me on github"
-                  onClick={() => window.open('https://github.com/shinima/battle-city')}
-                />
-              </g>
-              <Text content={'\u2160-    00 HI- 20000'} x={1 * B} y={1.5 * B} />
-              <g transform={`scale(${scale})`}>
-                <Text
-                  content="battle"
-                  x={1.5 * B / scale}
-                  y={3 * B / scale}
-                  fill="url(#pattern-brickwall)"
-                />
-                <Text
-                  content="city"
-                  x={3.5 * B / scale + 1}
-                  y={5.5 * B / scale}
-                  fill="url(#pattern-brickwall)"
-                />
-              </g>
-              <TextButton
-                content="1 player"
-                x={5.5 * B}
-                y={8.5 * B}
-                textFill="white"
-                onMouseOver={() => this.setState({ choice: '1-player' })}
-              />
-              <TextButton
-                content="stage list"
-                x={5.5 * B}
-                y={9.5 * B}
-                textFill="white"
-                onMouseOver={() => this.setState({ choice: 'stage-list' })}
-              />
-              <TextButton
-                content="gallery"
-                x={5.5 * B}
-                y={10.5 * B}
-                textFill="white"
-                onMouseOver={() => this.setState({ choice: 'gallery' })}
-              />
-              <Tank
-                tank={
-                  new TankRecord({
-                    side: 'human',
-                    direction: 'right',
-                    color: 'yellow',
-                    moving: true,
-                    x: 4 * B,
-                    y: 8.25 * B,
-                  })
-                }
-              />
-
-              <Text content={'\u00a9 1980 1985 NAMCO LTD.'} x={2 * B} y={12.5 * B} />
-              <Text content="ALL RIGHTS RESERVED" x={3 * B} y={13.5 * B} />
-            </g>
+            <GameTitleSceneContent push={noop} />
           </Transform>
         </g>
       )
@@ -229,12 +144,17 @@ namespace GalleryContent {
 
   // TODO 让这个场景动起来
   export class Statistics extends React.PureComponent {
+    state = {
+      game: new GameRecord(),
+    }
+
     render() {
+      const { game } = this.state
       return (
         <g>
           <Text x={8} y={8} content="Statistics" fill="#dd2664" />
-          <Transform k={0.4} x={25} y={32}>
-            <StatisticsScene />
+          <Transform k={0.8} x={25} y={32}>
+            <StatisticsSceneContent game={game} />
           </Transform>
         </g>
       )
@@ -243,90 +163,22 @@ namespace GalleryContent {
 
   export class Gameover extends React.PureComponent {
     render() {
-      const size = ITEM_SIZE_MAP.BRICK
-      const scale = 4
       return (
         <g>
           <Text x={8} y={8} content="gameover" fill="#dd2664" />
           <Transform k={0.8} x={25} y={32}>
-            <defs>
-              <pattern
-                id="pattern-brickwall"
-                width={size * 2 / scale}
-                height={size * 2 / scale}
-                patternUnits="userSpaceOnUse"
-              >
-                <g transform={`scale(${1 / scale})`}>
-                  <BrickWall x={0} y={0} />
-                  <BrickWall x={0} y={size} />
-                  <BrickWall x={size} y={0} />
-                  <BrickWall x={size} y={size} />
-                </g>
-              </pattern>
-            </defs>
-            <rect fill="#000000" x={0} y={0} width={16 * B} height={15 * B} />
-            <g transform={`scale(${scale})`}>
-              <Text
-                content="game"
-                x={4 * B / scale}
-                y={4 * B / scale}
-                fill="url(#pattern-brickwall)"
-              />
-              <Text
-                content="over"
-                x={4 * B / scale}
-                y={7 * B / scale}
-                fill="url(#pattern-brickwall)"
-              />
-            </g>
-            <g transform={`translate(${5.75 * B}, ${13 * B}) scale(0.5)`}>
-              <TextButton content="press R to restart" x={0} y={0} textFill="#9ed046" />
-            </g>
+            <GameoverSceneContent />
           </Transform>
         </g>
       )
     }
   }
 
-  function initGalleryStoreAndTask() {
-    const gallerySagaMiddleware = createSagaMiddleware()
-    const simpleActionLogMiddleware = () => (next: any) => (action: Action) => {
-      if (DEV.LOG && action.type !== 'TICK' && action.type !== 'AFTER_TICK') {
-        console.log(action)
-      }
-      return next(action)
-    }
-    const galleryReducer = combineReducers({
-      time,
-      players,
-      game,
-    })
-    const galleryInitState = {
-      time: undefined as number,
-      game: new GameRecord({ showHUD: true }),
-      players: Map({
-        'player-1': new PlayerRecord({
-          playerName: 'player-1',
-          lives: 3,
-        }),
-        'player-2': new PlayerRecord({
-          playerName: 'player-2',
-          lives: 1,
-        }),
-      }),
-    }
-    const store = createStore(
-      galleryReducer,
-      galleryInitState,
-      applyMiddleware(gallerySagaMiddleware, simpleActionLogMiddleware),
-    )
-    const task = gallerySagaMiddleware.run(tickEmitter, Infinity, false)
+  const players = Map({
+    'player-1': new PlayerRecord({ playerName: 'player-1', lives: 3 }),
+    'player-2': new PlayerRecord({ playerName: 'player-2', lives: 1 }),
+  })
 
-    return { store, task }
-  }
-  const storeAndTask = initGalleryStoreAndTask()
-
-  @withContext({ store: PropTypes.any }, () => ({ store: storeAndTask.store }))
   export class Misc extends React.PureComponent {
     render() {
       return (
@@ -336,9 +188,7 @@ namespace GalleryContent {
             <GrayText content="HUD" />
             <Transform y={16}>
               <rect width={16 + 4} height={128 + 4} fill="#757575" />
-              <Transform x={-232} y={-24}>
-                <HUD />
-              </Transform>
+              <HUDContent players={players} remainingEnemyCount={17} show />
             </Transform>
           </Transform>
           <Transform x={72} y={32}>
