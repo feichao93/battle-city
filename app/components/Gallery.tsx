@@ -131,9 +131,10 @@ namespace GalleryContent {
     render() {
       return (
         <g>
-          <Text x={8} y={8} content="Bullets" fill="#dd2664" />
+          <Text x={8} y={8} content="fire" fill="#dd2664" />
           <Transform x={8} y={40} k={2}>
             <Bullet bullet={new BulletRecord({ direction: 'right' })} />
+            <Text x={32} y={32} content="TODO" />
           </Transform>
         </g>
       )
@@ -154,6 +155,7 @@ namespace GalleryContent {
   }
 
   const player1KillInfo = Map([['basic', 10], ['fast', 4], ['power', 4], ['armor', 2]])
+
   @saga(
     combineReducers({ game }),
     { game: new GameRecord({ killInfo: Map({ 'player-1': player1KillInfo as any }) }) },
@@ -238,13 +240,17 @@ namespace GalleryContent {
             x={8}
             y={32}
             maxLength={28}
-            content="This remake is coded by shifeichao."
+            content="This remake is coded by shinima."
           />
+          <Transform k={2}>
+            <Text x={32} y={32} content="TODO" />
+          </Transform>
         </g>
       )
     }
   }
 }
+
 class DashLines extends React.PureComponent<{ t?: number }> {
   render() {
     const { t } = this.props
@@ -299,6 +305,15 @@ class Gallery extends React.PureComponent<{ tab: string }> {
   render() {
     const { tab } = this.props
     const index = tabs.indexOf(tab)
+    const NavText = ({ content, x }: { content: string; x: number }) => (
+      <TextButton
+        textFill={content === tab ? '#999' : '#444'}
+        x={x}
+        content={content}
+        onClick={() => history.replace(`/gallery/${content}`)}
+      />
+    )
+
     return (
       <Screen background="#333">
         <DashLines t={-1} />
@@ -325,6 +340,17 @@ class Gallery extends React.PureComponent<{ tab: string }> {
         {tab === 'gameover' && <GalleryContent.Gameover />}
         {tab === 'misc' && <GalleryContent.Misc />}
         {tab === 'info' && <GalleryContent.Info />}
+        <g transform={`translate(${0.5 * B}, ${14.5 * B}) scale(0.5)`}>
+          <NavText x={0} content="tanks" />
+          <NavText x={0} content="tanks" />
+          <NavText x={3 * B} content="texts" />
+          <NavText x={6 * B} content="fire" />
+          <NavText x={8.5 * B} content="misc" />
+          <NavText x={11 * B} content="title-scene" />
+          <NavText x={17 * B} content="statistics" />
+          <NavText x={22.5 * B} content="gameover" />
+          <NavText x={27 * B} content="info" />
+        </g>
       </Screen>
     )
   }
