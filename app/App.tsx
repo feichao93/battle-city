@@ -13,7 +13,7 @@ import StageListPageWrapper from './components/StageList'
 import { State } from 'types'
 import { GameRecord } from 'reducers/game'
 import { firstStageName as fsn } from 'stages'
-import Gallery from './Gallery'
+import Gallery from 'components/Gallery'
 
 class App extends React.PureComponent<{ game: GameRecord }> {
   render() {

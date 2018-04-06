@@ -4,8 +4,8 @@ import { BLOCK_SIZE as B } from 'utils/constants'
 import Text from 'components/Text'
 
 type TextButtonProps = {
-  x: number
-  y: number
+  x?: number
+  y?: number
   content: string
   spreadX?: number
   spreadY?: number
@@ -19,8 +19,8 @@ type TextButtonProps = {
 }
 
 const TextButton = ({
-  x,
-  y,
+  x = 0,
+  y = 0,
   content,
   spreadX = 0.25 * B,
   spreadY = 0.125 * B,

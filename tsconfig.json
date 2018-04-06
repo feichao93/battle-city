@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "experimentalDecorators": true,
     "esModuleInterop": true,
     "outDir": "./build/",
     "sourceMap": true,
