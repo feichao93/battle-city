@@ -2,7 +2,7 @@ import React from 'react'
 import { List } from 'immutable'
 import { connect, Dispatch } from 'react-redux'
 import { match, Redirect } from 'react-router-dom'
-import { replace } from 'react-router-redux'
+import { replace, push } from 'react-router-redux'
 import Text from 'components/Text'
 import TextButton from 'components/TextButton'
 import { BLOCK_SIZE as B, CONTROL_CONFIG } from 'utils/constants'
@@ -61,10 +61,9 @@ class ChooseStageScene extends React.PureComponent<{
   }
 
   onStartPlay = () => {
-    this.props.dispatch<Action>({
-      type: 'START_GAME',
-      stageIndex: this.getCurrentStageIndex(),
-    })
+    const { dispatch, match } = this.props
+    const { stageName } = match.params
+    dispatch(push(`/stage/${stageName}`))
   }
 
   render() {
@@ -76,34 +75,33 @@ class ChooseStageScene extends React.PureComponent<{
     }
     const index = stageNames.indexOf(stageName)
     return (
-      <Screen>
+      <Screen background="#333">
         <Text content="choose stage:" x={0.5 * B} y={0.5 * B} />
         <StagePreview
           key={index - 1}
           stage={index === 0 ? null : stages.get(index - 1)}
           x={0.75 * B}
-          y={3.375 * B}
+          y={4.375 * B}
           scale={1 / 4}
         />
         <StagePreview
           key={index}
           stage={stages.get(index)}
           x={4.75 * B}
-          y={1.75 * B}
+          y={2.75 * B}
           scale={1 / 2}
         />
         <StagePreview
           key={index + 1}
           stage={stages.get(index + 1)}
           x={12 * B}
-          y={3.375 * B}
+          y={4.375 * B}
           scale={1 / 4}
         />
-        <Text content={`stage ${stageName}`} x={6.5 * B} y={8.5 * B} />
-        <g className="button-areas" transform={`translate(${2.5 * B}, ${11 * B})`}>
+        <Text content={`stage ${stageName}`} x={6.5 * B} y={9.75 * B} />
+        <g className="button-areas" transform={`translate(${2.5 * B}, ${12 * B})`}>
           <TextButton
             content="prev"
-            textFill="white"
             disabled={index === 0}
             x={0}
             y={0}
@@ -111,30 +109,16 @@ class ChooseStageScene extends React.PureComponent<{
           />
           <TextButton
             content="next"
-            textFill="white"
             disabled={index === stageNames.size - 1}
             x={3 * B}
             y={0}
             onClick={this.onChooseNextStage}
           />
-          <TextButton
-            content="play"
-            textFill="#96d332"
-            stroke="#96d332"
-            x={6 * B}
-            y={0}
-            onClick={this.onStartPlay}
-          />
-          <TextButton
-            content="back"
-            textFill="white"
-            x={9 * B}
-            y={0}
-            onClick={() => dispatch(replace('/'))}
-          />
+          <TextButton content="play" stroke="#96d332" x={6 * B} y={0} onClick={this.onStartPlay} />
+          <TextButton content="back" x={9 * B} y={0} onClick={() => dispatch(replace('/'))} />
         </g>
-        <g className="hint" transform={`translate(${0.5 * B},${14 * B}) scale(0.5)`}>
-          <Text fill="#ccc" content="This page is a little janky. Keep patient." x={0} y={0} />
+        <g className="hint" transform={`translate(${0.5 * B},${14.5 * B}) scale(0.5)`}>
+          <Text fill="#999" content="Press left or right to choose stages. Press fire to start." />
         </g>
       </Screen>
     )

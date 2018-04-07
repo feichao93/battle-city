@@ -4,7 +4,7 @@ import { createStore, applyMiddleware } from 'redux'
 import { Provider, connect } from 'react-redux'
 import identity from 'lodash/identity'
 
-export default function saga(reducerFn: any, preloadedState: any, sagaFn: any): any {
+export default function saga(sagaFn: any, reducerFn: any, preloadedState?: any): any {
   return function(Component: any) {
     const Connected = connect(identity)(Component)
     return class extends React.PureComponent {

@@ -364,6 +364,9 @@ class StageListPageUnconncted extends React.PureComponent<StageListProps & State
           <TextButton content="upload" x={3.5 * B} y={0} onClick={() => this.input.click()} />
           <TextButton content="back" x={7 * B} y={0} onClick={() => dispatch(goBack())} />
         </g>
+        <g className="hint" transform={`translate(${0.5 * B},${14.5 * B}) scale(0.5)`}>
+          <Text fill="#999" content="This page is a little janky. Keep patient." />
+        </g>
         {this.renderPopup()}
       </Screen>
     )

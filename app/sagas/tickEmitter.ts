@@ -4,7 +4,14 @@ import { State } from 'types'
 
 const Mousetrap = require('mousetrap')
 
-export default function* tickEmitter(maxFPS: number, bindEsc: boolean) {
+export interface TickEmitterOptions {
+  maxFPS?: number
+  bindESC?: boolean
+  slow?: number
+}
+
+export default function* tickEmitter(options: TickEmitterOptions = {}) {
+  const { bindESC = false, slow = 1, maxFPS = Infinity } = options
   const tickChannel = eventChannel<Action.TickAction>(emit => {
     let lastTime = performance.now()
     let requestId = requestAnimationFrame(emitTick)
@@ -19,7 +26,7 @@ export default function* tickEmitter(maxFPS: number, bindEsc: boolean) {
     return () => cancelAnimationFrame(requestId)
   })
 
-  if (bindEsc) {
+  if (bindESC) {
     const escChannel = eventChannel(emitter => {
       Mousetrap.bind('esc', emitter)
       return () => Mousetrap.unbind('esc')
@@ -42,8 +49,11 @@ export default function* tickEmitter(maxFPS: number, bindEsc: boolean) {
       if (!paused) {
         accumulation += delta
         if (accumulation > 1000 / maxFPS) {
-          yield put<Action.TickAction>({ type: 'TICK', delta: accumulation })
-          yield put<Action.AfterTickAction>({ type: 'AFTER_TICK', delta: accumulation })
+          yield put<Action.TickAction>({ type: 'TICK', delta: accumulation / slow })
+          yield put<Action.AfterTickAction>({
+            type: 'AFTER_TICK',
+            delta: accumulation / slow,
+          })
           accumulation = 0
         }
       }

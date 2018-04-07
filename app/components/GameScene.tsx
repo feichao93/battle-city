@@ -6,7 +6,7 @@ import { Dispatch } from 'redux'
 import { State } from 'types'
 import { GameRecord } from '../reducers/game'
 import StageConfig from '../types/StageConfig'
-import BattleField from './BattleField'
+import BattleFieldScene from './BattleFieldScene'
 import StatisticsScene from './StatisticsScene'
 
 export interface GameSceneProps {
@@ -62,7 +62,7 @@ class GameScene extends React.PureComponent<GameSceneProps> {
     if (game.status === 'stat') {
       return <StatisticsScene />
     } else {
-      return <BattleField />
+      return <BattleFieldScene />
     }
   }
 }

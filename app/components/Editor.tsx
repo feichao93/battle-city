@@ -2,7 +2,7 @@ import { match, Route, Redirect } from 'react-router-dom'
 import { replace, goBack } from 'react-router-redux'
 import React from 'react'
 import { Dispatch } from 'redux'
-import { is, List, Range, Repeat } from 'immutable'
+import { is, List, Repeat } from 'immutable'
 import { connect } from 'react-redux'
 import {
   BLOCK_SIZE as B,
@@ -25,6 +25,7 @@ import { TankRecord, StageDifficulty, StageConfig, State } from 'types/index'
 import { add, dec, inc } from 'utils/common'
 import Popup from '../types/Popup'
 import AreaButton from './AreaButton'
+import Grid from './Grid'
 import Screen from './Screen'
 import StagePreview from './StagePreview'
 import {
@@ -34,43 +35,6 @@ import {
   StageConfigConverter,
 } from '../types/StageConfig'
 import TextWithLineWrap from './TextWithLineWrap'
-
-class DashLines extends React.PureComponent<{ t?: number }> {
-  render() {
-    const { t } = this.props
-    const hrow = Math.floor(t / FBZ)
-    const hcol = t % FBZ
-
-    return (
-      <g className="dash-lines" stroke="steelblue" strokeWidth="0.5" strokeDasharray="2 2">
-        {Range(1, FBZ + 1)
-          .map(col => (
-            <line
-              key={col}
-              x1={B * col}
-              y1={0}
-              x2={B * col}
-              y2={SCREEN_HEIGHT}
-              strokeOpacity={hcol === col || hcol === col - 1 ? 1 : 0.3}
-            />
-          ))
-          .toArray()}
-        {Range(1, FBZ + 1)
-          .map(row => (
-            <line
-              key={row}
-              x1={0}
-              y1={B * row}
-              x2={SCREEN_WIDTH}
-              y2={B * row}
-              strokeOpacity={hrow === row || hrow === row - 1 ? 1 : 0.3}
-            />
-          ))
-          .toArray()}
-      </g>
-    )
-  }
-}
 
 const HexBrickWall = ({ x, y, hex }: { x: number; y: number; hex: number }) => (
   <g className="hex-brick-wall">
@@ -460,7 +424,7 @@ class Editor extends React.Component<EditorProps> {
     return (
       <g className="map-view">
         <StagePreview disableImageCache stage={this.getStage()} />
-        <DashLines t={t} />
+        <Grid t={t} />
         <g className="tools" transform={`translate(${13 * B},0)`}>
           <TextButton
             content="?"
@@ -498,7 +462,7 @@ class Editor extends React.Component<EditorProps> {
 
     return (
       <g className="config-view">
-        <DashLines t={t} />
+        <Grid t={t} />
         <Text content="name:" x={3.5 * B} y={1 * B} fill="#ccc" />
         <TextInput
           x={6.5 * B}

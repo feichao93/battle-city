@@ -1,23 +1,22 @@
-import { Map, Range } from 'immutable'
+import { Map } from 'immutable'
 import React from 'react'
 import { Redirect, Route } from 'react-router'
 import { combineReducers } from 'redux'
 import { all } from 'redux-saga/effects'
 import saga from '../hocs/saga'
+import rootReducer, { State } from '../reducers'
 import game, { GameRecord } from '../reducers/game'
+import tanks from '../reducers/tanks'
+import fireDemoSaga from '../sagas/fireDemoSaga'
 import statistics from '../sagas/stageStatistics'
 import tickEmitter from '../sagas/tickEmitter'
-import { BulletRecord, PlayerRecord, PowerUpRecord, TankRecord } from '../types'
-import {
-  BLOCK_SIZE as B,
-  FIELD_BLOCK_SIZE as FBZ,
-  SCREEN_HEIGHT,
-  SCREEN_WIDTH,
-} from '../utils/constants'
+import { PlayerRecord, PowerUpRecord, TankRecord } from '../types'
+import { BLOCK_SIZE as B } from '../utils/constants'
 import history from '../utils/history'
-import Bullet from './Bullet'
+import { BattleFieldContent } from './BattleFieldScene'
 import { GameoverSceneContent } from './GameoverScene'
 import { GameTitleSceneContent } from './GameTitleScene'
+import Grid from './Grid'
 import { HUDContent } from './HUD'
 import PowerUp from './PowerUp'
 import Score from './Score'
@@ -32,7 +31,7 @@ const noop = () => 0
 
 function ticked(fn: any) {
   return function*() {
-    yield all([tickEmitter(Infinity, false), fn()])
+    yield all([tickEmitter(), fn()])
   }
 }
 
@@ -126,16 +125,23 @@ namespace GalleryContent {
     }
   }
 
-  // TODO 让这个场景动起来
-  export class Fire extends React.PureComponent {
+  @saga(fireDemoSaga, rootReducer)
+  export class Fire extends React.PureComponent<Partial<State>> {
     render() {
       return (
         <g>
           <Text x={8} y={8} content="fire" fill="#dd2664" />
-          <Transform x={8} y={40} k={2}>
-            <Bullet bullet={new BulletRecord({ direction: 'right' })} />
-            <Text x={32} y={32} content="TODO" />
+          <Transform x={16} y={40} k={2}>
+            <defs>
+              <clipPath id="fire-demo-hit-tank">
+                <rect width={112} height={32} />
+              </clipPath>
+            </defs>
+            <g clipPath="url(#fire-demo-hit-tank)">
+              <BattleFieldContent {...this.props} />
+            </g>
           </Transform>
+          {/* TODO fire-demo-hit-bricks */}
         </g>
       )
     }
@@ -155,12 +161,10 @@ namespace GalleryContent {
   }
 
   const player1KillInfo = Map([['basic', 10], ['fast', 4], ['power', 4], ['armor', 2]])
-
-  @saga(
-    combineReducers({ game }),
-    { game: new GameRecord({ killInfo: Map({ 'player-1': player1KillInfo as any }) }) },
-    ticked(statistics),
-  )
+  const StatisticsPreloadedState = {
+    game: new GameRecord({ killInfo: Map({ 'player-1': player1KillInfo as any }) }),
+  }
+  @saga(ticked(statistics), combineReducers({ game }), StatisticsPreloadedState)
   export class Statistics extends React.PureComponent {
     render() {
       const { game } = this.props as { game: GameRecord }
@@ -236,55 +240,25 @@ namespace GalleryContent {
       return (
         <g>
           <Text x={8} y={8} content="misc" fill="#dd2664" />
-          <TextWithLineWrap
-            x={8}
-            y={32}
-            maxLength={28}
-            content="This remake is coded by shinima."
-          />
-          <Transform k={2}>
-            <Text x={32} y={32} content="TODO" />
+          <Transform y={64}>
+            <TextWithLineWrap
+              x={8}
+              y={0}
+              maxLength={28}
+              content="This remake version is codedby shinima on github."
+            />
+            <TextButton
+              x={96 + 24}
+              y={12}
+              content="github."
+              onClick={() => window.open('https://github.com/shinima/battle-city')}
+              stroke="#9ed046"
+            />
+            <TextWithLineWrap x={8} y={40} maxLength={28} content="Welcome fork and star." />
           </Transform>
         </g>
       )
     }
-  }
-}
-
-class DashLines extends React.PureComponent<{ t?: number }> {
-  render() {
-    const { t } = this.props
-    const hrow = Math.floor(t / FBZ)
-    const hcol = t % FBZ
-
-    return (
-      <g className="dash-lines" stroke="steelblue" strokeWidth="0.5" strokeDasharray="2 2">
-        {Range(1, FBZ + 1)
-          .map(col => (
-            <line
-              key={col}
-              x1={B * col}
-              y1={0}
-              x2={B * col}
-              y2={SCREEN_HEIGHT}
-              strokeOpacity={hcol === col || hcol === col - 1 ? 1 : 0.3}
-            />
-          ))
-          .toArray()}
-        {Range(1, FBZ + 1)
-          .map(row => (
-            <line
-              key={row}
-              x1={0}
-              y1={B * row}
-              x2={SCREEN_WIDTH}
-              y2={B * row}
-              strokeOpacity={hrow === row || hrow === row - 1 ? 1 : 0.3}
-            />
-          ))
-          .toArray()}
-      </g>
-    )
   }
 }
 
@@ -316,7 +290,7 @@ class Gallery extends React.PureComponent<{ tab: string }> {
 
     return (
       <Screen background="#333">
-        <DashLines t={-1} />
+        <Grid />
         <g transform={`translate(${8 * B}, 8)`}>
           <TextButton
             x={0 * B}

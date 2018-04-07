@@ -8,7 +8,7 @@ export default function* rootSaga() {
 
   yield syncFrom()
 
-  yield fork(tickEmitter, Infinity, true)
+  yield fork(tickEmitter, { bindESC: true })
   yield takeEvery('SYNC_CUSTOM_STAGES', syncTo)
   yield takeLatest(['START_GAME', 'RESET_GAME'], gameSaga)
 
