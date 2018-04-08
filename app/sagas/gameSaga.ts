@@ -13,6 +13,7 @@ import { BLOCK_SIZE } from 'utils/constants'
 import TextRecord from 'types/TextRecord'
 import { State } from '../reducers'
 import Timing from '../utils/Timing'
+import tickEmitter from './tickEmitter'
 
 // 播放游戏结束的动画
 function* animateGameover() {
@@ -80,6 +81,7 @@ export default function* gameSaga(action: Action.StartGame | { type: 'RESET_GAME
   DEV.LOG && console.log('GAME STARTED')
 
   const result = yield race<any>({
+    tick: tickEmitter({ bindESC: true }),
     human: humanPlayerSaga('player-1', 'yellow'),
     ai: AIMasterSaga(),
     powerUp: powerUpManager(),

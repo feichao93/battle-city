@@ -38,7 +38,7 @@ function* demoHumanController(playerName: string) {
   }
 }
 
-export function* demohumanPalyerSaga(playerName: string, tankColor: TankColor) {
+export function* demohumanPalyerSaga(playerName: string, tankPrototype: TankRecord) {
   yield put<Action>({
     type: 'ADD_PLAYER',
     player: new PlayerRecord({
@@ -48,25 +48,9 @@ export function* demohumanPalyerSaga(playerName: string, tankColor: TankColor) {
     }),
   })
   yield fork(demoHumanController, playerName)
-  new TankRecord({
-    side: 'human',
-    color: tankColor,
-    level: 'basic',
-  })
 
   const tankId = getNextId('tank')
-  yield spawnTank(
-    new TankRecord({
-      tankId,
-      active: true,
-      side: 'human',
-      color: tankColor,
-      level: 'basic',
-      x: 0 * B,
-      y: 0.5 * B,
-      direction: 'right',
-    }),
-  )
+  yield spawnTank(tankPrototype.set('tankId', tankId))
   yield put<Action.ActivatePlayer>({
     type: 'ACTIVATE_PLAYER',
     playerName,
@@ -81,10 +65,10 @@ export const demoStage = StageConfigConverter.r2s({
   map: [
     'X  X  X  X  X  X  Ta X  X  X  X  X  X  ',
     'X  X  X  X  X  X  Ta X  X  X  X  X  X  ',
-    'X  X  X  X  X  X  X  X  X  X  X  X  X  ',
-    'X  X  X  X  X  X  X  X  X  X  X  X  X  ',
-    'X  X  X  X  X  X  X  X  X  X  X  X  X  ',
-    'X  X  X  X  X  X  X  X  X  X  X  X  X  ',
+    'X  X  X  X  X  X  Ta X  X  X  X  X  X  ',
+    'X  R  F  S  Bf Bf Ta X  X  X  X  X  X  ',
+    'X  R  F  S  Bf Bf Ta X  X  X  X  X  X  ',
+    'X  X  X  X  X  X  Ta X  X  X  X  X  X  ',
     'X  X  X  X  X  X  X  X  X  X  X  X  X  ',
     'X  X  X  X  X  X  X  X  X  X  X  X  X  ',
     'X  X  X  X  X  X  X  X  X  X  X  X  X  ',
@@ -117,9 +101,27 @@ export function* demoAIMasterSaga() {
 }
 
 export default function* fireDemoSaga() {
-  yield fork(tickEmitter, { slow: 3 })
+  yield fork(tickEmitter, { slow: 5, bindESC: true })
   yield fork(bulletsSaga)
   yield put<Action>({ type: 'LOAD_STAGE_MAP', stage: demoStage })
   yield fork(demoAIMasterSaga)
-  yield fork(demohumanPalyerSaga, 'demo-human-player', 'yellow')
+  const baseTank = new TankRecord({
+    active: true,
+    side: 'human',
+    level: 'basic',
+    direction: 'right',
+  })
+  yield fork(
+    demohumanPalyerSaga,
+    'yellow-player',
+    baseTank.set('y', 0.5 * B).set('color', 'yellow'),
+  )
+  yield fork(
+    demohumanPalyerSaga,
+    'green-player',
+    baseTank
+      .set('y', 3.5 * B)
+      .set('color', 'green')
+      .set('level', 'fast'),
+  )
 }

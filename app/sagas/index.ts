@@ -1,14 +1,11 @@
-import { fork, put, takeLatest, takeEvery } from 'redux-saga/effects'
+import { put, takeLatest, takeEvery } from 'redux-saga/effects'
 import gameSaga from 'sagas/gameSaga'
-import tickEmitter from 'sagas/tickEmitter'
 import { syncTo, syncFrom } from 'sagas/syncLocalStorage'
 
 export default function* rootSaga() {
   DEV.LOG && console.log('root saga started')
 
   yield syncFrom()
-
-  yield fork(tickEmitter, { bindESC: true })
   yield takeEvery('SYNC_CUSTOM_STAGES', syncTo)
   yield takeLatest(['START_GAME', 'RESET_GAME'], gameSaga)
 

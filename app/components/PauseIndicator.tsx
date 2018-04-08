@@ -1,12 +1,10 @@
 import React from 'react'
 import Text from 'components/Text'
-import { BLOCK_SIZE as B } from 'utils/constants'
 
-interface S {
-  visible: boolean
-}
-
-export default class PauseIndicator extends React.PureComponent<object, S> {
+export default class PauseIndicator extends React.PureComponent<
+  Partial<Point & { content: string; noflash: boolean }>,
+  { visible: boolean }
+> {
   private handle: any = null
 
   state = {
@@ -14,7 +12,9 @@ export default class PauseIndicator extends React.PureComponent<object, S> {
   }
 
   componentDidMount() {
-    this.handle = setInterval(() => this.setState({ visible: !this.state.visible }), 250)
+    if (!this.props.noflash) {
+      this.handle = setInterval(() => this.setState({ visible: !this.state.visible }), 250)
+    }
   }
 
   componentWillUnmount() {
@@ -22,16 +22,15 @@ export default class PauseIndicator extends React.PureComponent<object, S> {
   }
 
   render() {
+    const { x = 0, y = 0, content = 'pause' } = this.props
     return (
-      <g className="pause-indicator">
-        <Text
-          content="pause"
-          x={6.25 * B}
-          y={8 * B}
-          fill="#db2b00"
-          style={{ visibility: this.state.visible ? 'visible' : 'hidden' }}
-        />
-      </g>
+      <Text
+        content={content}
+        x={x}
+        y={y}
+        fill="#db2b00"
+        style={{ visibility: this.state.visible ? 'visible' : 'hidden' }}
+      />
     )
   }
 }

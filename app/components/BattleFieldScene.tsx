@@ -86,7 +86,7 @@ class BattleFieldScene extends React.PureComponent<State> {
         <BattleFieldContent {...this.props} x={B} y={B} />
         <TextLayer texts={texts} />
         <CurtainsContainer />
-        {game.paused ? <PauseIndicator /> : null}
+        {game.paused ? <PauseIndicator x={6.25 * B} y={8 * B} /> : null}
       </Screen>
     )
   }

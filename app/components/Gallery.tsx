@@ -4,7 +4,7 @@ import { Redirect, Route } from 'react-router'
 import { combineReducers } from 'redux'
 import { all } from 'redux-saga/effects'
 import saga from '../hocs/saga'
-import rootReducer, { State } from '../reducers'
+import rootReducer, { State, time } from '../reducers'
 import game, { GameRecord } from '../reducers/game'
 import tanks from '../reducers/tanks'
 import fireDemoSaga from '../sagas/fireDemoSaga'
@@ -18,6 +18,7 @@ import { GameoverSceneContent } from './GameoverScene'
 import { GameTitleSceneContent } from './GameTitleScene'
 import Grid from './Grid'
 import { HUDContent } from './HUD'
+import PauseIndicator from './PauseIndicator'
 import PowerUp from './PowerUp'
 import Score from './Score'
 import Screen from './Screen'
@@ -55,6 +56,7 @@ namespace GalleryContent {
   )
   const GrayText = (props: any) => <Text fill="#ccc" {...props} />
 
+  @saga(tickEmitter, combineReducers({ time, game }))
   export class Tanks extends React.PureComponent {
     render() {
       return (
@@ -112,7 +114,7 @@ namespace GalleryContent {
       return (
         <g>
           <Text x={8} y={8} content="Texts" fill="#dd2664" />
-          <Transform x={8} y={40} k={2}>
+          <Transform x={8} y={64} k={2}>
             <Text x={0} y={0} content="abcdefg" fill="#feac4e" />
             <Text x={64} y={0} content="hijklmn" fill="#feac4e" />
             <Text x={0} y={12} content="opq rst" fill="#feac4e" />
@@ -128,20 +130,28 @@ namespace GalleryContent {
   @saga(fireDemoSaga, rootReducer)
   export class Fire extends React.PureComponent<Partial<State>> {
     render() {
+      const { game } = this.props
       return (
         <g>
           <Text x={8} y={8} content="fire" fill="#dd2664" />
           <Transform x={16} y={40} k={2}>
             <defs>
-              <clipPath id="fire-demo-hit-tank">
+              <clipPath id="fire-demo">
                 <rect width={112} height={32} />
+                <rect y={48} width={112} height={32} />
               </clipPath>
             </defs>
-            <g clipPath="url(#fire-demo-hit-tank)">
+            <g clipPath="url(#fire-demo)">
               <BattleFieldContent {...this.props} />
             </g>
           </Transform>
-          {/* TODO fire-demo-hit-bricks */}
+          <Transform x={16} y={40}>
+            {game.paused ? <PauseIndicator content="paused" noflash /> : null}
+            {game.paused ? <PauseIndicator content="paused" noflash y={6 * B} /> : null}
+          </Transform>
+          <Transform x={0.5 * B} y={13.5 * B} k={0.5}>
+            <Text fill="#999" content="Hint: Press ESC to pause" />
+          </Transform>
         </g>
       )
     }
@@ -204,12 +214,15 @@ namespace GalleryContent {
           <Text x={8} y={8} content="misc" fill="#dd2664" />
           <Transform x={16} y={32}>
             <GrayText content="HUD" />
+            <Transform k={0.5} y={10}>
+              <GrayText content="head up display" />
+            </Transform>
             <Transform y={16}>
               <rect width={16 + 4} height={128 + 4} fill="#757575" />
               <HUDContent players={players} remainingEnemyCount={17} show />
             </Transform>
           </Transform>
-          <Transform x={72} y={32}>
+          <Transform x={96} y={32}>
             <GrayText content="powerups" />
             <Transform y={16} k={1.5}>
               {powerUpNames.map((powerUpName, index) => (
@@ -220,7 +233,7 @@ namespace GalleryContent {
               ))}
             </Transform>
           </Transform>
-          <Transform x={152} y={32}>
+          <Transform x={176} y={32}>
             <GrayText content="scores" />
             <Transform y={16} k={1.5}>
               <Score y={0} score={100} />

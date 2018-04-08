@@ -4,17 +4,17 @@
 
 module.exports = dev => ({
   // 是否打印 AI 的日志
-  'DEV.LOG_AI': dev,
+  'DEV.LOG_AI': false,
   // 是否启用 console.assert
   'DEV.ASSERT': dev,
   // 是否显示 <SpotGraph />
   'DEV.SPOT_GRAPH': false,
   // 是否显示 <TankPath />
-  'DEV.TANK_PATH': dev,
+  'DEV.TANK_PATH': false,
   // 是否显示 <RestrictedAreaLayer />
   'DEV.RESTRICTED_AREA': dev,
   // 是否加快游戏过程
-  'DEV.FAST': dev,
+  'DEV.FAST': false,
   // 是否使用测试关卡
   'DEV.TEST_STAGE': false,
   // 是否显示 About 信息
