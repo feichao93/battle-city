@@ -1,4 +1,4 @@
-# 用 React 与 Redux-saga 实现的高质量坦克大战复刻版
+# 基于 React 的高质量坦克大战复刻版
 
 _TODO 坦克大战介绍_
 
@@ -35,7 +35,7 @@ _TODO 坦克大战介绍_
 坦克炮管(gun)：一个矩形
 ```
 
-![素材分解](resource-decompose.jpg)
+![素材分解](imgs/resource-decompose.jpg)
 
 一些素材的形状具有一定的模式，此时可以采用循环/分支的方式来生成所需要的 SVG 元素。例如一个完整的砖墙的大小为 16x16，但是砖墙的左上/右上/左下/右下四个部分是完全一样的，有了砖墙左上部分(8x8)的 SVG 之后，使用循环可以生成整个砖墙。
 
@@ -65,7 +65,7 @@ _TODO 坦克大战介绍_
 
 React 的组件非常容易被组合，整个游戏的展现过程也是 react 组件不断组合的过程。下图是游戏中主要场景`BattleField` 的结构，可以看出 `BattleField` 组件由许多不同的组件组合而成，游戏中的其他组件也类似，归根结底由第一步中的素材组合而成。
 
-![battle-field-structure](battle-field-layers.jpg)
+![battle-field-structure](imgs/battle-field-layers.jpg)
 
 **React 性能优化**
 

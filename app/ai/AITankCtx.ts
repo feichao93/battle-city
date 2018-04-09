@@ -1,19 +1,20 @@
-import { logAI } from 'ai/logger'
 import EventEmitter from 'events'
 import { select } from 'redux-saga/effects'
-import { Input, TankRecord } from 'types'
-import { getDirectionInfo } from 'utils/common'
+import { logAI } from './logger'
+import { Input, TankRecord } from '../types'
+import { getDirectionInfo } from '../utils/common'
 import * as selectors from '../utils/selectors'
-import { RelativePosition } from 'ai/env-utils'
-import { getCol, getRow } from 'ai/spot-utils'
+import { RelativePosition } from './env-utils'
+import { getCol, getRow } from './spot-utils'
 
 export default class AITankCtx {
   private _fire = false
   private nextDirection: Direction = null
   private forwardLength = 0
   private startPos = 0
+  readonly noteEmitter = new EventEmitter()
 
-  constructor(readonly playerName: string, readonly noteEmitter: EventEmitter) {}
+  constructor(readonly playerName: string) {}
 
   turn(direction: Direction) {
     DEV.LOG_AI && logAI('turn', direction)

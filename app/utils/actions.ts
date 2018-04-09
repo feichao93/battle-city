@@ -53,6 +53,7 @@ declare global {
       | ActivatePlayer
       | AddPlayer
       | ReqAddPlayerTank
+      | ReqAddAIPlayer
       | RemovePlayer
       | Simple<'DEACTIVATE_ALL_PLAYERS'>
       | AddOrUpdateExplosion
@@ -267,6 +268,7 @@ declare global {
       tank: TankRecord
     }
 
+    // TODO rename to DEACTIVATE_TANK
     export interface RemoveTank {
       type: 'REMOVE_TANK'
       tankId: TankId
@@ -286,6 +288,10 @@ declare global {
     export interface ReqAddPlayerTank {
       type: 'REQ_ADD_PLAYER_TANK'
       playerName: PlayerName
+    }
+
+    export interface ReqAddAIPlayer {
+      type: 'REQ_ADD_AI_PLAYER'
     }
 
     export interface RemovePlayer {

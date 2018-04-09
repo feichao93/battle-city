@@ -14,12 +14,9 @@ import { around, getTankSpot, getBulletSpot } from 'ai/spot-utils'
 import Spot from 'ai/Spot'
 import { findPath } from 'ai/shortest-path'
 import simpleFireLoop from 'ai/simpleFireLoop'
-import EventEmitter from 'events'
 import { State } from 'reducers'
 import { Task } from 'redux-saga'
 import { fork, select, take, race } from 'redux-saga/effects'
-import directionController from 'sagas/directionController'
-import fireController from 'sagas/fireController'
 import { TankFireInfo, TankRecord } from 'types'
 import { randint, waitFor } from 'utils/common'
 import * as selectors from 'utils/selectors'
@@ -97,17 +94,6 @@ function* attackEagle(ctx: AITankCtx, fireEstimate: FireEstimate) {
   }
 }
 
-function* generateBulletCompleteNote(ctx: AITankCtx) {
-  while (true) {
-    const { bulletId }: Action.BeforeRemoveBulletAction = yield take('BEFORE_REMOVE_BULLET')
-    const { bullets }: State = yield select()
-    const bullet = bullets.get(bulletId)
-    if (bullet.playerName === ctx.playerName) {
-      ctx.noteEmitter.emit('bullet-complete', bullet)
-    }
-  }
-}
-
 // TODO WIP
 function* dangerDetectionLoop(ctx: AITankCtx) {
   while (true) {
@@ -172,16 +158,7 @@ function* blocked(ctx: AITankCtx) {
  * 并将创建noteChannel和commandChannel
  * 游戏逻辑和AI逻辑使用这两个channel来进行数据交换
  */
-export default function* AIWorkerSaga(playerName: string) {
-  const ctx = new AITankCtx(playerName, new EventEmitter())
-
-  yield fork(directionController, playerName, ctx.directionControllerCallback)
-  yield fork(fireController, playerName, ctx.fireControllerCallback)
-  yield fork(generateBulletCompleteNote, ctx)
-
-  yield take(
-    (action: Action) => action.type === 'ACTIVATE_PLAYER' && action.playerName === ctx.playerName,
-  )
+export default function* AIWorkerSaga(ctx: AITankCtx) {
   yield fork(dangerDetectionLoop, ctx)
 
   let continuousWanderCount = 0
