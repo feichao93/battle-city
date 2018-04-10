@@ -14,22 +14,26 @@ import { State } from 'types'
 import { GameRecord } from 'reducers/game'
 import { firstStageName as fsn } from 'stages'
 import Gallery from 'components/Gallery'
+import About from './components/About'
 
 class App extends React.PureComponent<{ game: GameRecord }> {
   render() {
     return (
       <ConnectedRouter history={history}>
-        <Switch>
-          <Route path="/list" component={StageListPageWrapper} />
-          <Route path="/editor" component={Editor} />
-          <Route path="/gallery" component={Gallery} />
-          <Route exact path="/gameover" component={GameoverScene} />
-          <Route exact path="/choose" render={() => <Redirect to={`/choose/${fsn}`} />} />
-          <Route path="/choose/:stageName" component={ChooseStageScene} />
-          <Route exact path="/stage" render={() => <Redirect to={`/stage/${fsn}`} />} />
-          <Route path="/stage/:stageName" component={GameScene} />
-          <Route component={GameTitleScene} />
-        </Switch>
+        <div style={{ display: 'flex' }}>
+          <Switch>
+            <Route path="/list" component={StageListPageWrapper} />
+            <Route path="/editor" component={Editor} />
+            <Route path="/gallery" component={Gallery} />
+            <Route exact path="/gameover" component={GameoverScene} />
+            <Route exact path="/choose" render={() => <Redirect to={`/choose/${fsn}`} />} />
+            <Route path="/choose/:stageName" component={ChooseStageScene} />
+            <Route exact path="/stage" render={() => <Redirect to={`/stage/${fsn}`} />} />
+            <Route path="/stage/:stageName" component={GameScene} />
+            <Route component={GameTitleScene} />
+          </Switch>
+          {DEV.HIDE_ABOUT ? null : <About />}
+        </div>
       </ConnectedRouter>
     )
   }

@@ -7,8 +7,6 @@ import TextButton from 'components/TextButton'
 import { Tank } from 'components/tanks'
 import { BLOCK_SIZE as B, CONTROL_CONFIG, ITEM_SIZE_MAP } from 'utils/constants'
 import { TankRecord } from 'types'
-import About from './About'
-import FlexDiv from './FlexDiv'
 import Screen from './Screen'
 
 type Choice = '1-player' | 'stage-list' | 'gallery'
@@ -179,12 +177,9 @@ export interface GameTitleSceneProps {
 class GameTitleScene extends React.PureComponent<GameTitleSceneProps> {
   render() {
     return (
-      <FlexDiv>
-        <Screen>
-          <GameTitleSceneContent push={this.props.push} />
-        </Screen>
-        {DEV.HIDE_ABOUT ? null : <About />}
-      </FlexDiv>
+      <Screen>
+        <GameTitleSceneContent push={this.props.push} />
+      </Screen>
     )
   }
 }
