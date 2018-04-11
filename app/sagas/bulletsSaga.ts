@@ -278,6 +278,6 @@ export default function* bulletsSaga() {
     yield takeEvery('END_STAGE', clearBullets)
     yield all([handleTick(), handleAfterTick()])
   } finally {
-    yield put<Action>({ type: 'CLEAR_BULLETS' })
+    yield clearBullets()
   }
 }
