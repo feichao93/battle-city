@@ -11,10 +11,10 @@ let defaultStages = filenames
   .sortBy(s => Number(s.name))
 
 if (DEV.TEST_STAGE) {
-  defaultStages = defaultStages.push(
+  defaultStages = defaultStages.unshift(
     StageConfig.fromJS({
-      name: '1',
-      custom: true,
+      name: 'test',
+      custom: false,
       difficulty: 1,
       map: [
         'X  X  X  X  X  X  X  X  X  X  X  X  X  ',
@@ -31,7 +31,7 @@ if (DEV.TEST_STAGE) {
         'X  X  X  X  X  Xf Tf Tf X  X  X  X  X  ',
         'X  X  X  X  X  X  E  Tf X  X  X  X  X  ',
       ],
-      enemies: ['5*basic'],
+      enemies: ['1*basic'],
     }),
   )
 }

@@ -6,7 +6,7 @@
 
 该 GitHub 仓库的版本是经典坦克大战的复刻版本，基于原版素材，使用 React 将各类素材封装为对应的组件。素材使用 SVG 进行渲染以展现游戏的像素风，可以先调整浏览器缩放再进行游戏，1080P 屏幕下使用 200% 缩放为最佳。此游戏使用网页前端技术进行开发，主要使用 React 进行页面展现，使用 Immutable.js 作为数据结构工具库，使用 redux 管理游戏状态，以及使用 redux-saga 处理复杂的游戏逻辑。
 
-目前游戏仍在开发中，只支持单人游戏，AI 设置不太合理。如果游戏过程中发现任何 BUG 的话，请给我提 [issue](https://github.com/shinima/battle-city/issues/new)。
+目前游戏仍在开发中，只支持单人游戏，AI 设置不太合理。如果游戏过程中发现任何 BUG 的话，欢迎提 [issue](https://github.com/shinima/battle-city/issues/new)。(\*^_^\*)
 
 ### 开发进度：
 
