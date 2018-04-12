@@ -1,4 +1,5 @@
 import React from 'react'
+import classNames from 'classnames'
 import { Route, Switch } from 'react-router-dom'
 
 const AboutGallery = () => (
@@ -57,24 +58,38 @@ const AboutTitle = () => (
   </div>
 )
 
-export default () => (
-  <div className="about">
-    <p>
-      当前版本 <br />
-      {COMPILE_VERSION}
-    </p>
-    <p>
-      编译时间 <br />
-      {COMPILE_DATE}
-    </p>
-    <Switch>
-      <Route path="/list" render={AboutList} />
-      <Route path="/editor" render={AboutEditor} />
-      <Route path="/gallery" render={AboutGallery} />
-      <Route exact path="/gameover" render={AboutGame} />
-      <Route path="/choose" render={AboutChoose} />
-      <Route path="/stage" render={AboutGame} />
-      <Route render={AboutTitle} />
-    </Switch>
-  </div>
-)
+export default class About extends React.PureComponent {
+  state = { hide: false }
+
+  onHide = () => {
+    this.setState({ hide: true })
+  }
+
+  render() {
+    const { hide } = this.state
+    return (
+      <div className={classNames('about', { hide })}>
+        <button className="close" onClick={this.onHide}>
+          隐藏
+        </button>
+        <p>
+          当前版本 <br />
+          {COMPILE_VERSION}
+        </p>
+        <p>
+          编译时间 <br />
+          {COMPILE_DATE}
+        </p>
+        <Switch>
+          <Route path="/list" render={AboutList} />
+          <Route path="/editor" render={AboutEditor} />
+          <Route path="/gallery" render={AboutGallery} />
+          <Route exact path="/gameover" render={AboutGame} />
+          <Route path="/choose" render={AboutChoose} />
+          <Route path="/stage" render={AboutGame} />
+          <Route render={AboutTitle} />
+        </Switch>
+      </div>
+    )
+  }
+}
