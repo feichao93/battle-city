@@ -88,11 +88,11 @@ export default function* stageSaga(stage: StageConfig) {
           )
           if (remainingEnemies.isEmpty() && otherActiveAITanks.isEmpty()) {
             // 剩余enemy数量为0, 且场上已经没有ai tank了
-            yield Timing.delay(2500)
+            yield Timing.delay(3000)
             const { powerUps }: State = yield select()
             if (!powerUps.isEmpty()) {
               // 如果场上有powerup, 则适当延长结束时间
-              yield Timing.delay(5000)
+              yield Timing.delay(3000)
             }
             yield* statistics()
             yield put<Action>({ type: 'BEFORE_END_STAGE' })
@@ -103,7 +103,7 @@ export default function* stageSaga(stage: StageConfig) {
           // ai击杀human
           if (!players.some(ply => ply.side === 'human' && ply.lives > 0)) {
             // 所有的human player都挂了
-            yield Timing.delay(2500)
+            yield Timing.delay(3000)
             yield* statistics()
             // 因为 gameSaga 会 put END_GAME 所以这里不需要 put END_STAGE
             return { pass: false, reason: 'dead' } as StageResult

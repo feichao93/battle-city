@@ -1,4 +1,4 @@
-import { cancel, fork, put, race, select, take, takeEvery } from 'redux-saga/effects'
+import { all, put, race, select, take, takeEvery } from 'redux-saga/effects'
 import AITankCtx from '../ai/AITankCtx'
 import AIWorkerSaga from '../ai/AIWorkerSaga'
 import { State } from '../reducers'
@@ -11,37 +11,32 @@ import fireController from './fireController'
 export default function* AIPlayer(playerName: string, tankId: TankId) {
   const ctx = new AITankCtx(playerName)
   try {
-    yield put<Action>({
-      type: 'ADD_PLAYER',
-      player: new PlayerRecord({
-        playerName,
-        lives: Infinity,
-        side: 'ai',
-      }),
-    })
-
-    yield takeEvery(hitPredicate, hitHandler)
-    yield fork(directionController, playerName, ctx.directionControllerCallback)
-    yield fork(fireController, playerName, ctx.fireControllerCallback)
-    yield fork(generateBulletCompleteNote)
-
+    const player = new PlayerRecord({ playerName, side: 'ai' })
+    yield put<Action>({ type: 'ADD_PLAYER', player })
     yield put<Action>({ type: 'ACTIVATE_PLAYER', playerName, tankId })
-
-    // prettier-ignore
     yield race<any>([
+      all([
+        takeEvery(hitPredicate, hitHandler),
+        generateBulletCompleteNote(),
+        directionController(playerName, ctx.directionControllerCallback),
+        fireController(playerName, ctx.fireControllerCallback),
+        AIWorkerSaga(ctx),
+      ]),
       take(killedPredicate),
       take('END_GAME'),
-      AIWorkerSaga(ctx),
     ])
     yield put<Action>({ type: 'REQ_ADD_AI_PLAYER' })
-    yield cancel() // cancel 自身来取消前面 fork 的各个 saga
-    // TODO 应该还有更好的方法来处理这里的逻辑
-  } finally {
     const tank: TankRecord = yield select(selectors.playerTank, playerName)
-    if (tank != null) {
-      yield put<Action>({ type: 'REMOVE_TANK', tankId: tank.tankId })
-    }
+    yield put({ type: 'REMOVE_TANK', tankId })
+    yield explosionFromTank(tank)
+    yield scoreFromKillTank(tank)
+  } finally {
     // 我们在这里不移除 AI 玩家，因为 AI 玩家的子弹可能还处于活跃状态
+    // AI 玩家会在下一次关卡开始的后自动被清除
+    const tank: TankRecord = yield select(selectors.playerTank, playerName)
+    if (tank && tank.active) {
+      yield put({ type: 'REMOVE_TANK', tankId })
+    }
   }
 
   /* ----------- below are function definitions ----------- */
@@ -65,10 +60,6 @@ export default function* AIPlayer(playerName: string, tankId: TankId) {
         targetPlayer,
         targetTank,
       })
-
-      yield put({ type: 'REMOVE_TANK', tankId: tank.tankId })
-      yield explosionFromTank(tank)
-      yield scoreFromKillTank(tank)
     }
   }
 
