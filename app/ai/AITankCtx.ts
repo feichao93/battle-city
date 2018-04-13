@@ -1,10 +1,10 @@
 import EventEmitter from 'events'
 import { select } from 'redux-saga/effects'
-import { logAI } from './logger'
 import { Input, TankRecord } from '../types'
 import { getDirectionInfo } from '../utils/common'
 import * as selectors from '../utils/selectors'
 import { RelativePosition } from './env-utils'
+import { logAI } from './logger'
 import { getCol, getRow } from './spot-utils'
 
 export default class AITankCtx {

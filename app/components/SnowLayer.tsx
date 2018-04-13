@@ -1,8 +1,8 @@
-import React from 'react'
 import { List } from 'immutable'
-import { getRowCol } from 'utils/common'
-import { ITEM_SIZE_MAP, N_MAP } from 'utils/constants'
-import Snow from 'components/Snow'
+import React from 'react'
+import { getRowCol } from '../utils/common'
+import { ITEM_SIZE_MAP, N_MAP } from '../utils/constants'
+import Snow from './Snow'
 
 type P = {
   snows: List<boolean>

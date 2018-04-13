@@ -1,9 +1,9 @@
-import { logAhead } from 'ai/logger'
 import { List } from 'immutable'
-import { MapRecord, TankRecord, TanksMap } from 'types'
-import { asRect, getDirectionInfo } from 'utils/common'
-import { BLOCK_SIZE, FIELD_SIZE, ITEM_SIZE_MAP, TANK_SIZE } from 'utils/constants'
-import IndexHelper from 'utils/IndexHelper'
+import { MapRecord, TankRecord, TanksMap } from '../types'
+import { asRect, getDirectionInfo } from '../utils/common'
+import { BLOCK_SIZE, FIELD_SIZE, ITEM_SIZE_MAP, TANK_SIZE } from '../utils/constants'
+import IndexHelper from '../utils/IndexHelper'
+import { logAhead } from './logger'
 
 /** AI是否可以破坏该障碍物 */
 function canDestroy(barrierType: BarrierType) {

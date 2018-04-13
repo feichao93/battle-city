@@ -1,6 +1,6 @@
 import React from 'react'
-import Text from 'components/Text'
-import { TextsMap } from 'types'
+import { TextsMap } from '../types'
+import Text from './Text'
 
 export default class TextLayer extends React.PureComponent<{ texts: TextsMap }, {}> {
   render() {

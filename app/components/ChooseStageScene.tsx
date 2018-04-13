@@ -1,14 +1,14 @@
-import React from 'react'
 import { List } from 'immutable'
+import React from 'react'
 import { connect, Dispatch } from 'react-redux'
 import { match, Redirect } from 'react-router-dom'
-import { replace, push } from 'react-router-redux'
-import Text from 'components/Text'
-import TextButton from 'components/TextButton'
-import { BLOCK_SIZE as B, CONTROL_CONFIG } from 'utils/constants'
-import { State, StageConfig } from 'types'
+import { push, replace } from 'react-router-redux'
+import { StageConfig, State } from '../types'
+import { BLOCK_SIZE as B, CONTROL_CONFIG } from '../utils/constants'
 import Screen from './Screen'
 import StagePreview from './StagePreview'
+import Text from './Text'
+import TextButton from './TextButton'
 
 class ChooseStageScene extends React.PureComponent<{
   stages: List<StageConfig>

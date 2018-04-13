@@ -1,6 +1,6 @@
 import React from 'react'
-import { Bitmap } from 'components/elements'
-import { ExplosionRecord } from 'types'
+import { ExplosionRecord } from '../types'
+import { Bitmap } from './elements'
 
 const schema = {
   ' ': 'none',

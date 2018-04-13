@@ -1,8 +1,9 @@
-import _ from 'lodash'
+import last from 'lodash/last'
+import pull from 'lodash/pull'
 import { all, take } from 'redux-saga/effects'
-import directionController from 'sagas/directionController'
-import fireController from 'sagas/fireController'
-import { HumanControllerConfig, Input, TankRecord } from 'types'
+import { HumanControllerConfig, Input, TankRecord } from '../types'
+import directionController from './directionController'
+import fireController from './fireController'
 
 const Mousetrap = require('mousetrap')
 
@@ -27,7 +28,7 @@ export default function* humanController(playerName: string, config: HumanContro
 
   function getDirectionControlInfo() {
     if (pressed.length > 0) {
-      return { direction: _.last(pressed) }
+      return { direction: last(pressed) }
     } else {
       return { direction: null }
     }
@@ -48,13 +49,7 @@ export default function* humanController(playerName: string, config: HumanContro
       },
       'keydown',
     )
-    Mousetrap.bind(
-      key,
-      () => {
-        _.pull(pressed, direction)
-      },
-      'keyup',
-    )
+    Mousetrap.bind(key, () => pull(pressed, direction), 'keyup')
   }
 
   bindKeyWithDirection(config.up, 'up')

@@ -1,6 +1,7 @@
-import React from 'react'
 import PropTypes from 'prop-types'
+import React from 'react'
 import { renderToString } from 'react-dom/server'
+
 const withContext = require('recompose/withContext').default
 
 const cache = new Map<string, string>()

@@ -1,4 +1,4 @@
-import { TankRecord, EagleRecord } from 'types'
+import { EagleRecord, TankRecord } from '../types'
 
 type Collision =
   | CollisionWithBrick

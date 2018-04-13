@@ -1,7 +1,7 @@
-import React from 'react'
 import { Map as IMap } from 'immutable'
+import React from 'react'
 import { connect } from 'react-redux'
-import { State } from 'types'
+import { State } from '../../types'
 
 let connectedTankPath: any = () => null as any
 

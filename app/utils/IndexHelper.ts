@@ -1,5 +1,5 @@
-import { N_MAP, ITEM_SIZE_MAP } from 'utils/constants'
-import { range } from 'lodash'
+import range from 'lodash/range'
+import { ITEM_SIZE_MAP, N_MAP } from './constants'
 
 export type ItemType = 'brick' | 'steel' | 'river' | 'snow' | 'forest'
 

@@ -1,6 +1,6 @@
 import React from 'react'
-import { Pixel } from 'components/elements'
 import Image from '../hocs/Image'
+import { Pixel } from './elements'
 
 const points = [[8, 3], [3, 6], [4, 7], [6, 8], [9, 8], [11, 7], [12, 6]]
 

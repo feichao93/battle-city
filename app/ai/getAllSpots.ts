@@ -1,8 +1,8 @@
-import Spot from 'ai/Spot'
 import _ from 'lodash'
-import MapRecord from 'types/MapRecord'
-import { testCollide } from 'utils/common'
-import IndexHelper from 'utils/IndexHelper'
+import MapRecord from '../types/MapRecord'
+import { testCollide } from '../utils/common'
+import IndexHelper from '../utils/IndexHelper'
+import Spot from './Spot'
 
 const threshold = -0.01
 

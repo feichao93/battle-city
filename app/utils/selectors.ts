@@ -1,8 +1,8 @@
 import _ from 'lodash'
-import { State, TankFireInfo } from 'types'
-import { asRect, getTankBulletLimit, testCollide } from 'utils/common'
-import { BLOCK_SIZE as B, FIELD_BLOCK_SIZE as FBZ, TANK_SIZE } from 'utils/constants'
-import IndexHelper from 'utils/IndexHelper'
+import { State, TankFireInfo } from '../types'
+import { asRect, getTankBulletLimit, testCollide } from './common'
+import { BLOCK_SIZE as B, FIELD_BLOCK_SIZE as FBZ, TANK_SIZE } from './constants'
+import IndexHelper from './IndexHelper'
 
 // 选取玩家的坦克对象. 如果玩家当前没有坦克, 则返回null
 export const playerTank = (state: State, playerName: string) => {

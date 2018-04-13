@@ -1,4 +1,4 @@
-import defaultStages from 'stages'
+import defaultStages from '../stages'
 
 export default function stages(state = defaultStages, action: Action) {
   if (action.type === 'SET_CUSTOM_STAGE') {

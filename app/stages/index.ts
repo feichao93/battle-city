@@ -1,5 +1,5 @@
 import { List } from 'immutable'
-import StageConfig from 'types/StageConfig'
+import StageConfig from '../types/StageConfig'
 
 const requireStage = (require as any).context('stages', false, /\.json/)
 const filenames = List<string>(requireStage.keys())

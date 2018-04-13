@@ -1,4 +1,5 @@
 import { Map, Record } from 'immutable'
+
 let reducer: any = () => 0
 
 if (DEV.TANK_PATH) {

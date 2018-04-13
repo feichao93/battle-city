@@ -1,5 +1,5 @@
 import { Map } from 'immutable'
-import BulletRecord from 'types/BulletRecord'
+import BulletRecord from '../types/BulletRecord'
 
 export type BulletsMap = Map<BulletId, BulletRecord>
 

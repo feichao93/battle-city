@@ -1,5 +1,5 @@
 import { Record } from 'immutable'
-import TankRecord from 'types/TankRecord'
+import TankRecord from './TankRecord'
 
 const PlayerRecordBase = Record({
   playerName: null as PlayerName,

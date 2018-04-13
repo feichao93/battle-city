@@ -1,7 +1,7 @@
-import React from 'react'
 import _ from 'lodash'
-import { Pixel } from 'components/elements'
+import React from 'react'
 import Image from '../hocs/Image'
+import { Pixel } from './elements'
 
 const a = '#ffffff'
 const b = '#adadad'

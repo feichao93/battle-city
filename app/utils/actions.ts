@@ -7,10 +7,10 @@ import {
   PlayerRecord,
   PowerUpRecord,
   ScoreRecord,
+  StageConfig,
   TankRecord,
   TextRecord,
-  StageConfig,
-} from 'types'
+} from '../types'
 
 declare global {
   type Action = Action.Action

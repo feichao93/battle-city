@@ -1,5 +1,5 @@
 import { Map } from 'immutable'
-import { FlickerRecord } from 'types'
+import { FlickerRecord } from '../types'
 
 export type FlickersMap = Map<FlickerId, FlickerRecord>
 

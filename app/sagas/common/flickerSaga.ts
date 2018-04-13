@@ -1,7 +1,7 @@
 import { put } from 'redux-saga/effects'
-import { getNextId, frame as f } from 'utils/common'
-import Timing from 'utils/Timing'
-import { FlickerRecord } from 'types'
+import { FlickerRecord } from '../../types'
+import { frame as f, getNextId } from '../../utils/common'
+import Timing from '../../utils/Timing'
 
 const flickerShapeTiming = new Timing<FlickerShape>([
   { v: 3, t: f(3) },

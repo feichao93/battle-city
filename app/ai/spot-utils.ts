@@ -1,4 +1,4 @@
-import { BulletRecord } from 'types'
+import { BulletRecord } from '../types'
 
 const N = 26
 

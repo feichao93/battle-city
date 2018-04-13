@@ -1,6 +1,6 @@
 import React from 'react'
-import { Bitmap } from 'components/elements'
-import { PowerUpRecord } from 'types'
+import PowerUpRecord from '../types/PowerUpRecord'
+import { Bitmap } from './elements'
 
 const colorSchema = {
   ' ': 'none',

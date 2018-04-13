@@ -1,10 +1,10 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import EnemyCountIndicator from 'components/EnemyCountIndicator'
-import { PlayerTankThumbnail } from 'components/icons'
-import Text from 'components/Text'
-import { BLOCK_SIZE as B, FIELD_SIZE } from 'utils/constants'
-import { State, PlayersMap } from 'types'
+import { PlayersMap, State } from '../types'
+import { BLOCK_SIZE as B, FIELD_SIZE } from '../utils/constants'
+import EnemyCountIndicator from './EnemyCountIndicator'
+import { PlayerTankThumbnail } from './icons'
+import Text from './Text'
 
 interface HUDContentProps {
   x?: number

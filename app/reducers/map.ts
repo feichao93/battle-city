@@ -1,4 +1,4 @@
-import { MapRecord } from 'types'
+import { MapRecord } from '../types'
 
 const initState = new MapRecord({ eagle: null })
 

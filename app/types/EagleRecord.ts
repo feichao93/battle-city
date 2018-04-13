@@ -1,5 +1,5 @@
 import { Record } from 'immutable'
-import { BLOCK_SIZE } from 'utils/constants'
+import { BLOCK_SIZE } from '../utils/constants'
 
 const EagleRecordBase = Record({
   x: 6 * BLOCK_SIZE,

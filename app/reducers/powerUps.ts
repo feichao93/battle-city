@@ -1,5 +1,5 @@
 import { Map } from 'immutable'
-import { PowerUpRecord } from 'types'
+import { PowerUpRecord } from '../types'
 
 export type PowerUpsMap = Map<PowerUpId, PowerUpRecord>
 

@@ -1,14 +1,14 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import { Dispatch } from 'redux'
 import { replace } from 'react-router-redux'
-import { ITEM_SIZE_MAP, BLOCK_SIZE as B } from 'utils/constants'
-import BrickWall from 'components/BrickWall'
-import Text from 'components/Text'
-import TextButton from 'components/TextButton'
-import { GameRecord } from 'reducers/game'
-import { State } from 'reducers'
+import { Dispatch } from 'redux'
+import { State } from '../reducers'
+import { GameRecord } from '../reducers/game'
+import { BLOCK_SIZE as B, ITEM_SIZE_MAP } from '../utils/constants'
+import BrickWall from './BrickWall'
 import Screen from './Screen'
+import Text from './Text'
+import TextButton from './TextButton'
 
 export class GameoverSceneContent extends React.PureComponent<{ onRestart?: () => void }> {
   render() {

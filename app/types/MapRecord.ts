@@ -1,6 +1,6 @@
-import { Record, Repeat, Map as IMap, List } from 'immutable'
-import { N_MAP } from 'utils/constants'
-import EagleRecord from 'types/EagleRecord'
+import { List, Map as IMap, Record, Repeat } from 'immutable'
+import { N_MAP } from '../utils/constants'
+import EagleRecord from './EagleRecord'
 
 const MapRecordBase = Record({
   eagle: new EagleRecord(),

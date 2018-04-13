@@ -1,17 +1,17 @@
 import { Set as ISet } from 'immutable'
-import { takeEvery, all, fork, put, select, take } from 'redux-saga/effects'
-import { BULLET_SIZE, FIELD_SIZE, STEEL_POWER } from 'utils/constants'
-import { destroyBullets } from 'sagas/common'
-import { BulletRecord, BulletsMap, State } from 'types'
-import { asRect, DefaultMap, getDirectionInfo, testCollide } from 'utils/common'
+import { all, fork, put, select, take, takeEvery } from 'redux-saga/effects'
+import { BulletRecord, BulletsMap, State } from '../types'
 import {
   BulletCollisionInfo,
   getCollisionInfoBetweenBullets,
   getMBR,
   lastPos,
   spreadBullet,
-} from 'utils/bullet-utils'
-import IndexHelper from 'utils/IndexHelper'
+} from '../utils/bullet-utils'
+import { asRect, DefaultMap, getDirectionInfo, testCollide } from '../utils/common'
+import { BULLET_SIZE, FIELD_SIZE, STEEL_POWER } from '../utils/constants'
+import IndexHelper from '../utils/IndexHelper'
+import { destroyBullets } from './common'
 
 interface Stat {
   /** 坦克被击中的统计 */

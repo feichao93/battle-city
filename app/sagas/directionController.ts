@@ -1,8 +1,8 @@
 import { put, select, take } from 'redux-saga/effects'
-import { getDirectionInfo, getTankMoveSpeed } from 'utils/common'
-import canTankMove from 'utils/canTankMove'
-import * as selectors from 'utils/selectors'
-import { Input, TankRecord } from 'types'
+import { Input, TankRecord } from '../types'
+import canTankMove from '../utils/canTankMove'
+import { getDirectionInfo, getTankMoveSpeed } from '../utils/common'
+import * as selectors from '../utils/selectors'
 
 function move(tank: TankRecord): Action.Move {
   return { type: 'MOVE', tankId: tank.tankId, x: tank.x, y: tank.y, direction: tank.direction }

@@ -1,5 +1,5 @@
 import React from 'react'
-import { FlickerRecord } from 'types'
+import { FlickerRecord } from '../types'
 
 interface P {
   flicker: FlickerRecord

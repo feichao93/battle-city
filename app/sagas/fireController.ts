@@ -1,14 +1,14 @@
-import { take, put, select } from 'redux-saga/effects'
+import { put, select, take } from 'redux-saga/effects'
+import { BulletRecord, State, TankRecord } from '../types'
 import {
   calculateBulletStartPosition,
   getNextId,
-  getTankBulletLimit,
-  getTankBulletSpeed,
   getTankBulletInterval,
+  getTankBulletLimit,
   getTankBulletPower,
-} from 'utils/common'
-import * as selectors from 'utils/selectors'
-import { State, TankRecord, BulletRecord } from 'types'
+  getTankBulletSpeed,
+} from '../utils/common'
+import * as selectors from '../utils/selectors'
 
 export default function* fireController(playerName: string, shouldFire: () => boolean) {
   // tank.cooldown用来记录player距离下一次可以发射子弹的时间

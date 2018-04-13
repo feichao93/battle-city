@@ -8,13 +8,8 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "noStrictGenericChecks": true,
-    "target": "es2015",
-    "jsx": "react",
-    "allowJs": true,
-    "baseUrl": ".", // This must be specified if "paths" is.
-    "paths": {
-      "*": ["*", "app/*"]
-    }
+    "target": "es2017",
+    "jsx": "react"
   },
   "include": ["./app/**/*"]
 }

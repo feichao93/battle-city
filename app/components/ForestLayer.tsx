@@ -1,8 +1,8 @@
-import React from 'react'
 import { List } from 'immutable'
-import { getRowCol } from 'utils/common'
-import { ITEM_SIZE_MAP, N_MAP } from 'utils/constants'
-import Forest from 'components/Forest'
+import React from 'react'
+import { getRowCol } from '../utils/common'
+import { ITEM_SIZE_MAP, N_MAP } from '../utils/constants'
+import Forest from './Forest'
 
 type P = {
   forests: List<boolean>

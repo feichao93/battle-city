@@ -1,7 +1,7 @@
-import { FireEstimate } from 'ai/fire-utils'
-import { dirs, getCol, getRow, left, right, up } from 'ai/spot-utils'
-import MapRecord from 'types/MapRecord'
-import IndexHelper from 'utils/IndexHelper'
+import MapRecord from '../types/MapRecord'
+import IndexHelper from '../utils/IndexHelper'
+import { FireEstimate } from './fire-utils'
+import { dirs, getCol, getRow, left, right, up } from './spot-utils'
 
 const e = 0.1
 

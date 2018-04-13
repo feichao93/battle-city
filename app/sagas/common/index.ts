@@ -1,4 +1,4 @@
-export { default as spawnTank } from 'sagas/common/spawnTank'
-export { default as destroyBullets } from 'sagas/common/destroyBullets'
-export { default as destroyTanks } from 'sagas/common/destroyTanks'
-export { default as flickerSaga } from 'sagas/common/flickerSaga'
+export { default as spawnTank } from './spawnTank'
+export { default as destroyBullets } from './destroyBullets'
+export { default as destroyTanks } from './destroyTanks'
+export { default as flickerSaga } from './flickerSaga'

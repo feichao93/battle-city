@@ -1,7 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import { State } from 'types'
-import StageEnterCurtain from 'components/StageEnterCurtain'
+import { State } from '../types'
+import StageEnterCurtain from './StageEnterCurtain'
 
 interface P {
   stageEnterCurtainT: number

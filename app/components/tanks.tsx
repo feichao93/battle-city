@@ -1,12 +1,12 @@
-import React from 'react'
 import _ from 'lodash'
+import React from 'react'
 import { connect } from 'react-redux'
-import { Bitmap, Pixel } from 'components/elements'
-import { BLOCK_SIZE, TANK_COLOR_SCHEMES } from 'utils/constants'
-import { frame as f } from 'utils/common'
-import Timing from 'utils/Timing'
-import { TankRecord, State } from 'types'
 import Image from '../hocs/Image'
+import { State, TankRecord } from '../types'
+import { frame as f } from '../utils/common'
+import { BLOCK_SIZE, TANK_COLOR_SCHEMES } from '../utils/constants'
+import Timing from '../utils/Timing'
+import { Bitmap, Pixel } from './elements'
 
 interface TankComponent {
   (props: { transform?: string; color: string; shape: number }): JSX.Element

@@ -1,6 +1,6 @@
-import { select, put, race, take } from 'redux-saga/effects'
-import { PowerUpRecord, State } from 'types'
-import { frame as f } from 'utils/common'
+import { put, race, select, take } from 'redux-saga/effects'
+import { PowerUpRecord, State } from '../types'
+import { frame as f } from '../utils/common'
 import Timing from '../utils/Timing'
 
 function* blink(powerUpId: PowerUpId) {

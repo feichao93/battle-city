@@ -1,6 +1,6 @@
 import { Map, Set } from 'immutable'
-import { getDirectionInfo } from 'utils/common'
-import { TextRecord } from 'types'
+import { TextRecord } from '../types'
+import { getDirectionInfo } from '../utils/common'
 
 export type TextsMap = Map<TextId, TextRecord>
 

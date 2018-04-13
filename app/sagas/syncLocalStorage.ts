@@ -1,7 +1,7 @@
 import { List } from 'immutable'
-import { select, put } from 'redux-saga/effects'
+import { put, select } from 'redux-saga/effects'
 import { State } from '../reducers'
-import { default as StageConfig, StageConfigConverter, RawStageConfig } from '../types/StageConfig'
+import { default as StageConfig, RawStageConfig, StageConfigConverter } from '../types/StageConfig'
 
 function getStageNameList(stageList: List<StageConfig | RawStageConfig>) {
   if (stageList.isEmpty()) {

@@ -1,7 +1,7 @@
 import { Map } from 'immutable'
 import { put, select } from 'redux-saga/effects'
-import { State } from 'types'
-import { TANK_LEVELS } from 'utils/constants'
+import { State } from '../types'
+import { TANK_LEVELS } from '../utils/constants'
 import Timing from '../utils/Timing'
 
 export default function* statistics() {

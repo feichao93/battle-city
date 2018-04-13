@@ -1,6 +1,6 @@
 import { Map } from 'immutable'
-import PlayerRecord from 'types/PlayerRecord'
-import { inc } from 'utils/common'
+import PlayerRecord from '../types/PlayerRecord'
+import { inc } from '../utils/common'
 
 export type PlayersMap = Map<PlayerName, PlayerRecord>
 

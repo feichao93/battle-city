@@ -1,7 +1,7 @@
 import { List, Record, Repeat } from 'immutable'
-import { BLOCK_SIZE, FIELD_BLOCK_SIZE, N_MAP } from 'utils/constants'
-import { MapRecord, EagleRecord } from '../types'
+import { EagleRecord, MapRecord } from '../types'
 import { or } from '../utils/common'
+import { BLOCK_SIZE, FIELD_BLOCK_SIZE, N_MAP } from '../utils/constants'
 import IndexHelper from '../utils/IndexHelper'
 
 export type MapItemType = 'X' | 'E' | 'B' | 'T' | 'R' | 'S' | 'F'

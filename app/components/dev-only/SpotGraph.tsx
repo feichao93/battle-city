@@ -1,10 +1,10 @@
-import { FireEstimate, getFireResist, mergeEstMap } from 'ai/fire-utils'
-import getAllSpots from 'ai/getAllSpots'
-import { around, getTankSpot } from 'ai/spot-utils'
-import _ from 'lodash'
+import identity from 'lodash/identity'
 import React from 'react'
 import { connect } from 'react-redux'
-import { State } from 'types'
+import { FireEstimate, getFireResist, mergeEstMap } from '../../ai/fire-utils'
+import getAllSpots from '../../ai/getAllSpots'
+import { around, getTankSpot } from '../../ai/spot-utils'
+import { State } from '../../reducers'
 
 let connectedSpotGraph: any = () => null as any
 
@@ -55,7 +55,7 @@ if (DEV.SPOT_GRAPH) {
     }
   }
 
-  connectedSpotGraph = connect<State>(_.identity)(SpotGraph)
+  connectedSpotGraph = connect<State>(identity)(SpotGraph)
 }
 
 export default connectedSpotGraph

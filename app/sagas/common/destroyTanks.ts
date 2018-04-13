@@ -1,8 +1,8 @@
 import { all, put } from 'redux-saga/effects'
-import { ExplosionRecord, ScoreRecord, TankRecord, TanksMap } from 'types'
-import { frame as f, getNextId } from 'utils/common'
-import { TANK_KILL_SCORE_MAP } from 'utils/constants'
-import Timing from 'utils/Timing'
+import { ExplosionRecord, ScoreRecord, TankRecord, TanksMap } from '../../types'
+import { frame as f, getNextId } from '../../utils/common'
+import { TANK_KILL_SCORE_MAP } from '../../utils/constants'
+import Timing from '../../utils/Timing'
 
 export function* scoreFromKillTank(tank: TankRecord) {
   const scoreId: ScoreId = getNextId('score')

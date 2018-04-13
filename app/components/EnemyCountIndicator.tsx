@@ -1,5 +1,5 @@
-import React from 'react'
 import range from 'lodash/range'
+import React from 'react'
 import Image from '../hocs/Image'
 
 // <EnemyTankThumbnail />的尺寸为 8 * 8

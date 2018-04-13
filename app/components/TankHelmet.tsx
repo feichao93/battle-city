@@ -1,7 +1,7 @@
 import React from 'react'
-import { frame as f } from 'utils/common'
-import registerTick from 'hocs/registerTick'
 import Image from '../hocs/Image'
+import registerTick from '../hocs/registerTick'
+import { frame as f } from '../utils/common'
 
 interface TankHelmetProps {
   x: number

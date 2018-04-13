@@ -1,6 +1,6 @@
 import { Map } from 'immutable'
-import { TankRecord } from 'types'
-import { incTankLevel } from 'utils/common'
+import { TankRecord } from '../types'
+import { incTankLevel } from '../utils/common'
 
 export type TanksMap = Map<TankId, TankRecord>
 

@@ -1,10 +1,10 @@
-import { State } from 'reducers'
-import { put, select, take, cancelled } from 'redux-saga/effects'
-import statistics from 'sagas/stageStatistics'
-import { frame as f } from 'utils/common'
 import { replace } from 'react-router-redux'
+import { cancelled, put, select, take } from 'redux-saga/effects'
+import { State } from '../reducers'
 import StageConfig from '../types/StageConfig'
+import { frame as f } from '../utils/common'
 import Timing from '../utils/Timing'
+import statistics from './stageStatistics'
 
 function* animateCurtainAndLoadMap(stage: StageConfig) {
   try {

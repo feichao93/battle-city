@@ -1,5 +1,5 @@
-import React from 'react'
 import { Map } from 'immutable'
+import React from 'react'
 
 interface P {
   areas: Map<AreaId, Rect>

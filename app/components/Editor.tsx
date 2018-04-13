@@ -4,7 +4,6 @@ import { connect } from 'react-redux'
 import { match, Redirect, Route } from 'react-router-dom'
 import { goBack, replace } from 'react-router-redux'
 import { Dispatch } from 'redux'
-import { add, dec, inc } from 'utils/common'
 import { StageConfig, StageDifficulty, State, TankRecord } from '../types/index'
 import {
   defaultEnemiesConfig,
@@ -12,6 +11,7 @@ import {
   MapItemType,
   StageConfigConverter,
 } from '../types/StageConfig'
+import { add, dec, inc } from '../utils/common'
 import { BLOCK_SIZE as B, FIELD_BLOCK_SIZE as FBZ, ZOOM_LEVEL } from '../utils/constants'
 import AreaButton from './AreaButton'
 import BrickWall from './BrickWall'

@@ -1,6 +1,6 @@
 import React from 'react'
-import { Bitmap } from 'components/elements'
 import Image from '../hocs/Image'
+import { Bitmap } from './elements'
 
 const scheme = {
   a: '#8CD600',

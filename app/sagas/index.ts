@@ -1,6 +1,6 @@
-import { put, takeLatest, takeEvery } from 'redux-saga/effects'
-import gameSaga from 'sagas/gameSaga'
-import { syncTo, syncFrom } from 'sagas/syncLocalStorage'
+import { put, takeEvery, takeLatest } from 'redux-saga/effects'
+import gameSaga from './gameSaga'
+import { syncFrom, syncTo } from './syncLocalStorage'
 
 export default function* rootSaga() {
   DEV.LOG && console.log('root saga started')

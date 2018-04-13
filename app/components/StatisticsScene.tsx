@@ -1,12 +1,12 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import Text from 'components/Text'
-import { Tank } from 'components/tanks'
-import { BLOCK_SIZE as B } from 'utils/constants'
-import { State, TankRecord } from 'types'
 import { GameRecord } from '../reducers/game'
+import { State, TankRecord } from '../types'
+import { BLOCK_SIZE as B } from '../utils/constants'
 import PauseIndicator from './PauseIndicator'
 import Screen from './Screen'
+import { Tank } from './tanks'
+import Text from './Text'
 
 export class StatisticsSceneContent extends React.PureComponent<{ game: GameRecord }> {
   render() {

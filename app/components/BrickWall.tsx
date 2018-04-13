@@ -1,6 +1,6 @@
 import React from 'react'
-import { ITEM_SIZE_MAP } from 'utils/constants'
 import Image from '../hocs/Image'
+import { ITEM_SIZE_MAP } from '../utils/constants'
 
 export default class BrickWall extends React.PureComponent<Point> {
   render() {

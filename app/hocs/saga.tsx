@@ -1,8 +1,8 @@
-import React from 'react'
-import createSgaMiddleware, { Task } from 'redux-saga'
-import { createStore, applyMiddleware } from 'redux'
-import { Provider, connect } from 'react-redux'
 import identity from 'lodash/identity'
+import React from 'react'
+import { connect, Provider } from 'react-redux'
+import { applyMiddleware, createStore } from 'redux'
+import createSgaMiddleware, { Task } from 'redux-saga'
 
 export default function saga(sagaFn: any, reducerFn: any, preloadedState?: any): any {
   return function(Component: any) {

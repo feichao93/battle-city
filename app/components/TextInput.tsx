@@ -1,6 +1,6 @@
 import React from 'react'
-import Text from 'components/Text'
-import { BLOCK_SIZE as B } from 'utils/constants'
+import { BLOCK_SIZE as B } from '../utils/constants'
+import Text from './Text'
 
 type TextInputProps = {
   x: number

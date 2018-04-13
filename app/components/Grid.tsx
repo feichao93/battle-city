@@ -9,7 +9,7 @@ import {
 
 export default class Grid extends React.PureComponent<{ t?: number }> {
   render() {
-    const { t =-1} = this.props
+    const { t = -1 } = this.props
     const hrow = Math.floor(t / FBZ)
     const hcol = t % FBZ
 

@@ -1,9 +1,9 @@
-import React from 'react'
 import { List } from 'immutable'
-import { getRowCol } from 'utils/common'
-import { N_MAP, ITEM_SIZE_MAP } from 'utils/constants'
-import River from 'components/River'
-import registerTick from 'hocs/registerTick'
+import React from 'react'
+import registerTick from '../hocs/registerTick'
+import { getRowCol } from '../utils/common'
+import { ITEM_SIZE_MAP, N_MAP } from '../utils/constants'
+import River from './River'
 
 interface RiverLayerProps {
   rivers: List<boolean>

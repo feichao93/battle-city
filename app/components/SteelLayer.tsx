@@ -1,8 +1,8 @@
-import React from 'react'
 import { List } from 'immutable'
-import { ITEM_SIZE_MAP, N_MAP } from 'utils/constants'
-import { getRowCol } from 'utils/common'
-import SteelWall from 'components/SteelWall'
+import React from 'react'
+import { getRowCol } from '../utils/common'
+import { ITEM_SIZE_MAP, N_MAP } from '../utils/constants'
+import SteelWall from './SteelWall'
 
 type P = {
   steels: List<boolean>

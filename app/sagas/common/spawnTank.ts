@@ -1,7 +1,7 @@
 import { put } from 'redux-saga/effects'
-import { TankRecord } from 'types'
-import { asRect, getNextId } from 'utils/common'
-import { flickerSaga } from 'sagas/common'
+import { TankRecord } from '../../types'
+import { asRect, getNextId } from '../../utils/common'
+import { flickerSaga } from '../common'
 
 export default function* spawnTank(tank: TankRecord, spawnSpeed = 1) {
   yield put<Action>({ type: 'START_SPAWN_TANK', tank })

@@ -1,13 +1,13 @@
-import { determineFire, getEnv } from 'ai/env-utils'
-import { State } from 'reducers'
 import { race, select } from 'redux-saga/effects'
-import { TankFireInfo } from 'types'
-import * as selectors from 'utils/selectors'
+import { State } from '../reducers'
+import { TankFireInfo } from '../types'
 import TankRecord from '../types/TankRecord'
 import { getTankBulletInterval, waitFor } from '../utils/common'
 import { SIMPLE_FIRE_LOOP_INTERVAL } from '../utils/constants'
+import * as selectors from '../utils/selectors'
 import Timing from '../utils/Timing'
 import AITankCtx from './AITankCtx'
+import { determineFire, getEnv } from './env-utils'
 
 export default function* simpleFireLoop(ctx: AITankCtx) {
   let skipDelayAtFirstTime = true

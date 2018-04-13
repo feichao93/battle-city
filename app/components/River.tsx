@@ -1,6 +1,6 @@
 import React from 'react'
-import { Pixel } from 'components/elements'
 import Image from '../hocs/Image'
+import { Pixel } from './elements'
 
 const coordinates = [
   [[5, 0], [0, 2], [1, 3], [4, 3], [3, 4], [5, 4], [1, 6], [2, 7], [6, 7]],

@@ -1,8 +1,8 @@
 import { List, Map } from 'immutable'
-import { asRect, isInField, testCollide } from 'utils/common'
-import { BLOCK_SIZE } from 'utils/constants'
-import { EagleRecord, State, TankRecord, TanksMap } from 'types'
-import IndexHelper from 'utils/IndexHelper'
+import { EagleRecord, State, TankRecord, TanksMap } from '../types'
+import { asRect, isInField, testCollide } from './common'
+import { BLOCK_SIZE } from './constants'
+import IndexHelper from './IndexHelper'
 
 function isTankCollidedWithEagle(eagle: EagleRecord, tankTarget: Rect, threshhold: number) {
   const eagleRect = {

@@ -1,28 +1,23 @@
 import { Map as IMap } from 'immutable'
-import AITankCtx from 'ai/AITankCtx'
-import { getEnv, RelativePosition } from 'ai/env-utils'
-import {
-  calculateFireEstimateMap,
-  FireEstimate,
-  getAIFireCount,
-  getFireResist,
-} from 'ai/fire-utils'
-import followPath from 'ai/followPath'
-import getAllSpots from 'ai/getAllSpots'
-import { logAI } from 'ai/logger'
-import { around, getTankSpot, getBulletSpot } from 'ai/spot-utils'
-import Spot from 'ai/Spot'
-import { findPath } from 'ai/shortest-path'
-import simpleFireLoop from 'ai/simpleFireLoop'
-import { State } from 'reducers'
 import { Task } from 'redux-saga'
-import { fork, select, take, race } from 'redux-saga/effects'
-import { TankFireInfo, TankRecord } from 'types'
-import { randint, waitFor } from 'utils/common'
-import * as selectors from 'utils/selectors'
-import Timing from 'utils/Timing'
-import * as dodgeUtils from 'ai/dodge-utils'
+import { fork, race, select, take } from 'redux-saga/effects'
+import { State } from '../reducers'
+import { TankFireInfo, TankRecord } from '../types'
+import { randint, waitFor } from '../utils/common'
 import { BLOCK_DISTANCE_THRESHOLD, BLOCK_TIMEOUT } from '../utils/constants'
+import * as selectors from '../utils/selectors'
+import Timing from '../utils/Timing'
+import AITankCtx from './AITankCtx'
+import * as dodgeUtils from './dodge-utils'
+import { getEnv, RelativePosition } from './env-utils'
+import { calculateFireEstimateMap, FireEstimate, getAIFireCount, getFireResist } from './fire-utils'
+import followPath from './followPath'
+import getAllSpots from './getAllSpots'
+import { logAI } from './logger'
+import { findPath } from './shortest-path'
+import simpleFireLoop from './simpleFireLoop'
+import Spot from './Spot'
+import { around, getBulletSpot, getTankSpot } from './spot-utils'
 
 function getRandomPassableSpot(posInfoArray: Spot[]) {
   while (true) {

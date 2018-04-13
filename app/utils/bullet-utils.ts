@@ -1,9 +1,9 @@
 import { Map as IMap } from 'immutable'
-import { BulletRecord } from 'types'
-import { asRect, DefaultMap, testCollide } from 'utils/common'
-import Collision, { CollisionWithBullet } from 'utils/Collision'
-import IndexHelper from 'utils/IndexHelper'
-import { BULLET_SIZE, FIELD_SIZE } from 'utils/constants'
+import { BulletRecord } from '../types'
+import Collision, { CollisionWithBullet } from './Collision'
+import { asRect, DefaultMap, testCollide } from './common'
+import { BULLET_SIZE, FIELD_SIZE } from './constants'
+import IndexHelper from './IndexHelper'
 
 export function getMBR(...rects: Rect[]): Rect {
   let left = Infinity

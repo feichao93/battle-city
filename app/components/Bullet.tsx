@@ -1,6 +1,6 @@
 import React from 'react'
-import { BulletRecord } from 'types'
-import { Pixel } from 'components/elements'
+import { BulletRecord } from '../types'
+import { Pixel } from './elements'
 
 const fill = '#ADADAD'
 

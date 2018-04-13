@@ -1,10 +1,10 @@
-import { logAI } from 'ai/logger'
-import { getTankSpot } from 'ai/spot-utils'
 import { put, select } from 'redux-saga/effects'
-import { TankRecord } from 'types'
-import { waitFor } from 'utils/common'
-import * as selectors from 'utils/selectors'
+import { TankRecord } from '../types'
+import { waitFor } from '../utils/common'
+import * as selectors from '../utils/selectors'
 import AITankCtx from './AITankCtx'
+import { logAI } from './logger'
+import { getTankSpot } from './spot-utils'
 
 // TODO 可以考虑「截断过长的路径」
 export default function* followPath(ctx: AITankCtx, path: number[]) {

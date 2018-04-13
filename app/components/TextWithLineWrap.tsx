@@ -1,5 +1,5 @@
-import React from 'react'
 import { Range } from 'immutable'
+import React from 'react'
 import { BLOCK_SIZE as B } from '../utils/constants'
 import Text from './Text'
 

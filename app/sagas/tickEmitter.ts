@@ -1,6 +1,6 @@
 import { eventChannel } from 'redux-saga'
-import { takeEvery, select, put, take } from 'redux-saga/effects'
-import { State } from 'types'
+import { put, select, take, takeEvery } from 'redux-saga/effects'
+import { State } from '../types'
 
 const Mousetrap = require('mousetrap')
 

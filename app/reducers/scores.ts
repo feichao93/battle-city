@@ -1,5 +1,5 @@
 import { Map } from 'immutable'
-import { ScoreRecord } from 'types'
+import { ScoreRecord } from '../types'
 
 export type ScoresMap = Map<ScoreId, ScoreRecord>
 

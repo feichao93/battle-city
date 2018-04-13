@@ -1,12 +1,11 @@
-import { take, fork, put, select, takeEvery } from 'redux-saga/effects'
-import { BLOCK_SIZE } from 'utils/constants'
-import { asRect, frame, getNextId, testCollide } from 'utils/common'
-import { PlayerRecord, State, TankRecord } from 'types'
-import { spawnTank } from 'sagas/common'
-import * as selectors from 'utils/selectors'
-import { CONTROL_CONFIG } from '../utils/constants'
+import { fork, put, select, take, takeEvery } from 'redux-saga/effects'
+import { spawnTank } from '../sagas/common'
+import { PlayerRecord, State, TankRecord } from '../types'
+import { asRect, frame, getNextId, testCollide } from '../utils/common'
+import { BLOCK_SIZE, CONTROL_CONFIG } from '../utils/constants'
+import * as selectors from '../utils/selectors'
+import { explosionFromTank } from './common/destroyTanks'
 import humanController from './humanController'
-import { explosionFromTank } from 'sagas/common/destroyTanks'
 
 function* handlePickPowerUps(playerName: string) {
   const tank: TankRecord = yield select(selectors.playerTank, playerName)
