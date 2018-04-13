@@ -23,6 +23,8 @@ module.exports = dev => ({
   'DEV.INSPECTOR': false,
   // 是否打印游戏日志
   'DEV.LOG': dev,
+  // 是否打印游戏性能相关日志
+  'DEV.LOG_PERF': false,
   // 是否跳过关卡选择
   'DEV.SKIP_CHOOSE_STAGE': false,
 })

@@ -12,6 +12,7 @@ declare global {
     HIDE_ABOUT: boolean
     INSPECTOR: boolean
     LOG: boolean
+    LOG_PERF: boolean
     SKIP_CHOOSE_STAGE: boolean
   }>
   const COMPILE_VERSION: string

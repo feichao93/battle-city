@@ -41,7 +41,7 @@ export default class Image extends React.PureComponent<ImageProps> {
       )
     } else {
       if (!cache.has(imageKey)) {
-        DEV.LOG && console.time(`Image: loading content of ${imageKey}`)
+        DEV.LOG_PERF && console.time(`Image: loading content of ${imageKey}`)
         const open = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">`
         const enhancer = withContext(
           { underImageComponent: PropTypes.bool, store: PropTypes.any },
@@ -57,7 +57,7 @@ export default class Image extends React.PureComponent<ImageProps> {
         const blob = new Blob([markup], { type: 'image/svg+xml' })
         const url = URL.createObjectURL(blob)
         cache.set(imageKey, url)
-        DEV.LOG && console.timeEnd(`Image: loading content of ${imageKey}`)
+        DEV.LOG_PERF && console.timeEnd(`Image: loading content of ${imageKey}`)
       }
       return (
         <image
