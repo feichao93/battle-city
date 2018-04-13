@@ -1,40 +1,33 @@
-import { match, Route, Redirect } from 'react-router-dom'
-import { replace, goBack } from 'react-router-redux'
-import React from 'react'
-import { Dispatch } from 'redux'
 import { is, List, Repeat } from 'immutable'
+import React from 'react'
 import { connect } from 'react-redux'
-import {
-  BLOCK_SIZE as B,
-  FIELD_BLOCK_SIZE as FBZ,
-  ZOOM_LEVEL,
-  SCREEN_WIDTH,
-  SCREEN_HEIGHT,
-} from 'utils/constants'
-import Eagle from 'components/Eagle'
-import Text from 'components/Text'
-import River from 'components/River'
-import Snow from 'components/Snow'
-import Forest from 'components/Forest'
-import { Tank } from 'components/tanks'
-import BrickWall from 'components/BrickWall'
-import SteelWall from 'components/SteelWall'
-import TextInput from 'components/TextInput'
-import TextButton from 'components/TextButton'
-import { TankRecord, StageDifficulty, StageConfig, State } from 'types/index'
+import { match, Redirect, Route } from 'react-router-dom'
+import { goBack, replace } from 'react-router-redux'
+import { Dispatch } from 'redux'
 import { add, dec, inc } from 'utils/common'
-import Popup from '../types/Popup'
-import AreaButton from './AreaButton'
-import Grid from './Grid'
-import Screen from './Screen'
-import StagePreview from './StagePreview'
+import { StageConfig, StageDifficulty, State, TankRecord } from '../types/index'
 import {
   defaultEnemiesConfig,
-  MapItemType,
   MapItem,
+  MapItemType,
   StageConfigConverter,
 } from '../types/StageConfig'
-import TextWithLineWrap from './TextWithLineWrap'
+import { BLOCK_SIZE as B, FIELD_BLOCK_SIZE as FBZ, ZOOM_LEVEL } from '../utils/constants'
+import AreaButton from './AreaButton'
+import BrickWall from './BrickWall'
+import Eagle from './Eagle'
+import Forest from './Forest'
+import Grid from './Grid'
+import PopupProvider, { PopupHandle } from './PopupProvider'
+import River from './River'
+import Screen from './Screen'
+import Snow from './Snow'
+import StagePreview from './StagePreview'
+import SteelWall from './SteelWall'
+import { Tank } from './tanks'
+import Text from './Text'
+import TextButton from './TextButton'
+import TextInput from './TextInput'
 
 const HexBrickWall = ({ x, y, hex }: { x: number; y: number; hex: number }) => (
   <g className="hex-brick-wall">
@@ -83,20 +76,18 @@ const positionMap = {
 }
 
 export interface EditorProps {
-  match: match<any>
+  view: string
   dispatch: Dispatch<State>
   initialCotnent: StageConfig
   stages: List<StageConfig>
+  popupHandle: PopupHandle
 }
 
 class Editor extends React.Component<EditorProps> {
   private svg: SVGSVGElement
   private pressed = false
-  private resolveConfirm: (ok: boolean) => void = null
-  private resolveAlert: () => void = null
 
   state = {
-    popup: null as Popup,
     t: -1,
 
     name: '',
@@ -161,15 +152,16 @@ class Editor extends React.Component<EditorProps> {
     }
   }
 
-  onMouseDown = (view: string, event: React.MouseEvent<SVGSVGElement>) => {
-    const { popup } = this.state
+  onMouseDown = (event: React.MouseEvent<SVGSVGElement>) => {
+    const { view, popupHandle: { popup } } = this.props
     if (view === 'map' && popup == null && this.getT(event) !== -1) {
       this.pressed = true
     }
   }
 
-  onMouseMove = (view: string, event: React.MouseEvent<SVGSVGElement>) => {
-    const { popup, t: lastT } = this.state
+  onMouseMove = (event: React.MouseEvent<SVGSVGElement>) => {
+    const { view, popupHandle: { popup } } = this.props
+    const { t: lastT } = this.state
     const t = this.getT(event)
     if (t !== lastT) {
       this.setState({ t })
@@ -179,9 +171,9 @@ class Editor extends React.Component<EditorProps> {
     }
   }
 
-  onMouseUp = (view: string, event: React.MouseEvent<SVGSVGElement>) => {
+  onMouseUp = (event: React.MouseEvent<SVGSVGElement>) => {
+    const { view, popupHandle: { popup } } = this.props
     this.pressed = false
-    const { popup } = this.state
     if (view === 'map' && popup == null) {
       this.setAsCurrentItem(this.getT(event))
     }
@@ -232,46 +224,46 @@ class Editor extends React.Component<EditorProps> {
 
   /** 检查当前编辑器中的关卡配置是否合理. 返回 true 表示关卡配置合理 */
   async check() {
-    const { stages } = this.props
+    const { stages, popupHandle: { showAlertPopup, showConfirmPopup } } = this.props
     const { name, enemies, itemList } = this.state
     const totalEnemyCount = enemies.map(e => e.count).reduce(add)
 
     // 检查stageName
     if (name === '') {
-      await this.showAlertPopup('Please enter stage name.')
+      await showAlertPopup('Please enter stage name.')
       this.props.dispatch(replace('/editor/config'))
       return false
     }
 
     // 检查是否与已有的default-stage 重名
     if (stages.some(s => !s.custom && s.name === name)) {
-      await this.showAlertPopup(`Stage ${name} already exists.`)
+      await showAlertPopup(`Stage ${name} already exists.`)
       return false
     }
 
     // 检查enemies数量
     if (totalEnemyCount === 0) {
-      await this.showAlertPopup('no enemy')
+      await showAlertPopup('no enemy')
       return false
     }
 
     // 检查老鹰是否存在
     const hasEagle = itemList.some(mapItem => mapItem.type === 'E')
     if (!hasEagle) {
-      await this.showAlertPopup('no eagle.')
+      await showAlertPopup('no eagle.')
       return false
     }
 
     // 检查是否与已有的custom-stage 重名
     if (stages.some(s => s.custom && s.name === name)) {
-      const confirmed = await this.showConfirmPopup('Override exsiting custome stage. continue?')
+      const confirmed = await showConfirmPopup('Override exsiting custome stage. continue?')
       if (!confirmed) {
         return false
       }
     }
 
     if (totalEnemyCount !== 20) {
-      const confirmed = await this.showConfirmPopup('total enemy count is not 20. continue?')
+      const confirmed = await showConfirmPopup('total enemy count is not 20. continue?')
       if (!confirmed) {
         return false
       }
@@ -296,46 +288,11 @@ class Editor extends React.Component<EditorProps> {
     }
   }
 
-  showAlertPopup(message: string) {
-    this.setState({
-      popup: new Popup({ type: 'alert', message }),
-    })
-    return new Promise<boolean>(resolve => {
-      this.resolveAlert = resolve
-    })
-  }
-
-  showConfirmPopup(message: string) {
-    this.setState({
-      popup: new Popup({ type: 'confirm', message }),
-    })
-    return new Promise<boolean>(resolve => {
-      this.resolveConfirm = resolve
-    })
-  }
-
-  onConfirm = () => {
-    this.resolveConfirm(true)
-    this.resolveConfirm = null
-    this.setState({ popup: null })
-  }
-
-  onCancel = () => {
-    this.resolveConfirm(false)
-    this.resolveConfirm = null
-    this.setState({ popup: null })
-  }
-
-  onClickOkOfAlert = () => {
-    this.resolveAlert()
-    this.resolveAlert = null
-    this.setState({ popup: null })
-  }
-
   onShowHelpInfo = async () => {
-    await this.showAlertPopup('1. Choose an item type below.')
-    await this.showAlertPopup('2. Click or pan in the left.')
-    await this.showAlertPopup('3. After selecting Brick or Steel you can change the item shape')
+    const { popupHandle: { showAlertPopup } } = this.props
+    await showAlertPopup('1. Choose an item type below.')
+    await showAlertPopup('2. Click or pan in the left.')
+    await showAlertPopup('3. After selecting Brick or Steel you can change the item shape')
   }
 
   getStage() {
@@ -537,108 +494,75 @@ class Editor extends React.Component<EditorProps> {
     )
   }
 
-  renderPopup() {
-    const { popup } = this.state
-    if (popup == null) {
-      return null
-    }
-
-    if (popup.type === 'alert') {
-      return (
-        <g className="popup-alert">
-          <rect x={0} y={0} width={SCREEN_WIDTH} height={SCREEN_HEIGHT} fill="transparent" />
-          <g transform={`translate(${2.5 * B}, ${4.5 * B})`}>
-            <rect x={-0.5 * B} y={-0.5 * B} width={12 * B} height={4 * B} fill="#e91e63" />
-            <TextWithLineWrap x={0} y={0} fill="#333" maxLength={22} content={popup.message} />
-            <TextButton
-              x={9.5 * B}
-              y={2.25 * B}
-              textFill="#333"
-              content="OK"
-              onClick={this.onClickOkOfAlert}
-            />
-          </g>
-        </g>
-      )
-    }
-
-    if (popup.type === 'confirm') {
-      return (
-        <g className="popup-confirm">
-          <rect x={0} y={0} width={SCREEN_WIDTH} height={SCREEN_HEIGHT} fill="transparent" />
-          <g transform={`translate(${2.5 * B}, ${4.5 * B})`}>
-            <rect x={-0.5 * B} y={-0.5 * B} width={12 * B} height={4 * B} fill="#e91e63" />
-            <TextWithLineWrap x={0} y={0} fill="#333" maxLength={22} content={popup.message} />
-            <TextButton
-              x={7.5 * B}
-              y={2 * B}
-              textFill="#333"
-              content="no"
-              onClick={this.onCancel}
-            />
-            <TextButton
-              x={9 * B}
-              y={2 * B}
-              textFill="#333"
-              content="yes"
-              onClick={this.onConfirm}
-            />
-          </g>
-        </g>
-      )
-    }
-  }
-
   render() {
-    const { match, dispatch } = this.props
+    const { dispatch, view, popupHandle: { popup } } = this.props
 
     return (
-      <Route
-        path={`${match.url}/:view`}
-        children={({ match }) => {
-          // match 在这里可能为 null
-          const view = match && match.params.view
-          if (!['map', 'config'].includes(view)) {
-            return <Redirect to="/editor/config" />
-          }
-          return (
-            <Screen
-              background="#333"
-              refFn={node => (this.svg = node)}
-              onMouseDown={e => this.onMouseDown(view, e)}
-              onMouseUp={e => this.onMouseUp(view, e)}
-              onMouseMove={e => this.onMouseMove(view, e)}
-              onMouseLeave={this.onMouseLeave}
-            >
-              {view === 'map' ? this.renderMapView() : null}
-              {view === 'config' ? this.renderConfigView() : null}
-              <g className="menu" transform={`translate(0, ${13 * B})`}>
-                <TextButton
-                  content="config"
-                  x={0.5 * B}
-                  y={0.5 * B}
-                  selected={view === 'config'}
-                  onClick={() => dispatch(replace('/editor/config'))}
-                />
-                <TextButton
-                  content="map"
-                  x={4 * B}
-                  y={0.5 * B}
-                  selected={view === 'map'}
-                  onClick={() => dispatch(replace('/editor/map'))}
-                />
-                <TextButton content="save" x={10 * B} y={0.5 * B} onClick={this.onSave} />
-                <TextButton content="back" x={12.5 * B} y={0.5 * B} onClick={this.onBack} />
-              </g>
-              {this.renderPopup()}
-            </Screen>
-          )
-        }}
-      />
+      <Screen
+        background="#333"
+        refFn={node => (this.svg = node)}
+        onMouseDown={this.onMouseDown}
+        onMouseUp={this.onMouseUp}
+        onMouseMove={this.onMouseMove}
+        onMouseLeave={this.onMouseLeave}
+      >
+        {view === 'map' ? this.renderMapView() : null}
+        {view === 'config' ? this.renderConfigView() : null}
+        <g className="menu" transform={`translate(0, ${13 * B})`}>
+          <TextButton
+            content="config"
+            x={0.5 * B}
+            y={0.5 * B}
+            selected={view === 'config'}
+            onClick={() => dispatch(replace('/editor/config'))}
+          />
+          <TextButton
+            content="map"
+            x={4 * B}
+            y={0.5 * B}
+            selected={view === 'map'}
+            onClick={() => dispatch(replace('/editor/map'))}
+          />
+          <TextButton content="save" x={10 * B} y={0.5 * B} onClick={this.onSave} />
+          <TextButton content="back" x={12.5 * B} y={0.5 * B} onClick={this.onBack} />
+        </g>
+        {popup}
+      </Screen>
     )
   }
 }
 
+const EditorWrapper = ({
+  match,
+  dispatch,
+  initialCotnent,
+  stages,
+}: EditorProps & { match: match<{ view: string }> }) => (
+  <Route
+    path={`${match.url}/:view`}
+    children={({ match }) => {
+      // match 在这里可能为 null
+      const view = match && match.params.view
+      if (!['map', 'config'].includes(view)) {
+        return <Redirect to="/editor/config" />
+      }
+      return (
+        <PopupProvider>
+          {popupHandle => (
+            <Editor
+              view={view}
+              dispatch={dispatch}
+              initialCotnent={initialCotnent}
+              stages={stages}
+              popupHandle={popupHandle}
+            />
+          )}
+        </PopupProvider>
+      )
+    }}
+  />
+)
+
 const mapStateToProps = (s: State) => ({ initialCotnent: s.editorContent, stages: s.stages })
 
-export default connect(mapStateToProps)(Editor)
+export default connect(mapStateToProps)(EditorWrapper)

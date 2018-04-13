@@ -1,67 +1,31 @@
-import { Range } from 'immutable'
+import { saveAs } from 'file-saver'
 import React from 'react'
 import { connect } from 'react-redux'
 import { match, Redirect, Route, Switch } from 'react-router-dom'
-import { push, replace, goBack } from 'react-router-redux'
+import { goBack, push, replace } from 'react-router-redux'
 import { Dispatch } from 'redux'
-import { saveAs } from 'file-saver'
-import { State } from 'types/index'
-import { BLOCK_SIZE as B } from 'utils/constants'
-import { RawStageConfig } from '../types'
+import { RawStageConfig, State } from '../types'
 import Popup from '../types/Popup'
 import { StageConfigConverter } from '../types/StageConfig'
-import { SCREEN_HEIGHT, SCREEN_WIDTH } from '../utils/constants'
+import { BLOCK_SIZE as B } from '../utils/constants'
+import PopupProvider, { PopupHandle } from './PopupProvider'
 import Screen from './Screen'
 import StagePreview from './StagePreview'
 import Text from './Text'
 import TextButton from './TextButton'
 
-type TextWithLineWrapProps = {
-  x: number
-  y: number
-  fill?: string
-  maxLength: number
-  content: string
-  lineSpacing?: number
-}
-
-// todo 针对单词进行换行
-const TextWithLineWrap = ({
-  x,
-  y,
-  fill,
-  maxLength,
-  content,
-  lineSpacing = 0.25 * B,
-}: TextWithLineWrapProps) => (
-  <g className="text-with-line-wrap">
-    {Range(0, Math.ceil(content.length / maxLength))
-      .map(index => (
-        <Text
-          key={index}
-          x={x}
-          y={y + (0.5 * B + lineSpacing) * index}
-          fill={fill}
-          content={content.substring(index * maxLength, (index + 1) * maxLength)}
-        />
-      ))
-      .toArray()}
-  </g>
-)
-
-interface StageListProps {
+type StageListProps = {
   dispatch: Dispatch<State>
   tab: 'default' | 'custom'
   page: number
-}
+  popupHandle: PopupHandle
+} & State
 
 const STAGE_COUNT_PER_PAGE = 6
 const GAP = 25
 const LEN = 52 + GAP
 
-class StageListPageUnconncted extends React.PureComponent<StageListProps & State> {
-  private resolveConfirm: (ok: boolean) => void = null
-  private resolveAlert: () => void = null
+class StageListPageUnconnected extends React.PureComponent<StageListProps> {
   private input: HTMLInputElement
   private resetButton: HTMLInputElement
   private form: HTMLFormElement
@@ -92,95 +56,8 @@ class StageListPageUnconncted extends React.PureComponent<StageListProps & State
     this.form.remove()
   }
 
-  showAlertPopup(message: string) {
-    this.setState({
-      popup: new Popup({ type: 'alert', message }),
-    })
-    return new Promise<boolean>(resolve => {
-      this.resolveAlert = resolve
-    })
-  }
-
-  showConfirmPopup(message: string) {
-    this.setState({
-      popup: new Popup({ type: 'confirm', message }),
-    })
-    return new Promise<boolean>(resolve => {
-      this.resolveConfirm = resolve
-    })
-  }
-
-  onConfirm = () => {
-    this.resolveConfirm(true)
-    this.resolveConfirm = null
-    this.setState({ popup: null })
-  }
-
-  onCancel = () => {
-    this.resolveConfirm(false)
-    this.resolveConfirm = null
-    this.setState({ popup: null })
-  }
-
-  onClickOkOfAlert = () => {
-    this.resolveAlert()
-    this.resolveAlert = null
-    this.setState({ popup: null })
-  }
-
-  renderPopup() {
-    const { popup } = this.state
-    if (popup == null) {
-      return null
-    }
-
-    if (popup.type === 'alert') {
-      return (
-        <g className="popup-alert">
-          <rect x={0} y={0} width={SCREEN_WIDTH} height={SCREEN_HEIGHT} fill="transparent" />
-          <g transform={`translate(${2.5 * B}, ${4.5 * B})`}>
-            <rect x={-0.5 * B} y={-0.5 * B} width={12 * B} height={4 * B} fill="#e91e63" />
-            <TextWithLineWrap x={0} y={0} fill="#333" maxLength={22} content={popup.message} />
-            <TextButton
-              x={9.5 * B}
-              y={2.25 * B}
-              textFill="#333"
-              content="OK"
-              onClick={this.onClickOkOfAlert}
-            />
-          </g>
-        </g>
-      )
-    }
-
-    if (popup.type === 'confirm') {
-      return (
-        <g className="popup-confirm">
-          <rect x={0} y={0} width={SCREEN_WIDTH} height={SCREEN_HEIGHT} fill="transparent" />
-          <g transform={`translate(${2.5 * B}, ${4.5 * B})`}>
-            <rect x={-0.5 * B} y={-0.5 * B} width={12 * B} height={4 * B} fill="#e91e63" />
-            <TextWithLineWrap x={0} y={0} fill="#333" maxLength={22} content={popup.message} />
-            <TextButton
-              x={7.5 * B}
-              y={2 * B}
-              textFill="#333"
-              content="no"
-              onClick={this.onCancel}
-            />
-            <TextButton
-              x={9 * B}
-              y={2 * B}
-              textFill="#333"
-              content="yes"
-              onClick={this.onConfirm}
-            />
-          </g>
-        </g>
-      )
-    }
-  }
-
   onUploadFile = () => {
+    const { popupHandle: { showAlertPopup, showConfirmPopup } } = this.props
     const file = this.input.files[0]
     if (file == null) {
       return
@@ -193,13 +70,11 @@ class StageListPageUnconncted extends React.PureComponent<StageListProps & State
         const stage = StageConfigConverter.r2s(raw).set('custom', true)
         const { dispatch, stages, tab } = this.props
         if (stages.some(s => !s.custom && s.name === stage.name)) {
-          this.showAlertPopup(`Stage ${stage.name} already exists.`)
+          await showAlertPopup(`Stage ${stage.name} already exists.`)
           return
         }
         if (stages.some(s => s.custom && s.name === stage.name)) {
-          const confirmed = await this.showConfirmPopup(
-            'Override exsiting custome stage. continue?',
-          )
+          const confirmed = await showConfirmPopup('Override exsiting custome stage. continue?')
           if (!confirmed) {
             return
           }
@@ -211,7 +86,7 @@ class StageListPageUnconncted extends React.PureComponent<StageListProps & State
         }
       } catch (error) {
         console.error(error)
-        this.showAlertPopup('Failed to parse stage config file.')
+        await showAlertPopup('Failed to parse stage config file.')
       } finally {
         this.resetButton.click()
       }
@@ -253,7 +128,8 @@ class StageListPageUnconncted extends React.PureComponent<StageListProps & State
   }
 
   async onDelete(stageName: string) {
-    if (await this.showConfirmPopup(`Delete stage ${stageName}?`)) {
+    const { popupHandle: { showConfirmPopup } } = this.props
+    if (await showConfirmPopup(`Delete stage ${stageName}?`)) {
       this.props.dispatch<Action>({
         type: 'REMOVE_CUSTOM_STAGE',
         stageName,
@@ -272,7 +148,7 @@ class StageListPageUnconncted extends React.PureComponent<StageListProps & State
   }
 
   render() {
-    const { tab, page, dispatch, stages: allStages } = this.props
+    const { tab, page, dispatch, stages: allStages, popupHandle: { popup } } = this.props
     const filteredStages = allStages.filter(
       s => (s.custom && tab === 'custom') || (!s.custom && tab === 'default'),
     )
@@ -367,15 +243,13 @@ class StageListPageUnconncted extends React.PureComponent<StageListProps & State
         <g className="hint" transform={`translate(${0.5 * B},${14.5 * B}) scale(0.5)`}>
           <Text fill="#999" content="This page is a little janky. Keep patient." />
         </g>
-        {this.renderPopup()}
+        {popup}
       </Screen>
     )
   }
 }
 
-const mapStateToProps = (s: State) => s
-
-const StageListPage = connect(mapStateToProps)(StageListPageUnconncted)
+const StageListPage = connect((s: State) => s)(StageListPageUnconnected)
 
 interface PageMatch {
   match: match<{ page: string }>
@@ -385,23 +259,27 @@ export default class StageListPageWrapper extends React.PureComponent<{ match: m
   render() {
     const { match } = this.props
     return (
-      <Switch>
-        <Route exact path="/list" render={() => <Redirect to="/list/default" />} />
-        <Route exact path="/list/default" render={() => <Redirect to="/list/default/1" />} />
-        <Route exact path="/list/custom" render={() => <Redirect to="/list/custom/1" />} />
-        <Route
-          path={`${match.url}/default/:page`}
-          render={({ match: { params: { page } } }: PageMatch) => (
-            <StageListPage tab="default" page={Number(page)} />
-          )}
-        />
-        <Route
-          path={`${match.url}/custom/:page`}
-          render={({ match: { params: { page } } }: PageMatch) => (
-            <StageListPage tab="custom" page={Number(page)} />
-          )}
-        />
-      </Switch>
+      <PopupProvider>
+        {popupHandle => (
+          <Switch>
+            <Route exact path="/list" render={() => <Redirect to="/list/default" />} />
+            <Route exact path="/list/default" render={() => <Redirect to="/list/default/1" />} />
+            <Route exact path="/list/custom" render={() => <Redirect to="/list/custom/1" />} />
+            <Route
+              path={`${match.url}/default/:page`}
+              render={({ match: { params: { page } } }: PageMatch) => (
+                <StageListPage popupHandle={popupHandle} tab="default" page={Number(page)} />
+              )}
+            />
+            <Route
+              path={`${match.url}/custom/:page`}
+              render={({ match: { params: { page } } }: PageMatch) => (
+                <StageListPage popupHandle={popupHandle} tab="custom" page={Number(page)} />
+              )}
+            />
+          </Switch>
+        )}
+      </PopupProvider>
     )
   }
 }
