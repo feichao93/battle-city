@@ -64,7 +64,7 @@ declare global {
       | StartSpawnTank
       | AddTank
       | StartMoveAction
-      | RemoveTank
+      | DeactivateTank
       | StopMoveAction
       | RemoveText
       | RemoveFlickerAction
@@ -268,9 +268,8 @@ declare global {
       tank: TankRecord
     }
 
-    // TODO rename to DEACTIVATE_TANK
-    export interface RemoveTank {
-      type: 'REMOVE_TANK'
+    export interface DeactivateTank {
+      type: 'DEACTIVATE_TANK'
       tankId: TankId
     }
 

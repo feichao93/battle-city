@@ -6,13 +6,13 @@ const filenames = List<string>(requireStage.keys())
 
 let defaultStages = filenames
   .map(requireStage)
-  .map(StageConfig.fromJS)
+  .map(StageConfig.fromRawStageConfig)
   // 按照关卡数字顺序排序
   .sortBy(s => Number(s.name))
 
 if (DEV.TEST_STAGE) {
   defaultStages = defaultStages.unshift(
-    StageConfig.fromJS({
+    StageConfig.fromRawStageConfig({
       name: 'test',
       custom: false,
       difficulty: 1,

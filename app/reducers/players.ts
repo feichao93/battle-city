@@ -19,7 +19,7 @@ export default function players(state = Map() as PlayersMap, action: Action) {
   } else if (action.type === 'SET_REVERSED_TANK') {
     const { playerName, reversedTank } = action
     return state.update(playerName, p => p.set('reservedTank', reversedTank))
-  } else if (action.type === 'REMOVE_TANK') {
+  } else if (action.type === 'DEACTIVATE_TANK') {
     return state.map(p => (p.activeTankId === action.tankId ? p.set('activeTankId', 0) : p))
   } else if (action.type === 'DEACTIVATE_ALL_PLAYERS') {
     return state.map(p => p.set('active', false))

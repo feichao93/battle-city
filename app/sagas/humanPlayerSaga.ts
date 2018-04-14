@@ -78,7 +78,7 @@ function* beforeEndStage(playerName: string) {
       playerName,
       reversedTank: tank,
     })
-    yield put<Action>({ type: 'REMOVE_TANK', tankId: tank.tankId })
+    yield put<Action>({ type: 'DEACTIVATE_TANK', tankId: tank.tankId })
   }
 }
 
@@ -103,7 +103,7 @@ export default function* humanPlayerSaga(playerName: string, tankColor: TankColo
   } finally {
     const tank: TankRecord = yield select(selectors.playerTank, playerName)
     if (tank != null) {
-      yield put<Action>({ type: 'REMOVE_TANK', tankId: tank.tankId })
+      yield put<Action>({ type: 'DEACTIVATE_TANK', tankId: tank.tankId })
     }
     yield put<Action>({ type: 'REMOVE_PALYER', playerName })
   }
@@ -135,7 +135,7 @@ export default function* humanPlayerSaga(playerName: string, tankColor: TankColo
         targetTank,
       })
 
-      yield put({ type: 'REMOVE_TANK', tankId: tank.tankId })
+      yield put<Action>({ type: 'DEACTIVATE_TANK', tankId: tank.tankId })
       yield explosionFromTank(tank)
       // 唤醒新的human tank
       yield put<Action>({ type: 'REQ_ADD_PLAYER_TANK', playerName })

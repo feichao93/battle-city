@@ -24,7 +24,7 @@ export default function tanks(state = Map() as TanksMap, action: Action) {
     return state.update(action.tankId, incTankLevel)
   } else if (action.type === 'REMOVE_POWER_UP_PROPERTY') {
     return state.update(action.tankId, tank => tank.set('withPowerUp', false))
-  } else if (action.type === 'REMOVE_TANK') {
+  } else if (action.type === 'DEACTIVATE_TANK') {
     // 不能在关卡进行过程中移除tank, 因为tank的子弹可能正在飞行
     // 防御式编程: tank设置为inactive的时候重置一些状态
     return state.update(action.tankId, tank =>

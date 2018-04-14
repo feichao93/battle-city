@@ -118,8 +118,7 @@ const StageConfigRecord = Record({
 })
 
 export default class StageConfig extends StageConfigRecord {
-  /* TODO 这个名字取得不好 */
-  static fromJS(object: RawStageConfig) {
+  static fromRawStageConfig(object: RawStageConfig) {
     return new StageConfig({
       name: object.name,
       custom: object.custom,
@@ -372,7 +371,7 @@ export namespace StageConfigConverter {
 
   // raw-to-stage
   export function r2s(raw: RawStageConfig): StageConfig {
-    return StageConfig.fromJS(raw)
+    return StageConfig.fromRawStageConfig(raw)
   }
 
   // raw-to-editor

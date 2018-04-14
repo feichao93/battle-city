@@ -57,10 +57,7 @@ export function* explosionFromTank(tank: TankRecord) {
 
 export function* destroyTank(tank: TankRecord) {
   // 移除坦克
-  yield put({
-    type: 'REMOVE_TANK',
-    tankId: tank.tankId,
-  })
+  yield put<Action>({ type: 'DEACTIVATE_TANK', tankId: tank.tankId })
 
   // 产生坦克爆炸效果
   yield* explosionFromTank(tank)

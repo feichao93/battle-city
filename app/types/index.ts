@@ -89,7 +89,6 @@ declare global {
     type Note = BulletComplete | Reach
 
     interface BulletComplete {
-      // TODO 这个还没有实现
       type: 'bullet-complete'
     }
 

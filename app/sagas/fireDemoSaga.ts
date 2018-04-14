@@ -50,7 +50,7 @@ export function* demohumanPalyerSaga(playerName: string, tankPrototype: TankReco
   yield fork(demoHumanController, playerName)
 
   const tankId = getNextId('tank')
-  yield spawnTank(tankPrototype.set('tankId', tankId))
+  yield spawnTank(tankPrototype.set('tankId', tankId), 2)
   yield put<Action.ActivatePlayer>({
     type: 'ACTIVATE_PLAYER',
     playerName,
@@ -92,11 +92,11 @@ export function* demoAIMasterSaga() {
       hp: 1,
       direction: 'left',
     })
-    yield spawnTank(tank)
+    yield spawnTank(tank, 1.5)
     yield take((action: Action) => action.type === 'HIT' && action.targetTank.tankId === tankId)
-    yield put({ type: 'REMOVE_TANK', tankId })
+    yield put<Action>({ type: 'DEACTIVATE_TANK', tankId })
     yield explosionFromTank(tank)
-    yield delay(10e3)
+    yield delay(7e3)
   }
 }
 

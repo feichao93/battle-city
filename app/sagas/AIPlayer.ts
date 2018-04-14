@@ -27,7 +27,7 @@ export default function* AIPlayer(playerName: string, tankId: TankId) {
     ])
     yield put<Action>({ type: 'REQ_ADD_AI_PLAYER' })
     const tank: TankRecord = yield select(selectors.playerTank, playerName)
-    yield put({ type: 'REMOVE_TANK', tankId })
+    yield put<Action>({ type: 'DEACTIVATE_TANK', tankId })
     yield explosionFromTank(tank)
     yield scoreFromKillTank(tank)
   } finally {
@@ -35,7 +35,7 @@ export default function* AIPlayer(playerName: string, tankId: TankId) {
     // AI 玩家会在下一次关卡开始的后自动被清除
     const tank: TankRecord = yield select(selectors.playerTank, playerName)
     if (tank && tank.active) {
-      yield put({ type: 'REMOVE_TANK', tankId })
+      yield put<Action>({ type: 'DEACTIVATE_TANK', tankId })
     }
   }
 
