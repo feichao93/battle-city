@@ -9,7 +9,6 @@ import Timing from '../utils/Timing'
 import AIMasterSaga from './AIMasterSaga'
 import bulletsSaga from './bulletsSaga'
 import animateTexts from './common/animateTexts'
-import { concat } from './helper'
 import humanPlayerSaga from './humanPlayerSaga'
 import powerUpManager from './powerUpManager'
 import stageSaga, { StageResult } from './stageSaga'
@@ -61,6 +60,8 @@ function* stageFlow(startStageIndex: number) {
       break
     }
   }
+  yield animateGameover()
+  return true
 }
 
 /**
@@ -88,7 +89,7 @@ export default function* gameSaga(action: Action.StartGame | { type: 'RESET_GAME
     bullets: bulletsSaga(),
     // 上面几个 saga 在一个 gameSaga 的生命周期内被认为是后台服务
     // 当 stage-flow 退出（或者是用户直接离开了game-scene）的时候，自动取消上面几个后台服务
-    flow: concat(stageFlow(action.stageIndex), animateGameover()),
+    flow: stageFlow(action.stageIndex),
     leave: take('LEAVE_GAME_SCENE'),
   })
 
