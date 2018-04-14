@@ -345,9 +345,23 @@ template {
 
 .about {
   max-width: 200px;
-  margin-left: 20px;
+  margin-left: 10px;
+  padding: 0 10px;
   font-family: consolas, Microsoft Yahei, monospace;
-  line-height: 1.5;
+  line-height: 1.4;
+  border: 1px dashed #ccc;
+  position: relative;
+}
+
+.about.hide {
+  display: none;
+}
+
+.about .close {
+  position: absolute;
+  font-size: 12px;
+  right: 4px;
+  top: 4px;
 }
 
 .about .bold {
