@@ -5,61 +5,68 @@ import { HumanControllerConfig, Input, TankRecord } from '../types'
 import directionController from './directionController'
 import fireController from './fireController'
 
-const Mousetrap = require('mousetrap')
-
 // 一个humanController实例对应一个人类玩家(用户)的控制器.
 // 参数playerName用来指定人类玩家的玩家名称, config为该玩家的操作配置.
 // humanController将启动 fireController 与 directionController, 从而控制人类玩家的坦克
 export default function* humanController(playerName: string, config: HumanControllerConfig) {
   let firePressing = false // 用来记录当前玩家是否按下了fire键
   let firePressed = false // 用来记录上一个tick内 玩家是否按下过fire键
-  Mousetrap.bind(
-    config.fire,
-    () => {
-      firePressing = true
-      firePressed = true
-    },
-    'keydown',
-  )
-  Mousetrap.bind(config.fire, () => (firePressing = false), 'keyup')
+  const pressed: Direction[] = [] // 用来记录上一个tick内, 玩家按下过的方向键
 
-  // 用来记录上一个tick内, 玩家按下过的方向键
-  const pressed: Direction[] = []
+  try {
+    document.addEventListener('keydown', onKeyDown)
+    document.addEventListener('keyup', onKeyUp)
+    yield all([
+      directionController(playerName, getHumanPlayerInput),
+      fireController(playerName, () => firePressed || firePressing),
+      resetFirePressedEveryTick(),
+    ])
+  } finally {
+    document.removeEventListener('keydown', onKeyDown)
+    document.removeEventListener('keyup', onKeyUp)
+  }
 
-  function getDirectionControlInfo() {
-    if (pressed.length > 0) {
-      return { direction: last(pressed) }
-    } else {
-      return { direction: null }
+  // region function-definitions
+  function tryPush(direciton: Direction) {
+    if (!pressed.includes(direciton)) {
+      pressed.push(direciton)
     }
   }
 
-  // 调用该函数用来获取当前玩家的开火操作
-  function shouldFire() {
-    return firePressing || firePressed
+  function onKeyDown(event: KeyboardEvent) {
+    const key = event.key.toLowerCase()
+    if (key === config.fire) {
+      firePressing = true
+      firePressed = true
+    } else if (key == config.left) {
+      tryPush('left')
+    } else if (key === config.right) {
+      tryPush('right')
+    } else if (key === config.up) {
+      tryPush('up')
+    } else if (key === config.down) {
+      tryPush('down')
+    }
   }
 
-  function bindKeyWithDirection(key: string, direction: Direction) {
-    Mousetrap.bind(
-      key,
-      () => {
-        if (pressed.indexOf(direction) === -1) {
-          pressed.push(direction)
-        }
-      },
-      'keydown',
-    )
-    Mousetrap.bind(key, () => pull(pressed, direction), 'keyup')
+  function onKeyUp(event: KeyboardEvent) {
+    const key = event.key.toLowerCase()
+    if (key === config.fire) {
+      firePressing = false
+    } else if (key === config.left) {
+      pull(pressed, 'left')
+    } else if (key === config.right) {
+      pull(pressed, 'right')
+    } else if (key === config.up) {
+      pull(pressed, 'up')
+    } else if (key === config.down) {
+      pull(pressed, 'down')
+    }
   }
-
-  bindKeyWithDirection(config.up, 'up')
-  bindKeyWithDirection(config.left, 'left')
-  bindKeyWithDirection(config.down, 'down')
-  bindKeyWithDirection(config.right, 'right')
 
   // 调用该函数来获取当前用户的移动操作(坦克级别)
   function getHumanPlayerInput(tank: TankRecord): Input {
-    const { direction } = getDirectionControlInfo()
+    const direction = pressed.length > 0 ? last(pressed) : null
     if (direction != null) {
       if (direction !== tank.direction) {
         return { type: 'turn', direction } as Input
@@ -76,10 +83,5 @@ export default function* humanController(playerName: string, config: HumanContro
       firePressed = false
     }
   }
-
-  yield all([
-    directionController(playerName, getHumanPlayerInput),
-    fireController(playerName, shouldFire),
-    resetFirePressedEveryTick(),
-  ])
+  // endregion
 }

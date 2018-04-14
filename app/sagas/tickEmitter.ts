@@ -2,8 +2,6 @@ import { eventChannel } from 'redux-saga'
 import { put, select, take, takeEvery } from 'redux-saga/effects'
 import { State } from '../types'
 
-const Mousetrap = require('mousetrap')
-
 export interface TickEmitterOptions {
   maxFPS?: number
   bindESC?: boolean
@@ -28,8 +26,13 @@ export default function* tickEmitter(options: TickEmitterOptions = {}) {
 
   if (bindESC) {
     const escChannel = eventChannel(emitter => {
-      Mousetrap.bind('esc', emitter)
-      return () => Mousetrap.unbind('esc')
+      const onKeyDown = (event: KeyboardEvent) => {
+        if (event.key === 'Escape') {
+          emitter('Escape')
+        }
+      }
+      document.addEventListener('keydown', onKeyDown)
+      return () => document.removeEventListener('keydown', onKeyDown)
     })
     yield takeEvery(escChannel, function* handleESC() {
       const { game: { paused } }: State = yield select()

@@ -25,7 +25,6 @@
     "history": "^4.7.2",
     "immutable": "4.0.0-rc.9",
     "lodash": "^4.17.5",
-    "mousetrap": "^1.6.0",
     "normalize.css": "^8.0.0",
     "prop-types": "^15.6.1",
     "react": "^15.3.2",
