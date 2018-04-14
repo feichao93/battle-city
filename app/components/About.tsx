@@ -58,7 +58,7 @@ const AboutTitle = () => (
   </div>
 )
 
-export default class About extends React.PureComponent {
+export default class About extends React.Component {
   state = { hide: false }
 
   onHide = () => {

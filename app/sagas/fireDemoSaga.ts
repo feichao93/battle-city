@@ -32,8 +32,8 @@ function* demoHumanController(playerName: string) {
   }
   function* setFireToTrueEvery3Seconds() {
     while (true) {
-      yield delay(3000)
       fire = true
+      yield delay(3000)
     }
   }
 }
