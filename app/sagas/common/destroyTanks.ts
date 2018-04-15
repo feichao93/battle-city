@@ -1,5 +1,5 @@
-import { all, put } from 'redux-saga/effects'
-import { ExplosionRecord, ScoreRecord, TankRecord, TanksMap } from '../../types'
+import { put } from 'redux-saga/effects'
+import { ExplosionRecord, ScoreRecord, TankRecord } from '../../types'
 import { frame as f, getNextId } from '../../utils/common'
 import { TANK_KILL_SCORE_MAP } from '../../utils/constants'
 import Timing from '../../utils/Timing'
@@ -60,18 +60,8 @@ export function* destroyTank(tank: TankRecord) {
   yield put<Action>({ type: 'DEACTIVATE_TANK', tankId: tank.tankId })
 
   // 产生坦克爆炸效果
-  yield* explosionFromTank(tank)
+  yield explosionFromTank(tank)
   if (tank.side === 'ai') {
-    yield* scoreFromKillTank(tank)
+    yield scoreFromKillTank(tank)
   }
-}
-
-// 移除坦克 & 产生爆炸效果 & 显示击杀得分信息
-export default function* destroyTanks(tanks: TanksMap) {
-  yield all(
-    tanks
-      .valueSeq()
-      .map(destroyTank)
-      .toArray(),
-  )
 }

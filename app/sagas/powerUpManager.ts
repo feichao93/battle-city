@@ -9,8 +9,8 @@ import { BLOCK_SIZE, N_MAP, POWER_UP_NAMES } from '../utils/constants'
 import IndexHelper from '../utils/IndexHelper'
 import * as selectors from '../utils/selectors'
 import Timing from '../utils/Timing'
-import { destroyTanks } from './common'
 import powerUpLifecycle from './powerUpLifecycle'
+import { destroyTank } from './common/destroyTanks'
 
 function convertToBricks(map: MapRecord) {
   const { eagle, steels, bricks } = map
@@ -117,20 +117,18 @@ function* grenade(action: Action.PickPowerUpAction) {
   const { tanks: allTanks, players }: State = yield select()
   const activeAITanks = allTanks.filter(t => t.active && t.side === 'ai')
 
-  yield* activeAITanks
-    .map(targetTank =>
-      put<Action.Kill>({
-        type: 'KILL',
-        sourcePlayer: action.player,
-        sourceTank: action.tank,
-        targetPlayer: players.find(p => p.activeTankId === targetTank.tankId),
-        targetTank,
-        method: 'grenade',
-      }),
-    )
-    .values()
+  for (const targetTank of activeAITanks.values()) {
+    yield put<Action.Kill>({
+      type: 'KILL',
+      sourcePlayer: action.player,
+      sourceTank: action.tank,
+      targetPlayer: players.find(p => p.activeTankId === targetTank.tankId),
+      targetTank,
+      method: 'grenade',
+    })
 
-  yield* destroyTanks(activeAITanks)
+    yield fork(destroyTank, targetTank)
+  }
 }
 
 function* star({ tank }: Action.PickPowerUpAction) {
@@ -227,15 +225,15 @@ function* spawnPowerUpIfNeccessary(action: Action.Hit) {
       x: randint(0, 25) / 2 * BLOCK_SIZE,
       y: randint(0, 25) / 2 * BLOCK_SIZE,
     }
-    yield powerUpLifecycle(
-      new PowerUpRecord({
-        powerUpId: getNextId('power-up'),
+  yield powerUpLifecycle(
+    new PowerUpRecord({
+      powerUpId: getNextId('power-up'),
         powerUpName,
-        visible: true,
+      visible: true,
         x: position.x,
         y: position.y,
-      }),
-    )
+    }),
+  )
   }
 }
 

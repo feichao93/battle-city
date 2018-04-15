@@ -1,6 +1,6 @@
 {
   "name": "battle-city",
-  "version": "0.2.0-beta",
+  "version": "0.2.0",
   "description": "Battle city remake built with react.",
   "author": "Shi Feichao <842351815@qq.com> (http://shinima.pw)",
   "scripts": {

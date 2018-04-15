@@ -100,7 +100,7 @@ class StatisticsScene extends React.PureComponent<{ game: GameRecord }> {
       <Screen>
         <rect fill="#000000" x={0} y={0} width={16 * B} height={16 * B} />
         <StatisticsSceneContent game={game} />
-        {game.paused ? <PauseIndicator /> : null}
+        {game.paused ? <PauseIndicator x={6.25 * B} y={8 * B} /> : null}
       </Screen>
     )
   }
