@@ -1,4 +1,4 @@
-import { all, put } from 'redux-saga/effects'
+import { all, put } from 'little-saga/compat'
 import { BulletRecord, BulletsMap, ExplosionRecord } from '../../types'
 import { frame as f, getNextId } from '../../utils/common'
 import Timing from '../../utils/Timing'

@@ -1,4 +1,4 @@
-import { put } from 'redux-saga/effects'
+import { put } from 'little-saga/compat'
 import { ExplosionRecord, ScoreRecord, TankRecord } from '../../types'
 import { frame as f, getNextId } from '../../utils/common'
 import { TANK_KILL_SCORE_MAP } from '../../utils/constants'

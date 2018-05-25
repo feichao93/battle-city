@@ -1,4 +1,4 @@
-import { actionChannel, fork, put, select, take } from 'redux-saga/effects'
+import { actionChannel, fork, put, select, take } from 'little-saga/compat'
 import { State } from '../reducers'
 import { TankRecord } from '../types'
 import { getNextId } from '../utils/common'

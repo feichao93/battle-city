@@ -1,5 +1,5 @@
 import { Map } from 'immutable'
-import { put, select } from 'redux-saga/effects'
+import { put, select } from 'little-saga/compat'
 import { State } from '../types'
 import { TANK_LEVELS } from '../utils/constants'
 import Timing from '../utils/Timing'

@@ -1,4 +1,4 @@
-import { race, select } from 'redux-saga/effects'
+import { race, select } from 'little-saga/compat'
 import { State } from '../reducers'
 import { TankFireInfo } from '../types'
 import TankRecord from '../types/TankRecord'

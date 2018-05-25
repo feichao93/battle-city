@@ -1,4 +1,4 @@
-import { put, take } from 'redux-saga/effects'
+import { put, take } from 'little-saga/compat'
 
 export interface TextAnimation {
   direction: Direction

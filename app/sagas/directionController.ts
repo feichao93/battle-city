@@ -1,4 +1,4 @@
-import { put, select, take } from 'redux-saga/effects'
+import { put, select, take } from 'little-saga/compat'
 import { Input, TankRecord } from '../types'
 import canTankMove from '../utils/canTankMove'
 import { getDirectionInfo, getTankMoveSpeed } from '../utils/common'

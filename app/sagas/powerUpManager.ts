@@ -1,5 +1,5 @@
+import { cancelled, fork, put, race, select, take, takeEvery, takeLatest } from 'little-saga/compat'
 import _ from 'lodash'
-import { cancelled, fork, put, race, select, take, takeEvery, takeLatest } from 'redux-saga/effects'
 import { calculateFireEstimateMap, getFireResist } from '../ai/fire-utils'
 import getAllSpots from '../ai/getAllSpots'
 import { around, getTankSpot } from '../ai/spot-utils'
@@ -9,8 +9,8 @@ import { BLOCK_SIZE, N_MAP, POWER_UP_NAMES } from '../utils/constants'
 import IndexHelper from '../utils/IndexHelper'
 import * as selectors from '../utils/selectors'
 import Timing from '../utils/Timing'
-import powerUpLifecycle from './powerUpLifecycle'
 import { destroyTank } from './common/destroyTanks'
+import powerUpLifecycle from './powerUpLifecycle'
 
 function convertToBricks(map: MapRecord) {
   const { eagle, steels, bricks } = map
@@ -225,15 +225,15 @@ function* spawnPowerUpIfNeccessary(action: Action.Hit) {
       x: randint(0, 25) / 2 * BLOCK_SIZE,
       y: randint(0, 25) / 2 * BLOCK_SIZE,
     }
-  yield powerUpLifecycle(
-    new PowerUpRecord({
-      powerUpId: getNextId('power-up'),
+    yield powerUpLifecycle(
+      new PowerUpRecord({
+        powerUpId: getNextId('power-up'),
         powerUpName,
-      visible: true,
+        visible: true,
         x: position.x,
         y: position.y,
-    }),
-  )
+      }),
+    )
   }
 }
 

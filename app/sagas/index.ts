@@ -1,4 +1,4 @@
-import { put, takeEvery, takeLatest } from 'redux-saga/effects'
+import { put, takeEvery, takeLatest } from 'little-saga/compat'
 import gameSaga from './gameSaga'
 import { syncFrom, syncTo } from './syncLocalStorage'
 

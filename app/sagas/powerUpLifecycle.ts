@@ -1,4 +1,4 @@
-import { put, race, select, take } from 'redux-saga/effects'
+import { put, race, select, take } from 'little-saga/compat'
 import { PowerUpRecord, State } from '../types'
 import { frame as f } from '../utils/common'
 import Timing from '../utils/Timing'

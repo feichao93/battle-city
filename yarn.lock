@@ -22,6 +22,10 @@
   version "4.14.105"
   resolved "http://registry.npm.taobao.org/@types/lodash/download/@types/lodash-4.14.105.tgz#9fcc4627a1f98f8f8fce79ddb2bff4afd97e959b"
 
+"@types/node@^10.1.2":
+  version "10.1.2"
+  resolved "http://registry.npm.taobao.org/@types/node/download/@types/node-10.1.2.tgz#1b928a0baa408fc8ae3ac012cc81375addc147c6"
+
 "@types/node@^9.4.7":
   version "9.4.7"
   resolved "http://registry.npm.taobao.org/@types/node/download/@types/node-9.4.7.tgz#57d81cd98719df2c9de118f2d5f3b1120dcd7275"
@@ -3702,6 +3706,12 @@ listr@^0.13.0:
     stream-to-observable "^0.2.0"
     strip-ansi "^3.0.1"
 
+little-saga@^0.3.0:
+  version "0.3.0"
+  resolved "http://registry.npm.taobao.org/little-saga/download/little-saga-0.3.0.tgz#30fc3e3547c05a423db7e1adeaa3f4859b4bf19a"
+  dependencies:
+    "@types/node" "^10.1.2"
+
 load-json-file@^1.0.0:
   version "1.1.0"
   resolved "http://registry.npm.taobao.org/load-json-file/download/load-json-file-1.1.0.tgz#956905708d58b4bab4c2261b04f59f31c99374c0"
@@ -5344,13 +5354,7 @@ reduce-function-call@^1.0.1:
   dependencies:
     balanced-match "^0.4.2"
 
-redux-saga@1.0.0-beta.0:
-  version "1.0.0-beta.0"
-  resolved "http://registry.npm.taobao.org/redux-saga/download/redux-saga-1.0.0-beta.0.tgz#a8d35a5530a727a26c5392ee9f9ec5ad6417609d"
-  dependencies:
-    redux "^3.5.1"
-
-redux@^3.5.1, redux@^3.6.0, redux@^3.7.2:
+redux@^3.6.0, redux@^3.7.2:
   version "3.7.2"
   resolved "http://registry.npm.taobao.org/redux/download/redux-3.7.2.tgz#06b73123215901d25d065be342eb026bc1c8537b"
   dependencies:

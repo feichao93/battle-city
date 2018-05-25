@@ -1,6 +1,5 @@
+import { delay, put, race, select, take } from 'little-saga/compat'
 import { replace } from 'react-router-redux'
-import { delay } from 'redux-saga'
-import { put, race, select, take } from 'redux-saga/effects'
 import { State } from '../reducers'
 import TextRecord from '../types/TextRecord'
 import { getNextId } from '../utils/common'

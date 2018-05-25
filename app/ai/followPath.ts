@@ -1,4 +1,4 @@
-import { put, select } from 'redux-saga/effects'
+import { put, select } from 'little-saga/compat'
 import { TankRecord } from '../types'
 import { waitFor } from '../utils/common'
 import * as selectors from '../utils/selectors'

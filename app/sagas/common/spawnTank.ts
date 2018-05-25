@@ -1,4 +1,4 @@
-import { put } from 'redux-saga/effects'
+import { put } from 'little-saga/compat'
 import { TankRecord } from '../../types'
 import { asRect, getNextId } from '../../utils/common'
 import { flickerSaga } from '../common'
