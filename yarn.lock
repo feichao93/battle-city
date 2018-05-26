@@ -3706,9 +3706,9 @@ listr@^0.13.0:
     stream-to-observable "^0.2.0"
     strip-ansi "^3.0.1"
 
-little-saga@^0.3.0:
-  version "0.3.0"
-  resolved "http://registry.npm.taobao.org/little-saga/download/little-saga-0.3.0.tgz#30fc3e3547c05a423db7e1adeaa3f4859b4bf19a"
+little-saga@^0.3.1:
+  version "0.3.1"
+  resolved "http://registry.npm.taobao.org/little-saga/download/little-saga-0.3.1.tgz#c78047c66b13a80c57e7325c77a657afb5c325b9"
   dependencies:
     "@types/node" "^10.1.2"
 
