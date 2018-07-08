@@ -77,3 +77,9 @@ helmet 闪烁时间: 每个形状持续 2 帧左右
 ~~短距离射击时, 玩家坦克的子弹间隔取决于玩家手速~~
 
 AI 坦克的子弹发射间隔还没进行测量
+
+#### 子弹生成位置[DONE]
+
+参考下图，与原版不一定一致
+
+![bullet-spwan-position](bullet-spwan-position.jpg)
