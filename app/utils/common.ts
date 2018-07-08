@@ -14,13 +14,13 @@ export function calculateBulletStartPosition({
   direction: Direction
 }) {
   if (direction === 'up') {
-    return { x: x + 6, y: y - 3 }
+    return { x: x + 6, y }
   } else if (direction === 'down') {
-    return { x: x + 6, y: y + BLOCK_SIZE }
+    return { x: x + 6, y: y + 13 }
   } else if (direction === 'left') {
-    return { x: x - 3, y: y + 6 }
+    return { x, y: y + 6 }
   } else if (direction === 'right') {
-    return { x: x + BLOCK_SIZE, y: y + 6 }
+    return { x: x + 13, y: y + 6 }
   } else {
     throw new Error(`Invalid direction ${direction}`)
   }
@@ -136,71 +136,6 @@ export function incTankLevel(tank: TankRecord) {
   }
 }
 
-export function getTankBulletLimit(tank: TankRecord) {
-  if (tank.side === 'ai' || tank.level === 'basic' || tank.level === 'fast') {
-    return 1
-  } else {
-    return 2
-  }
-}
-
-export function getTankBulletSpeed(tank: TankRecord) {
-  // todo 需要校准数值
-  if (tank.side === 'human') {
-    if (DEV.FAST) {
-      return 0.3
-    }
-    if (tank.level === 'basic') {
-      return 0.12
-    } else {
-      return 0.18
-    }
-  } else {
-    if (tank.level === 'basic') {
-      return 0.12
-    } else if (tank.level === 'power') {
-      return 0.24
-    } else {
-      return 0.18
-    }
-  }
-}
-
-export function getTankBulletInterval(tank: TankRecord) {
-  // todo 需要校准数值
-  if (tank.level === 'basic') {
-    return 300
-  } else {
-    return 200
-  }
-}
-
-export function getTankMoveSpeed(tank: TankRecord) {
-  // todo 需要校准数值
-  if (tank.side === 'human') {
-    return DEV.FAST ? 0.06 : 0.045
-  } else {
-    if (tank.level === 'power') {
-      return 0.045
-    } else if (tank.level === 'fast') {
-      return 0.06
-    } else {
-      // baisc or armor
-      return 0.03
-    }
-  }
-}
-
-export function getTankBulletPower(tank: TankRecord) {
-  if (tank.side === 'human' && tank.level === 'armor') {
-    return 3
-  } else if (tank.side === 'ai' && tank.level === 'power') {
-    return 2
-  } else {
-    return 1
-  }
-}
-
 export class DefaultMap<K, V> extends Map<K, V> {
   constructor(readonly defaulter: () => V) {
     super()
@@ -218,6 +153,7 @@ export function randint(start: number, end: number) {
   return Math.floor(Math.random() * (end - start)) + start
 }
 
+/** @deprecated 使用 multicast-channel 来代替 waitFor */
 export function* waitFor(emitter: EventEmitter, expectedType: string) {
   let callback: any
   try {

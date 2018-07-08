@@ -3,12 +3,9 @@ import { BulletRecord, State, TankRecord } from '../types'
 import {
   calculateBulletStartPosition,
   getNextId,
-  getTankBulletInterval,
-  getTankBulletLimit,
-  getTankBulletPower,
-  getTankBulletSpeed,
 } from '../utils/common'
 import * as selectors from '../utils/selectors'
+import values from '../utils/values'
 
 export default function* fireController(playerName: string, shouldFire: () => boolean) {
   // tank.cooldown用来记录player距离下一次可以发射子弹的时间
@@ -27,7 +24,7 @@ export default function* fireController(playerName: string, shouldFire: () => bo
 
     if (tank.cooldown <= 0 && shouldFire()) {
       const bullets = allBullets.filter(bullet => bullet.tankId === tank.tankId)
-      if (bullets.count() < getTankBulletLimit(tank)) {
+      if (bullets.count() < values.bulletLimit(tank)) {
         const { x, y } = calculateBulletStartPosition(tank)
         yield put<Action.AddBulletAction>({
           type: 'ADD_BULLET',
@@ -38,14 +35,14 @@ export default function* fireController(playerName: string, shouldFire: () => bo
             y,
             lastX: x,
             lastY: y,
-            power: getTankBulletPower(tank),
-            speed: getTankBulletSpeed(tank),
+            power: values.bulletPower(tank),
+            speed: values.bulletSpeed(tank),
             tankId: tank.tankId,
             playerName,
           }),
         })
         // 一旦发射子弹, 则重置cooldown计数器
-        nextCooldown = getTankBulletInterval(tank)
+        nextCooldown = values.bulletInterval(tank)
       } // else 如果坦克发射的子弹已经到达上限, 则坦克不能继续发射子弹
     }
 

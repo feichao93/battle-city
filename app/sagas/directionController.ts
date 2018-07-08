@@ -1,8 +1,9 @@
 import { put, select, take } from 'little-saga/compat'
 import { Input, TankRecord } from '../types'
 import canTankMove from '../utils/canTankMove'
-import { getDirectionInfo, getTankMoveSpeed } from '../utils/common'
+import { getDirectionInfo } from '../utils/common'
 import * as selectors from '../utils/selectors'
+import values from '../utils/values'
 
 function move(tank: TankRecord): Action.Move {
   return { type: 'MOVE', tankId: tank.tankId, x: tank.x, y: tank.y, direction: tank.direction }
@@ -53,7 +54,7 @@ export default function* directionController(
       }
       yield put(move(movedTank))
     } else if (input.type === 'forward') {
-      const speed = getTankMoveSpeed(tank)
+      const speed = values.moveSpeed(tank)
       const distance = Math.min(delta * speed, input.maxDistance || Infinity)
 
       const { xy, updater } = getDirectionInfo(tank.direction)

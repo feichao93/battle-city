@@ -2,10 +2,11 @@ import { race, select } from 'little-saga/compat'
 import { State } from '../reducers'
 import { TankFireInfo } from '../types'
 import TankRecord from '../types/TankRecord'
-import { getTankBulletInterval, waitFor } from '../utils/common'
+import { waitFor } from '../utils/common'
 import { SIMPLE_FIRE_LOOP_INTERVAL } from '../utils/constants'
 import * as selectors from '../utils/selectors'
 import Timing from '../utils/Timing'
+import values from '../utils/values'
 import AITankCtx from './AITankCtx'
 import { determineFire, getEnv } from './env-utils'
 
@@ -17,7 +18,7 @@ export default function* simpleFireLoop(ctx: AITankCtx) {
     } else {
       const tank: TankRecord = yield select(selectors.playerTank, ctx.playerName)
       yield race({
-        timeout: Timing.delay(tank ? getTankBulletInterval(tank) : SIMPLE_FIRE_LOOP_INTERVAL),
+        timeout: Timing.delay(tank ? values.bulletInterval(tank) : SIMPLE_FIRE_LOOP_INTERVAL),
         bulletComplete: waitFor(ctx.noteEmitter, 'bullet-complete'),
       })
     }

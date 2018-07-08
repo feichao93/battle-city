@@ -1,8 +1,9 @@
 import _ from 'lodash'
 import { State, TankFireInfo } from '../types'
-import { asRect, getTankBulletLimit, testCollide } from './common'
+import { asRect, testCollide } from './common'
 import { BLOCK_SIZE as B, FIELD_BLOCK_SIZE as FBZ, TANK_SIZE } from './constants'
 import IndexHelper from './IndexHelper'
+import values from './values'
 
 // 选取玩家的坦克对象. 如果玩家当前没有坦克, 则返回null
 export const playerTank = (state: State, playerName: string) => {
@@ -18,7 +19,7 @@ export function fireInfo(state: State, playerName: string): TankFireInfo {
   const tank = playerTank(state, playerName)
   const { bullets } = state
   const bulletCount = bullets.filter(b => b.tankId === tank.tankId).count()
-  const canFire = bulletCount < getTankBulletLimit(tank) && tank.cooldown <= 0
+  const canFire = bulletCount < values.bulletLimit(tank) && tank.cooldown <= 0
   return {
     bulletCount,
     canFire,
