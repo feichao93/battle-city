@@ -1,6 +1,6 @@
-import { all, take } from 'little-saga/compat'
 import last from 'lodash/last'
 import pull from 'lodash/pull'
+import { all, take } from 'redux-saga/effects'
 import { HumanControllerConfig, Input, TankRecord } from '../types'
 import directionController from './directionController'
 import fireController from './fireController'

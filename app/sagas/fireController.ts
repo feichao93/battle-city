@@ -1,4 +1,4 @@
-import { put, select, take } from 'little-saga/compat'
+import { put, select, take } from 'redux-saga/effects'
 import { BulletRecord, State, TankRecord } from '../types'
 import {
   calculateBulletStartPosition,

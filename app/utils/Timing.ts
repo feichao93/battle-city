@@ -1,5 +1,5 @@
-import { Effect, take } from 'little-saga/compat'
 import { clamp } from 'lodash'
+import { Effect, take } from 'redux-saga/effects'
 
 const add = (x: number, y: number) => x + y
 

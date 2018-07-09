@@ -1,5 +1,5 @@
-import { cancelled, put, select, take } from 'little-saga/compat'
 import { replace } from 'react-router-redux'
+import { cancelled, put, select, take } from 'redux-saga/effects'
 import { State } from '../reducers'
 import StageConfig from '../types/StageConfig'
 import { frame as f } from '../utils/common'

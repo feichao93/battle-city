@@ -1,4 +1,5 @@
-import { all, delay, fork, put, take } from 'little-saga/compat'
+import { all, fork, put, take } from 'redux-saga/effects'
+import { delay } from 'redux-saga/utils'
 import { PlayerRecord, TankRecord } from '../types'
 import { StageConfigConverter } from '../types/StageConfig'
 import { getNextId } from '../utils/common'

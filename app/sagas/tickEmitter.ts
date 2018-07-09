@@ -1,4 +1,5 @@
-import { eventChannel, put, select, take, takeEvery } from 'little-saga/compat'
+import { eventChannel } from 'redux-saga'
+import { put, select, take, takeEvery } from 'redux-saga/effects'
 import { State } from '../types'
 
 export interface TickEmitterOptions {

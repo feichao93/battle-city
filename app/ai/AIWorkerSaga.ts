@@ -1,5 +1,6 @@
 import { Map as IMap } from 'immutable'
-import { fork, race, select, take, Task } from 'little-saga/compat'
+import { Task } from 'redux-saga'
+import { fork, race, select, take } from 'redux-saga/effects'
 import { State } from '../reducers'
 import { TankFireInfo, TankRecord } from '../types'
 import { randint, waitFor } from '../utils/common'

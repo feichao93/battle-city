@@ -1,6 +1,6 @@
 {
   "name": "battle-city",
-  "version": "0.2.0",
+  "version": "0.3.0-SNAPSHOT",
   "description": "Battle city remake built with react.",
   "author": "Shi Feichao <842351815@qq.com> (http://shinima.pw)",
   "scripts": {
@@ -24,7 +24,6 @@
     "file-saver": "^1.3.3",
     "history": "^4.7.2",
     "immutable": "4.0.0-rc.9",
-    "little-saga": "^0.3.1",
     "lodash": "^4.17.5",
     "normalize.css": "^8.0.0",
     "prop-types": "^15.6.1",
@@ -35,7 +34,8 @@
     "react-router-dom": "^4.2.2",
     "react-router-redux": "5.0.0-alpha.9",
     "recompose": "^0.26.0",
-    "redux": "^3.6.0"
+    "redux": "^3.6.0",
+    "redux-saga": "1.0.0-beta.1"
   },
   "devDependencies": {
     "@types/classnames": "^2.2.0",

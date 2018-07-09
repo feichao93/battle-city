@@ -1,5 +1,5 @@
 import EventEmitter from 'events'
-import { select } from 'little-saga/compat'
+import { select } from 'redux-saga/effects'
 import { Input, TankRecord } from '../types'
 import { getDirectionInfo } from '../utils/common'
 import * as selectors from '../utils/selectors'

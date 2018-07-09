@@ -1,5 +1,5 @@
 import { List } from 'immutable'
-import { put, select } from 'little-saga/compat'
+import { put, select } from 'redux-saga/effects'
 import { State } from '../reducers'
 import { default as StageConfig, RawStageConfig, StageConfigConverter } from '../types/StageConfig'
 

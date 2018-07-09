@@ -1,5 +1,5 @@
 import { Set as ISet } from 'immutable'
-import { all, fork, put, select, take, takeEvery } from 'little-saga/compat'
+import { all, fork, put, select, take, takeEvery } from 'redux-saga/effects'
 import { BulletRecord, BulletsMap, State } from '../types'
 import {
   BulletCollisionInfo,

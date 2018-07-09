@@ -1,4 +1,4 @@
-import { fork, put, select, take, takeEvery } from 'little-saga/compat'
+import { fork, put, select, take, takeEvery } from 'redux-saga/effects'
 import { spawnTank } from '../sagas/common'
 import { PlayerRecord, State, TankRecord } from '../types'
 import { asRect, frame, getNextId, testCollide } from '../utils/common'

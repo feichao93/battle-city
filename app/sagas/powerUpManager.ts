@@ -1,5 +1,5 @@
-import { cancelled, fork, put, race, select, take, takeEvery, takeLatest } from 'little-saga/compat'
 import _ from 'lodash'
+import { cancelled, fork, put, race, select, take, takeEvery, takeLatest } from 'redux-saga/effects'
 import { calculateFireEstimateMap, getFireResist } from '../ai/fire-utils'
 import getAllSpots from '../ai/getAllSpots'
 import { around, getTankSpot } from '../ai/spot-utils'

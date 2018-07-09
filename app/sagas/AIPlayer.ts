@@ -1,4 +1,4 @@
-import { all, put, race, select, take, takeEvery } from 'little-saga/compat'
+import { all, put, race, select, take, takeEvery } from 'redux-saga/effects'
 import AITankCtx from '../ai/AITankCtx'
 import AIWorkerSaga from '../ai/AIWorkerSaga'
 import { State } from '../reducers'
