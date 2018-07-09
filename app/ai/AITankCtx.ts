@@ -55,7 +55,7 @@ export default class AITankCtx {
       return { type: 'turn', direction }
     } else if (this.forwardLength > 0) {
       const { xy } = getDirectionInfo(tank.direction)
-      const movedLength = Math.abs(tank.get(xy, undefined) - this.startPos)
+      const movedLength = Math.abs(tank[xy] - this.startPos)
       const maxDistance = this.forwardLength - movedLength
       if (movedLength === this.forwardLength) {
         this.forwardLength = 0

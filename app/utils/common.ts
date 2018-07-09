@@ -165,3 +165,17 @@ export function* waitFor(emitter: EventEmitter, expectedType: string) {
     emitter.removeListener(expectedType, callback)
   }
 }
+
+export const round8 = (x: number) => Math.round(x / 8) * 8
+export const floor8 = (x: number) => Math.floor(x / 8) * 8
+export const ceil8 = (x: number) => Math.ceil(x / 8) * 8
+
+export function xor(p: boolean, q: boolean) {
+  return (p && !q) || (!p && q)
+}
+
+export function isPerpendicular(dir1: Direction, dir2: Direction) {
+  const isDir1Vertical = dir1 === 'up' || dir1 === 'down'
+  const isDir2Vertical = dir2 === 'up' || dir2 === 'down'
+  return xor(isDir1Vertical, isDir2Vertical)
+}

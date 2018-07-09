@@ -13,8 +13,7 @@ export default function tanks(state = Map() as TanksMap, action: Action) {
   } else if (action.type === 'START_STAGE') {
     return state.clear()
   } else if (action.type === 'MOVE') {
-    const { tankId, x, y, direction } = action
-    return state.update(tankId, t => t.merge({ x, y, direction }))
+    return state.update(action.tankId, t => t.merge(action))
   } else if (action.type === 'START_MOVE') {
     return state.setIn([action.tankId, 'moving'], true)
   } else if (action.type === 'STOP_MOVE') {

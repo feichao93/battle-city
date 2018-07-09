@@ -72,7 +72,8 @@ function isTankCollidedWithOtherTanks(
     if (tank.tankId === otherTank.tankId) {
       continue
     }
-    const subject = asRect(otherTank)
+    // 判断坦克相撞时，subject 一方需要使用预留位置
+    const subject = asRect(otherTank.useReservedXY())
     if (testCollide(subject, tankTarget, threshhold)) {
       return true
     }

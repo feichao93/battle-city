@@ -13,6 +13,10 @@ const TankRecordType = Record({
   hp: 1,
   withPowerUp: false,
 
+  // 坦克转弯预留位置的坐标
+  rx: 0,
+  ry: 0,
+
   // helmetDuration用来记录tank的helmet的剩余的持续时间
   helmetDuration: 0,
   // frozenTimeout小于等于0表示可以进行移动, 大于0表示还需要等待frozen毫秒才能进行移动
@@ -24,5 +28,9 @@ const TankRecordType = Record({
 export default class TankRecord extends TankRecordType {
   static fromJS(object: any) {
     return new TankRecord(object)
+  }
+
+  useReservedXY() {
+    return this.merge({ x: this.rx, y: this.ry })
   }
 }

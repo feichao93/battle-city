@@ -17,7 +17,10 @@ export default function* spawnTank(tank: TankRecord, spawnSpeed = 1) {
     if (!DEV.FAST) {
       yield flickerSaga(tank.x, tank.y, spawnSpeed)
     }
-    yield put({ type: 'ADD_TANK', tank })
+    yield put<Action>({
+      type: 'ADD_TANK',
+      tank: tank.merge({ rx: tank.x, ry: tank.y }),
+    })
   } finally {
     yield put<Action>({
       type: 'REMOVE_RESTRICTED_AREA',

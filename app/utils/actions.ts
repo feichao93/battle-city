@@ -102,6 +102,8 @@ declare global {
       tankId: TankId
       x: number
       y: number
+      rx: number
+      ry: number
       direction: Direction
     }
 

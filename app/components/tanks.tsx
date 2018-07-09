@@ -134,6 +134,7 @@ function calculateTankTransform(tank: TankRecord) {
 type P = {
   tank: TankRecord
   time: number
+  showReservedIndicator?: boolean
 }
 
 type S = { lastTireShape: number }
@@ -157,17 +158,28 @@ export class TankClassBase extends React.Component<P, S> {
   }
 
   render() {
-    const { tank, time } = this.props
+    const { tank, time, showReservedIndicator } = this.props
     const { lastTireShape } = this.state
 
     const color = resolveTankColorConfig(tank).find(time - this.startTime)
     const shape = tank.moving ? tireShapeTiming.find(time - this.startTime) : lastTireShape
     const imageKey = `Tank/${tank.side}/${tank.level}/${color}/${shape}`
-    return (
+    const img = (
       <Image imageKey={imageKey} transform={calculateTankTransform(tank)} width="16" height="16">
         {React.createElement(resolveTankComponent(tank.side, tank.level), { color, shape })}
       </Image>
     )
+
+    if (DEV.RESTRICTED_AREA && showReservedIndicator) {
+      return (
+        <g>
+          {img}
+          <rect width="16" height="16" x={tank.rx} y={tank.ry} fill="yellow" opacity={0.4} />
+        </g>
+      )
+    } else {
+      return img
+    }
   }
 }
 

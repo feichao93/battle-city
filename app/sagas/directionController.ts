@@ -1,12 +1,43 @@
 import { put, select, take } from 'redux-saga/effects'
 import { Input, TankRecord } from '../types'
 import canTankMove from '../utils/canTankMove'
-import { getDirectionInfo } from '../utils/common'
+import { ceil8, floor8, getDirectionInfo, isPerpendicular, round8 } from '../utils/common'
 import * as selectors from '../utils/selectors'
 import values from '../utils/values'
 
+// 坦克进行转向时, 需要对坐标进行处理
+// 如果转向前的方向为 left / right, 则将 x 坐标转换到最近的 8 的倍数
+// 如果转向前的方向为 up / down, 则将 y 坐标设置为最近的 8 的倍数
+// 这样做是为了使坦克转向之后更容易的向前行驶, 因为障碍物(brick/steel/river)的坐标也总是4或8的倍数
+// 但是有的时候简单的使用 round8 来转换坐标, 可能使得坦克卡在障碍物中
+// 所以这里转向的时候, 需要同时尝试 floor8 和 ceil8 来转换坐标
+function* getReservedTank(tank: TankRecord) {
+  const { xy } = getDirectionInfo(tank.direction)
+  const coordinate = tank[xy]
+  const useFloor = tank.set(xy, floor8(coordinate))
+  const useCeil = tank.set(xy, ceil8(coordinate))
+  const canMoveWhenUseFloor = yield select(canTankMove, useFloor)
+  const canMoveWhenUseCeil = yield select(canTankMove, useCeil)
+
+  if (!canMoveWhenUseFloor) {
+    return useCeil
+  } else if (!canMoveWhenUseCeil) {
+    return useFloor
+  } else {
+    return tank.set(xy, round8(coordinate))
+  }
+}
+
 function move(tank: TankRecord): Action.Move {
-  return { type: 'MOVE', tankId: tank.tankId, x: tank.x, y: tank.y, direction: tank.direction }
+  return {
+    type: 'MOVE',
+    tankId: tank.tankId,
+    x: tank.x,
+    y: tank.y,
+    rx: tank.rx,
+    ry: tank.ry,
+    direction: tank.direction,
+  }
 }
 
 export default function* directionController(
@@ -28,31 +59,11 @@ export default function* directionController(
         yield put({ type: 'STOP_MOVE', tankId: tank.tankId })
       }
     } else if (input.type === 'turn') {
-      const { direction } = input
-      // 坦克进行转向时, 需要对坐标进行处理
-      // 如果转向UP/DOWN, 则将x坐标转换到最近的8的倍数
-      // 如果转向为LEFT/RIGHT, 则将y坐标设置为最近的8的倍数
-      // 这样做是为了使坦克转向之后更容易的向前行驶, 因为障碍物(brick/steel/river)的坐标也总是4或8的倍数
-      // 但是有的时候简单的使用Math.round来转换坐标, 可能使得坦克卡在障碍物中
-      // 所以这里转向的时候, 需要同时尝试Math.floor和Math.ceil来转换坐标
-      const turned = tank.set('direction', direction) // 转向之后的tank对象
-      // 要进行校准的坐标字段
-      const { xy } = getDirectionInfo(direction, true)
-      const n = tank.get(xy, undefined) / 8
-      const useFloor = turned.set(xy, Math.floor(n) * 8)
-      const useCeil = turned.set(xy, Math.ceil(n) * 8)
-      const canMoveWhenUseFloor = yield select(canTankMove, useFloor)
-      const canMoveWhenUseCeil = yield select(canTankMove, useCeil)
-      let movedTank
-      if (!canMoveWhenUseFloor) {
-        movedTank = useCeil
-      } else if (!canMoveWhenUseCeil) {
-        movedTank = useFloor
+      if (isPerpendicular(input.direction, tank.direction)) {
+        yield put(move(tank.useReservedXY().set('direction', input.direction)))
       } else {
-        // use-round
-        movedTank = turned.set(xy, Math.round(n) * 8)
+        yield put(move(tank.set('direction', input.direction)))
       }
-      yield put(move(movedTank))
     } else if (input.type === 'forward') {
       const speed = values.moveSpeed(tank)
       const distance = Math.min(delta * speed, input.maxDistance || Infinity)
@@ -60,7 +71,8 @@ export default function* directionController(
       const { xy, updater } = getDirectionInfo(tank.direction)
       const movedTank = tank.update(xy, updater(distance))
       if (yield select(canTankMove, movedTank)) {
-        yield put(move(movedTank))
+        const reservedTank: TankRecord = yield getReservedTank(movedTank)
+        yield put(move(movedTank.merge({ rx: reservedTank.x, ry: reservedTank.y })))
         if (!tank.moving) {
           yield put({ type: 'START_MOVE', tankId: tank.tankId })
         }
