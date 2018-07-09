@@ -61,6 +61,16 @@ function isTankCollidedWithRestrictedAreas(
   return areas.some(subject => testCollide(subject, tankTarget, threshold))
 }
 
+// 判断 other 是否在 tank 前方
+function isInFront(other: TankRecord, tank: TankRecord) {
+  return (
+    (tank.direction === 'left' && other.x < tank.x) ||
+    (tank.direction === 'right' && other.x > tank.x) ||
+    (tank.direction === 'up' && other.y < tank.y) ||
+    (tank.direction === 'down' && other.y > tank.y)
+  )
+}
+
 function isTankCollidedWithOtherTanks(
   activeTanks: TanksMap,
   tank: TankRecord,
@@ -72,9 +82,13 @@ function isTankCollidedWithOtherTanks(
     if (tank.tankId === otherTank.tankId) {
       continue
     }
-    // 判断坦克相撞时，subject 一方需要使用预留位置
-    const subject = asRect(otherTank.useReservedXY())
-    if (testCollide(subject, tankTarget, threshhold)) {
+    // 判断坦克相撞时，只需要考虑当前坦克前方的其他坦克
+    // 且其他坦克需要使用「预留位置」
+    const otherReserved = otherTank.useReservedXY()
+    if (
+      isInFront(otherReserved, tank) &&
+      testCollide(asRect(otherReserved), tankTarget, threshhold)
+    ) {
       return true
     }
   }
