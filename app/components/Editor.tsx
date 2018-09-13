@@ -77,7 +77,7 @@ const positionMap = {
 
 export interface EditorProps {
   view: string
-  dispatch: Dispatch<State>
+  dispatch: Dispatch
   initialCotnent: StageConfig
   stages: List<StageConfig>
   popupHandle: PopupHandle

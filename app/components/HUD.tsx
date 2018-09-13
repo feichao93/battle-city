@@ -71,6 +71,6 @@ function mapStateToProps(state: State) {
   }
 }
 
-export default connect(mapStateToProps)(props => (
+export default connect(mapStateToProps)((props: HUDContentProps) => (
   <HUDContent x={FIELD_SIZE + 1.5 * B} y={1.5 * B} {...props} />
 ))

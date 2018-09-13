@@ -1,6 +1,7 @@
 import { List } from 'immutable'
 import React from 'react'
-import { connect, Dispatch } from 'react-redux'
+import { Dispatch } from 'redux'
+import { connect } from 'react-redux'
 import { match, Redirect } from 'react-router-dom'
 import { push, replace } from 'react-router-redux'
 import { StageConfig, State } from '../types'
@@ -12,7 +13,7 @@ import TextButton from './TextButton'
 
 class ChooseStageScene extends React.PureComponent<{
   stages: List<StageConfig>
-  dispatch: Dispatch<State>
+  dispatch: Dispatch
   match: match<{ stageName: string }>
 }> {
   componentDidMount() {

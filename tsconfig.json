@@ -8,6 +8,7 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "noStrictGenericChecks": true,
+    "skipLibCheck": true,
     "target": "es2017",
     "jsx": "react"
   },

@@ -15,7 +15,7 @@ import Text from './Text'
 import TextButton from './TextButton'
 
 type StageListProps = {
-  dispatch: Dispatch<State>
+  dispatch: Dispatch
   tab: 'default' | 'custom'
   page: number
   popupHandle: PopupHandle
@@ -66,7 +66,7 @@ class StageListPageUnconnected extends React.PureComponent<StageListProps> {
     fileReader.readAsText(file)
     fileReader.onloadend = async () => {
       try {
-        const raw: RawStageConfig = JSON.parse(fileReader.result)
+        const raw: RawStageConfig = JSON.parse(fileReader.result as string)
         const stage = StageConfigConverter.r2s(raw).set('custom', true)
         const { dispatch, stages, tab } = this.props
         if (stages.some(s => !s.custom && s.name === stage.name)) {

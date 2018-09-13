@@ -12,7 +12,7 @@ import StatisticsScene from './StatisticsScene'
 export interface GameSceneProps {
   game: GameRecord
   stages: List<StageConfig>
-  dispatch: Dispatch<State>
+  dispatch: Dispatch
   match: match<any>
 }
 

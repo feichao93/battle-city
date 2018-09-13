@@ -50,7 +50,7 @@ export class GameoverSceneContent extends React.PureComponent<{ onRestart?: () =
   }
 }
 
-class GameoverScene extends React.PureComponent<{ dispatch: Dispatch<State>; game: GameRecord }> {
+class GameoverScene extends React.PureComponent<{ dispatch: Dispatch; game: GameRecord }> {
   componentDidMount() {
     document.addEventListener('keypress', this.handleKeyPress)
     const { game, dispatch } = this.props

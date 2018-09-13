@@ -1,7 +1,6 @@
 const path = require('path')
 const webpack = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
-const ExtractTextPlugin = require('extract-text-webpack-plugin')
 const moment = require('moment')
 const packageInfo = require('./package.json')
 const getDevConfig = require('./devConfig')
@@ -16,18 +15,13 @@ function processDevConfig(config) {
   return result
 }
 
-module.exports = function(env) {
-  env = env || {}
-
+module.exports = function(env = {}) {
   const prod = Boolean(env.prod)
 
-  const plugins = []
-
-  plugins.push(
+  const plugins = [
     new webpack.DefinePlugin({
       COMPILE_VERSION: JSON.stringify(packageInfo.version),
       COMPILE_DATE: JSON.stringify(moment().format('YYYY-MM-DD HH:mm:ss')),
-      'process.env.NODE_ENV': JSON.stringify(prod ? 'production' : 'development'),
       // 将 devConfig.js 中的配置数据加入到 DefinePlugin 中
       ...processDevConfig(getDevConfig(!prod)),
     }),
@@ -36,13 +30,8 @@ module.exports = function(env) {
       filename: 'index.html',
       template: path.resolve(__dirname, 'app/index.tmpl.html'),
     }),
-  )
-
-  if (prod) {
-    plugins.push(new ExtractTextPlugin('[name]-[contenthash:6].css'))
-  } else {
-    plugins.push(new webpack.HotModuleReplacementPlugin())
-  }
+    !prod && new webpack.HotModuleReplacementPlugin(),
+  ].filter(Boolean)
 
   return {
     mode: prod ? 'production' : 'development',
@@ -83,24 +72,11 @@ module.exports = function(env) {
           ],
           exclude: /node_modules/,
         },
-      ].concat(
-        prod
-          ? [
-              {
-                test: /\.css$/,
-                use: ExtractTextPlugin.extract({
-                  fallback: 'style-loader',
-                  use: 'css-loader',
-                }),
-              },
-            ]
-          : [
-              {
-                test: /\.css$/,
-                use: ['style-loader', 'css-loader'],
-              },
-            ],
-      ),
+        {
+          test: /\.css$/,
+          use: ['style-loader', 'css-loader'],
+        },
+      ],
     },
 
     plugins,
