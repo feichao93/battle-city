@@ -65,6 +65,8 @@ export default class Image extends React.PureComponent<ImageProps> {
           data-imageKey={imageKey}
           transform={transform}
           href={cache.get(imageKey)}
+          width={width}
+          height={height}
           {...other}
         />
       )
