@@ -1,7 +1,6 @@
 import { put, race, select, take } from 'redux-saga/effects'
 import { PowerUpRecord, State } from '../types'
 import { frame as f } from '../utils/common'
-import soundManager from '../utils/soundManager'
 import Timing from '../utils/Timing'
 
 function* blink(powerUpId: PowerUpId) {
@@ -22,7 +21,7 @@ export default function* powerUpLifecycle(powerUp: PowerUpRecord) {
     action.type === 'PICK_POWER_UP' && action.powerUp.powerUpId === powerUp.powerUpId
 
   try {
-    soundManager.powerup_appear()
+    yield put<Action.PlaySound>({ type: 'PLAY_SOUND', sound: 'powerup_appear' })
     yield put<Action>({
       type: 'SET_POWER_UP',
       powerUp,
@@ -32,9 +31,8 @@ export default function* powerUpLifecycle(powerUp: PowerUpRecord) {
       blink: blink(powerUp.powerUpId),
       picked: take(pickThisPowerUp),
     })
-    console.log('powerup-result:', result)
     if (result.picked) {
-      soundManager.powerup_pick()
+      yield put<Action.PlaySound>({ type: 'PLAY_SOUND', sound: 'powerup_pick' })
     }
   } finally {
     yield put<Action>({

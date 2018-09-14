@@ -11,7 +11,6 @@ import {
 import { asRect, DefaultMap, getDirectionInfo, testCollide } from '../utils/common'
 import { BULLET_SIZE, FIELD_SIZE, STEEL_POWER } from '../utils/constants'
 import IndexHelper from '../utils/IndexHelper'
-import soundManager from '../utils/soundManager'
 import { destroyBullets } from './common'
 
 interface Stat {
@@ -269,13 +268,9 @@ function* handleAfterTick() {
 
     const { expBullets, noExpBullets, sounds } = stat.bulletCollisionInfo.getExplosionInfo()
 
-    sounds.forEach(sound => {
-      if (sound === 'bullet_hit_1') {
-        soundManager.bullet_hit_1()
-      } else if (sound === 'bullet_hit_2') {
-        soundManager.bullet_hit_2()
-      }
-    })
+    for (const sound of sounds) {
+      yield put<Action.PlaySound>({ type: 'PLAY_SOUND', sound })
+    }
 
     // 产生爆炸效果, 并移除子弹
     yield fork(destroyBullets, expBullets, true)

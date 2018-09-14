@@ -42,7 +42,7 @@ module.exports = function(env = {}) {
     entry: path.resolve(__dirname, 'app/main.tsx'),
 
     output: {
-      path: path.resolve(__dirname, 'build', packageInfo.version),
+      path: path.resolve(__dirname, 'dist'),
       filename: prod ? '[name]-[chunkhash:6].js' : '[name].js',
     },
 

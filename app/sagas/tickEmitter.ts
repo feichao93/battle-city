@@ -1,7 +1,6 @@
 import { eventChannel } from 'redux-saga'
 import { put, select, take, takeEvery } from 'redux-saga/effects'
 import { State } from '../types'
-import soundManager from '../utils/soundManager'
 
 export interface TickEmitterOptions {
   maxFPS?: number
@@ -39,7 +38,7 @@ export default function* tickEmitter(options: TickEmitterOptions = {}) {
       const {
         game: { paused },
       }: State = yield select()
-      soundManager.pause()
+      yield put<Action.PlaySound>({ type: 'PLAY_SOUND', sound: 'pause' })
       if (!paused) {
         yield put<Action>({ type: 'GAMEPAUSE' })
       } else {

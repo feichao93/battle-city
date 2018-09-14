@@ -2,7 +2,6 @@ import { Map } from 'immutable'
 import { put, select } from 'redux-saga/effects'
 import { State } from '../types'
 import { TANK_LEVELS } from '../utils/constants'
-import soundManager from '../utils/soundManager'
 import Timing from '../utils/Timing'
 
 export default function* statistics() {
@@ -27,7 +26,7 @@ export default function* statistics() {
     const levelKillCount = player1KillInfo.get(tankLevel, 0)
     if (levelKillCount === 0) {
       // 如果击杀数是 0 的话，则直接在界面中显示 0
-      soundManager.statistics_1()
+      yield put<Action.PlaySound>({ type: 'PLAY_SOUND', sound: 'statistics_1' })
       yield put<Action>({
         type: 'UPDATE_TRANSIENT_KILL_INFO',
         info: transientKillInfo.setIn(['player-1', tankLevel], 0),
@@ -35,7 +34,7 @@ export default function* statistics() {
     } else {
       // 如果击杀数大于 0，则显示从 1 开始增加到击杀数的动画
       for (let count = 1; count <= levelKillCount; count += 1) {
-        soundManager.statistics_1()
+        yield put<Action.PlaySound>({ type: 'PLAY_SOUND', sound: 'statistics_1' })
         yield put<Action>({
           type: 'UPDATE_TRANSIENT_KILL_INFO',
           info: transientKillInfo.setIn(['player-1', tankLevel], count),
@@ -46,7 +45,7 @@ export default function* statistics() {
     yield Timing.delay(DEV.FAST ? 80 : 200)
   }
   yield Timing.delay(DEV.FAST ? 80 : 200)
-  soundManager.statistics_1()
+  yield put<Action.PlaySound>({ type: 'PLAY_SOUND', sound: 'statistics_1' })
   yield put<Action>({ type: 'SHOW_TOTAL_KILL_COUNT' })
   yield Timing.delay(DEV.FAST ? 400 : 1000)
 

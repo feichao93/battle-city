@@ -96,4 +96,17 @@ declare global {
       type: 'reach'
     }
   }
+
+  type SoundName =
+    | 'stage_start'
+    | 'game_over'
+    | 'bullet_shot'
+    | 'bullet_hit_1'
+    | 'bullet_hit_2'
+    | 'explosion_1'
+    | 'explosion_2'
+    | 'pause'
+    | 'powerup_appear'
+    | 'powerup_pick'
+    | 'statistics_1'
 }

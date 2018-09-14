@@ -3,7 +3,6 @@ import { cancelled, put, select, take } from 'redux-saga/effects'
 import { State } from '../reducers'
 import StageConfig from '../types/StageConfig'
 import { frame as f } from '../utils/common'
-import soundManager from '../utils/soundManager'
 import Timing from '../utils/Timing'
 import statistics from './stageStatistics'
 
@@ -26,7 +25,7 @@ function* animateCurtainAndLoadMap(stage: StageConfig) {
 
     // 在幕布完全将舞台遮起来的时候载入地图
     yield Timing.delay(f(20))
-    soundManager.stage_start()
+    yield put<Action.PlaySound>({ type: 'PLAY_SOUND', sound: 'stage_start' })
     yield put<Action>({ type: 'LOAD_STAGE_MAP', stage })
     yield Timing.delay(f(20))
 
@@ -74,7 +73,11 @@ export default function* stageSaga(stage: StageConfig) {
       const action: Action = yield take(['KILL', 'DESTROY_EAGLE'])
       if (action.type === 'KILL') {
         const { sourcePlayer, targetTank } = action
-        const { players, game: { remainingEnemies }, tanks }: State = yield select()
+        const {
+          players,
+          game: { remainingEnemies },
+          tanks,
+        }: State = yield select()
 
         if (sourcePlayer.side === 'human') {
           // human击杀ai

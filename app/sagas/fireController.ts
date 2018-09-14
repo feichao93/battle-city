@@ -2,7 +2,6 @@ import { put, select, take } from 'redux-saga/effects'
 import { BulletRecord, State, TankRecord } from '../types'
 import { calculateBulletStartPosition, getNextId } from '../utils/common'
 import * as selectors from '../utils/selectors'
-import soundManager from '../utils/soundManager'
 import values from '../utils/values'
 
 export default function* fireController(playerName: string, shouldFire: () => boolean) {
@@ -27,7 +26,7 @@ export default function* fireController(playerName: string, shouldFire: () => bo
       if (bullets.count() < values.bulletLimit(tank)) {
         const { x, y } = calculateBulletStartPosition(tank)
         if (tank.side === 'human') {
-          soundManager.bullet_shot()
+          yield put<Action.PlaySound>({ type: 'PLAY_SOUND', sound: 'bullet_shot' })
         }
         yield put<Action.AddBulletAction>({
           type: 'ADD_BULLET',

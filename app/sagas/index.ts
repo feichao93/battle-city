@@ -1,11 +1,13 @@
-import { put, takeEvery, takeLatest } from 'redux-saga/effects'
+import { fork, put, takeEvery, takeLatest } from 'redux-saga/effects'
 import gameSaga from './gameSaga'
+import soundManager from './soundManager'
 import { syncFrom, syncTo } from './syncLocalStorage'
 
 export default function* rootSaga() {
   DEV.LOG && console.log('root saga started')
 
   yield syncFrom()
+  yield fork(soundManager)
   yield takeEvery('SYNC_CUSTOM_STAGES', syncTo)
   yield takeLatest(['START_GAME', 'RESET_GAME'], gameSaga)
 

@@ -76,8 +76,7 @@ export class BulletCollisionInfo extends DefaultMap<BulletId, Collision[]> {
     return false
   }
 
-  // bullet_hit_1 / bullet_hit_2
-  getExplosionSoundType(bulletId: BulletId): 'bullet_hit_1' | 'bullet_hit_2' {
+  getExplosionSoundType(bulletId: BulletId): SoundName {
     const bullet = this.bullets.get(bulletId)
     if (bullet.side === 'human') {
       const collisions = this.get(bulletId)
@@ -125,7 +124,7 @@ export class BulletCollisionInfo extends DefaultMap<BulletId, Collision[]> {
   getExplosionInfo() {
     const expBullets = new Map<BulletId, BulletRecord>()
     const noExpBullets = new Map<BulletId, BulletRecord>()
-    const sounds: string[] = []
+    const sounds: SoundName[] = []
     for (const bulletId of this.keys()) {
       const bullet = this.bullets.get(bulletId)
       const expPos = this.getExplosionPos(bulletId)

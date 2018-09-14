@@ -96,6 +96,7 @@ declare global {
       | SetEditorContent
       | Simple<'SYNC_CUSTOM_STAGES'>
       | Simple<'LEAVE_GAME_SCENE'>
+      | PlaySound
 
     export interface Move {
       type: 'MOVE'
@@ -425,6 +426,11 @@ declare global {
     export interface SetEditorContent {
       type: 'SET_EDITOR_CONTENT'
       stage: StageConfig
+    }
+
+    export interface PlaySound {
+      type: 'PLAY_SOUND'
+      sound: SoundName
     }
   }
 }

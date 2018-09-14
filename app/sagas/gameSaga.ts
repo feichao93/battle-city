@@ -5,7 +5,6 @@ import { State } from '../reducers'
 import TextRecord from '../types/TextRecord'
 import { getNextId } from '../utils/common'
 import { BLOCK_SIZE } from '../utils/constants'
-import soundManager from '../utils/soundManager'
 import Timing from '../utils/Timing'
 import AIMasterSaga from './AIMasterSaga'
 import bulletsSaga from './bulletsSaga'
@@ -40,7 +39,7 @@ function* animateGameover() {
         y: BLOCK_SIZE * 13.5,
       }),
     })
-    soundManager.game_over()
+    yield put<Action.PlaySound>({ type: 'PLAY_SOUND', sound: 'game_over' })
     yield* animateTexts([textId1, textId2], {
       direction: 'up',
       distance: BLOCK_SIZE * 6,

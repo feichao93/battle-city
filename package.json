@@ -5,7 +5,7 @@
   "author": "Shi Feichao <842351815@qq.com> (http://shinima.pw)",
   "scripts": {
     "start": "webpack-dev-server",
-    "build": "webpack --env.prod"
+    "build": "webpack --env.prod && copyfiles sound/* dist"
   },
   "dependencies": {
     "@types/history": "^4.6.2",
@@ -20,6 +20,7 @@
     "@types/react-router-redux": "^5.0.12",
     "@types/recompose": "^0.26.5",
     "classnames": "^2.2.5",
+    "copyfiles": "^2.1.0",
     "core-js": "^2.5.5",
     "file-saver": "^1.3.3",
     "history": "^4.7.2",
