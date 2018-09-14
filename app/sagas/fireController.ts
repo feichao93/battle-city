@@ -1,10 +1,8 @@
 import { put, select, take } from 'redux-saga/effects'
 import { BulletRecord, State, TankRecord } from '../types'
-import {
-  calculateBulletStartPosition,
-  getNextId,
-} from '../utils/common'
+import { calculateBulletStartPosition, getNextId } from '../utils/common'
 import * as selectors from '../utils/selectors'
+import soundManager from '../utils/soundManager'
 import values from '../utils/values'
 
 export default function* fireController(playerName: string, shouldFire: () => boolean) {
@@ -16,7 +14,9 @@ export default function* fireController(playerName: string, shouldFire: () => bo
     const { delta }: Action.TickAction = yield take('TICK')
     const { bullets: allBullets }: State = yield select()
     const tank: TankRecord = yield select(selectors.playerTank, playerName)
-    const { game: { AIFrozenTimeout } }: State = yield select()
+    const {
+      game: { AIFrozenTimeout },
+    }: State = yield select()
     if (tank == null || (tank.side === 'ai' && AIFrozenTimeout > 0)) {
       continue
     }
@@ -26,6 +26,9 @@ export default function* fireController(playerName: string, shouldFire: () => bo
       const bullets = allBullets.filter(bullet => bullet.tankId === tank.tankId)
       if (bullets.count() < values.bulletLimit(tank)) {
         const { x, y } = calculateBulletStartPosition(tank)
+        if (tank.side === 'human') {
+          soundManager.bullet_shot()
+        }
         yield put<Action.AddBulletAction>({
           type: 'ADD_BULLET',
           bullet: new BulletRecord({
@@ -38,6 +41,7 @@ export default function* fireController(playerName: string, shouldFire: () => bo
             power: values.bulletPower(tank),
             speed: values.bulletSpeed(tank),
             tankId: tank.tankId,
+            side: tank.side,
             playerName,
           }),
         })

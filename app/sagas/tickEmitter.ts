@@ -1,6 +1,7 @@
 import { eventChannel } from 'redux-saga'
 import { put, select, take, takeEvery } from 'redux-saga/effects'
 import { State } from '../types'
+import soundManager from '../utils/soundManager'
 
 export interface TickEmitterOptions {
   maxFPS?: number
@@ -35,7 +36,10 @@ export default function* tickEmitter(options: TickEmitterOptions = {}) {
       return () => document.removeEventListener('keydown', onKeyDown)
     })
     yield takeEvery(escChannel, function* handleESC() {
-      const { game: { paused } }: State = yield select()
+      const {
+        game: { paused },
+      }: State = yield select()
+      soundManager.pause()
       if (!paused) {
         yield put<Action>({ type: 'GAMEPAUSE' })
       } else {
@@ -48,7 +52,9 @@ export default function* tickEmitter(options: TickEmitterOptions = {}) {
     let accumulation = 0
     while (true) {
       const { delta }: Action.TickAction = yield take(tickChannel)
-      const { game: { paused } }: State = yield select()
+      const {
+        game: { paused },
+      }: State = yield select()
       if (!paused) {
         accumulation += delta
         if (accumulation > 1000 / maxFPS) {

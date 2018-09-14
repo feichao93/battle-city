@@ -3,6 +3,7 @@ import { cancelled, put, select, take } from 'redux-saga/effects'
 import { State } from '../reducers'
 import StageConfig from '../types/StageConfig'
 import { frame as f } from '../utils/common'
+import soundManager from '../utils/soundManager'
 import Timing from '../utils/Timing'
 import statistics from './stageStatistics'
 
@@ -25,6 +26,7 @@ function* animateCurtainAndLoadMap(stage: StageConfig) {
 
     // 在幕布完全将舞台遮起来的时候载入地图
     yield Timing.delay(f(20))
+    soundManager.stage_start()
     yield put<Action>({ type: 'LOAD_STAGE_MAP', stage })
     yield Timing.delay(f(20))
 

@@ -11,6 +11,7 @@ import {
 import { asRect, DefaultMap, getDirectionInfo, testCollide } from '../utils/common'
 import { BULLET_SIZE, FIELD_SIZE, STEEL_POWER } from '../utils/constants'
 import IndexHelper from '../utils/IndexHelper'
+import soundManager from '../utils/soundManager'
 import { destroyBullets } from './common'
 
 interface Stat {
@@ -41,7 +42,10 @@ function* handleTick() {
 
 function handleBulletsCollidedWithBricks(context: Stat, state: State) {
   // todo 需要考虑子弹强度
-  const { bullets, map: { bricks } } = state
+  const {
+    bullets,
+    map: { bricks },
+  } = state
 
   bullets.forEach(b => {
     const mbr = getMBR(asRect(b), asRect(lastPos(b)))
@@ -55,7 +59,10 @@ function handleBulletsCollidedWithBricks(context: Stat, state: State) {
 
 function handleBulletsCollidedWithSteels({ bulletCollisionInfo }: Stat, state: State) {
   // TODO 需要考虑子弹强度
-  const { bullets, map: { steels } } = state
+  const {
+    bullets,
+    map: { steels },
+  } = state
 
   bullets.forEach(b => {
     const mbr = getMBR(asRect(b), asRect(lastPos(b)))
@@ -86,7 +93,9 @@ function handleBulletsCollidedWithBorder({ bulletCollisionInfo }: Stat, state: S
 }
 
 function* destroySteels(collidedBullets: BulletsMap) {
-  const { map: { steels } }: State = yield select()
+  const {
+    map: { steels },
+  }: State = yield select()
   const steelsNeedToDestroy: SteelIndex[] = []
   collidedBullets.forEach(bullet => {
     if (bullet.power >= STEEL_POWER) {
@@ -107,7 +116,9 @@ function* destroySteels(collidedBullets: BulletsMap) {
 }
 
 function* destroyBricks(collidedBullets: BulletsMap) {
-  const { map: { bricks } }: State = yield select()
+  const {
+    map: { bricks },
+  }: State = yield select()
   const bricksNeedToDestroy: BrickIndex[] = []
 
   collidedBullets.forEach(bullet => {
@@ -128,7 +139,9 @@ function* destroyBricks(collidedBullets: BulletsMap) {
 }
 
 function* destroyEagleIfNeeded(expBullets: BulletsMap) {
-  const { map: { eagle } }: State = yield select()
+  const {
+    map: { eagle },
+  }: State = yield select()
   const eagleBox = asRect(eagle)
   for (const bullet of expBullets.values()) {
     const spreaded = spreadBullet(bullet)
@@ -201,7 +214,10 @@ function handleBulletsCollidedWithBullets(stat: Stat, state: State, delta: numbe
 }
 
 function handleBulletsCollidedWithEagle({ bulletCollisionInfo }: Stat, state: State) {
-  const { bullets, map: { eagle } } = state
+  const {
+    bullets,
+    map: { eagle },
+  } = state
   if (eagle == null || eagle.broken) {
     // 如果Eagle尚未加载, 或是已经被破坏, 那么直接返回
     return
@@ -251,7 +267,15 @@ function* handleAfterTick() {
     handleBulletsCollidedWithSteels(stat, state)
     handleBulletsCollidedWithBorder(stat, state)
 
-    const { expBullets, noExpBullets } = stat.bulletCollisionInfo.getExplosionInfo()
+    const { expBullets, noExpBullets, sounds } = stat.bulletCollisionInfo.getExplosionInfo()
+
+    sounds.forEach(sound => {
+      if (sound === 'bullet_hit_1') {
+        soundManager.bullet_hit_1()
+      } else if (sound === 'bullet_hit_2') {
+        soundManager.bullet_hit_2()
+      }
+    })
 
     // 产生爆炸效果, 并移除子弹
     yield fork(destroyBullets, expBullets, true)

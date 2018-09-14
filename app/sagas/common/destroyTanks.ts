@@ -2,6 +2,7 @@ import { put } from 'redux-saga/effects'
 import { ExplosionRecord, ScoreRecord, TankRecord } from '../../types'
 import { frame as f, getNextId } from '../../utils/common'
 import { TANK_KILL_SCORE_MAP } from '../../utils/constants'
+import soundManager from '../../utils/soundManager'
 import Timing from '../../utils/Timing'
 
 export function* scoreFromKillTank(tank: TankRecord) {
@@ -36,6 +37,7 @@ const tankExplosionShapeTiming = new Timing<ExplosionShape>([
 export function* explosionFromTank(tank: TankRecord) {
   const explosionId = getNextId('explosion')
   try {
+    soundManager.explosion_1()
     yield* tankExplosionShapeTiming.iter(function*(shape) {
       yield put<Action.AddOrUpdateExplosion>({
         type: 'ADD_OR_UPDATE_EXPLOSION',

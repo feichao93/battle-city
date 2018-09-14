@@ -5,6 +5,7 @@ import { State } from '../reducers'
 import TextRecord from '../types/TextRecord'
 import { getNextId } from '../utils/common'
 import { BLOCK_SIZE } from '../utils/constants'
+import soundManager from '../utils/soundManager'
 import Timing from '../utils/Timing'
 import AIMasterSaga from './AIMasterSaga'
 import bulletsSaga from './bulletsSaga'
@@ -39,6 +40,7 @@ function* animateGameover() {
         y: BLOCK_SIZE * 13.5,
       }),
     })
+    soundManager.game_over()
     yield* animateTexts([textId1, textId2], {
       direction: 'up',
       distance: BLOCK_SIZE * 6,
@@ -81,7 +83,7 @@ export default function* gameSaga(action: Action.StartGame | { type: 'RESET_GAME
   yield delay(0)
   DEV.LOG && console.log('GAME STARTED')
 
-  const result = yield race<any>({
+  const result = yield race({
     tick: tickEmitter({ bindESC: true }),
     human: humanPlayerSaga('player-1', 'yellow'),
     ai: AIMasterSaga(),

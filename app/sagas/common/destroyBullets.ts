@@ -1,6 +1,7 @@
 import { all, put } from 'redux-saga/effects'
 import { BulletRecord, BulletsMap, ExplosionRecord } from '../../types'
 import { frame as f, getNextId } from '../../utils/common'
+import soundManager from '../../utils/soundManager'
 import Timing from '../../utils/Timing'
 
 function* explosionFromBullet(bullet: BulletRecord) {
@@ -34,6 +35,7 @@ function* explosionFromBullet(bullet: BulletRecord) {
 
 /** 移除单个子弹, 调用explosionFromBullet来生成子弹爆炸(并在之后移除子弹爆炸效果) */
 function* destroyBullet(bullet: BulletRecord, useExplosion: boolean) {
+  soundManager.explosion_2()
   yield put<Action.BeforeRemoveBulletAction>({
     type: 'BEFORE_REMOVE_BULLET',
     bulletId: bullet.bulletId,

@@ -76,6 +76,20 @@ export class BulletCollisionInfo extends DefaultMap<BulletId, Collision[]> {
     return false
   }
 
+  // bullet_hit_1 / bullet_hit_2
+  getExplosionSoundType(bulletId: BulletId): 'bullet_hit_1' | 'bullet_hit_2' {
+    const bullet = this.bullets.get(bulletId)
+    if (bullet.side === 'human') {
+      const collisions = this.get(bulletId)
+      if (collisions.some(c => c.type === 'steel' || c.type === 'border')) {
+        return 'bullet_hit_1'
+      } else if (collisions.some(c => c.type === 'brick')) {
+        return 'bullet_hit_2'
+      }
+    }
+    return null
+  }
+
   // 获取子弹爆炸的位置. 如果该子弹不需要爆炸, 那么该函数返回null
   getExplosionPos(bulletId: BulletId): Point {
     const collisions = this.get(bulletId)
@@ -111,6 +125,7 @@ export class BulletCollisionInfo extends DefaultMap<BulletId, Collision[]> {
   getExplosionInfo() {
     const expBullets = new Map<BulletId, BulletRecord>()
     const noExpBullets = new Map<BulletId, BulletRecord>()
+    const sounds: string[] = []
     for (const bulletId of this.keys()) {
       const bullet = this.bullets.get(bulletId)
       const expPos = this.getExplosionPos(bulletId)
@@ -120,10 +135,14 @@ export class BulletCollisionInfo extends DefaultMap<BulletId, Collision[]> {
         // 注意expBullets中存放的子弹的坐标是*子弹爆炸*的坐标
         expBullets.set(bulletId, bullet.merge(expPos))
       }
+
+      sounds.push(this.getExplosionSoundType(bulletId))
     }
+
     return {
       expBullets: IMap(expBullets),
       noExpBullets: IMap(noExpBullets),
+      sounds: sounds.filter(Boolean),
     }
   }
 }

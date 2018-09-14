@@ -42,7 +42,9 @@ export class BattleFieldContent extends React.PureComponent<Partial<State & Poin
           {bullets.map((b, i) => <Bullet key={i} bullet={b} />).toArray()}
         </g>
         <g className="tank-layer">
-          {activeTanks.map(tank => <Tank key={tank.tankId} tank={tank} />).toArray()}
+          {activeTanks
+            .map(tank => <Tank key={tank.tankId} tank={tank} showReservedIndicator />)
+            .toArray()}
         </g>
         <g className="helmet-layer">
           {activeTanks
