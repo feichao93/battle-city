@@ -1,4 +1,4 @@
-import EventEmitter from 'events'
+import { multicastChannel } from 'redux-saga'
 import { select } from 'redux-saga/effects'
 import { Input, TankRecord } from '../types'
 import { getDirectionInfo } from '../utils/common'
@@ -12,7 +12,7 @@ export default class AITankCtx {
   private nextDirection: Direction = null
   private forwardLength = 0
   private startPos = 0
-  readonly noteEmitter = new EventEmitter()
+  readonly noteChannel = multicastChannel<Note>()
 
   constructor(readonly playerName: string) {}
 
@@ -60,7 +60,7 @@ export default class AITankCtx {
       if (movedLength === this.forwardLength) {
         this.forwardLength = 0
         DEV.LOG_AI && logAI('note reach')
-        this.noteEmitter.emit('reach')
+        this.noteChannel.put({ type: 'reach' })
         return null
       } else {
         return {

@@ -3,7 +3,7 @@ import { Task } from 'redux-saga'
 import { fork, race, select, take } from 'redux-saga/effects'
 import { State } from '../reducers'
 import { TankFireInfo, TankRecord } from '../types'
-import { randint, waitFor } from '../utils/common'
+import { randint } from '../utils/common'
 import { BLOCK_DISTANCE_THRESHOLD, BLOCK_TIMEOUT } from '../utils/constants'
 import * as selectors from '../utils/selectors'
 import Timing from '../utils/Timing'
@@ -81,7 +81,7 @@ function* attackEagle(ctx: AITankCtx, fireEstimate: FireEstimate) {
     const fireInfo: TankFireInfo = yield select(selectors.fireInfo, ctx.playerName)
     if (fireInfo.canFire) {
       ctx.fire()
-      yield waitFor(ctx.noteEmitter, 'bullet-complete')
+      yield take(ctx.noteChannel, 'bullet-complete')
       fireCount--
     } else {
       yield Timing.delay(fireInfo.cooldown)

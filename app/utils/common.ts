@@ -1,4 +1,3 @@
-import EventEmitter from 'events'
 import { BulletRecord, EagleRecord, PowerUpRecord, TankRecord } from '../types'
 import { BLOCK_SIZE, BULLET_SIZE, FIELD_SIZE, TANK_SIZE } from './constants'
 
@@ -42,7 +41,7 @@ export function testCollide(subject: Rect, object: Rect, threshhold = 0) {
   )
 }
 
-export const frame = (x: number) => 1000 / 60 * x
+export const frame = (x: number) => (1000 / 60) * x
 
 // 判断rect是否在战场内
 export function isInField(rect: Rect) {
@@ -69,30 +68,30 @@ export function asRect(
 ): Rect {
   if (item instanceof BulletRecord) {
     return {
-      x: item.x - BULLET_SIZE / 2 * enlargement,
-      y: item.y - BULLET_SIZE / 2 * enlargement,
+      x: item.x - (BULLET_SIZE / 2) * enlargement,
+      y: item.y - (BULLET_SIZE / 2) * enlargement,
       width: BULLET_SIZE * (1 + enlargement),
       height: BULLET_SIZE * (1 + enlargement),
     }
   } else if (item instanceof TankRecord) {
     return {
-      x: item.x - TANK_SIZE / 2 * enlargement,
-      y: item.y - TANK_SIZE / 2 * enlargement,
+      x: item.x - (TANK_SIZE / 2) * enlargement,
+      y: item.y - (TANK_SIZE / 2) * enlargement,
       width: TANK_SIZE * (1 + enlargement),
       height: TANK_SIZE * (1 + enlargement),
     }
   } else if (item instanceof EagleRecord) {
     return {
-      x: item.x - BLOCK_SIZE / 2 * enlargement,
-      y: item.y - BLOCK_SIZE / 2 * enlargement,
+      x: item.x - (BLOCK_SIZE / 2) * enlargement,
+      y: item.y - (BLOCK_SIZE / 2) * enlargement,
       width: BLOCK_SIZE * (1 + enlargement),
       height: BLOCK_SIZE * (1 + enlargement),
     }
   } else if (item instanceof PowerUpRecord) {
     DEV.ASSERT && console.assert(enlargement === -0.5)
     return {
-      x: item.x - BLOCK_SIZE / 2 * enlargement,
-      y: item.y - BLOCK_SIZE / 2 * enlargement,
+      x: item.x - (BLOCK_SIZE / 2) * enlargement,
+      y: item.y - (BLOCK_SIZE / 2) * enlargement,
       width: BLOCK_SIZE * (1 + enlargement),
       height: BLOCK_SIZE * (1 + enlargement),
     }
@@ -151,19 +150,6 @@ export class DefaultMap<K, V> extends Map<K, V> {
 
 export function randint(start: number, end: number) {
   return Math.floor(Math.random() * (end - start)) + start
-}
-
-/** @deprecated 使用 multicast-channel 来代替 waitFor */
-export function* waitFor(emitter: EventEmitter, expectedType: string) {
-  let callback: any
-  try {
-    yield new Promise(resolve => {
-      callback = resolve
-      emitter.addListener(expectedType, resolve)
-    })
-  } finally {
-    emitter.removeListener(expectedType, callback)
-  }
 }
 
 export const round8 = (x: number) => Math.round(x / 8) * 8

@@ -1,3 +1,5 @@
+import BulletRecord from './BulletRecord'
+
 export { default as TankRecord } from './TankRecord'
 export { default as PowerUpRecord } from './PowerUpRecord'
 export { default as ScoreRecord } from './ScoreRecord'
@@ -90,6 +92,7 @@ declare global {
 
     interface BulletComplete {
       type: 'bullet-complete'
+      bullet: BulletRecord
     }
 
     interface Reach {

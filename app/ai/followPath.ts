@@ -1,6 +1,5 @@
-import { put, select } from 'redux-saga/effects'
+import { put, select, take } from 'redux-saga/effects'
 import { TankRecord } from '../types'
-import { waitFor } from '../utils/common'
 import * as selectors from '../utils/selectors'
 import AITankCtx from './AITankCtx'
 import { logAI } from './logger'
@@ -28,7 +27,7 @@ export default function* followPath(ctx: AITankCtx, path: number[]) {
       }
       index += step
       yield* ctx.moveTo(path[index])
-      yield waitFor(ctx.noteEmitter, 'reach')
+      yield take(ctx.noteChannel, 'reach')
     }
   } finally {
     yield put<Action>({ type: 'REMOVE_AI_TANK_PATH', playerName: ctx.playerName })

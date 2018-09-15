@@ -1,8 +1,7 @@
-import { race, select } from 'redux-saga/effects'
+import { race, select, take } from 'redux-saga/effects'
 import { State } from '../reducers'
 import { TankFireInfo } from '../types'
 import TankRecord from '../types/TankRecord'
-import { waitFor } from '../utils/common'
 import { SIMPLE_FIRE_LOOP_INTERVAL } from '../utils/constants'
 import * as selectors from '../utils/selectors'
 import Timing from '../utils/Timing'
@@ -19,7 +18,7 @@ export default function* simpleFireLoop(ctx: AITankCtx) {
       const tank: TankRecord = yield select(selectors.playerTank, ctx.playerName)
       yield race({
         timeout: Timing.delay(tank ? values.bulletInterval(tank) : SIMPLE_FIRE_LOOP_INTERVAL),
-        bulletComplete: waitFor(ctx.noteEmitter, 'bullet-complete'),
+        bulletComplete: take(ctx.noteChannel, 'bullet-complete'),
       })
     }
 

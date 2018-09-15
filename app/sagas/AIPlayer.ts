@@ -77,7 +77,7 @@ export default function* AIPlayer(playerName: string, tankId: TankId) {
       const { bullets }: State = yield select()
       const bullet = bullets.get(bulletId)
       if (bullet.playerName === ctx.playerName) {
-        ctx.noteEmitter.emit('bullet-complete', bullet)
+        ctx.noteChannel.put({ type: 'bullet-complete', bullet })
       }
     }
   }
