@@ -87,6 +87,7 @@ export enum A {
   UpgardeTank = 'UpgardeTank',
   UpdateCurtain = 'UpdateCurtain',
   SetReservedTank = 'SetReversedTank',
+  SetTankVisibility = 'SetTankVisibility',
   ClearBullets = 'ClearBullets',
   UpdateComingStageName = 'UpdateComingStageName',
   AddRestrictedArea = 'AddRestrictedArea',
@@ -540,6 +541,15 @@ export function updateCurtain(curtainName: 'stage-enter-curtain', t: number) {
   }
 }
 
+export type SetTankVisibility = ReturnType<typeof setTankVisibility>
+export function setTankVisibility(tankId: TankId, visible: boolean) {
+  return {
+    type: A.SetTankVisibility as A.SetTankVisibility,
+    tankId,
+    visible,
+  }
+}
+
 export type SetReservedTank = ReturnType<typeof setReservedTank>
 export function setReservedTank(playerName: PlayerName, tank: TankRecord) {
   return {
@@ -744,6 +754,7 @@ export type Action =
   | UpgardeTank
   | UpdateCurtain
   | SetReservedTank
+  | SetTankVisibility
   | ClearBullets
   | UpdateComingStageName
   | AddRestrictedArea

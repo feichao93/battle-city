@@ -170,16 +170,15 @@ export class TankClassBase extends React.Component<P, S> {
       </Image>
     )
 
-    if (DEV.RESTRICTED_AREA && showReservedIndicator) {
-      return (
-        <g>
-          {img}
-          <rect width="16" height="16" x={tank.rx} y={tank.ry} fill={color} opacity={0.4} />
-        </g>
-      )
-    } else {
-      return img
-    }
+    return (
+      <g style={{ visibility: tank.visible ? null : 'hidden' }}>
+        {img}
+        {DEV.RESTRICTED_AREA &&
+          showReservedIndicator && (
+            <rect width="16" height="16" x={tank.rx} y={tank.ry} fill={color} opacity={0.4} />
+          )}
+      </g>
+    )
   }
 }
 

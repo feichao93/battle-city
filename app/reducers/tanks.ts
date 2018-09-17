@@ -15,6 +15,8 @@ export default function tanks(state = Map() as TanksMap, action: Action) {
     return state.clear()
   } else if (action.type === A.Move) {
     return state.update(action.tankId, t => t.merge(action))
+  } else if (action.type === A.SetTankVisibility) {
+    return state.update(action.tankId, t => t.set('visible', action.visible))
   } else if (action.type === A.StartMove) {
     return state.setIn([action.tankId, 'moving'], true)
   } else if (action.type === A.StopMove) {
