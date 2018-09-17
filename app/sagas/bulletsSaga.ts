@@ -157,10 +157,11 @@ function handleBulletsCollidedWithTanks(stat: Stat, state: State) {
   const activeTanks = allTanks.filter(t => t.active)
 
   // 子弹与坦克碰撞的规则
-  // 1. player的子弹打到player-tank: player-tank将会停滞一段时间
-  // 2. player的子弹打到AI-tank: AI-tank扣血
-  // 3. AI的子弹打到player-tank: player-tank扣血/死亡
-  // 4. AI的子弹达到AI-tank: 不发生任何事件
+  //        | bullet | tank  | 效果
+  // case-1 | human  | human | human-tank 将会停滞一段时间
+  // case-2 | human  | ai    | ai-tank 扣血
+  // case-3 | ai     | human | human-tank 扣血/死亡
+  // case-4 | ai     | ai    | 无效果，ai-bullet 可以穿过 ai-tank
   for (const bullet of bullets.values()) {
     for (const tank of activeTanks.values()) {
       if (tank.tankId === bullet.tankId) {
@@ -170,26 +171,23 @@ function handleBulletsCollidedWithTanks(stat: Stat, state: State) {
       const subject = asRect(tank)
       const mbr = getMBR(asRect(lastPos(bullet)), asRect(bullet))
       if (testCollide(subject, mbr, -0.02)) {
-        const bulletSide = allTanks.find(t => t.tankId === bullet.tankId).side
+        const bulletSide = bullet.side
         const tankSide = tank.side
         const infoRow = stat.bulletCollisionInfo.get(bullet.bulletId)
 
         if (bulletSide === 'human') {
-          // tankSide 是 human 还是 ai 都是相同的处理
+          // case-1 或 case-2: 相同的处理
           stat.tankHitMap.get(tank.tankId).push(bullet)
           infoRow.push({ type: 'tank', tank, shouldExplode: true })
         } else if (bulletSide === 'ai' && tankSide === 'human') {
+          // case-3
           if (tank.helmetDuration > 0) {
             infoRow.push({ type: 'tank', tank, shouldExplode: false })
           } else {
             stat.tankHitMap.get(tank.tankId).push(bullet)
             infoRow.push({ type: 'tank', tank, shouldExplode: true })
           }
-        } else if (bulletSide === 'ai' && tankSide === 'ai') {
-          // 子弹穿过坦克
-        } else {
-          throw new Error('Error side status')
-        }
+        } // else case-4 子弹穿过坦克，不需要处理
       }
     }
   }
@@ -268,6 +266,7 @@ function* handleAfterTick() {
 
     const { expBullets, noExpBullets, sounds } = stat.bulletCollisionInfo.getExplosionInfo()
 
+    // 播放声音
     for (const sound of sounds) {
       yield put<Action.PlaySound>({ type: 'PLAY_SOUND', sound })
     }

@@ -26,12 +26,16 @@ export interface TankFireInfo {
   cooldown: number
 }
 
-export interface HumanControllerConfig {
-  fire: string
-  up: string
-  down: string
-  left: string
-  right: string
+export interface PlayerConfig {
+  color: TankColor
+  control: {
+    fire: string
+    up: string
+    down: string
+    left: string
+    right: string
+  }
+  spawnPos: Point
 }
 
 export type Input =
@@ -82,6 +86,7 @@ declare global {
   type BrickIndex = number
   type RiverIndex = number
 
+  // TODO 分离 humanPlayer 和 aiPlayer 之后，将 Side 改为 player 和 bot
   type Side = 'human' | 'ai'
 
   /** Note 包含了一些游戏逻辑向AI逻辑发送的消息/通知 */

@@ -326,7 +326,6 @@ declare global {
     export interface StartGame {
       type: 'START_GAME'
       stageIndex: number
-      // TODO 需要指定是单人游戏还是双人游戏
     }
 
     export interface SetPowerUp {

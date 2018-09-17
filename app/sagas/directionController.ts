@@ -47,12 +47,11 @@ export default function* directionController(
   while (true) {
     const { delta }: Action.TickAction = yield take('TICK')
     const tank: TankRecord = yield select(selectors.playerTank, playerName)
-    if (tank == null || tank.frozenTimeout > 0) {
+    if (tank == null) {
       continue
     }
-    const input: Input = getPlayerInput(tank, delta)
 
-    let nextFrozenTimeout = tank.frozenTimeout <= 0 ? 0 : tank.frozenTimeout - delta
+    const input: Input = getPlayerInput(tank, delta)
 
     if (input == null) {
       if (tank.moving) {
@@ -65,22 +64,25 @@ export default function* directionController(
         yield put(move(tank.set('direction', input.direction)))
       }
     } else if (input.type === 'forward') {
-      const speed = values.moveSpeed(tank)
-      const distance = Math.min(delta * speed, input.maxDistance || Infinity)
+      if (tank.frozenTimeout === 0) {
+        const speed = values.moveSpeed(tank)
+        const distance = Math.min(delta * speed, input.maxDistance || Infinity)
 
-      const { xy, updater } = getDirectionInfo(tank.direction)
-      const movedTank = tank.update(xy, updater(distance))
-      if (yield select(canTankMove, movedTank)) {
-        const reservedTank: TankRecord = yield getReservedTank(movedTank)
-        yield put(move(movedTank.merge({ rx: reservedTank.x, ry: reservedTank.y })))
-        if (!tank.moving) {
-          yield put({ type: 'START_MOVE', tankId: tank.tankId })
+        const { xy, updater } = getDirectionInfo(tank.direction)
+        const movedTank = tank.update(xy, updater(distance))
+        if (yield select(canTankMove, movedTank)) {
+          const reservedTank: TankRecord = yield getReservedTank(movedTank)
+          yield put(move(movedTank.merge({ rx: reservedTank.x, ry: reservedTank.y })))
+          if (!tank.moving) {
+            yield put({ type: 'START_MOVE', tankId: tank.tankId })
+          }
         }
       }
     } else {
       throw new Error(`Invalid input: ${input}`)
     }
 
+    const nextFrozenTimeout = tank.frozenTimeout <= 0 ? 0 : tank.frozenTimeout - delta
     if (tank.frozenTimeout !== nextFrozenTimeout) {
       yield put<Action.SetFrozenTimeoutAction>({
         type: 'SET_FROZEN_TIMEOUT',

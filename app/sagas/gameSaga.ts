@@ -1,10 +1,11 @@
 import { replace } from 'react-router-redux'
-import { put, race, select, take } from 'redux-saga/effects'
+import { all, put, race, select, take } from 'redux-saga/effects'
 import { delay } from 'redux-saga/utils'
 import { State } from '../reducers'
 import TextRecord from '../types/TextRecord'
 import { getNextId } from '../utils/common'
-import { BLOCK_SIZE } from '../utils/constants'
+import { BLOCK_SIZE, PLAYER_CONFIGS } from '../utils/constants'
+import * as selectors from '../utils/selectors'
 import Timing from '../utils/Timing'
 import AIMasterSaga from './AIMasterSaga'
 import bulletsSaga from './bulletsSaga'
@@ -82,9 +83,14 @@ export default function* gameSaga(action: Action.StartGame | { type: 'RESET_GAME
   yield delay(0)
   DEV.LOG && console.log('GAME STARTED')
 
+  const humanPlayers = [humanPlayerSaga('player-1', PLAYER_CONFIGS.player1)]
+  if (yield select(selectors.isInMultiPlayersMode)) {
+    humanPlayers.push(humanPlayerSaga('player-2', PLAYER_CONFIGS.player2))
+  }
+
   const result = yield race({
     tick: tickEmitter({ bindESC: true }),
-    human: humanPlayerSaga('player-1', 'yellow'),
+    human: all(humanPlayers),
     ai: AIMasterSaga(),
     powerUp: powerUpManager(),
     bullets: bulletsSaga(),

@@ -1,3 +1,4 @@
+import ReactDOM from 'react-dom'
 import { eventChannel } from 'redux-saga'
 import { put, select, take, takeEvery } from 'redux-saga/effects'
 import { State } from '../types'
@@ -16,7 +17,7 @@ export default function* tickEmitter(options: TickEmitterOptions = {}) {
 
     function emitTick() {
       const now = performance.now()
-      emit({ type: 'TICK', delta: now - lastTime })
+      ReactDOM.unstable_batchedUpdates(emit, { type: 'TICK', delta: now - lastTime })
       lastTime = now
       requestId = requestAnimationFrame(emitTick)
     }

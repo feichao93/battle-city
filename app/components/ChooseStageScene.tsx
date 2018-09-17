@@ -1,11 +1,11 @@
 import { List } from 'immutable'
 import React from 'react'
-import { Dispatch } from 'redux'
 import { connect } from 'react-redux'
 import { match, Redirect } from 'react-router-dom'
 import { push, replace } from 'react-router-redux'
+import { Dispatch } from 'redux'
 import { StageConfig, State } from '../types'
-import { BLOCK_SIZE as B, CONTROL_CONFIG } from '../utils/constants'
+import { BLOCK_SIZE as B, PLAYER_CONFIGS } from '../utils/constants'
 import Screen from './Screen'
 import StagePreview from './StagePreview'
 import Text from './Text'
@@ -14,23 +14,24 @@ import TextButton from './TextButton'
 class ChooseStageScene extends React.PureComponent<{
   stages: List<StageConfig>
   dispatch: Dispatch
+  location: Location
   match: match<{ stageName: string }>
 }> {
   componentDidMount() {
-    document.addEventListener('keypress', this.handleKeyPress)
+    document.addEventListener('keydown', this.onKeyDown)
   }
 
   componentWillUnmount() {
-    document.removeEventListener('keypress', this.handleKeyPress)
+    document.removeEventListener('keydown', this.onKeyDown)
   }
 
-  handleKeyPress = (event: KeyboardEvent) => {
-    const config = CONTROL_CONFIG.player1
-    if (event.key === config.left) {
+  onKeyDown = (event: KeyboardEvent) => {
+    const config = PLAYER_CONFIGS.player1
+    if (event.code === config.control.left) {
       this.onChoosePrevStage()
-    } else if (event.key === config.right) {
+    } else if (event.code === config.control.right) {
       this.onChooseNextStage()
-    } else if (event.key === config.fire) {
+    } else if (event.code === config.control.fire) {
       this.onStartPlay()
     }
   }
@@ -43,7 +44,10 @@ class ChooseStageScene extends React.PureComponent<{
     return stageIndex
   }
 
-  onChoose = (stageName: string) => this.props.dispatch(replace(`/choose/${stageName}`))
+  onChoose = (stageName: string) => {
+    const { dispatch, location } = this.props
+    dispatch(replace(`/choose/${stageName}${location.search}`))
+  }
 
   onChoosePrevStage = () => {
     const { stages } = this.props
@@ -62,9 +66,9 @@ class ChooseStageScene extends React.PureComponent<{
   }
 
   onStartPlay = () => {
-    const { dispatch, match } = this.props
+    const { dispatch, match, location } = this.props
     const { stageName } = match.params
-    dispatch(push(`/stage/${stageName}`))
+    dispatch(push(`/stage/${stageName}${location.search}`))
   }
 
   render() {

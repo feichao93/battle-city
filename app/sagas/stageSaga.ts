@@ -61,7 +61,8 @@ export interface StageResult {
  * 当玩家清空关卡时stage-saga退出, 并向game-saga返回该关卡结果
  */
 export default function* stageSaga(stage: StageConfig) {
-  yield put(replace(`/stage/${stage.name}`))
+  const { router }: State = yield select()
+  yield put(replace(`/stage/${stage.name}${router.location.search}`))
 
   try {
     yield animateCurtainAndLoadMap(stage)

@@ -2,11 +2,7 @@ import { actionChannel, fork, put, select, take } from 'redux-saga/effects'
 import { State } from '../reducers'
 import { TankRecord } from '../types'
 import { getNextId } from '../utils/common'
-import {
-  AI_SPAWN_SPEED_MAP,
-  MAX_AI_TANK_COUNT,
-  TANK_INDEX_THAT_WITH_POWER_UP,
-} from '../utils/constants'
+import { AI_SPAWN_SPEED_MAP, TANK_INDEX_THAT_WITH_POWER_UP } from '../utils/constants'
 import * as selectors from '../utils/selectors'
 import AIPlayer from './AIPlayer'
 import { spawnTank } from './common'
@@ -40,11 +36,14 @@ function* addAIHandler() {
 }
 
 export default function* AIMasterSaga() {
+  const inMultiPlayersMode = yield select(selectors.isInMultiPlayersMode)
+  const maxAIPlayerCount = inMultiPlayersMode ? 4 : 2
+
   yield fork(addAIHandler)
 
   while (true) {
     yield take('START_STAGE')
-    for (let i = 0; i < MAX_AI_TANK_COUNT; i++) {
+    for (let i = 0; i < maxAIPlayerCount; i++) {
       yield put<Action>({ type: 'REQ_ADD_AI_PLAYER' })
     }
   }

@@ -1,9 +1,19 @@
 import _ from 'lodash'
 import { State, TankFireInfo } from '../types'
 import { asRect, testCollide } from './common'
-import { BLOCK_SIZE as B, FIELD_BLOCK_SIZE as FBZ, TANK_SIZE } from './constants'
+import {
+  BLOCK_SIZE as B,
+  FIELD_BLOCK_SIZE as FBZ,
+  MULTI_PLAYERS_SEARCH_KEY,
+  TANK_SIZE,
+} from './constants'
 import IndexHelper from './IndexHelper'
 import values from './values'
+
+export const isInMultiPlayersMode = (state: State) => {
+  const params = new URLSearchParams(state.router.location.search)
+  return params.has(MULTI_PLAYERS_SEARCH_KEY)
+}
 
 // 选取玩家的坦克对象. 如果玩家当前没有坦克, 则返回null
 export const playerTank = (state: State, playerName: string) => {

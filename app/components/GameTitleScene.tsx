@@ -1,70 +1,60 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import { push } from 'react-router-redux'
+import { Dispatch } from 'redux'
 import { TankRecord } from '../types'
-import { BLOCK_SIZE as B, CONTROL_CONFIG, ITEM_SIZE_MAP } from '../utils/constants'
+import {
+  BLOCK_SIZE as B,
+  ITEM_SIZE_MAP,
+  MULTI_PLAYERS_SEARCH_KEY,
+  PLAYER_CONFIGS,
+} from '../utils/constants'
 import BrickWall from './BrickWall'
 import Screen from './Screen'
 import { Tank } from './tanks'
 import Text from './Text'
 import TextButton from './TextButton'
 
-type Choice = '1-player' | 'stage-list' | 'gallery'
+type Choice = 'single-player' | 'multi-players' | 'stage-list' | 'gallery'
+
+const CHOICES: Choice[] = ['single-player', 'multi-players', 'stage-list', 'gallery']
 
 function nextChoice(choice: Choice): Choice {
-  if (choice === '1-player') {
-    return 'stage-list'
-  } else if (choice === 'stage-list') {
-    return 'gallery'
-  } else {
-    return '1-player'
-  }
+  const index = CHOICES.indexOf(choice)
+  return CHOICES[(index + 1) % CHOICES.length]
 }
 
 function prevChoice(choice: Choice): Choice {
-  if (choice === '1-player') {
-    return 'gallery'
-  } else if (choice === 'stage-list') {
-    return '1-player'
-  } else {
-    return 'stage-list'
-  }
-}
-
-function y(choice: Choice) {
-  if (choice === '1-player') {
-    return 8.25 * B
-  } else if (choice === 'stage-list') {
-    return 9.25 * B
-  } else {
-    return 10.25 * B
-  }
+  const index = CHOICES.indexOf(choice)
+  return CHOICES[(index - 1 + CHOICES.length) % CHOICES.length]
 }
 
 export class GameTitleSceneContent extends React.PureComponent<
-  { push: (url: string) => void },
+  {
+    push(url: string): void
+  },
   { choice: Choice }
 > {
   state = {
-    choice: '1-player' as Choice,
+    choice: 'single-player' as Choice,
   }
 
   componentDidMount() {
-    document.addEventListener('keypress', this.handleKeyPress)
+    document.addEventListener('keydown', this.onKeyDown)
   }
 
   componentWillUnmount() {
-    document.removeEventListener('keypress', this.handleKeyPress)
+    document.removeEventListener('keydown', this.onKeyDown)
   }
 
-  handleKeyPress = (event: KeyboardEvent) => {
+  onKeyDown = (event: KeyboardEvent) => {
     const { choice } = this.state
-    const config = CONTROL_CONFIG.player1
-    if (event.key === config.down) {
+    const config = PLAYER_CONFIGS.player1
+    if (event.code === config.control.down) {
       this.setState({ choice: nextChoice(choice) })
-    } else if (event.key === config.up) {
+    } else if (event.code === config.control.up) {
       this.setState({ choice: prevChoice(choice) })
-    } else if (event.key === config.fire) {
+    } else if (event.code === config.control.fire) {
       this.onChoose(choice)
     }
   }
@@ -73,8 +63,10 @@ export class GameTitleSceneContent extends React.PureComponent<
     const { push } = this.props
     if (choice === 'stage-list') {
       push('/list')
-    } else if (choice === '1-player') {
+    } else if (choice === 'single-player') {
       push('/choose')
+    } else if (choice === 'multi-players') {
+      push(`/choose?${MULTI_PLAYERS_SEARCH_KEY}`)
     } else {
       push('/gallery')
     }
@@ -89,8 +81,8 @@ export class GameTitleSceneContent extends React.PureComponent<
         <defs>
           <pattern
             id="pattern-brickwall"
-            width={size * 2 / scale}
-            height={size * 2 / scale}
+            width={(size * 2) / scale}
+            height={(size * 2) / scale}
             patternUnits="userSpaceOnUse"
           >
             <g transform={`scale(${1 / scale})`}>
@@ -115,29 +107,37 @@ export class GameTitleSceneContent extends React.PureComponent<
         <g transform={`scale(${scale})`}>
           <Text
             content="battle"
-            x={1.5 * B / scale}
-            y={3 * B / scale}
+            x={(1.5 * B) / scale}
+            y={(3 * B) / scale}
             fill="url(#pattern-brickwall)"
           />
           <Text
             content="city"
-            x={3.5 * B / scale + 1}
-            y={5.5 * B / scale}
+            x={(3.5 * B) / scale + 1}
+            y={(5.5 * B) / scale}
             fill="url(#pattern-brickwall)"
           />
         </g>
         <TextButton
           content="1 player"
           x={5.5 * B}
-          y={8.5 * B}
+          y={8 * B}
           textFill="white"
-          onMouseOver={() => this.setState({ choice: '1-player' })}
-          onClick={() => this.onChoose('1-player')}
+          onMouseOver={() => this.setState({ choice: 'single-player' })}
+          onClick={() => this.onChoose('single-player')}
+        />
+        <TextButton
+          content="2 players"
+          x={5.5 * B}
+          y={9 * B}
+          textFill="white"
+          onMouseOver={() => this.setState({ choice: 'multi-players' })}
+          onClick={() => this.onChoose('multi-players')}
         />
         <TextButton
           content="stage list"
           x={5.5 * B}
-          y={9.5 * B}
+          y={10 * B}
           textFill="white"
           onMouseOver={() => this.setState({ choice: 'stage-list' })}
           onClick={() => this.onChoose('stage-list')}
@@ -145,7 +145,7 @@ export class GameTitleSceneContent extends React.PureComponent<
         <TextButton
           content="gallery"
           x={5.5 * B}
-          y={10.5 * B}
+          y={11 * B}
           textFill="white"
           onMouseOver={() => this.setState({ choice: 'gallery' })}
           onClick={() => this.onChoose('gallery')}
@@ -158,7 +158,7 @@ export class GameTitleSceneContent extends React.PureComponent<
               color: 'yellow',
               moving: true,
               x: 4 * B,
-              y: y(choice),
+              y: (7.75 + CHOICES.indexOf(choice)) * B,
             })
           }
         />
@@ -171,17 +171,18 @@ export class GameTitleSceneContent extends React.PureComponent<
 }
 
 export interface GameTitleSceneProps {
-  push: (url: string) => void
+  dispatch: Dispatch
 }
 
 class GameTitleScene extends React.PureComponent<GameTitleSceneProps> {
   render() {
+    const { dispatch } = this.props
     return (
       <Screen>
-        <GameTitleSceneContent push={this.props.push} />
+        <GameTitleSceneContent push={url => dispatch(push(url))} />
       </Screen>
     )
   }
 }
 
-export default connect(undefined, { push })(GameTitleScene as any)
+export default connect(undefined)(GameTitleScene as any)

@@ -1,8 +1,7 @@
 import { fork, put, select, take, takeEvery } from 'redux-saga/effects'
 import { spawnTank } from '../sagas/common'
-import { PlayerRecord, State, TankRecord } from '../types'
+import { PlayerConfig, PlayerRecord, State, TankRecord } from '../types'
 import { asRect, frame, getNextId, testCollide } from '../utils/common'
-import { BLOCK_SIZE, CONTROL_CONFIG } from '../utils/constants'
 import * as selectors from '../utils/selectors'
 import { explosionFromTank } from './common/destroyTanks'
 import humanController from './humanController'
@@ -25,7 +24,7 @@ function* handlePickPowerUps(playerName: string) {
 
 /** 关卡开始时, 需要创建玩家的tank.
  * 如果玩家在上一关结束时有坦克保留, 则这一关开始的时候使用上一关保留的坦克 */
-function* startStage(playerName: string, tankColor: TankColor) {
+function* startStage(playerName: string, config: PlayerConfig) {
   const { players }: State = yield select()
   const player = players.get(playerName)
 
@@ -47,7 +46,7 @@ function* startStage(playerName: string, tankColor: TankColor) {
       player.reservedTank ||
       new TankRecord({
         side: 'human',
-        color: tankColor,
+        color: config.color,
         level: 'basic',
       })
 
@@ -56,8 +55,8 @@ function* startStage(playerName: string, tankColor: TankColor) {
       tankPrototype.merge({
         tankId,
         active: true,
-        x: 4 * BLOCK_SIZE,
-        y: 12 * BLOCK_SIZE,
+        x: config.spawnPos.x,
+        y: config.spawnPos.y,
         direction: 'up',
         helmetDuration: frame(135),
       }),
@@ -82,7 +81,7 @@ function* beforeEndStage(playerName: string) {
   }
 }
 
-export default function* humanPlayerSaga(playerName: string, tankColor: TankColor) {
+export default function* humanPlayerSaga(playerName: string, config: PlayerConfig) {
   try {
     yield put<Action>({
       type: 'ADD_PLAYER',
@@ -94,12 +93,12 @@ export default function* humanPlayerSaga(playerName: string, tankColor: TankColo
     })
 
     yield takeEvery('AFTER_TICK', handlePickPowerUps, playerName)
-    yield takeEvery('START_STAGE', startStage, playerName, tankColor)
+    yield takeEvery('START_STAGE', startStage, playerName, config)
     yield takeEvery('BEFORE_END_STAGE', beforeEndStage, playerName)
     yield takeEvery(hitPredicate, hitHandler)
     yield fork(newTankHelper)
 
-    yield humanController(playerName, CONTROL_CONFIG.player1)
+    yield humanController(playerName, config)
   } finally {
     const tank: TankRecord = yield select(selectors.playerTank, playerName)
     if (tank != null) {
@@ -108,8 +107,7 @@ export default function* humanPlayerSaga(playerName: string, tankColor: TankColo
     yield put<Action>({ type: 'REMOVE_PALYER', playerName })
   }
 
-  /* ----------- below are function definitions ----------- */
-
+  // region function deftinitions
   function hitPredicate(action: Action) {
     return action.type === 'HIT' && action.targetPlayer.playerName === playerName
   }
@@ -121,7 +119,7 @@ export default function* humanPlayerSaga(playerName: string, tankColor: TankColo
       yield put<Action.SetFrozenTimeoutAction>({
         type: 'SET_FROZEN_TIMEOUT',
         tankId: tank.tankId,
-        frozenTimeout: 500,
+        frozenTimeout: 1000,
       })
     } else {
       // 玩家的坦克 HP 始终为 1. 一旦被 AI 击中就需要派发 KILL
@@ -156,10 +154,10 @@ export default function* humanPlayerSaga(playerName: string, tankColor: TankColo
         yield spawnTank(
           new TankRecord({
             tankId,
-            x: 4 * BLOCK_SIZE,
-            y: 12 * BLOCK_SIZE,
+            x: config.spawnPos.x,
+            y: config.spawnPos.y,
             side: 'human',
-            color: tankColor,
+            color: config.color,
             level: 'basic',
             helmetDuration: frame(180),
           }),
@@ -172,4 +170,5 @@ export default function* humanPlayerSaga(playerName: string, tankColor: TankColo
       }
     }
   }
+  // endregion
 }

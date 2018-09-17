@@ -1,3 +1,5 @@
+import { PlayerConfig } from '../types'
+
 /** 一块的大小对应16个像素 */
 export const BLOCK_SIZE = 16
 /** 坦克的大小 */
@@ -14,6 +16,8 @@ export const STEEL_POWER = 3
 export const ZOOM_LEVEL = 2
 export const SCREEN_WIDTH = 16 * BLOCK_SIZE
 export const SCREEN_HEIGHT = 15 * BLOCK_SIZE
+
+export const MULTI_PLAYERS_SEARCH_KEY = 'multi-players'
 
 /**
  * 坦克的配色方案
@@ -70,20 +74,34 @@ export const N_MAP = {
   FOREST: FIELD_SIZE / ITEM_SIZE_MAP.FOREST,
 }
 
-export const CONTROL_CONFIG = {
+export const PLAYER_CONFIGS: { [key: string]: PlayerConfig } = {
   player1: {
-    up: 'w',
-    left: 'a',
-    down: 's',
-    right: 'd',
-    fire: 'j',
+    color: 'yellow',
+    control: {
+      up: 'KeyW',
+      left: 'KeyA',
+      down: 'KeyS',
+      right: 'KeyD',
+      fire: 'KeyJ',
+    },
+    spawnPos: {
+      x: 4 * BLOCK_SIZE,
+      y: 12 * BLOCK_SIZE,
+    },
   },
   player2: {
-    up: 'up',
-    left: 'left',
-    down: 'down',
-    right: 'right',
-    fire: 'space',
+    color: 'green',
+    control: {
+      up: 'ArrowUp',
+      left: 'ArrowLeft',
+      down: 'ArrowDown',
+      right: 'ArrowRight',
+      fire: 'Space',
+    },
+    spawnPos: {
+      x: 8 * BLOCK_SIZE,
+      y: 12 * BLOCK_SIZE,
+    },
   },
 }
 
@@ -116,8 +134,5 @@ export const AI_SPAWN_SPEED_MAP = {
   3: 1,
   4: 1.15,
 }
-
-/** AI 坦克在场上的最大数量 */
-export const MAX_AI_TANK_COUNT = 2
 
 export const SIMPLE_FIRE_LOOP_INTERVAL = 300

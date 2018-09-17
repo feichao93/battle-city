@@ -1,14 +1,14 @@
 import last from 'lodash/last'
 import pull from 'lodash/pull'
 import { all, take } from 'redux-saga/effects'
-import { HumanControllerConfig, Input, TankRecord } from '../types'
+import { PlayerConfig, Input, TankRecord } from '../types'
 import directionController from './directionController'
 import fireController from './fireController'
 
 // 一个humanController实例对应一个人类玩家(用户)的控制器.
 // 参数playerName用来指定人类玩家的玩家名称, config为该玩家的操作配置.
 // humanController将启动 fireController 与 directionController, 从而控制人类玩家的坦克
-export default function* humanController(playerName: string, config: HumanControllerConfig) {
+export default function* humanController(playerName: string, config: PlayerConfig) {
   let firePressing = false // 用来记录当前玩家是否按下了fire键
   let firePressed = false // 用来记录上一个tick内 玩家是否按下过fire键
   const pressed: Direction[] = [] // 用来记录上一个tick内, 玩家按下过的方向键
@@ -34,32 +34,32 @@ export default function* humanController(playerName: string, config: HumanContro
   }
 
   function onKeyDown(event: KeyboardEvent) {
-    const key = event.key.toLowerCase()
-    if (key === config.fire) {
+    const code = event.code
+    if (code === config.control.fire) {
       firePressing = true
       firePressed = true
-    } else if (key == config.left) {
+    } else if (code == config.control.left) {
       tryPush('left')
-    } else if (key === config.right) {
+    } else if (code === config.control.right) {
       tryPush('right')
-    } else if (key === config.up) {
+    } else if (code === config.control.up) {
       tryPush('up')
-    } else if (key === config.down) {
+    } else if (code === config.control.down) {
       tryPush('down')
     }
   }
 
   function onKeyUp(event: KeyboardEvent) {
-    const key = event.key.toLowerCase()
-    if (key === config.fire) {
+    const code = event.code
+    if (code === config.control.fire) {
       firePressing = false
-    } else if (key === config.left) {
+    } else if (code === config.control.left) {
       pull(pressed, 'left')
-    } else if (key === config.right) {
+    } else if (code === config.control.right) {
       pull(pressed, 'right')
-    } else if (key === config.up) {
+    } else if (code === config.control.up) {
       pull(pressed, 'up')
-    } else if (key === config.down) {
+    } else if (code === config.control.down) {
       pull(pressed, 'down')
     }
   }
