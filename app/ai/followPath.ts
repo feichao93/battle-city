@@ -1,5 +1,6 @@
 import { put, select, take } from 'redux-saga/effects'
 import { TankRecord } from '../types'
+import * as actions from '../utils/actions'
 import * as selectors from '../utils/selectors'
 import AITankCtx from './AITankCtx'
 import { logAI } from './logger'
@@ -9,7 +10,7 @@ import { getTankSpot } from './spot-utils'
 export default function* followPath(ctx: AITankCtx, path: number[]) {
   DEV.LOG_AI && logAI('start-follow-path')
   try {
-    yield put<Action>({ type: 'SET_AI_TANK_PATH', playerName: ctx.playerName, path })
+    yield put(actions.setAITankPath(ctx.playerName, path))
     const tank: TankRecord = yield select(selectors.playerTank, ctx.playerName)
     DEV.ASSERT && console.assert(tank != null)
     const start = getTankSpot(tank)
@@ -30,6 +31,6 @@ export default function* followPath(ctx: AITankCtx, path: number[]) {
       yield take(ctx.noteChannel, 'reach')
     }
   } finally {
-    yield put<Action>({ type: 'REMOVE_AI_TANK_PATH', playerName: ctx.playerName })
+    yield put(actions.removeAITankPath(ctx.playerName))
   }
 }

@@ -1,7 +1,8 @@
 import last from 'lodash/last'
 import pull from 'lodash/pull'
 import { all, take } from 'redux-saga/effects'
-import { PlayerConfig, Input, TankRecord } from '../types'
+import { Input, PlayerConfig, TankRecord } from '../types'
+import { A } from '../utils/actions'
 import directionController from './directionController'
 import fireController from './fireController'
 
@@ -79,7 +80,7 @@ export default function* humanController(playerName: string, config: PlayerConfi
   function* resetFirePressedEveryTick() {
     // 每次tick时, 都将firePressed重置
     while (true) {
-      yield take('TICK')
+      yield take(A.Tick)
       firePressed = false
     }
   }

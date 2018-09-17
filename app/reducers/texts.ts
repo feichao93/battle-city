@@ -1,13 +1,14 @@
 import { Map, Set } from 'immutable'
 import { TextRecord } from '../types'
+import { A, Action } from '../utils/actions'
 import { getDirectionInfo } from '../utils/common'
 
 export type TextsMap = Map<TextId, TextRecord>
 
 export default function textsReducer(state = Map() as TextsMap, action: Action) {
-  if (action.type === 'SET_TEXT') {
+  if (action.type === A.SetText) {
     return state.set(action.text.textId, action.text)
-  } else if (action.type === 'UPDATE_TEXT_POSITION') {
+  } else if (action.type === A.MoveTexts) {
     const { textIds, direction, distance } = action
     const set = Set(textIds)
     return state.map((t, textId) => {
@@ -18,7 +19,7 @@ export default function textsReducer(state = Map() as TextsMap, action: Action) 
         return t
       }
     })
-  } else if (action.type === 'REMOVE_TEXT') {
+  } else if (action.type === A.RemoveText) {
     return state.delete(action.textId)
   } else {
     return state

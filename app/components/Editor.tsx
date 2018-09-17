@@ -11,6 +11,7 @@ import {
   MapItemType,
   StageConfigConverter,
 } from '../types/StageConfig'
+import * as actions from '../utils/actions'
 import { add, dec, inc } from '../utils/common'
 import { BLOCK_SIZE as B, FIELD_BLOCK_SIZE as FBZ, ZOOM_LEVEL } from '../utils/constants'
 import AreaButton from './AreaButton'
@@ -153,14 +154,20 @@ class Editor extends React.Component<EditorProps> {
   }
 
   onMouseDown = (event: React.MouseEvent<SVGSVGElement>) => {
-    const { view, popupHandle: { popup } } = this.props
+    const {
+      view,
+      popupHandle: { popup },
+    } = this.props
     if (view === 'map' && popup == null && this.getT(event) !== -1) {
       this.pressed = true
     }
   }
 
   onMouseMove = (event: React.MouseEvent<SVGSVGElement>) => {
-    const { view, popupHandle: { popup } } = this.props
+    const {
+      view,
+      popupHandle: { popup },
+    } = this.props
     const { t: lastT } = this.state
     const t = this.getT(event)
     if (t !== lastT) {
@@ -172,7 +179,10 @@ class Editor extends React.Component<EditorProps> {
   }
 
   onMouseUp = (event: React.MouseEvent<SVGSVGElement>) => {
-    const { view, popupHandle: { popup } } = this.props
+    const {
+      view,
+      popupHandle: { popup },
+    } = this.props
     this.pressed = false
     if (view === 'map' && popup == null) {
       this.setAsCurrentItem(this.getT(event))
@@ -224,7 +234,10 @@ class Editor extends React.Component<EditorProps> {
 
   /** 检查当前编辑器中的关卡配置是否合理. 返回 true 表示关卡配置合理 */
   async check() {
-    const { stages, popupHandle: { showAlertPopup, showConfirmPopup } } = this.props
+    const {
+      stages,
+      popupHandle: { showAlertPopup, showConfirmPopup },
+    } = this.props
     const { name, enemies, itemList } = this.state
     const totalEnemyCount = enemies.map(e => e.count).reduce(add)
 
@@ -274,7 +287,7 @@ class Editor extends React.Component<EditorProps> {
 
   onBack = async () => {
     const { dispatch } = this.props
-    dispatch<Action>({ type: 'SET_EDITOR_CONTENT', stage: this.getStage() })
+    dispatch(actions.setEditorContent(this.getStage()))
     dispatch(goBack())
   }
 
@@ -282,14 +295,16 @@ class Editor extends React.Component<EditorProps> {
     if (await this.check()) {
       const { dispatch } = this.props
       const stage = StageConfigConverter.e2s(Object.assign({ custom: true }, this.state))
-      dispatch<Action>({ type: 'SET_CUSTOM_STAGE', stage })
-      dispatch<Action>({ type: 'SYNC_CUSTOM_STAGES' })
+      dispatch(actions.setCustomStage(stage))
+      dispatch(actions.simple(actions.A.SyncCustomStages))
       dispatch(replace('/list/custom'))
     }
   }
 
   onShowHelpInfo = async () => {
-    const { popupHandle: { showAlertPopup } } = this.props
+    const {
+      popupHandle: { showAlertPopup },
+    } = this.props
     await showAlertPopup('1. Choose an item type below.')
     await showAlertPopup('2. Click or pan in the left.')
     await showAlertPopup('3. After selecting Brick or Steel you can change the item shape')
@@ -495,7 +510,11 @@ class Editor extends React.Component<EditorProps> {
   }
 
   render() {
-    const { dispatch, view, popupHandle: { popup } } = this.props
+    const {
+      dispatch,
+      view,
+      popupHandle: { popup },
+    } = this.props
 
     return (
       <Screen

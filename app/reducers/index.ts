@@ -4,6 +4,7 @@ import { combineReducers } from 'redux'
 import devOnly from '../components/dev-only/reducer'
 import MapRecord from '../types/MapRecord'
 import StageConfig from '../types/StageConfig'
+import { A, Action } from '../utils/actions'
 import bullets, { BulletsMap } from './bullets'
 import explosions, { ExplosionsMap } from './explosions'
 import flickers, { FlickersMap } from './flickers'
@@ -35,7 +36,7 @@ export interface State {
 }
 
 export function time(state = 0, action: Action) {
-  if (action.type === 'TICK') {
+  if (action.type === A.Tick) {
     return state + action.delta
   } else {
     return state
@@ -43,7 +44,7 @@ export function time(state = 0, action: Action) {
 }
 
 export function editorContent(state = new StageConfig(), action: Action) {
-  if (action.type === 'SET_EDITOR_CONTENT') {
+  if (action.type === A.SetEditorContent) {
     return action.stage
   } else {
     return state

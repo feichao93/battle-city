@@ -8,6 +8,7 @@ import { State } from '../types'
 import StageConfig from '../types/StageConfig'
 import BattleFieldScene from './BattleFieldScene'
 import StatisticsScene from './StatisticsScene'
+import * as actions from '../utils/actions'
 
 export interface GameSceneProps {
   game: GameRecord
@@ -31,10 +32,7 @@ class GameScene extends React.PureComponent<GameSceneProps> {
       // 如果游戏还没开始或已经结束 则开始游戏
       const stageName = match.params.stageName
       const stageIndex = stages.findIndex(s => s.name === stageName)
-      dispatch<Action>({
-        type: 'START_GAME',
-        stageIndex: stageIndex === -1 ? 0 : stageIndex,
-      })
+      dispatch(actions.startGame(stageIndex === -1 ? 0 : stageIndex))
     } else {
       // status is 'on' or 'statistics'
       // 用户在地址栏中手动输入了新的关卡名称
@@ -45,16 +43,14 @@ class GameScene extends React.PureComponent<GameSceneProps> {
         stageName !== game.currentStageName
       ) {
         DEV.LOG && console.log('`stageName` in url changed. Restart game...')
-        dispatch<Action>({
-          type: 'START_GAME',
-          stageIndex: stages.findIndex(s => s.name === stageName),
-        })
+
+        dispatch(actions.startGame(stages.findIndex(s => s.name === stageName)))
       }
     }
   }
 
   componentWillUnmount() {
-    this.props.dispatch<Action>({ type: 'LEAVE_GAME_SCENE' })
+    this.props.dispatch(actions.simple(actions.A.LeaveGameScene))
   }
 
   render() {

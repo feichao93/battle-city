@@ -2,49 +2,31 @@ import { replace } from 'react-router-redux'
 import { cancelled, put, select, take } from 'redux-saga/effects'
 import { State } from '../reducers'
 import StageConfig from '../types/StageConfig'
+import * as actions from '../utils/actions'
+import { A, simple } from '../utils/actions'
 import { frame as f } from '../utils/common'
 import Timing from '../utils/Timing'
 import statistics from './stageStatistics'
 
 function* animateCurtainAndLoadMap(stage: StageConfig) {
   try {
-    yield put<Action>({ type: 'UPDATE_COMING_STAGE_NAME', stageName: stage.name })
-    yield put<Action>({
-      type: 'UPDATE_CURTAIN',
-      curtainName: 'stage-enter-cutain',
-      t: 0,
-    })
+    yield put(actions.updateComingStageName(stage.name))
+    yield put(actions.updateCurtain('stage-enter-curtain', 0))
 
-    yield* Timing.tween(f(30), t =>
-      put<Action>({
-        type: 'UPDATE_CURTAIN',
-        curtainName: 'stage-enter-cutain',
-        t,
-      }),
-    )
+    yield* Timing.tween(f(30), t => put(actions.updateCurtain('stage-enter-curtain', t)))
 
     // 在幕布完全将舞台遮起来的时候载入地图
     yield Timing.delay(f(20))
-    yield put<Action.PlaySound>({ type: 'PLAY_SOUND', sound: 'stage_start' })
-    yield put<Action>({ type: 'LOAD_STAGE_MAP', stage })
+    yield put(actions.playSound('stage_start'))
+    yield put(actions.loadStageMap(stage))
     yield Timing.delay(f(20))
 
-    yield* Timing.tween(f(30), t =>
-      put<Action>({
-        type: 'UPDATE_CURTAIN',
-        curtainName: 'stage-enter-cutain',
-        t: 1 - t,
-      }),
-    )
+    yield* Timing.tween(f(30), t => put(actions.updateCurtain('stage-enter-curtain', 1 - t)))
     // todo 游戏开始的时候有一个 反色效果
   } finally {
     if (yield cancelled()) {
       // 将幕布隐藏起来
-      yield put<Action>({
-        type: 'UPDATE_CURTAIN',
-        curtainName: 'stage-enter-cutain',
-        t: 0,
-      })
+      yield put(actions.updateCurtain('stage-enter-curtain', 0))
     }
   }
 }
@@ -66,13 +48,14 @@ export default function* stageSaga(stage: StageConfig) {
 
   try {
     yield animateCurtainAndLoadMap(stage)
-    yield put<Action>({ type: 'BEFORE_START_STAGE', stage })
-    yield put<Action>({ type: 'SHOW_HUD' })
-    yield put<Action>({ type: 'START_STAGE', stage })
+    yield put(actions.beforeStartStage(stage))
+    yield put(simple(A.ShowHud))
+    yield put(actions.startStage(stage))
 
     while (true) {
-      const action: Action = yield take(['KILL', 'DESTROY_EAGLE'])
-      if (action.type === 'KILL') {
+      const action: actions.Action = yield take([A.Kill, A.DestroyEagle])
+
+      if (action.type === A.Kill) {
         const { sourcePlayer, targetTank } = action
         const {
           players,
@@ -83,11 +66,7 @@ export default function* stageSaga(stage: StageConfig) {
         if (sourcePlayer.side === 'human') {
           // human击杀ai
           // 对human player的击杀信息进行统计
-          yield put<Action>({
-            type: 'INC_KILL_COUNT',
-            playerName: sourcePlayer.playerName,
-            level: targetTank.level,
-          })
+          yield put(actions.incKillCount(sourcePlayer.playerName, targetTank.level))
 
           const otherActiveAITanks = tanks.filter(
             t => t.active && t.side === 'ai' && t.tankId !== targetTank.tankId,
@@ -96,8 +75,8 @@ export default function* stageSaga(stage: StageConfig) {
             // 剩余enemy数量为0, 且场上已经没有ai tank了
             yield Timing.delay(DEV.FAST ? 1000 : 3000)
             yield statistics()
-            yield put<Action>({ type: 'BEFORE_END_STAGE' })
-            yield put<Action>({ type: 'END_STAGE' })
+            yield put(simple(A.BeforeEndStage))
+            yield put(simple(A.EndStage))
             return { pass: true } as StageResult
           }
         } else {
@@ -110,12 +89,12 @@ export default function* stageSaga(stage: StageConfig) {
             return { pass: false, reason: 'dead' } as StageResult
           }
         }
-      } else if (action.type === 'DESTROY_EAGLE') {
+      } else if (action.type === 'DestroyEagle') {
         // 因为 gameSaga 会 put END_GAME 所以这里不需要 put END_STAGE
         return { pass: false, reason: 'eagle-destroyed' } as StageResult
       }
     }
   } finally {
-    yield put<Action>({ type: 'HIDE_HUD' })
+    yield put(simple(A.HideHud))
   }
 }

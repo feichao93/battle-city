@@ -3,6 +3,8 @@ import AITankCtx from '../ai/AITankCtx'
 import AIWorkerSaga from '../ai/AIWorkerSaga'
 import { State } from '../reducers'
 import { PlayerRecord, TankRecord } from '../types'
+import * as actions from '../utils/actions'
+import { A } from '../utils/actions'
 import * as selectors from '../utils/selectors'
 import { explosionFromTank, scoreFromKillTank } from './common/destroyTanks'
 import directionController from './directionController'
@@ -12,8 +14,8 @@ export default function* AIPlayer(playerName: string, tankId: TankId) {
   const ctx = new AITankCtx(playerName)
   try {
     const player = new PlayerRecord({ playerName, side: 'ai' })
-    yield put<Action>({ type: 'ADD_PLAYER', player })
-    yield put<Action>({ type: 'ACTIVATE_PLAYER', playerName, tankId })
+    yield put(actions.addPlayer(player))
+    yield put(actions.activatePlayer(playerName, tankId))
     yield race<any>([
       all([
         takeEvery(hitPredicate, hitHandler),
@@ -23,11 +25,11 @@ export default function* AIPlayer(playerName: string, tankId: TankId) {
         AIWorkerSaga(ctx),
       ]),
       take(killedPredicate),
-      take('END_GAME'),
+      take(A.EndGame),
     ])
-    yield put<Action>({ type: 'REQ_ADD_AI_PLAYER' })
+    yield put(actions.reqAddAIPlayer())
     const tank: TankRecord = yield select(selectors.playerTank, playerName)
-    yield put<Action>({ type: 'DEACTIVATE_TANK', tankId })
+    yield put(actions.deactivateTank(tankId))
     yield explosionFromTank(tank)
     yield scoreFromKillTank(tank)
   } finally {
@@ -35,37 +37,30 @@ export default function* AIPlayer(playerName: string, tankId: TankId) {
     // AI 玩家会在下一次关卡开始的后自动被清除
     const tank: TankRecord = yield select(selectors.playerTank, playerName)
     if (tank && tank.active) {
-      yield put<Action>({ type: 'DEACTIVATE_TANK', tankId })
+      yield put(actions.deactivateTank(tankId))
     }
   }
 
   /* ----------- below are function definitions ----------- */
 
-  function hitPredicate(action: Action) {
-    return action.type === 'HIT' && action.targetPlayer.playerName === playerName
+  function hitPredicate(action: actions.Action) {
+    return action.type === actions.A.Hit && action.targetPlayer.playerName === playerName
   }
 
-  function* hitHandler(action: Action.Hit) {
+  function* hitHandler(action: actions.Hit) {
     const tank: TankRecord = yield select(selectors.playerTank, playerName)
     DEV.ASSERT && console.assert(tank != null)
     if (tank.hp > 1) {
-      yield put<Action>({ type: 'HURT', targetTank: tank })
+      yield put(actions.hurt(tank))
     } else {
       const { sourcePlayer, sourceTank, targetPlayer, targetTank } = action
-      yield put<Action.Kill>({
-        type: 'KILL',
-        method: 'bullet',
-        sourcePlayer,
-        sourceTank,
-        targetPlayer,
-        targetTank,
-      })
+      yield put(actions.kill(targetTank, sourceTank, targetPlayer, sourcePlayer, 'bullet'))
     }
   }
 
-  function killedPredicate(action: Action) {
+  function killedPredicate(action: actions.Action) {
     return (
-      action.type === 'KILL' &&
+      action.type === actions.A.Kill &&
       action.targetTank.side === 'ai' &&
       action.targetPlayer.playerName === playerName
     )
@@ -73,7 +68,7 @@ export default function* AIPlayer(playerName: string, tankId: TankId) {
 
   function* generateBulletCompleteNote() {
     while (true) {
-      const { bulletId }: Action.BeforeRemoveBulletAction = yield take('BEFORE_REMOVE_BULLET')
+      const { bulletId }: actions.BeforeRemoveBullet = yield take(actions.A.BeforeRemoveBullet)
       const { bullets }: State = yield select()
       const bullet = bullets.get(bulletId)
       if (bullet.playerName === ctx.playerName) {

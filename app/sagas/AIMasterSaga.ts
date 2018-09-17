@@ -1,6 +1,7 @@
 import { actionChannel, fork, put, select, take } from 'redux-saga/effects'
 import { State } from '../reducers'
 import { TankRecord } from '../types'
+import { A, simple } from '../utils/actions'
 import { getNextId } from '../utils/common'
 import { AI_SPAWN_SPEED_MAP, TANK_INDEX_THAT_WITH_POWER_UP } from '../utils/constants'
 import * as selectors from '../utils/selectors'
@@ -8,13 +9,14 @@ import AIPlayer from './AIPlayer'
 import { spawnTank } from './common'
 
 function* addAIHandler() {
-  const reqChannel = yield actionChannel('REQ_ADD_AI_PLAYER')
+  const reqChannel = yield actionChannel(A.ReqAddAIPlayer)
+
   while (true) {
     yield take(reqChannel)
     const { game, stages }: State = yield select()
     if (!game.remainingEnemies.isEmpty()) {
       const { x, y } = yield select(selectors.availableSpawnPosition)
-      yield put<Action>({ type: 'REMOVE_FIRST_REMAINING_ENEMY' })
+      yield put(simple(A.RemoveFirstRemainingEnemy))
       const level = game.remainingEnemies.first()
       const hp = level === 'armor' ? 4 : 1
       const tank = new TankRecord({
@@ -42,9 +44,9 @@ export default function* AIMasterSaga() {
   yield fork(addAIHandler)
 
   while (true) {
-    yield take('START_STAGE')
+    yield take(A.StartStage)
     for (let i = 0; i < maxAIPlayerCount; i++) {
-      yield put<Action>({ type: 'REQ_ADD_AI_PLAYER' })
+      yield put(simple(A.ReqAddAIPlayer))
     }
   }
 }

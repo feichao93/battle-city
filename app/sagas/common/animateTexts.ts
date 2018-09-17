@@ -1,4 +1,6 @@
 import { put, take } from 'redux-saga/effects'
+import * as actions from '../../utils/actions'
+import { A } from '../../utils/actions'
 
 export interface TextAnimation {
   direction: Direction
@@ -14,16 +16,11 @@ export default function* animateTexts(
   // 累计移动的距离
   let animatedDistance = 0
   while (true) {
-    const { delta }: Action.TickAction = yield take('TICK')
+    const { delta }: actions.Tick = yield take(A.Tick)
     // 本次TICK中可以移动的距离
     const len = delta * speed
     const distance = len + animatedDistance < totalDistance ? len : totalDistance - animatedDistance
-    yield put({
-      type: 'UPDATE_TEXT_POSITION',
-      textIds,
-      direction,
-      distance,
-    })
+    yield put(actions.moveTexts(textIds, direction, distance))
     animatedDistance += distance
     if (animatedDistance >= totalDistance) {
       return

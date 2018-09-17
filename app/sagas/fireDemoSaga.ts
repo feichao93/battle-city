@@ -2,6 +2,8 @@ import { all, fork, put, take } from 'redux-saga/effects'
 import { delay } from 'redux-saga/utils'
 import { PlayerRecord, TankRecord } from '../types'
 import { StageConfigConverter } from '../types/StageConfig'
+import * as actions from '../utils/actions'
+import { A, Action } from '../utils/actions'
 import { getNextId } from '../utils/common'
 import { BLOCK_SIZE as B } from '../utils/constants'
 import bulletsSaga from './bulletsSaga'
@@ -39,23 +41,17 @@ function* demoHumanController(playerName: string) {
 }
 
 export function* demohumanPalyerSaga(playerName: string, tankPrototype: TankRecord) {
-  yield put<Action>({
-    type: 'ADD_PLAYER',
-    player: new PlayerRecord({
-      playerName,
-      lives: 3,
-      side: 'human',
-    }),
+  const player = new PlayerRecord({
+    playerName,
+    lives: 3,
+    side: 'human',
   })
+  yield put(actions.addPlayer(player))
   yield fork(demoHumanController, playerName)
 
   const tankId = getNextId('tank')
   yield spawnTank(tankPrototype.set('tankId', tankId), 2)
-  yield put<Action.ActivatePlayer>({
-    type: 'ACTIVATE_PLAYER',
-    playerName,
-    tankId,
-  })
+  yield put(actions.activatePlayer(playerName, tankId))
 }
 
 export const demoStage = StageConfigConverter.r2s({
@@ -93,8 +89,8 @@ export function* demoAIMasterSaga() {
       direction: 'left',
     })
     yield spawnTank(tank, 1.5)
-    yield take((action: Action) => action.type === 'HIT' && action.targetTank.tankId === tankId)
-    yield put<Action>({ type: 'DEACTIVATE_TANK', tankId })
+    yield take((action: Action) => action.type === A.Hit && action.targetTank.tankId === tankId)
+    yield put(actions.deactivateTank(tankId))
     yield explosionFromTank(tank)
     yield delay(7e3)
   }
@@ -103,7 +99,7 @@ export function* demoAIMasterSaga() {
 export default function* fireDemoSaga() {
   yield fork(tickEmitter, { slow: 5, bindESC: true })
   yield fork(bulletsSaga)
-  yield put<Action>({ type: 'LOAD_STAGE_MAP', stage: demoStage })
+  yield put(actions.loadStageMap(demoStage))
   yield fork(demoAIMasterSaga)
   const baseTank = new TankRecord({
     active: true,

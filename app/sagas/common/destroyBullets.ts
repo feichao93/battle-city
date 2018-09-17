@@ -1,5 +1,6 @@
 import { all, put } from 'redux-saga/effects'
 import { BulletRecord, BulletsMap, ExplosionRecord } from '../../types'
+import * as actions from '../../utils/actions'
 import { frame as f, getNextId } from '../../utils/common'
 import Timing from '../../utils/Timing'
 
@@ -13,22 +14,20 @@ function* explosionFromBullet(bullet: BulletRecord) {
   const explosionId = getNextId('explosion')
   try {
     for (const [shape, time] of bulletExplosionShapeTiming) {
-      yield put<Action.AddOrUpdateExplosion>({
-        type: 'ADD_OR_UPDATE_EXPLOSION',
-        explosion: new ExplosionRecord({
-          cx: bullet.x + 2,
-          cy: bullet.y + 2,
-          shape,
-          explosionId,
-        }),
-      })
+      yield put(
+        actions.addOrUpdateExplosion(
+          new ExplosionRecord({
+            cx: bullet.x + 2,
+            cy: bullet.y + 2,
+            shape,
+            explosionId,
+          }),
+        ),
+      )
       yield Timing.delay(time)
     }
   } finally {
-    yield put<Action.RemoveExplosionAction>({
-      type: 'REMOVE_EXPLOSION',
-      explosionId,
-    })
+    yield put(actions.removeExplosion(explosionId))
   }
 }
 
@@ -37,14 +36,8 @@ function* destroyBullet(bullet: BulletRecord, useExplosion: boolean) {
   // if (bullet.side === 'human') {
   //  // TODO soundManager.explosion_2()
   // }
-  yield put<Action.BeforeRemoveBulletAction>({
-    type: 'BEFORE_REMOVE_BULLET',
-    bulletId: bullet.bulletId,
-  })
-  yield put<Action.RemoveBulletAction>({
-    type: 'REMOVE_BULLET',
-    bulletId: bullet.bulletId,
-  })
+  yield put(actions.beforeRemoveBullet(bullet.bulletId))
+  yield put(actions.removeBullet(bullet.bulletId))
   if (useExplosion) {
     yield explosionFromBullet(bullet)
   }

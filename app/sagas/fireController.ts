@@ -1,5 +1,7 @@
 import { put, select, take } from 'redux-saga/effects'
 import { BulletRecord, State, TankRecord } from '../types'
+import * as actions from '../utils/actions'
+import { A } from '../utils/actions'
 import { calculateBulletStartPosition, getNextId } from '../utils/common'
 import * as selectors from '../utils/selectors'
 import values from '../utils/values'
@@ -10,7 +12,7 @@ export default function* fireController(playerName: string, shouldFire: () => bo
   // 每个TICK时, cooldown都会相应减少. 坦克发射子弹的时候, cooldown重置为坦克的发射间隔
   // tank.cooldown和bulletLimit共同影响坦克能否发射子弹
   while (true) {
-    const { delta }: Action.TickAction = yield take('TICK')
+    const { delta }: actions.Tick = yield take(A.Tick)
     const { bullets: allBullets }: State = yield select()
     const tank: TankRecord = yield select(selectors.playerTank, playerName)
     const {
@@ -26,35 +28,29 @@ export default function* fireController(playerName: string, shouldFire: () => bo
       if (bullets.count() < values.bulletLimit(tank)) {
         const { x, y } = calculateBulletStartPosition(tank)
         if (tank.side === 'human') {
-          yield put<Action.PlaySound>({ type: 'PLAY_SOUND', sound: 'bullet_shot' })
+          yield put(actions.playSound('bullet_shot'))
         }
-        yield put<Action.AddBulletAction>({
-          type: 'ADD_BULLET',
-          bullet: new BulletRecord({
-            bulletId: getNextId('bullet'),
-            direction: tank.direction,
-            x,
-            y,
-            lastX: x,
-            lastY: y,
-            power: values.bulletPower(tank),
-            speed: values.bulletSpeed(tank),
-            tankId: tank.tankId,
-            side: tank.side,
-            playerName,
-          }),
+        const bullet = new BulletRecord({
+          bulletId: getNextId('bullet'),
+          direction: tank.direction,
+          x,
+          y,
+          lastX: x,
+          lastY: y,
+          power: values.bulletPower(tank),
+          speed: values.bulletSpeed(tank),
+          tankId: tank.tankId,
+          side: tank.side,
+          playerName,
         })
+        yield put(actions.addBullet(bullet))
         // 一旦发射子弹, 则重置cooldown计数器
         nextCooldown = values.bulletInterval(tank)
       } // else 如果坦克发射的子弹已经到达上限, 则坦克不能继续发射子弹
     }
 
     if (tank.cooldown !== nextCooldown) {
-      yield put<Action>({
-        type: 'SET_COOLDOWN',
-        tankId: tank.tankId,
-        cooldown: nextCooldown,
-      })
+      yield put(actions.setCooldown(tank.tankId, nextCooldown))
     }
   }
 }

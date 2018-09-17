@@ -1,4 +1,6 @@
 import { fork, put, takeEvery, takeLatest } from 'redux-saga/effects'
+import { A } from '../utils/actions'
+import * as actions from '../utils/actions'
 import gameSaga from './gameSaga'
 import soundManager from './soundManager'
 import { syncFrom, syncTo } from './syncLocalStorage'
@@ -8,10 +10,10 @@ export default function* rootSaga() {
 
   yield syncFrom()
   yield fork(soundManager)
-  yield takeEvery('SYNC_CUSTOM_STAGES', syncTo)
-  yield takeLatest(['START_GAME', 'RESET_GAME'], gameSaga)
+  yield takeEvery(A.SyncCustomStages, syncTo)
+  yield takeLatest([A.StartGame, A.ResetGame], gameSaga)
 
   if (DEV.SKIP_CHOOSE_STAGE) {
-    yield put<Action>({ type: 'START_GAME', stageIndex: 0 })
+    yield put(actions.startGame(0))
   }
 }

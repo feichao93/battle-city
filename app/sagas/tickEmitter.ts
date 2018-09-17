@@ -2,6 +2,8 @@ import ReactDOM from 'react-dom'
 import { eventChannel } from 'redux-saga'
 import { put, select, take, takeEvery } from 'redux-saga/effects'
 import { State } from '../types'
+import * as actions from '../utils/actions'
+import { A, simple } from '../utils/actions'
 
 export interface TickEmitterOptions {
   maxFPS?: number
@@ -11,13 +13,13 @@ export interface TickEmitterOptions {
 
 export default function* tickEmitter(options: TickEmitterOptions = {}) {
   const { bindESC = false, slow = 1, maxFPS = Infinity } = options
-  const tickChannel = eventChannel<Action.TickAction>(emit => {
+  const tickChannel = eventChannel<actions.Tick>(emit => {
     let lastTime = performance.now()
     let requestId = requestAnimationFrame(emitTick)
 
     function emitTick() {
       const now = performance.now()
-      ReactDOM.unstable_batchedUpdates(emit, { type: 'TICK', delta: now - lastTime })
+      ReactDOM.unstable_batchedUpdates(emit, actions.tick(now - lastTime))
       lastTime = now
       requestId = requestAnimationFrame(emitTick)
     }
@@ -39,11 +41,11 @@ export default function* tickEmitter(options: TickEmitterOptions = {}) {
       const {
         game: { paused },
       }: State = yield select()
-      yield put<Action.PlaySound>({ type: 'PLAY_SOUND', sound: 'pause' })
+      yield put(actions.playSound('pause'))
       if (!paused) {
-        yield put<Action>({ type: 'GAMEPAUSE' })
+        yield put(simple(A.GamePause))
       } else {
-        yield put<Action>({ type: 'GAMERESUME' })
+        yield put(simple(A.GameResume))
       }
     })
   }
@@ -51,18 +53,15 @@ export default function* tickEmitter(options: TickEmitterOptions = {}) {
   try {
     let accumulation = 0
     while (true) {
-      const { delta }: Action.TickAction = yield take(tickChannel)
+      const { delta }: actions.Tick = yield take(tickChannel)
       const {
         game: { paused },
       }: State = yield select()
       if (!paused) {
         accumulation += delta
         if (accumulation > 1000 / maxFPS) {
-          yield put<Action.TickAction>({ type: 'TICK', delta: accumulation / slow })
-          yield put<Action.AfterTickAction>({
-            type: 'AFTER_TICK',
-            delta: accumulation / slow,
-          })
+          yield put(actions.tick(accumulation / slow))
+          yield put(actions.afterTick(accumulation / slow))
           accumulation = 0
         }
       }

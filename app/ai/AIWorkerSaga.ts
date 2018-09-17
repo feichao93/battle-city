@@ -3,6 +3,8 @@ import { Task } from 'redux-saga'
 import { fork, race, select, take } from 'redux-saga/effects'
 import { State } from '../reducers'
 import { TankFireInfo, TankRecord } from '../types'
+import { A } from '../utils/actions'
+import * as actions from '../utils/actions'
 import { randint } from '../utils/common'
 import { BLOCK_DISTANCE_THRESHOLD, BLOCK_TIMEOUT } from '../utils/constants'
 import * as selectors from '../utils/selectors'
@@ -75,7 +77,7 @@ function* attackEagle(ctx: AITankCtx, fireEstimate: FireEstimate) {
   DEV.ASSERT && console.assert(tank != null)
   const env = getEnv(map, tanks, tank)
   ctx.turn(env.tankPosition.eagle.getPrimaryDirection())
-  yield take('TICK') // 等待一个 tick, 确保转向已经完成
+  yield take(A.Tick) // 等待一个 tick, 确保转向已经完成
   let fireCount = getAIFireCount(fireEstimate)
   while (fireCount > 0) {
     const fireInfo: TankFireInfo = yield select(selectors.fireInfo, ctx.playerName)
@@ -128,7 +130,7 @@ function* blocked(ctx: AITankCtx) {
   let acc = 0
   let lastTank = yield select(selectors.playerTank, ctx.playerName)
   while (acc < BLOCK_TIMEOUT) {
-    const { delta }: Action.TickAction = yield take('TICK')
+    const { delta }: actions.Tick = yield take(actions.A.Tick)
     const tank: TankRecord = yield select(selectors.playerTank, ctx.playerName)
     if (tank.frozenTimeout > 0) {
       continue

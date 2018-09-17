@@ -7,6 +7,7 @@ import { Dispatch } from 'redux'
 import { RawStageConfig, State } from '../types'
 import Popup from '../types/Popup'
 import { StageConfigConverter } from '../types/StageConfig'
+import * as actions from '../utils/actions'
 import { BLOCK_SIZE as B } from '../utils/constants'
 import PopupProvider, { PopupHandle } from './PopupProvider'
 import Screen from './Screen'
@@ -57,7 +58,9 @@ class StageListPageUnconnected extends React.PureComponent<StageListProps> {
   }
 
   onUploadFile = () => {
-    const { popupHandle: { showAlertPopup, showConfirmPopup } } = this.props
+    const {
+      popupHandle: { showAlertPopup, showConfirmPopup },
+    } = this.props
     const file = this.input.files[0]
     if (file == null) {
       return
@@ -79,8 +82,8 @@ class StageListPageUnconnected extends React.PureComponent<StageListProps> {
             return
           }
         }
-        dispatch<Action>({ type: 'SET_CUSTOM_STAGE', stage })
-        dispatch<Action>({ type: 'SYNC_CUSTOM_STAGES' })
+        dispatch(actions.setCustomStage(stage))
+        dispatch(actions.simple(actions.A.SyncCustomStages))
         if (tab !== 'custom') {
           dispatch(replace('/list/custom'))
         }
@@ -123,18 +126,17 @@ class StageListPageUnconnected extends React.PureComponent<StageListProps> {
   onEdit(stageName: string) {
     const { dispatch, stages } = this.props
     const stage = stages.find(s => s.name === stageName)
-    dispatch<Action.SetEditorContent>({ type: 'SET_EDITOR_CONTENT', stage })
+    dispatch(actions.setEditorContent(stage))
     dispatch(push('/editor'))
   }
 
   async onDelete(stageName: string) {
-    const { popupHandle: { showConfirmPopup } } = this.props
+    const {
+      popupHandle: { showConfirmPopup },
+    } = this.props
     if (await showConfirmPopup(`Delete stage ${stageName}?`)) {
-      this.props.dispatch<Action>({
-        type: 'REMOVE_CUSTOM_STAGE',
-        stageName,
-      })
-      this.props.dispatch<Action>({ type: 'SYNC_CUSTOM_STAGES' })
+      this.props.dispatch(actions.removeCustomStage(stageName))
+      this.props.dispatch(actions.simple(actions.A.SyncCustomStages))
     }
   }
 
@@ -148,7 +150,13 @@ class StageListPageUnconnected extends React.PureComponent<StageListProps> {
   }
 
   render() {
-    const { tab, page, dispatch, stages: allStages, popupHandle: { popup } } = this.props
+    const {
+      tab,
+      page,
+      dispatch,
+      stages: allStages,
+      popupHandle: { popup },
+    } = this.props
     const filteredStages = allStages.filter(
       s => (s.custom && tab === 'custom') || (!s.custom && tab === 'default'),
     )
@@ -267,13 +275,21 @@ export default class StageListPageWrapper extends React.PureComponent<{ match: m
             <Route exact path="/list/custom" render={() => <Redirect to="/list/custom/1" />} />
             <Route
               path={`${match.url}/default/:page`}
-              render={({ match: { params: { page } } }: PageMatch) => (
+              render={({
+                match: {
+                  params: { page },
+                },
+              }: PageMatch) => (
                 <StageListPage popupHandle={popupHandle} tab="default" page={Number(page)} />
               )}
             />
             <Route
               path={`${match.url}/custom/:page`}
-              render={({ match: { params: { page } } }: PageMatch) => (
+              render={({
+                match: {
+                  params: { page },
+                },
+              }: PageMatch) => (
                 <StageListPage popupHandle={popupHandle} tab="custom" page={Number(page)} />
               )}
             />

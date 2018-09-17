@@ -2,6 +2,7 @@ import { List } from 'immutable'
 import { put, select } from 'redux-saga/effects'
 import { State } from '../reducers'
 import { default as StageConfig, RawStageConfig, StageConfigConverter } from '../types/StageConfig'
+import * as actions from '../utils/actions'
 
 function getStageNameList(stageList: List<StageConfig | RawStageConfig>) {
   if (stageList.isEmpty()) {
@@ -34,7 +35,7 @@ export function* syncFrom() {
     const content = localStorage.getItem(key)
     const stageList = List(JSON.parse(content)).map(StageConfigConverter.r2s)
     DEV.LOG && console.log('Loaded stages:', getStageNameList(stageList))
-    yield* stageList.map(stage => put<Action>({ type: 'SET_CUSTOM_STAGE', stage }))
+    yield* stageList.map(stage => put(actions.setCustomStage(stage)))
   } catch (e) {
     console.error(e)
     localStorage.removeItem(key)

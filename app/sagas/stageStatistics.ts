@@ -1,11 +1,13 @@
 import { Map } from 'immutable'
 import { put, select } from 'redux-saga/effects'
 import { State } from '../types'
+import * as actions from '../utils/actions'
+import { A, simple } from '../utils/actions'
 import { TANK_LEVELS } from '../utils/constants'
 import Timing from '../utils/Timing'
 
 export default function* statistics() {
-  yield put<Action>({ type: 'SHOW_STATISTICS' })
+  yield put(simple(A.ShowStatistics))
 
   const {
     game: { killInfo },
@@ -26,28 +28,26 @@ export default function* statistics() {
     const levelKillCount = player1KillInfo.get(tankLevel, 0)
     if (levelKillCount === 0) {
       // 如果击杀数是 0 的话，则直接在界面中显示 0
-      yield put<Action.PlaySound>({ type: 'PLAY_SOUND', sound: 'statistics_1' })
-      yield put<Action>({
-        type: 'UPDATE_TRANSIENT_KILL_INFO',
-        info: transientKillInfo.setIn(['player-1', tankLevel], 0),
-      })
+      yield put(actions.playSound('statistics_1'))
+      yield put(
+        actions.updateTransientKillInfo(transientKillInfo.setIn(['player-1', tankLevel], 0)),
+      )
     } else {
       // 如果击杀数大于 0，则显示从 1 开始增加到击杀数的动画
       for (let count = 1; count <= levelKillCount; count += 1) {
-        yield put<Action.PlaySound>({ type: 'PLAY_SOUND', sound: 'statistics_1' })
-        yield put<Action>({
-          type: 'UPDATE_TRANSIENT_KILL_INFO',
-          info: transientKillInfo.setIn(['player-1', tankLevel], count),
-        })
+        yield put(actions.playSound('statistics_1'))
+        yield put(
+          actions.updateTransientKillInfo(transientKillInfo.setIn(['player-1', tankLevel], count)),
+        )
         yield Timing.delay(DEV.FAST ? 64 : 160)
       }
     }
     yield Timing.delay(DEV.FAST ? 80 : 200)
   }
   yield Timing.delay(DEV.FAST ? 80 : 200)
-  yield put<Action.PlaySound>({ type: 'PLAY_SOUND', sound: 'statistics_1' })
-  yield put<Action>({ type: 'SHOW_TOTAL_KILL_COUNT' })
+  yield put(actions.playSound('statistics_1'))
+  yield put(simple(A.ShowTotalKillCount))
   yield Timing.delay(DEV.FAST ? 400 : 1000)
 
-  yield put<Action>({ type: 'HIDE_STATISTICS' })
+  yield put(simple(A.HideStatistics))
 }

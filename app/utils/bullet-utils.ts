@@ -76,7 +76,7 @@ export class BulletCollisionInfo extends DefaultMap<BulletId, Collision[]> {
     return false
   }
 
-  getExplosionSoundType(bulletId: BulletId): SoundName {
+  getExplosionSoundName(bulletId: BulletId): SoundName {
     const bullet = this.bullets.get(bulletId)
     if (bullet.side === 'human') {
       const collisions = this.get(bulletId)
@@ -124,7 +124,7 @@ export class BulletCollisionInfo extends DefaultMap<BulletId, Collision[]> {
   getExplosionInfo() {
     const expBullets = new Map<BulletId, BulletRecord>()
     const noExpBullets = new Map<BulletId, BulletRecord>()
-    const sounds: SoundName[] = []
+    const soundNames: SoundName[] = []
     for (const bulletId of this.keys()) {
       const bullet = this.bullets.get(bulletId)
       const expPos = this.getExplosionPos(bulletId)
@@ -135,13 +135,13 @@ export class BulletCollisionInfo extends DefaultMap<BulletId, Collision[]> {
         expBullets.set(bulletId, bullet.merge(expPos))
       }
 
-      sounds.push(this.getExplosionSoundType(bulletId))
+      soundNames.push(this.getExplosionSoundName(bulletId))
     }
 
     return {
       expBullets: IMap(expBullets),
       noExpBullets: IMap(noExpBullets),
-      sounds: sounds.filter(Boolean),
+      soundNames: soundNames.filter(Boolean),
     }
   }
 }

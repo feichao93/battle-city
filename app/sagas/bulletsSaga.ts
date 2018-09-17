@@ -1,5 +1,7 @@
 import { Set as ISet } from 'immutable'
 import { all, fork, put, select, take, takeEvery } from 'redux-saga/effects'
+import * as actions from '../utils/actions'
+import { A } from '../utils/actions'
 import { BulletRecord, BulletsMap, State } from '../types'
 import {
   BulletCollisionInfo,
@@ -21,7 +23,7 @@ interface Stat {
 
 function* handleTick() {
   while (true) {
-    const { delta }: Action.TickAction = yield take('TICK')
+    const { delta }: actions.Tick = yield take(A.Tick)
     const { bullets }: State = yield select()
     if (bullets.isEmpty()) {
       continue
@@ -35,7 +37,7 @@ function* handleTick() {
         .set('lastX', bullet.x)
         .set('lastY', bullet.y) // 设置子弹上一次的位置, 用于进行碰撞检测
     })
-    yield put({ type: 'UPDATE_BULLETS', updatedBullets })
+    yield put(actions.updateBullets(updatedBullets))
   }
 }
 
@@ -107,10 +109,7 @@ function* destroySteels(collidedBullets: BulletsMap) {
   })
 
   if (steelsNeedToDestroy.length > 0) {
-    yield put<Action.RemoveSteelsAction>({
-      type: 'REMOVE_STEELS',
-      ts: ISet(steelsNeedToDestroy),
-    })
+    yield put(actions.removeSteels(ISet(steelsNeedToDestroy)))
   }
 }
 
@@ -130,10 +129,7 @@ function* destroyBricks(collidedBullets: BulletsMap) {
   })
 
   if (bricksNeedToDestroy.length > 0) {
-    yield put<Action.RemoveBricksAction>({
-      type: 'REMOVE_BRICKS',
-      ts: ISet(bricksNeedToDestroy),
-    })
+    yield put(actions.removeBricks(ISet(bricksNeedToDestroy)))
   }
 }
 
@@ -145,7 +141,7 @@ function* destroyEagleIfNeeded(expBullets: BulletsMap) {
   for (const bullet of expBullets.values()) {
     const spreaded = spreadBullet(bullet)
     if (testCollide(eagleBox, spreaded)) {
-      yield put<Action>({ type: 'DESTROY_EAGLE' })
+      yield put(actions.simple(A.DestroyEagle))
       // DESTROY_EAGLE被dispatch之后将会触发游戏失败的流程
       return
     }
@@ -234,20 +230,21 @@ function* spawnHitActions({ tanks, players }: State, stat: Stat) {
     const bullet = hitBullets[0]
     const sourceTankId = bullet.tankId
     const sourcePlayerName = bullet.playerName
-    yield put<Action.Hit>({
-      type: 'HIT',
-      bullet,
-      sourcePlayer: players.get(sourcePlayerName),
-      sourceTank: tanks.get(sourceTankId),
-      targetPlayer: players.find(p => p.activeTankId === targetTankId),
-      targetTank: tanks.get(targetTankId),
-    })
+    yield put(
+      actions.hit(
+        bullet,
+        tanks.get(targetTankId),
+        tanks.get(sourceTankId),
+        players.find(p => p.activeTankId === targetTankId),
+        players.get(sourcePlayerName),
+      ),
+    )
   }
 }
 
 function* handleAfterTick() {
   while (true) {
-    const { delta }: Action.AfterTickAction = yield take('AFTER_TICK')
+    const { delta }: actions.AfterTick = yield take(A.AfterTick)
     const state: State = yield select()
 
     // 新建一个统计对象(stat), 用来存放这一个tick中的统计信息
@@ -264,11 +261,11 @@ function* handleAfterTick() {
     handleBulletsCollidedWithSteels(stat, state)
     handleBulletsCollidedWithBorder(stat, state)
 
-    const { expBullets, noExpBullets, sounds } = stat.bulletCollisionInfo.getExplosionInfo()
+    const { expBullets, noExpBullets, soundNames } = stat.bulletCollisionInfo.getExplosionInfo()
 
     // 播放声音
-    for (const sound of sounds) {
-      yield put<Action.PlaySound>({ type: 'PLAY_SOUND', sound })
+    for (const soundName of soundNames) {
+      yield put(actions.playSound(soundName))
     }
 
     // 产生爆炸效果, 并移除子弹
@@ -288,12 +285,12 @@ function* handleAfterTick() {
 }
 
 function* clearBullets() {
-  yield put<Action>({ type: 'CLEAR_BULLETS' })
+  yield put(actions.simple(A.ClearBullets))
 }
 
 export default function* bulletsSaga() {
   try {
-    yield takeEvery('END_STAGE', clearBullets)
+    yield takeEvery(A.EndStage, clearBullets)
     yield all([handleTick(), handleAfterTick()])
   } finally {
     yield clearBullets()

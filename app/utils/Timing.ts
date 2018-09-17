@@ -1,5 +1,6 @@
 import { clamp } from 'lodash'
 import { Effect, take } from 'redux-saga/effects'
+import * as actions from '../utils/actions'
 
 const add = (x: number, y: number) => x + y
 
@@ -9,7 +10,7 @@ export default class Timing<V> {
   static *delay(ms: number) {
     let acc = 0
     while (true) {
-      const { delta }: Action.TickAction = yield take('TICK')
+      const { delta }: actions.Tick = yield take(actions.A.Tick)
       acc += delta
       if (acc >= ms) {
         break
@@ -20,7 +21,7 @@ export default class Timing<V> {
   static *tween(duration: number, effectFactory: (t: number) => Effect) {
     let accumulation = 0
     while (accumulation < duration) {
-      const { delta }: Action.TickAction = yield take('TICK')
+      const { delta }: actions.Tick = yield take(actions.A.Tick)
       accumulation += delta
       yield effectFactory(clamp(accumulation / duration, 0, 1))
     }
@@ -53,7 +54,7 @@ export default class Timing<V> {
 
       target += t
       while (true) {
-        const { delta }: Action.TickAction = yield take('TICK')
+        const { delta }: actions.Tick = yield take(actions.A.Tick)
         acc += delta
         if (acc >= target) {
           break

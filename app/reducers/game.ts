@@ -1,5 +1,6 @@
 import { Map, Record, Repeat } from 'immutable'
 import { EnemyGroupConfig } from '../types/StageConfig'
+import { A, Action } from '../utils/actions'
 
 const emptyTransientKillInfo = Map({
   'player-1': Map({
@@ -54,20 +55,20 @@ const GameRecordBase = Record(
 export class GameRecord extends GameRecordBase {}
 
 export default function game(state = new GameRecord(), action: Action) {
-  if (action.type === 'START_GAME') {
+  if (action.type === A.StartGame) {
     return state.set('status', 'on').set('currentStageName', null)
-  } else if (action.type === 'RESET_GAME') {
+  } else if (action.type === A.ResetGame) {
     return state.set('status', 'idle').set('currentStageName', null)
-  } else if (action.type === 'SHOW_STATISTICS') {
+  } else if (action.type === A.ShowStatistics) {
     return state.set('status', 'stat')
-  } else if (action.type === 'HIDE_STATISTICS') {
+  } else if (action.type === A.HideStatistics) {
     return state.set('status', 'on')
-  } else if (action.type === 'END_GAME') {
+  } else if (action.type === A.EndGame) {
     return state
       .set('status', 'gameover')
       .set('lastStageName', state.currentStageName)
       .set('currentStageName', null)
-  } else if (action.type === 'START_STAGE') {
+  } else if (action.type === A.StartStage) {
     return state.merge({
       currentStageName: action.stage.name,
       transientKillInfo: emptyTransientKillInfo,
@@ -75,30 +76,30 @@ export default function game(state = new GameRecord(), action: Action) {
       remainingEnemies: action.stage.enemies.flatMap(EnemyGroupConfig.unwind),
       showTotalKillCount: false,
     })
-  } else if (action.type === 'END_STAGE') {
+  } else if (action.type === A.EndStage) {
     return state.set('currentStageName', null)
-  } else if (action.type === 'REMOVE_FIRST_REMAINING_ENEMY') {
+  } else if (action.type === A.RemoveFirstRemainingEnemy) {
     return state.update('remainingEnemies', enemies => enemies.shift())
-  } else if (action.type === 'INC_KILL_COUNT') {
+  } else if (action.type === A.IncKillCount) {
     const { playerName, level } = action
     return state.updateIn(['killInfo', playerName, level], x => (x == null ? 1 : x + 1))
-  } else if (action.type === 'UPDATE_TRANSIENT_KILL_INFO') {
+  } else if (action.type === A.UpdateTransientKillInfo) {
     return state.set('transientKillInfo', action.info)
-  } else if (action.type === 'SHOW_TOTAL_KILL_COUNT') {
+  } else if (action.type === A.ShowTotalKillCount) {
     return state.set('showTotalKillCount', true)
-  } else if (action.type === 'SET_AI_FROZEN_TIMEOUT') {
-    return state.set('AIFrozenTimeout', action.AIFrozenTimeout)
-  } else if (action.type === 'GAMEPAUSE') {
+  } else if (action.type === A.SetAIFrozenTimeout) {
+    return state.set('AIFrozenTimeout', action.timeout)
+  } else if (action.type === A.GamePause) {
     return state.set('paused', true)
-  } else if (action.type === 'GAMERESUME') {
+  } else if (action.type === A.GameResume) {
     return state.set('paused', false)
-  } else if (action.type === 'UPDATE_CURTAIN') {
+  } else if (action.type === A.UpdateCurtain) {
     return state.set('stageEnterCurtainT', action.t)
-  } else if (action.type === 'SHOW_HUD') {
+  } else if (action.type === A.ShowHud) {
     return state.set('showHUD', true)
-  } else if (action.type === 'HIDE_HUD') {
+  } else if (action.type === A.HideHud) {
     return state.set('showHUD', false)
-  } else if (action.type === 'UPDATE_COMING_STAGE_NAME') {
+  } else if (action.type === A.UpdateComingStageName) {
     return state.set('comingStageName', action.stageName)
   } else {
     return state

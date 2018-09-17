@@ -3,6 +3,8 @@ import { all, put, race, select, take } from 'redux-saga/effects'
 import { delay } from 'redux-saga/utils'
 import { State } from '../reducers'
 import TextRecord from '../types/TextRecord'
+import * as actions from '../utils/actions'
+import { A, simple, Simple } from '../utils/actions'
 import { getNextId } from '../utils/common'
 import { BLOCK_SIZE, PLAYER_CONFIGS } from '../utils/constants'
 import * as selectors from '../utils/selectors'
@@ -20,27 +22,23 @@ function* animateGameover() {
   const textId1 = getNextId('text')
   const textId2 = getNextId('text')
   try {
-    yield put<Action>({
-      type: 'SET_TEXT',
-      text: new TextRecord({
-        textId: textId1,
-        content: 'game',
-        fill: 'red',
-        x: BLOCK_SIZE * 6.5,
-        y: BLOCK_SIZE * 13,
-      }),
+    const text1 = new TextRecord({
+      textId: textId1,
+      content: 'game',
+      fill: 'red',
+      x: BLOCK_SIZE * 6.5,
+      y: BLOCK_SIZE * 13,
     })
-    yield put<Action>({
-      type: 'SET_TEXT',
-      text: new TextRecord({
-        textId: textId2,
-        content: 'over',
-        fill: 'red',
-        x: BLOCK_SIZE * 6.5,
-        y: BLOCK_SIZE * 13.5,
-      }),
+    yield put(actions.setText(text1))
+    const text2 = new TextRecord({
+      textId: textId2,
+      content: 'over',
+      fill: 'red',
+      x: BLOCK_SIZE * 6.5,
+      y: BLOCK_SIZE * 13.5,
     })
-    yield put<Action.PlaySound>({ type: 'PLAY_SOUND', sound: 'game_over' })
+    yield put(actions.setText(text2))
+    yield put(actions.playSound('game_over'))
     yield* animateTexts([textId1, textId2], {
       direction: 'up',
       distance: BLOCK_SIZE * 6,
@@ -48,8 +46,8 @@ function* animateGameover() {
     })
     yield Timing.delay(500)
   } finally {
-    yield put<Action>({ type: 'REMOVE_TEXT', textId: textId1 })
-    yield put<Action>({ type: 'REMOVE_TEXT', textId: textId2 })
+    yield put(actions.removeText(textId1))
+    yield put(actions.removeText(textId2))
   }
 }
 
@@ -72,8 +70,8 @@ function* stageFlow(startStageIndex: number) {
  *  game-stage调用stage-saga来运行不同的关卡
  *  并根据stage-saga返回的结果选择继续下一个关卡, 或是选择游戏结束
  */
-export default function* gameSaga(action: Action.StartGame | { type: 'RESET_GAME' }) {
-  if (action.type === 'RESET_GAME') {
+export default function* gameSaga(action: actions.StartGame | Simple<A.ResetGame>) {
+  if (action.type === A.ResetGame) {
     console.log('GAME RESET')
     return
   }
@@ -97,7 +95,7 @@ export default function* gameSaga(action: Action.StartGame | { type: 'RESET_GAME
     // 上面几个 saga 在一个 gameSaga 的生命周期内被认为是后台服务
     // 当 stage-flow 退出（或者是用户直接离开了game-scene）的时候，自动取消上面几个后台服务
     flow: stageFlow(action.stageIndex),
-    leave: take('LEAVE_GAME_SCENE'),
+    leave: take(A.LeaveGameScene),
   })
 
   if (DEV.LOG) {
@@ -110,6 +108,6 @@ export default function* gameSaga(action: Action.StartGame | { type: 'RESET_GAME
     DEV.LOG && console.log('GAME ENDED')
     yield put(replace('/gameover'))
   }
-  yield put<Action>({ type: 'BEFORE_END_GAME' })
-  yield put<Action>({ type: 'END_GAME' })
+  yield put(simple(A.BeforeEndGame))
+  yield put(simple(A.EndGame))
 }

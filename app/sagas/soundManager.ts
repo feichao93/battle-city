@@ -1,4 +1,6 @@
 import { takeEvery } from 'redux-saga/effects'
+import * as actions from '../utils/actions'
+import { A } from '../utils/actions'
 
 const SOUND_NAMES: SoundName[] = [
   'stage_start',
@@ -23,5 +25,9 @@ export default function* soundManager() {
     }),
   )
 
-  yield takeEvery('PLAY_SOUND', ({ sound }: Action.PlaySound) => map.get(sound).play())
+  yield takeEvery(A.PlaySound, function*({ soundName }: actions.PlaySound) {
+    try {
+      yield map.get(soundName).play()
+    } catch (e) {}
+  })
 }
