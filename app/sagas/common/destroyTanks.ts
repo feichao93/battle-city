@@ -40,7 +40,7 @@ export function* explosionFromTank(tank: TankRecord) {
         shape,
         explosionId,
       })
-      yield put(actions.addOrUpdateExplosion(explosion))
+      yield put(actions.setExplosion(explosion))
     })
   } finally {
     yield put(actions.removeExplosion(explosionId))

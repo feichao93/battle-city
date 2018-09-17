@@ -25,7 +25,7 @@ export default function* flickerSaga(x: number, y: number, spawnSpeed: number) {
 
   try {
     yield* flickerShapeTiming.accelerate(spawnSpeed).iter(function*(shape) {
-      yield put(actions.addOrUpdateFlicker(new FlickerRecord({ flickerId, x, y, shape })))
+      yield put(actions.setFlicker(new FlickerRecord({ flickerId, x, y, shape })))
     })
   } finally {
     yield put(actions.removeFlicker(flickerId))

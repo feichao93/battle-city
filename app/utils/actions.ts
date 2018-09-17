@@ -58,7 +58,7 @@ export enum A {
   ReqAddAIPlayer = 'ReqAddAIPlayer',
   RemovePlayer = 'RemovePlayer',
   DeactivateAllPlayers = 'DeactivateAllPlayers',
-  AddOrUpdateExplosion = 'AddOrUpdateExplosion',
+  SetExplosion = 'AddOrUpdateExplosion',
   RemoveExplosion = 'RemoveExplosion',
   SetText = 'SetText',
   MoveTexts = 'UpdateTextPosition',
@@ -70,7 +70,7 @@ export enum A {
   StopMove = 'StopMove',
   RemoveText = 'RemoveText',
   RemoveFlicker = 'RemoveFlicker',
-  AddOrUpdateFlicker = 'AddOrUpdateFlicker',
+  SetFlicker = 'AddOrUpdateFlicker',
   Hit = 'Hit',
   Hurt = 'Hurt',
   Kill = 'Kill',
@@ -330,10 +330,10 @@ export function startStage(stage: StageConfig) {
   }
 }
 
-export type AddOrUpdateExplosion = ReturnType<typeof addOrUpdateExplosion>
-export function addOrUpdateExplosion(explosion: ExplosionRecord) {
+export type SetExplosion = ReturnType<typeof setExplosion>
+export function setExplosion(explosion: ExplosionRecord) {
   return {
-    type: A.AddOrUpdateExplosion as A.AddOrUpdateExplosion,
+    type: A.SetExplosion as A.SetExplosion,
     explosion,
   }
 }
@@ -346,10 +346,10 @@ export function removeExplosion(explosionId: ExplosionId) {
   }
 }
 
-export type AddOrUpdateFlicker = ReturnType<typeof addOrUpdateFlicker>
-export function addOrUpdateFlicker(flicker: FlickerRecord) {
+export type SetFlicker = ReturnType<typeof setFlicker>
+export function setFlicker(flicker: FlickerRecord) {
   return {
-    type: A.AddOrUpdateFlicker as A.AddOrUpdateFlicker,
+    type: A.SetFlicker as A.SetFlicker,
     flicker,
   }
 }
@@ -716,7 +716,7 @@ export type Action =
   | ReqAddAIPlayer
   | RemovePlayer
   | DeactivateAllPlayers
-  | AddOrUpdateExplosion
+  | SetExplosion
   | RemoveExplosion
   | SetText
   | MoveTexts
@@ -727,7 +727,7 @@ export type Action =
   | StopMove
   | RemoveText
   | RemoveFlicker
-  | AddOrUpdateFlicker
+  | SetFlicker
   | Hit
   | Hurt
   | Kill

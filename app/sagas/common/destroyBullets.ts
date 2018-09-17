@@ -15,7 +15,7 @@ function* explosionFromBullet(bullet: BulletRecord) {
   try {
     for (const [shape, time] of bulletExplosionShapeTiming) {
       yield put(
-        actions.addOrUpdateExplosion(
+        actions.setExplosion(
           new ExplosionRecord({
             cx: bullet.x + 2,
             cy: bullet.y + 2,
