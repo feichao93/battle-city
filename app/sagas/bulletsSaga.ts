@@ -1,8 +1,8 @@
 import { Set as ISet } from 'immutable'
 import { all, fork, put, select, take, takeEvery } from 'redux-saga/effects'
+import { BulletRecord, BulletsMap, State } from '../types'
 import * as actions from '../utils/actions'
 import { A } from '../utils/actions'
-import { BulletRecord, BulletsMap, State } from '../types'
 import {
   BulletCollisionInfo,
   getCollisionInfoBetweenBullets,
@@ -141,7 +141,7 @@ function* destroyEagleIfNeeded(expBullets: BulletsMap) {
   for (const bullet of expBullets.values()) {
     const spreaded = spreadBullet(bullet)
     if (testCollide(eagleBox, spreaded)) {
-      yield put(actions.simple(A.DestroyEagle))
+      yield put(actions.destroyEagle())
       // DESTROY_EAGLE被dispatch之后将会触发游戏失败的流程
       return
     }
@@ -285,7 +285,7 @@ function* handleAfterTick() {
 }
 
 function* clearBullets() {
-  yield put(actions.simple(A.ClearBullets))
+  yield put(actions.clearBullets())
 }
 
 export default function* bulletsSaga() {

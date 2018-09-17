@@ -6,7 +6,7 @@ const initState = new MapRecord({ eagle: null })
 export default function mapReducer(state = initState, action: Action) {
   if (action.type === A.LoadStageMap) {
     return action.stage.map
-  } else if (action.type === 'DestroyEagle') {
+  } else if (action.type === A.DestroyEagle) {
     return state.setIn(['eagle', 'broken'], true)
   } else if (action.type === A.RemoveBricks) {
     return state.update('bricks', bricks =>

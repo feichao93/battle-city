@@ -4,7 +4,7 @@ import { delay } from 'redux-saga/utils'
 import { State } from '../reducers'
 import TextRecord from '../types/TextRecord'
 import * as actions from '../utils/actions'
-import { A, simple, Simple } from '../utils/actions'
+import { A } from '../utils/actions'
 import { getNextId } from '../utils/common'
 import { BLOCK_SIZE, PLAYER_CONFIGS } from '../utils/constants'
 import * as selectors from '../utils/selectors'
@@ -70,7 +70,7 @@ function* stageFlow(startStageIndex: number) {
  *  game-stage调用stage-saga来运行不同的关卡
  *  并根据stage-saga返回的结果选择继续下一个关卡, 或是选择游戏结束
  */
-export default function* gameSaga(action: actions.StartGame | Simple<A.ResetGame>) {
+export default function* gameSaga(action: actions.StartGame | actions.ResetGame) {
   if (action.type === A.ResetGame) {
     console.log('GAME RESET')
     return
@@ -108,6 +108,6 @@ export default function* gameSaga(action: actions.StartGame | Simple<A.ResetGame
     DEV.LOG && console.log('GAME ENDED')
     yield put(replace('/gameover'))
   }
-  yield put(simple(A.BeforeEndGame))
-  yield put(simple(A.EndGame))
+  yield put(actions.beforeEndGame())
+  yield put(actions.endGame())
 }

@@ -3,7 +3,7 @@ import { cancelled, put, select, take } from 'redux-saga/effects'
 import { State } from '../reducers'
 import StageConfig from '../types/StageConfig'
 import * as actions from '../utils/actions'
-import { A, simple } from '../utils/actions'
+import { A } from '../utils/actions'
 import { frame as f } from '../utils/common'
 import Timing from '../utils/Timing'
 import statistics from './stageStatistics'
@@ -49,7 +49,7 @@ export default function* stageSaga(stage: StageConfig) {
   try {
     yield animateCurtainAndLoadMap(stage)
     yield put(actions.beforeStartStage(stage))
-    yield put(simple(A.ShowHud))
+    yield put(actions.showHud())
     yield put(actions.startStage(stage))
 
     while (true) {
@@ -75,8 +75,8 @@ export default function* stageSaga(stage: StageConfig) {
             // 剩余enemy数量为0, 且场上已经没有ai tank了
             yield Timing.delay(DEV.FAST ? 1000 : 3000)
             yield statistics()
-            yield put(simple(A.BeforeEndStage))
-            yield put(simple(A.EndStage))
+            yield put(actions.beforeEndStage())
+            yield put(actions.endStage())
             return { pass: true } as StageResult
           }
         } else {
@@ -89,12 +89,12 @@ export default function* stageSaga(stage: StageConfig) {
             return { pass: false, reason: 'dead' } as StageResult
           }
         }
-      } else if (action.type === 'DestroyEagle') {
+      } else if (action.type === A.DestroyEagle) {
         // 因为 gameSaga 会 put END_GAME 所以这里不需要 put END_STAGE
         return { pass: false, reason: 'eagle-destroyed' } as StageResult
       }
     }
   } finally {
-    yield put(simple(A.HideHud))
+    yield put(actions.hideHud())
   }
 }

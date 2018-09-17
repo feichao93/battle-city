@@ -3,8 +3,6 @@
  * 第一部分为 action type，定义在 enum A 中
  * 第二部分为 action 本身的 TS 类型，注意需要将该 TS type alias 放到文件下方的 type union 中
  * 第三部分为 action creator
- *
- * 简单的 action，即只有 action type，没有其他参数的 action，可以直接使用 simple/Simple 来创建
  * */
 
 import { Map, Set } from 'immutable'
@@ -415,9 +413,7 @@ export function reqAddPlayerTank(playerName: PlayerName) {
 }
 
 export type ReqAddAIPlayer = ReturnType<typeof reqAddAIPlayer>
-export function reqAddAIPlayer() {
-  return { type: A.ReqAddAIPlayer as A.ReqAddAIPlayer }
-}
+export const reqAddAIPlayer = () => ({ type: A.ReqAddAIPlayer as A.ReqAddAIPlayer })
 
 export type RemovePlayer = ReturnType<typeof removePlayer>
 export function removePlayer(playerName: PlayerName) {
@@ -619,13 +615,66 @@ export function playSound(soundName: SoundName) {
   }
 }
 
-/** simple action creator */
-export function simple<T extends A>(actionType: T) {
-  return { type: actionType }
-}
+export type BeforeEndStage = ReturnType<typeof beforeEndStage>
+export const beforeEndStage = () => ({ type: A.BeforeEndStage as A.BeforeEndStage })
 
-/** simple action type factory */
-export type Simple<T extends A> = { type: T }
+export type EndStage = ReturnType<typeof endStage>
+export const endStage = () => ({ type: A.EndStage as A.EndStage })
+
+export type BeforeEndGame = ReturnType<typeof beforeEndGame>
+export const beforeEndGame = () => ({ type: A.BeforeEndGame as A.BeforeEndGame })
+
+export type EndGame = ReturnType<typeof endGame>
+export const endGame = () => ({ type: A.EndGame as A.EndGame })
+
+export type ResetGame = ReturnType<typeof resetGame>
+export const resetGame = () => ({ type: A.ResetGame as A.ResetGame })
+
+export type GamePause = ReturnType<typeof gamePause>
+export const gamePause = () => ({ type: A.GamePause as A.GamePause })
+
+export type GameResume = ReturnType<typeof gameResume>
+export const gameResume = () => ({ type: A.GameResume as A.GameResume })
+
+export type ShowHud = ReturnType<typeof showHud>
+export const showHud = () => ({ type: A.ShowHud as A.ShowHud })
+
+export type HideHud = ReturnType<typeof hideHud>
+export const hideHud = () => ({ type: A.HideHud as A.HideHud })
+
+export type ShowStatistics = ReturnType<typeof showStatistics>
+export const showStatistics = () => ({ type: A.ShowStatistics as A.ShowStatistics })
+
+export type HideStatistics = ReturnType<typeof hideStatistics>
+export const hideStatistics = () => ({ type: A.HideStatistics as A.HideStatistics })
+
+export type RemoveFirstRemainingEnemy = ReturnType<typeof removeFirstRemainingEnemy>
+export const removeFirstRemainingEnemy = () => ({
+  type: A.RemoveFirstRemainingEnemy as A.RemoveFirstRemainingEnemy,
+})
+
+export type DeactivateAllPlayers = ReturnType<typeof deactivateAllPlayers>
+export const deactivateAllPlayers = () => ({
+  type: A.DeactivateAllPlayers as A.DeactivateAllPlayers,
+})
+
+export type DestroyEagle = ReturnType<typeof destroyEagle>
+export const destroyEagle = () => ({ type: A.DestroyEagle as A.DestroyEagle })
+
+export type ShowTotalKillCount = ReturnType<typeof showTotalKillCount>
+export const showTotalKillCount = () => ({ type: A.ShowTotalKillCount as A.ShowTotalKillCount })
+
+export type ClearAllPowerUps = ReturnType<typeof clearAllPowerUps>
+export const clearAllPowerUps = () => ({ type: A.ClearAllPowerUps as A.ClearAllPowerUps })
+
+export type ClearBullets = ReturnType<typeof clearBullets>
+export const clearBullets = () => ({ type: A.ClearBullets as A.ClearBullets })
+
+export type SyncCustomStages = ReturnType<typeof syncCustomStages>
+export const syncCustomStages = () => ({ type: A.SyncCustomStages as A.SyncCustomStages })
+
+export type LeaveGameScene = ReturnType<typeof leaveGameScene>
+export const leaveGameScene = () => ({ type: A.LeaveGameScene as A.LeaveGameScene })
 
 export type Action =
   | Move
@@ -646,19 +695,19 @@ export type Action =
   | LoadStageMap
   | BeforeStartStage
   | StartStage
-  | Simple<A.BeforeEndStage>
-  | Simple<A.EndStage>
-  | Simple<A.BeforeEndGame>
-  | Simple<A.EndGame>
+  | BeforeEndStage
+  | EndStage
+  | BeforeEndGame
+  | EndGame
   | StartGame
-  | Simple<A.ResetGame>
-  | Simple<A.GamePause>
-  | Simple<A.GameResume>
-  | Simple<A.ShowHud>
-  | Simple<A.HideHud>
-  | Simple<A.ShowStatistics>
-  | Simple<A.HideStatistics>
-  | Simple<A.RemoveFirstRemainingEnemy>
+  | ResetGame
+  | GamePause
+  | GameResume
+  | ShowHud
+  | HideHud
+  | ShowStatistics
+  | HideStatistics
+  | RemoveFirstRemainingEnemy
   | IncrementPlayerLife
   | DecrementPlayerLife
   | ActivatePlayer
@@ -666,12 +715,12 @@ export type Action =
   | ReqAddPlayerTank
   | ReqAddAIPlayer
   | RemovePlayer
-  | Simple<A.DeactivateAllPlayers>
+  | DeactivateAllPlayers
   | AddOrUpdateExplosion
   | RemoveExplosion
   | SetText
   | MoveTexts
-  | Simple<A.DestroyEagle>
+  | DestroyEagle
   | StartSpawnTank
   | AddTank
   | DeactivateTank
@@ -684,18 +733,18 @@ export type Action =
   | Kill
   | IncKillCount
   | UpdateTransientKillInfo
-  | Simple<A.ShowTotalKillCount>
+  | ShowTotalKillCount
   | SetPowerUp
   | RemovePowerUp
   | RemovePowerUpProperty
-  | Simple<A.ClearAllPowerUps>
+  | ClearAllPowerUps
   | PickPowerUp
   | AddScore
   | RemoveScore
   | UpgardeTank
   | UpdateCurtain
   | SetReservedTank
-  | Simple<A.ClearBullets>
+  | ClearBullets
   | UpdateComingStageName
   | AddRestrictedArea
   | RemoveRestrictedArea
@@ -704,6 +753,6 @@ export type Action =
   | SetCustomStage
   | RemoveCustomStage
   | SetEditorContent
-  | Simple<A.SyncCustomStages>
-  | Simple<A.LeaveGameScene>
+  | SyncCustomStages
+  | LeaveGameScene
   | PlaySound

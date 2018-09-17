@@ -3,7 +3,6 @@ import { eventChannel } from 'redux-saga'
 import { put, select, take, takeEvery } from 'redux-saga/effects'
 import { State } from '../types'
 import * as actions from '../utils/actions'
-import { A, simple } from '../utils/actions'
 
 export interface TickEmitterOptions {
   maxFPS?: number
@@ -43,9 +42,9 @@ export default function* tickEmitter(options: TickEmitterOptions = {}) {
       }: State = yield select()
       yield put(actions.playSound('pause'))
       if (!paused) {
-        yield put(simple(A.GamePause))
+        yield put(actions.gamePause())
       } else {
-        yield put(simple(A.GameResume))
+        yield put(actions.gameResume())
       }
     })
   }

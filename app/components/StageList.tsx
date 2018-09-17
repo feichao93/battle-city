@@ -83,7 +83,7 @@ class StageListPageUnconnected extends React.PureComponent<StageListProps> {
           }
         }
         dispatch(actions.setCustomStage(stage))
-        dispatch(actions.simple(actions.A.SyncCustomStages))
+        dispatch(actions.syncCustomStages())
         if (tab !== 'custom') {
           dispatch(replace('/list/custom'))
         }
@@ -136,7 +136,7 @@ class StageListPageUnconnected extends React.PureComponent<StageListProps> {
     } = this.props
     if (await showConfirmPopup(`Delete stage ${stageName}?`)) {
       this.props.dispatch(actions.removeCustomStage(stageName))
-      this.props.dispatch(actions.simple(actions.A.SyncCustomStages))
+      this.props.dispatch(actions.syncCustomStages())
     }
   }
 

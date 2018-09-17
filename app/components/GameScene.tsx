@@ -6,9 +6,9 @@ import { Dispatch } from 'redux'
 import { GameRecord } from '../reducers/game'
 import { State } from '../types'
 import StageConfig from '../types/StageConfig'
+import * as actions from '../utils/actions'
 import BattleFieldScene from './BattleFieldScene'
 import StatisticsScene from './StatisticsScene'
-import * as actions from '../utils/actions'
 
 export interface GameSceneProps {
   game: GameRecord
@@ -43,14 +43,13 @@ class GameScene extends React.PureComponent<GameSceneProps> {
         stageName !== game.currentStageName
       ) {
         DEV.LOG && console.log('`stageName` in url changed. Restart game...')
-
         dispatch(actions.startGame(stages.findIndex(s => s.name === stageName)))
       }
     }
   }
 
   componentWillUnmount() {
-    this.props.dispatch(actions.simple(actions.A.LeaveGameScene))
+    this.props.dispatch(actions.leaveGameScene())
   }
 
   render() {

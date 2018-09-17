@@ -2,12 +2,11 @@ import { Map } from 'immutable'
 import { put, select } from 'redux-saga/effects'
 import { State } from '../types'
 import * as actions from '../utils/actions'
-import { A, simple } from '../utils/actions'
 import { TANK_LEVELS } from '../utils/constants'
 import Timing from '../utils/Timing'
 
 export default function* statistics() {
-  yield put(simple(A.ShowStatistics))
+  yield put(actions.showStatistics())
 
   const {
     game: { killInfo },
@@ -46,8 +45,8 @@ export default function* statistics() {
   }
   yield Timing.delay(DEV.FAST ? 80 : 200)
   yield put(actions.playSound('statistics_1'))
-  yield put(simple(A.ShowTotalKillCount))
+  yield put(actions.showTotalKillCount())
   yield Timing.delay(DEV.FAST ? 400 : 1000)
 
-  yield put(simple(A.HideStatistics))
+  yield put(actions.hideStatistics())
 }

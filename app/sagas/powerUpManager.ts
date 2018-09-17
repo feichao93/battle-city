@@ -202,13 +202,13 @@ function* spawnPowerUpIfNeccessary(action: actions.Hit) {
 
 function* clearAllPowerUps({ tank }: actions.StartSpawnTank) {
   if (tank.side === 'ai' && tank.withPowerUp) {
-    yield put(actions.simple(actions.A.ClearAllPowerUps))
+    yield put(actions.clearAllPowerUps())
   }
 }
 
 function raceEndStage(handler: any) {
   return function*() {
-    yield race<any>([take(A.EndStage), handler()])
+    yield race([take(A.EndStage), handler()])
   }
 }
 

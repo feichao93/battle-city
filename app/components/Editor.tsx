@@ -296,7 +296,7 @@ class Editor extends React.Component<EditorProps> {
       const { dispatch } = this.props
       const stage = StageConfigConverter.e2s(Object.assign({ custom: true }, this.state))
       dispatch(actions.setCustomStage(stage))
-      dispatch(actions.simple(actions.A.SyncCustomStages))
+      dispatch(actions.syncCustomStages())
       dispatch(replace('/list/custom'))
     }
   }
