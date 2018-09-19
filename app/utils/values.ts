@@ -2,9 +2,9 @@ import { TankRecord } from '../types'
 
 namespace values {
   export function bulletPower(tank: TankRecord) {
-    if (tank.side === 'human' && tank.level === 'armor') {
+    if (tank.side === 'player' && tank.level === 'armor') {
       return 3
-    } else if (tank.side === 'ai' && tank.level === 'power') {
+    } else if (tank.side === 'bot' && tank.level === 'power') {
       return 2
     } else {
       return 1
@@ -13,7 +13,7 @@ namespace values {
 
   export function moveSpeed(tank: TankRecord) {
     // todo 需要校准数值
-    if (tank.side === 'human') {
+    if (tank.side === 'player') {
       return DEV.FAST ? 0.06 : 0.045
     } else {
       if (tank.level === 'power') {
@@ -37,7 +37,7 @@ namespace values {
   }
 
   export function bulletLimit(tank: TankRecord) {
-    if (tank.side === 'ai' || tank.level === 'basic' || tank.level === 'fast') {
+    if (tank.side === 'bot' || tank.level === 'basic' || tank.level === 'fast') {
       return 1
     } else {
       return 2
@@ -46,7 +46,7 @@ namespace values {
 
   export function bulletSpeed(tank: TankRecord) {
     // todo 需要校准数值
-    if (tank.side === 'human') {
+    if (tank.side === 'player') {
       if (DEV.FAST) {
         return 0.3
       }

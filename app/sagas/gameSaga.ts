@@ -9,10 +9,10 @@ import { getNextId } from '../utils/common'
 import { BLOCK_SIZE, PLAYER_CONFIGS } from '../utils/constants'
 import * as selectors from '../utils/selectors'
 import Timing from '../utils/Timing'
-import AIMasterSaga from './AIMasterSaga'
+import botMasterSaga from './botMasterSaga'
 import bulletsSaga from './bulletsSaga'
 import animateTexts from './common/animateTexts'
-import humanPlayerSaga from './humanPlayerSaga'
+import playerSaga from './playerSaga'
 import powerUpManager from './powerUpManager'
 import stageSaga, { StageResult } from './stageSaga'
 import tickEmitter from './tickEmitter'
@@ -39,7 +39,7 @@ function* animateGameover() {
     })
     yield put(actions.setText(text2))
     yield put(actions.playSound('game_over'))
-    yield* animateTexts([textId1, textId2], {
+    yield animateTexts([textId1, textId2], {
       direction: 'up',
       distance: BLOCK_SIZE * 6,
       duration: 2000,
@@ -72,7 +72,7 @@ function* stageFlow(startStageIndex: number) {
  */
 export default function* gameSaga(action: actions.StartGame | actions.ResetGame) {
   if (action.type === A.ResetGame) {
-    console.log('GAME RESET')
+    DEV.LOG && console.log('GAME RESET')
     return
   }
 
@@ -81,15 +81,15 @@ export default function* gameSaga(action: actions.StartGame | actions.ResetGame)
   yield delay(0)
   DEV.LOG && console.log('GAME STARTED')
 
-  const humanPlayers = [humanPlayerSaga('player-1', PLAYER_CONFIGS.player1)]
+  const players = [playerSaga('player-1', PLAYER_CONFIGS.player1)]
   if (yield select(selectors.isInMultiPlayersMode)) {
-    humanPlayers.push(humanPlayerSaga('player-2', PLAYER_CONFIGS.player2))
+    players.push(playerSaga('player-2', PLAYER_CONFIGS.player2))
   }
 
   const result = yield race({
     tick: tickEmitter({ bindESC: true }),
-    human: all(humanPlayers),
-    ai: AIMasterSaga(),
+    players: all(players),
+    ai: botMasterSaga(),
     powerUp: powerUpManager(),
     bullets: bulletsSaga(),
     // 上面几个 saga 在一个 gameSaga 的生命周期内被认为是后台服务

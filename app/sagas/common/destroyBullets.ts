@@ -33,7 +33,7 @@ function* explosionFromBullet(bullet: BulletRecord) {
 
 /** 移除单个子弹, 调用explosionFromBullet来生成子弹爆炸(并在之后移除子弹爆炸效果) */
 function* destroyBullet(bullet: BulletRecord, useExplosion: boolean) {
-  // if (bullet.side === 'human') {
+  // if (bullet.side === 'player') {
   //  // TODO soundManager.explosion_2()
   // }
   yield put(actions.beforeRemoveBullet(bullet.bulletId))

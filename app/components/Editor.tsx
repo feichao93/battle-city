@@ -472,7 +472,7 @@ class Editor extends React.Component<EditorProps> {
                 disabled={tankLevel === 'basic'}
                 onClick={() => this.onDecEnemyLevel(index)}
               />
-              <Tank tank={new TankRecord({ side: 'ai', level: tankLevel, x: B, y: 0 })} />
+              <Tank tank={new TankRecord({ side: 'bot', level: tankLevel, x: B, y: 0 })} />
               <TextButton
                 content={'\u2192'}
                 x={2.25 * B}

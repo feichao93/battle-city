@@ -3,6 +3,7 @@ import { routerReducer } from 'react-router-redux'
 import { combineReducers } from 'redux'
 import devOnly from '../components/dev-only/reducer'
 import MapRecord from '../types/MapRecord'
+import PlayerRecord from '../types/PlayerRecord'
 import StageConfig from '../types/StageConfig'
 import { A, Action } from '../utils/actions'
 import bullets, { BulletsMap } from './bullets'
@@ -10,7 +11,7 @@ import explosions, { ExplosionsMap } from './explosions'
 import flickers, { FlickersMap } from './flickers'
 import game, { GameRecord } from './game'
 import map from './map'
-import players, { PlayersMap } from './players'
+import { player1, player2 } from './players'
 import powerUps, { PowerUpsMap } from './powerUps'
 import scores, { ScoresMap } from './scores'
 import stages from './stages'
@@ -20,7 +21,8 @@ import texts, { TextsMap } from './texts'
 export interface State {
   router: any
   game: GameRecord
-  players: PlayersMap
+  player1: PlayerRecord
+  player2: PlayerRecord
   bullets: BulletsMap
   explosions: ExplosionsMap
   map: MapRecord
@@ -54,7 +56,8 @@ export function editorContent(state = new StageConfig(), action: Action) {
 export default combineReducers<State>({
   router: routerReducer,
   game,
-  players,
+  player1,
+  player2,
   bullets,
   map,
   time,

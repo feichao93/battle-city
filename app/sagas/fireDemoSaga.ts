@@ -11,16 +11,18 @@ import { spawnTank } from './common'
 import { explosionFromTank } from './common/destroyTanks'
 import directionController from './directionController'
 import fireController from './fireController'
+import playerController from './playerController'
+import playerTankSaga from './playerTankSaga'
 import tickEmitter from './tickEmitter'
 
 const always = (v: any) => () => v
 
-function* demoHumanController(playerName: string) {
+function* demoPlayerContronller(tankId: TankId) {
   let fire = false
 
   yield all([
-    directionController(playerName, always(null)),
-    fireController(playerName, shouldFire),
+    directionController(tankId, always(null)),
+    fireController(tankId, shouldFire),
     setFireToTrueEvery3Seconds(),
   ])
 
@@ -40,18 +42,10 @@ function* demoHumanController(playerName: string) {
   }
 }
 
-export function* demohumanPalyerSaga(playerName: string, tankPrototype: TankRecord) {
-  const player = new PlayerRecord({
-    playerName,
-    lives: 3,
-    side: 'human',
-  })
-  yield put(actions.addPlayer(player))
-  yield fork(demoHumanController, playerName)
-
+export function* demohumanPalyerSaga(tankPrototype: TankRecord) {
   const tankId = getNextId('tank')
   yield spawnTank(tankPrototype.set('tankId', tankId), 2)
-  yield put(actions.activatePlayer(playerName, tankId))
+  yield fork(demoPlayerContronller, tankId)
 }
 
 export const demoStage = StageConfigConverter.r2s({
@@ -83,7 +77,7 @@ export function* demoAIMasterSaga() {
       tankId,
       x: 5.5 * B,
       y: 0.5 * B,
-      side: 'ai',
+      side: 'bot',
       level: 'basic',
       hp: 1,
       direction: 'left',
@@ -101,23 +95,9 @@ export default function* fireDemoSaga() {
   yield fork(bulletsSaga)
   yield put(actions.loadStageMap(demoStage))
   yield fork(demoAIMasterSaga)
-  const baseTank = new TankRecord({
-    active: true,
-    side: 'human',
-    level: 'basic',
-    direction: 'right',
-  })
-  yield fork(
-    demohumanPalyerSaga,
-    'yellow-player',
-    baseTank.set('y', 0.5 * B).set('color', 'yellow'),
-  )
-  yield fork(
-    demohumanPalyerSaga,
-    'green-player',
-    baseTank
-      .set('y', 3.5 * B)
-      .set('color', 'green')
-      .set('level', 'fast'),
-  )
+  const baseTank = new TankRecord({ direction: 'right' })
+  const yelloTank = baseTank.merge({ y: 0.5 * B, color: 'yellow' })
+  const greenTank = baseTank.merge({ y: 3.5 * B, color: 'green', level: 'fast' })
+  yield fork(demohumanPalyerSaga, yelloTank)
+  yield fork(demohumanPalyerSaga, greenTank)
 }

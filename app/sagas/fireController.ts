@@ -6,7 +6,7 @@ import { calculateBulletStartPosition, getNextId } from '../utils/common'
 import * as selectors from '../utils/selectors'
 import values from '../utils/values'
 
-export default function* fireController(playerName: string, shouldFire: () => boolean) {
+export default function* fireController(tankId: TankId, shouldFire: () => boolean) {
   // tank.cooldown用来记录player距离下一次可以发射子弹的时间
   // tank.cooldown大于0的时候玩家不能发射子弹
   // 每个TICK时, cooldown都会相应减少. 坦克发射子弹的时候, cooldown重置为坦克的发射间隔
@@ -14,11 +14,11 @@ export default function* fireController(playerName: string, shouldFire: () => bo
   while (true) {
     const { delta }: actions.Tick = yield take(A.Tick)
     const { bullets: allBullets }: State = yield select()
-    const tank: TankRecord = yield select(selectors.playerTank, playerName)
+    const tank: TankRecord = yield select((s: State) => s.tanks.get(tankId))
     const {
       game: { AIFrozenTimeout },
     }: State = yield select()
-    if (tank == null || (tank.side === 'ai' && AIFrozenTimeout > 0)) {
+    if (tank == null || (tank.side === 'bot' && AIFrozenTimeout > 0)) {
       continue
     }
     let nextCooldown = tank.cooldown <= 0 ? 0 : tank.cooldown - delta
@@ -27,7 +27,7 @@ export default function* fireController(playerName: string, shouldFire: () => bo
       const bullets = allBullets.filter(bullet => bullet.tankId === tank.tankId)
       if (bullets.count() < values.bulletLimit(tank)) {
         const { x, y } = calculateBulletStartPosition(tank)
-        if (tank.side === 'human') {
+        if (tank.side === 'player') {
           yield put(actions.playSound('bullet_shot'))
         }
         const bullet = new BulletRecord({
@@ -41,7 +41,7 @@ export default function* fireController(playerName: string, shouldFire: () => bo
           speed: values.bulletSpeed(tank),
           tankId: tank.tankId,
           side: tank.side,
-          playerName,
+          playerName: yield select(selectors.playerName, tankId),
         })
         yield put(actions.addBullet(bullet))
         // 一旦发射子弹, 则重置cooldown计数器

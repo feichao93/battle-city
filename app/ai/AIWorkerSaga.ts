@@ -9,7 +9,7 @@ import { randint } from '../utils/common'
 import { BLOCK_DISTANCE_THRESHOLD, BLOCK_TIMEOUT } from '../utils/constants'
 import * as selectors from '../utils/selectors'
 import Timing from '../utils/Timing'
-import AITankCtx from './AITankCtx'
+import Bot from './Bot'
 import * as dodgeUtils from './dodge-utils'
 import { getEnv, RelativePosition } from './env-utils'
 import { calculateFireEstimateMap, FireEstimate, getAIFireCount, getFireResist } from './fire-utils'
@@ -30,10 +30,10 @@ function getRandomPassableSpot(posInfoArray: Spot[]) {
   }
 }
 
-function* wanderMode(ctx: AITankCtx) {
+function* wanderMode(ctx: Bot) {
   DEV.LOG_AI && logAI('enter wander-mode')
   const simpleFireLoopTask: Task = yield fork(simpleFireLoop, ctx)
-  const tank: TankRecord = yield select(selectors.playerTank, ctx.playerName)
+  const tank: TankRecord = yield select(selectors.tank, ctx.tankId)
   DEV.ASSERT && console.assert(tank != null)
   const { map }: State = yield select()
   const allSpots = getAllSpots(map)
@@ -46,11 +46,11 @@ function* wanderMode(ctx: AITankCtx) {
   simpleFireLoopTask.cancel()
 }
 
-function* attackEagleMode(ctx: AITankCtx) {
+function* attackEagleMode(ctx: Bot) {
   DEV.LOG_AI && logAI('enter attack-eagle-mode')
   const simpleFireLoopTask: Task = yield fork(simpleFireLoop, ctx)
   const { map }: State = yield select()
-  const tank: TankRecord = yield select(selectors.playerTank, ctx.playerName)
+  const tank: TankRecord = yield select(selectors.tank, ctx.tankId)
   DEV.ASSERT && console.assert(tank != null)
   const eagleWeakSpots = around(getTankSpot(map.eagle))
   const allSpots = getAllSpots(map)
@@ -70,17 +70,17 @@ function* attackEagleMode(ctx: AITankCtx) {
   }
 }
 
-function* attackEagle(ctx: AITankCtx, fireEstimate: FireEstimate) {
+function* attackEagle(ctx: Bot, fireEstimate: FireEstimate) {
   DEV.LOG_AI && logAI('start attack eagle')
   const { map, tanks }: State = yield select()
-  const tank: TankRecord = yield select(selectors.playerTank, ctx.playerName)
+  const tank: TankRecord = yield select(selectors.tank, ctx.tankId)
   DEV.ASSERT && console.assert(tank != null)
   const env = getEnv(map, tanks, tank)
   ctx.turn(env.tankPosition.eagle.getPrimaryDirection())
   yield take(A.Tick) // 等待一个 tick, 确保转向已经完成
   let fireCount = getAIFireCount(fireEstimate)
   while (fireCount > 0) {
-    const fireInfo: TankFireInfo = yield select(selectors.fireInfo, ctx.playerName)
+    const fireInfo: TankFireInfo = yield select(selectors.fireInfo, ctx.tankId)
     if (fireInfo.canFire) {
       ctx.fire()
       yield take(ctx.noteChannel, 'bullet-complete')
@@ -92,9 +92,9 @@ function* attackEagle(ctx: AITankCtx, fireEstimate: FireEstimate) {
 }
 
 // TODO WIP
-function* dangerDetectionLoop(ctx: AITankCtx) {
+function* dangerDetectionLoop(ctx: Bot) {
   while (true) {
-    const tank: TankRecord = yield select(selectors.playerTank, ctx.playerName)
+    const tank: TankRecord = yield select(selectors.tank, ctx.tankId)
     DEV.ASSERT && console.assert(tank != null)
     const tankWeakSpots = around(getTankSpot(tank))
     const { map, bullets, tanks }: State = yield select()
@@ -105,7 +105,7 @@ function* dangerDetectionLoop(ctx: AITankCtx) {
     // upcomingBullets: 即将击中坦克的子弹
     const upcomingBullets = bullets.filter(
       blt =>
-        tanks.get(blt.tankId).side === 'human' &&
+        tanks.get(blt.tankId).side === 'player' &&
         directEstMap.has(getBulletSpot(blt)) &&
         // TODO 直接调用getPrimaryDirection可能会有一点点的误差
         new RelativePosition(blt, tank).getPrimaryDirection() === blt.direction,
@@ -126,12 +126,12 @@ function* dangerDetectionLoop(ctx: AITankCtx) {
   }
 }
 
-function* blocked(ctx: AITankCtx) {
+function* blocked(ctx: Bot) {
   let acc = 0
-  let lastTank = yield select(selectors.playerTank, ctx.playerName)
+  let lastTank = yield select(selectors.tank, ctx.tankId)
   while (acc < BLOCK_TIMEOUT) {
     const { delta }: actions.Tick = yield take(actions.A.Tick)
-    const tank: TankRecord = yield select(selectors.playerTank, ctx.playerName)
+    const tank: TankRecord = yield select(selectors.tank, ctx.tankId)
     if (tank.frozenTimeout > 0) {
       continue
     }
@@ -155,7 +155,7 @@ function* blocked(ctx: AITankCtx) {
  * 并将创建noteChannel和commandChannel
  * 游戏逻辑和AI逻辑使用这两个channel来进行数据交换
  */
-export default function* AIWorkerSaga(ctx: AITankCtx) {
+export default function* AIWorkerSaga(ctx: Bot) {
   yield fork(dangerDetectionLoop, ctx)
 
   let continuousWanderCount = 0

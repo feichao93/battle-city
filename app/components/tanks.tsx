@@ -79,7 +79,7 @@ function resolveTankColorConfig(tank: TankRecord): Timing<TankColor> {
 
 function resolveTankComponent(side: Side, level: TankLevel): TankComponent {
   let component: TankComponent
-  if (side === 'human') {
+  if (side === 'player') {
     if (level === 'basic') {
       component = TankHumanBasic
     } else if (level === 'fast') {

@@ -78,7 +78,7 @@ export class BulletCollisionInfo extends DefaultMap<BulletId, Collision[]> {
 
   getExplosionSoundName(bulletId: BulletId): SoundName {
     const bullet = this.bullets.get(bulletId)
-    if (bullet.side === 'human') {
+    if (bullet.side === 'player') {
       const collisions = this.get(bulletId)
       if (collisions.some(c => c.type === 'steel' || c.type === 'border')) {
         return 'bullet_hit_1'

@@ -12,7 +12,6 @@ export { default as MapRecord } from './MapRecord'
 export { default as EagleRecord } from './EagleRecord'
 export { default as StageConfig, RawStageConfig, StageDifficulty } from './StageConfig'
 export { State } from '../reducers/index'
-export { PlayersMap } from '../reducers/players'
 export { BulletsMap } from '../reducers/bullets'
 export { TextsMap } from '../reducers/texts'
 export { TanksMap } from '../reducers/tanks'
@@ -69,12 +68,8 @@ declare global {
   type ScoreId = number
   type AreaId = number
 
-  /**
-   * 玩家名称.
-   * human-player的名称格式为 'player-x', 而AI-player的名称格式为 'AI-x'
-   * 其实x表示数字1,2,3...
-   */
-  type PlayerName = string
+  type PlayerName = 'player-1' | 'player-2'
+  type BotName = string
   type TextId = number
   type FlickerId = number
   type ExplosionId = number
@@ -86,8 +81,7 @@ declare global {
   type BrickIndex = number
   type RiverIndex = number
 
-  // TODO 分离 humanPlayer 和 aiPlayer 之后，将 Side 改为 player 和 bot
-  type Side = 'human' | 'ai'
+  type Side = 'player' | 'bot'
 
   /** Note 包含了一些游戏逻辑向AI逻辑发送的消息/通知 */
   type Note = Note.Note

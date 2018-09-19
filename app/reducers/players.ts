@@ -1,34 +1,27 @@
-import { Map } from 'immutable'
 import PlayerRecord from '../types/PlayerRecord'
-import { inc } from '../utils/common'
 import { A, Action } from '../utils/actions'
+import { dec, inc } from '../utils/common'
 
-export type PlayersMap = Map<PlayerName, PlayerRecord>
-
-export default function players(state = Map() as PlayersMap, action: Action) {
-  if (action.type === A.ActivatePlayer) {
-    const { playerName, tankId } = action
-    return state.update(playerName, player =>
-      player.set('activeTankId', tankId).set('active', true),
-    )
-  } else if (action.type === A.AddPlayer) {
-    return state.set(action.player.playerName, action.player)
-  } else if (action.type === A.RemovePlayer) {
-    return state.remove(action.playerName)
-  } else if (action.type === A.StartStage) {
-    return state.filterNot(player => player.side === 'ai')
-  } else if (action.type === A.SetReservedTank) {
-    return state.update(action.playerName, p => p.set('reservedTank', action.tank))
-  } else if (action.type === A.DeactivateTank) {
-    return state.map(p => (p.activeTankId === action.tankId ? p.set('activeTankId', 0) : p))
-  } else if (action.type === A.DeactivateAllPlayers) {
-    return state.map(p => p.set('active', false))
-  } else if (action.type === A.DecrementPlayerLife) {
-    const player = state.get(action.playerName)
-    return state.set(action.playerName, player.update('lives', x => x - 1))
-  } else if (action.type === A.IncrementPlayerLife) {
-    return state.update(action.playerName, p => p.update('lives', inc(1)))
-  } else {
-    return state
+export function playerReducerFactory(playerName: PlayerName) {
+  const initState = new PlayerRecord({ playerName, lives: 3, side: 'player' })
+  return function players(state = initState, action: Action) {
+    if (action.type === A.ActivatePlayer && action.playerName === playerName) {
+      return state.set('activeTankId', action.tankId)
+    } else if (action.type === A.StartGame) {
+      return state.set('lives', 3)
+    } else if (action.type === A.SetReservedTank && action.playerName === playerName) {
+      return state.set('reservedTank', action.tank)
+    } else if (action.type === A.DeactivateTank) {
+      return state.activeTankId === action.tankId ? state.set('activeTankId', -1) : state
+    } else if (action.type === A.DecrementPlayerLife && action.playerName === playerName) {
+      return state.update('lives', dec(1))
+    } else if (action.type === A.IncrementPlayerLife && action.playerName === playerName) {
+      return state.update('lives', inc(1))
+    } else {
+      return state
+    }
   }
 }
+
+export const player1 = playerReducerFactory('player-1')
+export const player2 = playerReducerFactory('player-2')

@@ -1,11 +1,13 @@
 import { Record } from 'immutable'
 
 const TankRecordType = Record({
-  active: true,
+  /** 坦克是否存活在战场上，因为坦克被击毁之后，坦克的子弹可能还处于飞行状态
+   * 故不能直接将坦克移除，而是使用该字段来表示坦克状态 */
+  alive: true,
   tankId: 0,
   x: 0,
   y: 0,
-  side: 'human' as Side,
+  side: 'player' as Side,
   direction: 'up' as Direction,
   moving: false,
   level: 'basic' as TankLevel,
@@ -23,7 +25,7 @@ const TankRecordType = Record({
   frozenTimeout: 0,
   // cooldown小于等于0表示可以进行开火, 大于0表示还需要等待cooldown毫秒才能进行开火
   cooldown: 0,
-  // human tank被队友击中时无法移动，此时坦克会闪烁，该变量用来记录坦克是否可见
+  // player tank被队友击中时无法移动，此时坦克会闪烁，该变量用来记录坦克是否可见
   visible: true,
 })
 

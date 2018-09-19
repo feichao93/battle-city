@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import React from 'react'
 import { connect } from 'react-redux'
-import { ExplosionsMap, PlayersMap, ScoresMap, State, TankRecord, TanksMap } from '../../types'
+import { ExplosionsMap, ScoresMap, State, TankRecord, TanksMap } from '../../types'
 
 let connectedInspector: any = () => null as any
 
@@ -20,7 +20,6 @@ if (DEV.INSPECTOR) {
     view: View
     allScores: ScoresMap
     allTanks: TanksMap
-    allPlayers: PlayersMap
     allExplosions: ExplosionsMap
   }
 
@@ -29,17 +28,15 @@ if (DEV.INSPECTOR) {
       view: 'scores' as View,
       allScores: this.props.scores,
       allTanks: this.props.tanks.map(roundTank),
-      allPlayers: this.props.players,
       allExplosions: this.props.explosions,
     }
 
     componentWillReceiveProps(nextProps: State) {
-      const { scores, tanks, players, explosions } = this.props
-      const { allScores, allTanks, allPlayers, allExplosions } = this.state
+      const { scores, tanks, explosions } = this.props
+      const { allScores, allTanks, allExplosions } = this.state
       this.setState({
         allScores: allScores.merge(scores),
         allTanks: allTanks.merge(tanks.map(roundTank)),
-        allPlayers: allPlayers.merge(players),
         allExplosions: allExplosions.merge(explosions),
       })
     }
@@ -55,23 +52,11 @@ if (DEV.INSPECTOR) {
     }
 
     renderPlayersView() {
-      const { players } = this.props
-      const { allPlayers } = this.state
+      const { player1, player2 } = this.props
       return (
         <div className="players-view">
-          {allPlayers.isEmpty() ? <p> EMPTY PLAYERS </p> : null}
-          {allPlayers
-            .map(p => (
-              <pre
-                key={p.playerName}
-                style={{
-                  textDecoration: players.has(p.playerName) ? 'none' : 'line-through',
-                }}
-              >
-                {JSON.stringify(p, null, 2)}
-              </pre>
-            ))
-            .toArray()}
+          <pre>{JSON.stringify(player1, null, 2)}</pre>
+          <pre>{JSON.stringify(player2, null, 2)}</pre>
         </div>
       )
     }

@@ -28,10 +28,10 @@ export default function tanks(state = Map() as TanksMap, action: Action) {
     return state.update(action.tankId, tank => tank.set('withPowerUp', false))
   } else if (action.type === A.DeactivateTank) {
     // 不能在关卡进行过程中移除tank, 因为tank的子弹可能正在飞行
-    // 防御式编程: tank设置为inactive的时候重置一些状态
+    // 防御式编程: tank 设置为 dead 的时候重置一些状态
     return state.update(action.tankId, tank =>
       tank.merge({
-        active: false,
+        alive: false,
         cooldown: 0,
         frozenTimeout: 0,
         helmetDuration: 0,
@@ -44,7 +44,7 @@ export default function tanks(state = Map() as TanksMap, action: Action) {
   } else if (action.type === A.SetAIFrozenTimeout) {
     return state.map(
       tank =>
-        tank.side === 'ai' ? tank.set('moving', false).set('frozenTimeout', action.timeout) : tank,
+        tank.side === 'bot' ? tank.set('moving', false).set('frozenTimeout', action.timeout) : tank,
     )
   } else if (action.type === A.SetFrozenTimeout) {
     return state.update(action.tankId, tank =>

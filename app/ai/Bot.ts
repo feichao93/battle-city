@@ -7,14 +7,14 @@ import { RelativePosition } from './env-utils'
 import { logAI } from './logger'
 import { getCol, getRow } from './spot-utils'
 
-export default class AITankCtx {
+export default class Bot {
   private _fire = false
   private nextDirection: Direction = null
   private forwardLength = 0
   private startPos = 0
   readonly noteChannel = multicastChannel<Note>()
 
-  constructor(readonly playerName: string) {}
+  constructor(readonly tankId: TankId) {}
 
   turn(direction: Direction) {
     DEV.LOG_AI && logAI('turn', direction)
@@ -28,7 +28,7 @@ export default class AITankCtx {
 
   *forward(forwardLength: number) {
     DEV.LOG_AI && logAI('forward', forwardLength)
-    const tank = yield select(selectors.playerTank, this.playerName)
+    const tank = yield select(selectors.tank, this.tankId)
     DEV.ASSERT && console.assert(tank != null)
     const { xy } = getDirectionInfo(this.nextDirection || tank.direction)
     this.startPos = tank.get(xy)
@@ -36,7 +36,7 @@ export default class AITankCtx {
   }
 
   *moveTo(t: number) {
-    const tank = yield select(selectors.playerTank, this.playerName)
+    const tank = yield select(selectors.tank, this.tankId)
     DEV.ASSERT && console.assert(tank != null)
     const target = {
       x: getCol(t) * 8 - 8,

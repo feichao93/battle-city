@@ -124,7 +124,7 @@ export default function canTankMove(state: State, tank: TankRecord, threshhold =
   }
 
   // 判断是否与其他坦克相碰撞
-  const activeTanks = tanks.filter(t => t.active)
+  const activeTanks = tanks.filter(t => t.alive)
   if (isTankCollidedWithOtherTanks(activeTanks, tank, tankRect, threshhold)) {
     return false
   }

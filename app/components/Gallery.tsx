@@ -172,7 +172,9 @@ namespace GalleryContent {
 
   const player1KillInfo = Map([['basic', 10], ['fast', 4], ['power', 4], ['armor', 2]])
   const StatisticsPreloadedState = {
-    game: new GameRecord({ killInfo: Map({ 'player-1': player1KillInfo as any }) }),
+    game: new GameRecord({
+      killInfo: Map({ 'player-1': player1KillInfo } as any),
+    }),
   }
   @saga(ticked(statistics), combineReducers({ game }), StatisticsPreloadedState)
   export class Statistics extends React.PureComponent {
@@ -202,10 +204,8 @@ namespace GalleryContent {
     }
   }
 
-  const players = Map({
-    'player-1': new PlayerRecord({ playerName: 'player-1', lives: 3 }),
-    'player-2': new PlayerRecord({ playerName: 'player-2', lives: 1 }),
-  })
+  const player1 = new PlayerRecord({ playerName: 'player-1', lives: 3 })
+  const player2 = new PlayerRecord({ playerName: 'player-2', lives: 1 })
 
   export class Misc extends React.PureComponent {
     render() {
@@ -219,7 +219,13 @@ namespace GalleryContent {
             </Transform>
             <Transform y={16}>
               <rect width={16 + 4} height={128 + 4} fill="#757575" />
-              <HUDContent players={players} remainingEnemyCount={17} show />
+              <HUDContent
+                player1={player1}
+                player2={player2}
+                remainingEnemyCount={17}
+                show
+                inMultiPlayersMode
+              />
             </Transform>
           </Transform>
           <Transform x={96} y={32}>

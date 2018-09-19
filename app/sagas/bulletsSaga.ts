@@ -150,16 +150,16 @@ function* destroyEagleIfNeeded(expBullets: BulletsMap) {
 
 function handleBulletsCollidedWithTanks(stat: Stat, state: State) {
   const { bullets, tanks: allTanks } = state
-  const activeTanks = allTanks.filter(t => t.active)
+  const aliveTanks = allTanks.filter(t => t.alive)
 
   // 子弹与坦克碰撞的规则
-  //        | bullet | tank  | 效果
-  // case-1 | human  | human | human-tank 将会停滞一段时间
-  // case-2 | human  | ai    | ai-tank 扣血
-  // case-3 | ai     | human | human-tank 扣血/死亡
-  // case-4 | ai     | ai    | 无效果，ai-bullet 可以穿过 ai-tank
+  //        | bullet | tank   | 效果
+  // case-1 | player | player | player-tank 将会停滞一段时间
+  // case-2 | player | bot    | bot-tank 扣血
+  // case-3 | bot    | player | player-tank 扣血/死亡
+  // case-4 | bot    | bot    | 无效果，bot-bullet 可以穿过 bot-tank
   for (const bullet of bullets.values()) {
-    for (const tank of activeTanks.values()) {
+    for (const tank of aliveTanks.values()) {
       if (tank.tankId === bullet.tankId) {
         // 如果是自己发射的子弹, 则不需要进行处理
         continue
@@ -171,11 +171,11 @@ function handleBulletsCollidedWithTanks(stat: Stat, state: State) {
         const tankSide = tank.side
         const infoRow = stat.bulletCollisionInfo.get(bullet.bulletId)
 
-        if (bulletSide === 'human') {
+        if (bulletSide === 'player') {
           // case-1 或 case-2: 相同的处理
           stat.tankHitMap.get(tank.tankId).push(bullet)
           infoRow.push({ type: 'tank', tank, shouldExplode: true })
-        } else if (bulletSide === 'ai' && tankSide === 'human') {
+        } else if (bulletSide === 'bot' && tankSide === 'player') {
           // case-3
           if (tank.helmetDuration > 0) {
             infoRow.push({ type: 'tank', tank, shouldExplode: false })
@@ -224,21 +224,14 @@ function handleBulletsCollidedWithEagle({ bulletCollisionInfo }: Stat, state: St
   }
 }
 
-function* spawnHitActions({ tanks, players }: State, stat: Stat) {
+function* spawnHitActions({ tanks }: State, stat: Stat) {
   for (const [targetTankId, hitBullets] of stat.tankHitMap) {
     // 这里假设一帧内最多只有一发子弹同时击中一架坦克
     const bullet = hitBullets[0]
     const sourceTankId = bullet.tankId
-    const sourcePlayerName = bullet.playerName
-    yield put(
-      actions.hit(
-        bullet,
-        tanks.get(targetTankId),
-        tanks.get(sourceTankId),
-        players.find(p => p.activeTankId === targetTankId),
-        players.get(sourcePlayerName),
-      ),
-    )
+    const targetTank = tanks.get(targetTankId)
+    const sourceTank = tanks.get(sourceTankId)
+    yield put(actions.hit(bullet, targetTank, sourceTank))
   }
 }
 

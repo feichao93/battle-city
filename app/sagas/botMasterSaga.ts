@@ -6,11 +6,11 @@ import { A } from '../utils/actions'
 import { getNextId } from '../utils/common'
 import { AI_SPAWN_SPEED_MAP, TANK_INDEX_THAT_WITH_POWER_UP } from '../utils/constants'
 import * as selectors from '../utils/selectors'
-import AIPlayer from './AIPlayer'
+import botSaga from './BotSaga'
 import { spawnTank } from './common'
 
-function* addAIHandler() {
-  const reqChannel = yield actionChannel(A.ReqAddAIPlayer)
+function* addBotHelper() {
+  const reqChannel = yield actionChannel(A.ReqAddBot)
 
   while (true) {
     yield take(reqChannel)
@@ -24,7 +24,7 @@ function* addAIHandler() {
         tankId: getNextId('tank'),
         x,
         y,
-        side: 'ai',
+        side: 'bot',
         level,
         hp,
         withPowerUp: TANK_INDEX_THAT_WITH_POWER_UP.includes(20 - game.remainingEnemies.count()),
@@ -33,21 +33,21 @@ function* addAIHandler() {
       const difficulty = stages.find(s => s.name === game.currentStageName).difficulty
       const spawnSpeed = AI_SPAWN_SPEED_MAP[difficulty]
       yield spawnTank(tank, spawnSpeed)
-      yield fork(AIPlayer, `AI-${getNextId('AI-player')}`, tank.tankId)
+      yield fork(botSaga, tank.tankId)
     }
   }
 }
 
-export default function* AIMasterSaga() {
+export default function* botMasterSaga() {
   const inMultiPlayersMode = yield select(selectors.isInMultiPlayersMode)
-  const maxAIPlayerCount = inMultiPlayersMode ? 4 : 2
+  const maxBotCount = inMultiPlayersMode ? 4 : 2
 
-  yield fork(addAIHandler)
+  yield fork(addBotHelper)
 
   while (true) {
     yield take(A.StartStage)
-    for (let i = 0; i < maxAIPlayerCount; i++) {
-      yield put(actions.reqAddAIPlayer())
+    for (let i = 0; i < maxBotCount; i++) {
+      yield put(actions.reqAddBot())
     }
   }
 }

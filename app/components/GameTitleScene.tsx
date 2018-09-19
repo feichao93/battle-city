@@ -153,7 +153,7 @@ export class GameTitleSceneContent extends React.PureComponent<
         <Tank
           tank={
             new TankRecord({
-              side: 'human',
+              side: 'player',
               direction: 'right',
               color: 'yellow',
               moving: true,

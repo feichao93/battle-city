@@ -2,7 +2,7 @@ import Spot from './Spot'
 import { dirs } from './spot-utils'
 
 // TODO 使用A*算法
-// TODO 寻找路径还需要考虑经过的位置安全与否 （是否容易被 human 玩家轻易地击中）
+// TODO 寻找路径还需要考虑经过的位置安全与否 （是否容易被 player 玩家轻易地击中）
 export function findPath(
   allSpots: Spot[],
   start: number,

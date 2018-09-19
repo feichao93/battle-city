@@ -103,7 +103,7 @@ export const FireThreshhold = {
     }
   },
   humanTank(forwardLength: number) {
-    logAhead('human-tank:', forwardLength)
+    logAhead('player-tank:', forwardLength)
     if (forwardLength < 0) {
       return 0.1
     } else if (forwardLength <= 6 * BLOCK_SIZE) {
@@ -132,7 +132,7 @@ export function getEnv(map: MapRecord, tanks: TanksMap, tank: TankRecord): TankE
   // 计算ai-tank与最近的human-tank的相对位置
   const { nearestHumanTank } = tanks.reduce(
     (reduction, next) => {
-      if (next.side === 'human') {
+      if (next.side === 'player') {
         const distance = Math.abs(next.x - tank.x) + Math.abs(next.y - tank.y)
         if (distance < reduction.minDistance) {
           return { minDistance: distance, nearestHumanTank: next }

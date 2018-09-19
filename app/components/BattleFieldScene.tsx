@@ -29,7 +29,7 @@ export class BattleFieldContent extends React.PureComponent<Partial<State & Poin
   render() {
     const { x = 0, y = 0, bullets, map, explosions, flickers, tanks, powerUps, scores } = this.props
     const { bricks, steels, rivers, snows, forests, eagle, restrictedAreas } = map.toObject()
-    const activeTanks = tanks.filter(t => t.active)
+    const aliveTanks = tanks.filter(t => t.alive)
     return (
       <g className="battle-field" transform={`translate(${x},${y})`}>
         <rect width={13 * B} height={13 * B} fill="#000000" />
@@ -42,12 +42,12 @@ export class BattleFieldContent extends React.PureComponent<Partial<State & Poin
           {bullets.map((b, i) => <Bullet key={i} bullet={b} />).toArray()}
         </g>
         <g className="tank-layer">
-          {activeTanks
+          {aliveTanks
             .map(tank => <Tank key={tank.tankId} tank={tank} showReservedIndicator />)
             .toArray()}
         </g>
         <g className="helmet-layer">
-          {activeTanks
+          {aliveTanks
             .map(
               tank =>
                 tank.helmetDuration > 0 ? (
@@ -56,7 +56,7 @@ export class BattleFieldContent extends React.PureComponent<Partial<State & Poin
             )
             .toArray()}
         </g>
-        {/* 因为坦克/子弹可以"穿过"森林, 所以<ForestLayer />需要放在tank-layer和bullet-layer的后面 */}
+        {/* 因为坦克/子弹可以"穿过"森林, 所以 <ForestLayer /> 需要放在 tank-layer 和 bullet-layer 的后面 */}
         <ForestLayer forests={forests} />
         <RestrictedAreaLayer areas={restrictedAreas} />
         <g className="power-up-layer">

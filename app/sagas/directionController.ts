@@ -1,10 +1,9 @@
 import { put, select, take } from 'redux-saga/effects'
-import { Input, TankRecord } from '../types'
+import { Input, State, TankRecord } from '../types'
 import * as actions from '../utils/actions'
 import { A } from '../utils/actions'
 import canTankMove from '../utils/canTankMove'
 import { ceil8, floor8, getDirectionInfo, isPerpendicular, round8 } from '../utils/common'
-import * as selectors from '../utils/selectors'
 import values from '../utils/values'
 
 // 坦克进行转向时, 需要对坐标进行处理
@@ -31,15 +30,12 @@ function* getReservedTank(tank: TankRecord) {
 }
 
 export default function* directionController(
-  playerName: string,
+  tankId: TankId,
   getPlayerInput: (tank: TankRecord, delta: number) => Input,
 ) {
   while (true) {
     const { delta }: actions.Tick = yield take(A.Tick)
-    const tank: TankRecord = yield select(selectors.playerTank, playerName)
-    if (tank == null) {
-      continue
-    }
+    const tank = yield select((s: State) => s.tanks.get(tankId))
 
     const input: Input = getPlayerInput(tank, delta)
 

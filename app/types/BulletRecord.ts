@@ -19,7 +19,7 @@ const BulletRecordBase = Record({
   power: 1,
   // 发射子弹的坦克id
   tankId: -1 as TankId,
-  side: 'human' as Side,
+  side: 'player' as Side,
   // 发射子弹的玩家
   playerName: null as PlayerName,
 })

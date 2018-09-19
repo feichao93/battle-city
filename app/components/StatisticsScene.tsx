@@ -48,10 +48,10 @@ export class StatisticsSceneContent extends React.PureComponent<{ game: GameReco
           <Text content={`STAGE  ${currentStageName}`} x={6.5 * B} y={4.5 * B} fill="#ffffff" />
 
           {/* 中间的4辆坦克 & 白线 */}
-          <Tank tank={new TankRecord({ x: 8 * B, y: 7.7 * B, side: 'ai', level: 'basic' })} />
-          <Tank tank={new TankRecord({ x: 8 * B, y: 9.2 * B, side: 'ai', level: 'fast' })} />
-          <Tank tank={new TankRecord({ x: 8 * B, y: 10.7 * B, side: 'ai', level: 'power' })} />
-          <Tank tank={new TankRecord({ x: 8 * B, y: 12.2 * B, side: 'ai', level: 'armor' })} />
+          <Tank tank={new TankRecord({ x: 8 * B, y: 7.7 * B, side: 'bot', level: 'basic' })} />
+          <Tank tank={new TankRecord({ x: 8 * B, y: 9.2 * B, side: 'bot', level: 'fast' })} />
+          <Tank tank={new TankRecord({ x: 8 * B, y: 10.7 * B, side: 'bot', level: 'power' })} />
+          <Tank tank={new TankRecord({ x: 8 * B, y: 12.2 * B, side: 'bot', level: 'armor' })} />
           <rect x={6.5 * B} y={13.3 * B} width={4 * B} height={2} fill="white" />
 
           {/* player-1的击杀统计 */}

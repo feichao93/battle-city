@@ -53,7 +53,7 @@ export function* destroyTank(tank: TankRecord) {
 
   // 产生坦克爆炸效果
   yield explosionFromTank(tank)
-  if (tank.side === 'ai') {
+  if (tank.side === 'bot') {
     yield scoreFromKillTank(tank)
   }
 }

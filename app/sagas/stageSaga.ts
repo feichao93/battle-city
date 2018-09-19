@@ -1,6 +1,7 @@
 import { replace } from 'react-router-redux'
 import { cancelled, put, select, take } from 'redux-saga/effects'
 import { State } from '../reducers'
+import * as selectors from '../utils/selectors'
 import StageConfig from '../types/StageConfig'
 import * as actions from '../utils/actions'
 import { A } from '../utils/actions'
@@ -56,23 +57,20 @@ export default function* stageSaga(stage: StageConfig) {
       const action: actions.Action = yield take([A.Kill, A.DestroyEagle])
 
       if (action.type === A.Kill) {
-        const { sourcePlayer, targetTank } = action
-        const {
-          players,
-          game: { remainingEnemies },
-          tanks,
-        }: State = yield select()
+        const { sourceTank, targetTank } = action
+        const state: State = yield select()
 
-        if (sourcePlayer.side === 'human') {
-          // human击杀ai
+        if (sourceTank.side === 'player') {
+          // player 击杀 bot
           // 对human player的击杀信息进行统计
-          yield put(actions.incKillCount(sourcePlayer.playerName, targetTank.level))
+          const sourcePlayerName = yield select(selectors.playerName, sourceTank.tankId)
+          yield put(actions.incKillCount(sourcePlayerName, targetTank.level))
 
-          const otherActiveAITanks = tanks.filter(
-            t => t.active && t.side === 'ai' && t.tankId !== targetTank.tankId,
+          const otherAliveBotTanks = state.tanks.filter(
+            t => t.alive && t.side === 'bot' && t.tankId !== targetTank.tankId,
           )
-          if (remainingEnemies.isEmpty() && otherActiveAITanks.isEmpty()) {
-            // 剩余enemy数量为0, 且场上已经没有ai tank了
+          if (state.game.remainingEnemies.isEmpty() && otherAliveBotTanks.isEmpty()) {
+            // 剩余 bot 数量为0, 且场上已经没有 bot 了
             yield Timing.delay(DEV.FAST ? 1000 : 3000)
             yield statistics()
             yield put(actions.beforeEndStage())
@@ -80,9 +78,11 @@ export default function* stageSaga(stage: StageConfig) {
             return { pass: true } as StageResult
           }
         } else {
-          // ai击杀human
-          if (!players.some(ply => ply.side === 'human' && ply.lives > 0)) {
-            // 所有的human player都挂了
+          // bot 击杀 player
+          const allPlayerDead = selectors.isInMultiPlayersMode(state)
+            ? state.player1.lives === 0
+            : state.player1.lives === 0 && state.player2.lives === 0
+          if (allPlayerDead) {
             yield Timing.delay(DEV.FAST ? 1000 : 3000)
             yield statistics()
             // 因为 gameSaga 会 put END_GAME 所以这里不需要 put END_STAGE

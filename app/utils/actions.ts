@@ -53,11 +53,9 @@ export enum A {
   IncrementPlayerLife = 'IncrementPlayerLife',
   DecrementPlayerLife = 'DecrementPlayerLife',
   ActivatePlayer = 'ActivatePlayer',
-  AddPlayer = 'AddPlayer',
+  DeactivatePlayer = 'DeactivatePlayer',
   ReqAddPlayerTank = 'ReqAddPlayerTank',
-  ReqAddAIPlayer = 'ReqAddAIPlayer',
-  RemovePlayer = 'RemovePlayer',
-  DeactivateAllPlayers = 'DeactivateAllPlayers',
+  ReqAddBot = 'ReqAddAIPlayer',
   SetExplosion = 'AddOrUpdateExplosion',
   RemoveExplosion = 'RemoveExplosion',
   SetText = 'SetText',
@@ -66,6 +64,7 @@ export enum A {
   StartSpawnTank = 'StartSpawnTank',
   AddTank = 'AddTank',
   StartMove = 'StartMove',
+  // TODO rename to SetTankToDead
   DeactivateTank = 'DeactivateTank',
   StopMove = 'StopMove',
   RemoveText = 'RemoveText',
@@ -166,20 +165,12 @@ export function setFrozenTimeout(tankId: TankId, frozenTimeout: number) {
 }
 
 export type Hit = ReturnType<typeof hit>
-export function hit(
-  bullet: BulletRecord,
-  targetTank: TankRecord,
-  sourceTank: TankRecord,
-  targetPlayer: PlayerRecord,
-  sourcePlayer: PlayerRecord,
-) {
+export function hit(bullet: BulletRecord, targetTank: TankRecord, sourceTank: TankRecord) {
   return {
     type: A.Hit as A.Hit,
     bullet,
     targetTank,
     sourceTank,
-    targetPlayer,
-    sourcePlayer,
   }
 }
 
@@ -192,19 +183,11 @@ export function hurt(targetTank: TankRecord) {
 }
 
 export type Kill = ReturnType<typeof kill>
-export function kill(
-  targetTank: TankRecord,
-  sourceTank: TankRecord,
-  targetPlayer: PlayerRecord,
-  sourcePlayer: PlayerRecord,
-  method: 'bullet' | 'grenade',
-) {
+export function kill(targetTank: TankRecord, sourceTank: TankRecord, method: 'bullet' | 'grenade') {
   return {
     type: A.Kill as A.Kill,
     targetTank,
     sourceTank,
-    targetPlayer,
-    sourcePlayer,
     method,
   }
 }
@@ -397,11 +380,11 @@ export function activatePlayer(playerName: PlayerName, tankId: TankId) {
   }
 }
 
-export type AddPlayer = ReturnType<typeof addPlayer>
-export function addPlayer(player: PlayerRecord) {
+export type DeactivatePlayer = ReturnType<typeof deactivatePlayer>
+export function deactivatePlayer(playerName: PlayerName) {
   return {
-    type: A.AddPlayer as A.AddPlayer,
-    player,
+    type: A.DeactivatePlayer as A.DeactivatePlayer,
+    playerName,
   }
 }
 
@@ -413,16 +396,8 @@ export function reqAddPlayerTank(playerName: PlayerName) {
   }
 }
 
-export type ReqAddAIPlayer = ReturnType<typeof reqAddAIPlayer>
-export const reqAddAIPlayer = () => ({ type: A.ReqAddAIPlayer as A.ReqAddAIPlayer })
-
-export type RemovePlayer = ReturnType<typeof removePlayer>
-export function removePlayer(playerName: PlayerName) {
-  return {
-    type: A.RemovePlayer as A.RemovePlayer,
-    playerName,
-  }
-}
+export type ReqAddBot = ReturnType<typeof reqAddBot>
+export const reqAddBot = () => ({ type: A.ReqAddBot as A.ReqAddBot })
 
 export type SetText = ReturnType<typeof setText>
 export function setText(text: TextRecord) {
@@ -577,19 +552,15 @@ export function removeRestrictedArea(areaId: AreaId) {
 }
 
 export type SetAITankPath = ReturnType<typeof setAITankPath>
-export function setAITankPath(playerName: PlayerName, path: number[]) {
-  return {
-    type: A.SetAITankPath as A.SetAITankPath,
-    playerName,
-    path,
-  }
+export function setAITankPath(tankId: TankId, path: number[]) {
+  return { type: A.SetAITankPath as A.SetAITankPath, tankId, path }
 }
 
 export type RemoveAITankPath = ReturnType<typeof removeAITankPath>
-export function removeAITankPath(playerName: PlayerName) {
+export function removeAITankPath(tankId: TankId) {
   return {
     type: A.RemoveAITankPath as A.RemoveAITankPath,
-    playerName,
+    tankId,
   }
 }
 
@@ -663,11 +634,6 @@ export const removeFirstRemainingEnemy = () => ({
   type: A.RemoveFirstRemainingEnemy as A.RemoveFirstRemainingEnemy,
 })
 
-export type DeactivateAllPlayers = ReturnType<typeof deactivateAllPlayers>
-export const deactivateAllPlayers = () => ({
-  type: A.DeactivateAllPlayers as A.DeactivateAllPlayers,
-})
-
 export type DestroyEagle = ReturnType<typeof destroyEagle>
 export const destroyEagle = () => ({ type: A.DestroyEagle as A.DestroyEagle })
 
@@ -721,11 +687,9 @@ export type Action =
   | IncrementPlayerLife
   | DecrementPlayerLife
   | ActivatePlayer
-  | AddPlayer
+  | DeactivatePlayer
   | ReqAddPlayerTank
-  | ReqAddAIPlayer
-  | RemovePlayer
-  | DeactivateAllPlayers
+  | ReqAddBot
   | SetExplosion
   | RemoveExplosion
   | SetText

@@ -100,19 +100,11 @@ function* timer() {
 }
 
 function* grenade(action: actions.PickPowerUp) {
-  const { tanks: allTanks, players }: State = yield select()
-  const activeAITanks = allTanks.filter(t => t.active && t.side === 'ai')
+  const { tanks: allTanks }: State = yield select()
+  const activeBotTanks = allTanks.filter(t => t.alive && t.side === 'bot')
 
-  for (const targetTank of activeAITanks.values()) {
-    yield put(
-      actions.kill(
-        targetTank,
-        action.tank,
-        players.find(p => p.activeTankId === targetTank.tankId),
-        action.player,
-        'grenade',
-      ),
-    )
+  for (const targetTank of activeBotTanks.values()) {
+    yield put(actions.kill(targetTank, action.tank, 'grenade'))
 
     yield fork(destroyTank, targetTank)
   }
@@ -138,10 +130,10 @@ function* handleHelmetDuration() {
   while (true) {
     const { delta }: actions.Tick = yield take(actions.A.Tick)
     const { tanks }: State = yield select()
-    yield* tanks
-      .filter(tank => tank.active && tank.helmetDuration > 0)
-      .map(tank => put(actions.setHelmetDuration(tank.tankId, tank.helmetDuration - delta)))
-      .values()
+    for (const tank of tanks.filter(t => t.alive && t.helmetDuration > 0).values()) {
+      const nextDuration = Math.max(0, tank.helmetDuration - delta)
+      yield put(actions.setHelmetDuration(tank.tankId, nextDuration))
+    }
   }
 }
 
@@ -166,16 +158,18 @@ function determineWhichPowerUpToSpawn(state: State): PowerUpName {
     }
   }
 
-  // 如果玩家坦克仍然是 BASIC 增加 star 的概率
-  const humanPlayer = state.players.find(ply => ply.side === 'human')
-  if (humanPlayer != null && humanPlayer.active) {
-    const tank = selectors.playerTank(state, humanPlayer.playerName)
-    if (tank != null && (tank.level === 'basic' || tank.level === 'fast')) {
-      if (Math.random() < 0.5) {
-        return 'star'
-      }
+  // 如果玩家坦克仍然是 BASIC/FAST，则增加 star 的概率
+  const player1Tank = selectors.tank(state, state.player1.activeTankId)
+  const player2Tank = selectors.tank(state, state.player2.activeTankId)
+  const hasPoorTank =
+    (player1Tank && (player1Tank.level === 'basic' || player1Tank.level === 'fast')) ||
+    (player2Tank && (player2Tank.level === 'basic' || player2Tank.level === 'fast'))
+  if (hasPoorTank) {
+    if (Math.random() < 0.5) {
+      return 'star'
     }
   }
+
   return _.sample(POWER_UP_NAMES)
 }
 
@@ -201,7 +195,7 @@ function* spawnPowerUpIfNeccessary(action: actions.Hit) {
 }
 
 function* clearAllPowerUps({ tank }: actions.StartSpawnTank) {
-  if (tank.side === 'ai' && tank.withPowerUp) {
+  if (tank.side === 'bot' && tank.withPowerUp) {
     yield put(actions.clearAllPowerUps())
   }
 }
