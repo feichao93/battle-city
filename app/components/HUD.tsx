@@ -59,7 +59,7 @@ export class HUDContent extends React.PureComponent<HUDContentProps> {
 
 function mapStateToProps(state: State) {
   return {
-    remainingEnemyCount: state.game.remainingEnemies.size,
+    remainingEnemyCount: state.game.remainingBots.size,
     player1: state.player1,
     player2: state.player2,
     show: state.game.showHUD,

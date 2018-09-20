@@ -60,6 +60,7 @@ export class GameoverSceneContent extends React.PureComponent<{ onRestart?: () =
   }
 }
 
+// TODO 需要考虑 multi-players 的情况
 class GameoverScene extends React.PureComponent<{ dispatch: Dispatch; game: GameRecord }> {
   componentDidMount() {
     document.addEventListener('keydown', this.onKeyDown)

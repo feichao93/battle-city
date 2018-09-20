@@ -42,7 +42,7 @@ function* demoPlayerContronller(tankId: TankId) {
   }
 }
 
-export function* demohumanPalyerSaga(tankPrototype: TankRecord) {
+export function* demoPlayerSaga(tankPrototype: TankRecord) {
   const tankId = getNextId('tank')
   yield spawnTank(tankPrototype.set('tankId', tankId), 2)
   yield fork(demoPlayerContronller, tankId)
@@ -84,7 +84,7 @@ export function* demoAIMasterSaga() {
     })
     yield spawnTank(tank, 1.5)
     yield take((action: Action) => action.type === A.Hit && action.targetTank.tankId === tankId)
-    yield put(actions.deactivateTank(tankId))
+    yield put(actions.setTankToDead(tankId))
     yield explosionFromTank(tank)
     yield delay(7e3)
   }
@@ -98,6 +98,6 @@ export default function* fireDemoSaga() {
   const baseTank = new TankRecord({ direction: 'right' })
   const yelloTank = baseTank.merge({ y: 0.5 * B, color: 'yellow' })
   const greenTank = baseTank.merge({ y: 3.5 * B, color: 'green', level: 'fast' })
-  yield fork(demohumanPalyerSaga, yelloTank)
-  yield fork(demohumanPalyerSaga, greenTank)
+  yield fork(demoPlayerSaga, yelloTank)
+  yield fork(demoPlayerSaga, greenTank)
 }

@@ -39,12 +39,12 @@ export class BattleFieldContent extends React.PureComponent<Partial<State & Poin
         <SnowLayer snows={snows} />
         {eagle ? <Eagle x={eagle.x} y={eagle.y} broken={eagle.broken} /> : null}
         <g className="bullet-layer">
-          {bullets.map((b, i) => <Bullet key={i} bullet={b} />).toArray()}
+          {bullets.map((b, i) => <Bullet key={i} bullet={b} />).valueSeq()}
         </g>
         <g className="tank-layer">
           {aliveTanks
             .map(tank => <Tank key={tank.tankId} tank={tank} showReservedIndicator />)
-            .toArray()}
+            .valueSeq()}
         </g>
         <g className="helmet-layer">
           {aliveTanks
@@ -54,22 +54,26 @@ export class BattleFieldContent extends React.PureComponent<Partial<State & Poin
                   <TankHelmet key={tank.tankId} x={tank.x} y={tank.y} />
                 ) : null,
             )
-            .toArray()}
+            .valueSeq()}
         </g>
         {/* 因为坦克/子弹可以"穿过"森林, 所以 <ForestLayer /> 需要放在 tank-layer 和 bullet-layer 的后面 */}
         <ForestLayer forests={forests} />
         <RestrictedAreaLayer areas={restrictedAreas} />
         <g className="power-up-layer">
-          {powerUps.map(powerUp => <PowerUp key={powerUp.powerUpId} powerUp={powerUp} />).toArray()}
+          {powerUps
+            .map(powerUp => <PowerUp key={powerUp.powerUpId} powerUp={powerUp} />)
+            .valueSeq()}
         </g>
         <g className="explosion-layer">
-          {explosions.map(exp => <Explosion key={exp.explosionId} explosion={exp} />).toArray()}
+          {explosions.map(exp => <Explosion key={exp.explosionId} explosion={exp} />).valueSeq()}
         </g>
         <g className="flicker-layer">
-          {flickers.map(flicker => <Flicker key={flicker.flickerId} flicker={flicker} />).toArray()}
+          {flickers
+            .map(flicker => <Flicker key={flicker.flickerId} flicker={flicker} />)
+            .valueSeq()}
         </g>
         <g className="score-layer">
-          {scores.map(s => <Score key={s.scoreId} score={s.score} x={s.x} y={s.y} />).toArray()}
+          {scores.map(s => <Score key={s.scoreId} score={s.score} x={s.x} y={s.y} />).valueSeq()}
         </g>
         <SpotGraph />
         <TankPath />

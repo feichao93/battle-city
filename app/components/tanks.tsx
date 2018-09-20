@@ -81,23 +81,23 @@ function resolveTankComponent(side: Side, level: TankLevel): TankComponent {
   let component: TankComponent
   if (side === 'player') {
     if (level === 'basic') {
-      component = TankHumanBasic
+      component = BasicPlayerTank
     } else if (level === 'fast') {
-      component = TankHumanFast
+      component = FastPlayerTank
     } else if (level === 'power') {
-      component = TankHumanPower
+      component = PowerPlayerTank
     } else {
-      component = TankHumanArmor
+      component = ArmorPlayerTank
     }
   } else {
     if (level === 'basic') {
-      component = TankAIBasic
+      component = BasicBotTank
     } else if (level === 'fast') {
-      component = TankAIFast
+      component = FastBotTank
     } else if (level === 'power') {
-      component = TankAIPower
+      component = PowerBotTank
     } else {
-      component = TankAIArmor
+      component = ArmorBotTank
     }
   }
   return component
@@ -140,7 +140,7 @@ type P = {
 type S = { lastTireShape: number }
 
 export class TankClassBase extends React.Component<P, S> {
-  private startTime: number
+  readonly startTime: number
 
   constructor(props: P) {
     super(props)
@@ -186,7 +186,7 @@ const mapStateToProps = ({ time }: State, { tank }: { tank: TankRecord }) => ({ 
 
 export const Tank = connect(mapStateToProps)(TankClassBase)
 
-const TankHumanBasic: TankComponent = ({ transform, color, shape }) => {
+const BasicPlayerTank: TankComponent = ({ transform, color, shape }) => {
   const scheme = TANK_COLOR_SCHEMES[color]
   const { a, b, c } = scheme
   return (
@@ -248,7 +248,7 @@ const TankHumanBasic: TankComponent = ({ transform, color, shape }) => {
   )
 }
 
-const TankHumanFast: TankComponent = ({ transform, color, shape }) => {
+const FastPlayerTank: TankComponent = ({ transform, color, shape }) => {
   const scheme = TANK_COLOR_SCHEMES[color]
   const { a, b, c } = scheme
   return (
@@ -309,7 +309,7 @@ const TankHumanFast: TankComponent = ({ transform, color, shape }) => {
   )
 }
 
-const TankHumanPower: TankComponent = ({ transform, color, shape }) => {
+const PowerPlayerTank: TankComponent = ({ transform, color, shape }) => {
   const scheme = TANK_COLOR_SCHEMES[color]
   const { a, b, c } = scheme
   return (
@@ -372,7 +372,7 @@ const TankHumanPower: TankComponent = ({ transform, color, shape }) => {
   )
 }
 
-const TankHumanArmor: TankComponent = ({ transform, color, shape }) => {
+const ArmorPlayerTank: TankComponent = ({ transform, color, shape }) => {
   const scheme = TANK_COLOR_SCHEMES[color]
   const { a, b, c } = scheme
   return (
@@ -433,7 +433,7 @@ const TankHumanArmor: TankComponent = ({ transform, color, shape }) => {
   )
 }
 
-const TankAIBasic: TankComponent = ({ transform, color, shape }) => {
+const BasicBotTank: TankComponent = ({ transform, color, shape }) => {
   const scheme = TANK_COLOR_SCHEMES[color]
   const { a, b, c } = scheme
   return (
@@ -492,7 +492,7 @@ const TankAIBasic: TankComponent = ({ transform, color, shape }) => {
   )
 }
 
-const TankAIFast: TankComponent = ({ transform, color, shape }) => {
+const FastBotTank: TankComponent = ({ transform, color, shape }) => {
   const scheme = TANK_COLOR_SCHEMES[color]
   const { a, b, c } = scheme
   return (
@@ -554,7 +554,7 @@ const TankAIFast: TankComponent = ({ transform, color, shape }) => {
   )
 }
 
-const TankAIPower: TankComponent = ({ transform, color, shape }) => {
+const PowerBotTank: TankComponent = ({ transform, color, shape }) => {
   const scheme = TANK_COLOR_SCHEMES[color]
   const { a, b, c } = scheme
   return (
@@ -615,7 +615,7 @@ const TankAIPower: TankComponent = ({ transform, color, shape }) => {
   )
 }
 
-const TankAIArmor: TankComponent = ({ transform, color, shape }) => {
+const ArmorBotTank: TankComponent = ({ transform, color, shape }) => {
   const scheme = TANK_COLOR_SCHEMES[color]
   const { a, b, c } = scheme
   return (

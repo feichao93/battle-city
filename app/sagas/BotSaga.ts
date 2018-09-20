@@ -24,15 +24,15 @@ export default function* botSaga(tankId: TankId) {
       take(killedPredicate),
       take(A.EndGame),
     ])
-    yield put(actions.reqAddBot())
     const tank: TankRecord = yield select(selectors.tank, tankId)
-    yield put(actions.deactivateTank(tankId))
+    yield put(actions.setTankToDead(tankId))
     yield explosionFromTank(tank)
     yield scoreFromKillTank(tank)
+    yield put(actions.reqAddBot())
   } finally {
     const tank: TankRecord = yield select(selectors.tank, tankId)
     if (tank && tank.alive) {
-      yield put(actions.deactivateTank(tankId))
+      yield put(actions.setTankToDead(tankId))
     }
   }
 

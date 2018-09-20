@@ -38,11 +38,11 @@ fast: 0.6px/ms
 
 todo 下面几个数值似乎有问题
 
-AI basic, AI fast, Human basic 的子弹速度为 0.12px/ms; 其他坦克的子弹速度为 0.24px/ms
+Bot basic, Bot fast, Player basic 的子弹速度为 0.12px/ms; 其他坦克的子弹速度为 0.24px/ms
 
 #### 子弹上限[DONE]
 
-Human power 和 Human armor 的子弹上限为 2; 其余坦克的子弹上限 1
+Player power 和 Player armor 的子弹上限为 2; 其余坦克的子弹上限 1
 
 子弹上限表示一架坦克在场上的子弹数量最大值
 

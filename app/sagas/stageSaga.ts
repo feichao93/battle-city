@@ -1,6 +1,7 @@
 import { replace } from 'react-router-redux'
 import { cancelled, put, select, take } from 'redux-saga/effects'
 import { State } from '../reducers'
+import { TankRecord } from '../types'
 import * as selectors from '../utils/selectors'
 import StageConfig from '../types/StageConfig'
 import * as actions from '../utils/actions'
@@ -54,34 +55,32 @@ export default function* stageSaga(stage: StageConfig) {
     yield put(actions.startStage(stage))
 
     while (true) {
-      const action: actions.Action = yield take([A.Kill, A.DestroyEagle])
+      const action: actions.Action = yield take([A.Kill, A.SetTankToDead, A.DestroyEagle])
 
       if (action.type === A.Kill) {
         const { sourceTank, targetTank } = action
-        const state: State = yield select()
 
         if (sourceTank.side === 'player') {
-          // player 击杀 bot
-          // 对human player的击杀信息进行统计
+          // 对 player 的击杀信息进行统计
           const sourcePlayerName = yield select(selectors.playerName, sourceTank.tankId)
           yield put(actions.incKillCount(sourcePlayerName, targetTank.level))
-
-          const otherAliveBotTanks = state.tanks.filter(
-            t => t.alive && t.side === 'bot' && t.tankId !== targetTank.tankId,
-          )
-          if (state.game.remainingEnemies.isEmpty() && otherAliveBotTanks.isEmpty()) {
-            // 剩余 bot 数量为0, 且场上已经没有 bot 了
-            yield Timing.delay(DEV.FAST ? 1000 : 3000)
+        }
+      } else if (action.type === A.SetTankToDead) {
+        const state: State = yield select()
+        const tank: TankRecord = state.tanks.get(action.tankId)
+        if (tank.side === 'bot') {
+          const allBotDead = state.tanks.filter(t => t.side === 'bot').every(t => !t.alive)
+          if (allBotDead && state.game.remainingBots.isEmpty()) {
+            yield Timing.delay(DEV.FAST ? 1000 : 4000)
             yield statistics()
             yield put(actions.beforeEndStage())
             yield put(actions.endStage())
             return { pass: true } as StageResult
           }
         } else {
-          // bot 击杀 player
           const allPlayerDead = selectors.isInMultiPlayersMode(state)
-            ? state.player1.lives === 0
-            : state.player1.lives === 0 && state.player2.lives === 0
+            ? state.player1.lives === 0 && state.player2.lives === 0
+            : state.player1.lives === 0
           if (allPlayerDead) {
             yield Timing.delay(DEV.FAST ? 1000 : 3000)
             yield statistics()

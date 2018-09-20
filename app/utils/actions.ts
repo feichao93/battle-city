@@ -64,8 +64,7 @@ export enum A {
   StartSpawnTank = 'StartSpawnTank',
   AddTank = 'AddTank',
   StartMove = 'StartMove',
-  // TODO rename to SetTankToDead
-  DeactivateTank = 'DeactivateTank',
+  SetTankToDead = 'SetTankToDead',
   StopMove = 'StopMove',
   RemoveText = 'RemoveText',
   RemoveFlicker = 'RemoveFlicker',
@@ -363,10 +362,10 @@ export function addTank(tank: TankRecord) {
   }
 }
 
-export type DeactivateTank = ReturnType<typeof deactivateTank>
-export function deactivateTank(tankId: TankId) {
+export type SetTankToDead = ReturnType<typeof setTankToDead>
+export function setTankToDead(tankId: TankId) {
   return {
-    type: A.DeactivateTank as A.DeactivateTank,
+    type: A.SetTankToDead as A.SetTankToDead,
     tankId,
   }
 }
@@ -697,7 +696,7 @@ export type Action =
   | DestroyEagle
   | StartSpawnTank
   | AddTank
-  | DeactivateTank
+  | SetTankToDead
   | StopMove
   | RemoveText
   | RemoveFlicker

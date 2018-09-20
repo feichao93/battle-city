@@ -24,7 +24,7 @@ interface BarrierInfo {
 
 interface TankPosition {
   eagle: RelativePosition
-  nearestHumanTank: RelativePosition
+  nearestPlayerTank: RelativePosition
 }
 
 interface TankEnv {
@@ -102,7 +102,7 @@ export const FireThreshhold = {
       return 0.6
     }
   },
-  humanTank(forwardLength: number) {
+  playerTank(forwardLength: number) {
     logAhead('player-tank:', forwardLength)
     if (forwardLength < 0) {
       return 0.1
@@ -121,29 +121,29 @@ export const FireThreshhold = {
 }
 
 /** 获取tank的「环境信息」
- * 包括坦克上下左右四个方向的障碍物信息，以及坦克与最近的human-tank相对位置 */
+ * 包括坦克上下左右四个方向的障碍物信息，以及坦克与最近的 player-tank 相对位置 */
 export function getEnv(map: MapRecord, tanks: TanksMap, tank: TankRecord): TankEnv {
   // pos对象用来存放tank与其他物体之间的相对位置
   const pos: TankPosition = {
     eagle: new RelativePosition(tank, map.eagle),
-    nearestHumanTank: null,
+    nearestPlayerTank: null,
   }
 
-  // 计算ai-tank与最近的human-tank的相对位置
-  const { nearestHumanTank } = tanks.reduce(
+  // 计算ai-tank与最近的 player-tank 的相对位置
+  const { nearestPlayerTank } = tanks.reduce(
     (reduction, next) => {
       if (next.side === 'player') {
         const distance = Math.abs(next.x - tank.x) + Math.abs(next.y - tank.y)
         if (distance < reduction.minDistance) {
-          return { minDistance: distance, nearestHumanTank: next }
+          return { minDistance: distance, nearestPlayerTank: next }
         }
       }
       return reduction
     },
-    { minDistance: Infinity, nearestHumanTank: null as TankRecord },
+    { minDistance: Infinity, nearestPlayerTank: null as TankRecord },
   )
-  if (nearestHumanTank) {
-    pos.nearestHumanTank = new RelativePosition(tank, nearestHumanTank)
+  if (nearestPlayerTank) {
+    pos.nearestPlayerTank = new RelativePosition(tank, nearestPlayerTank)
   }
 
   // 障碍物信息
@@ -179,11 +179,11 @@ export function determineFire(tank: TankRecord, { barrierInfo, tankPosition: pos
     }
   }
 
-  // 坦克面向nearestHumanTank且足够接近时, 增加开火概率
-  if (pos.nearestHumanTank) {
-    const humanTankForwardInfo = pos.nearestHumanTank.getForwardInfo(tank.direction)
-    if (humanTankForwardInfo.offset <= 8) {
-      if (random < FireThreshhold.humanTank(humanTankForwardInfo.length)) {
+  // 坦克面向nearestPlayerTank且足够接近时, 增加开火概率
+  if (pos.nearestPlayerTank) {
+    const playerTankForwardInfo = pos.nearestPlayerTank.getForwardInfo(tank.direction)
+    if (playerTankForwardInfo.offset <= 8) {
+      if (random < FireThreshhold.playerTank(playerTankForwardInfo.length)) {
         return true
       }
     }

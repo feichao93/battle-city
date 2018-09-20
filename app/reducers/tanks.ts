@@ -26,9 +26,9 @@ export default function tanks(state = Map() as TanksMap, action: Action) {
     return state.update(action.tankId, incTankLevel)
   } else if (action.type === A.RemovePowerUpProperty) {
     return state.update(action.tankId, tank => tank.set('withPowerUp', false))
-  } else if (action.type === A.DeactivateTank) {
-    // 不能在关卡进行过程中移除tank, 因为tank的子弹可能正在飞行
-    // 防御式编程: tank 设置为 dead 的时候重置一些状态
+  } else if (action.type === A.SetTankToDead) {
+    // 不能在关卡进行过程中移除坦克, 因为坦克的子弹可能正在飞行
+    // 防御式编程: 坦克设置为 dead 的时候重置一些状态
     return state.update(action.tankId, tank =>
       tank.merge({
         alive: false,

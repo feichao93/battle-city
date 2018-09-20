@@ -1,9 +1,9 @@
-import { put } from 'redux-saga/effects';
-import { ExplosionRecord, ScoreRecord, TankRecord } from '../../types';
-import * as actions from '../../utils/actions';
-import { frame as f, getNextId } from '../../utils/common';
-import { TANK_KILL_SCORE_MAP } from '../../utils/constants';
-import Timing from '../../utils/Timing';
+import { put } from 'redux-saga/effects'
+import { ExplosionRecord, ScoreRecord, TankRecord } from '../../types'
+import * as actions from '../../utils/actions'
+import { frame as f, getNextId } from '../../utils/common'
+import { TANK_KILL_SCORE_MAP } from '../../utils/constants'
+import Timing from '../../utils/Timing'
 
 export function* scoreFromKillTank(tank: TankRecord) {
   const scoreId: ScoreId = getNextId('score')
@@ -48,10 +48,8 @@ export function* explosionFromTank(tank: TankRecord) {
 }
 
 export function* destroyTank(tank: TankRecord) {
-  // 移除坦克
-  yield put(actions.deactivateTank(tank.tankId))
+  yield put(actions.setTankToDead(tank.tankId))
 
-  // 产生坦克爆炸效果
   yield explosionFromTank(tank)
   if (tank.side === 'bot') {
     yield scoreFromKillTank(tank)

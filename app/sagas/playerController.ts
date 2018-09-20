@@ -6,9 +6,9 @@ import { A } from '../utils/actions'
 import directionController from './directionController'
 import fireController from './fireController'
 
-// 一个humanController实例对应一个人类玩家(用户)的控制器.
+// 一个 playerController 实例对应一个人类玩家(用户)的控制器.
 // 参数playerName用来指定人类玩家的玩家名称, config为该玩家的操作配置.
-// humanController将启动 fireController 与 directionController, 从而控制人类玩家的坦克
+// playerController 将启动 fireController 与 directionController, 从而控制人类玩家的坦克
 export default function* playerController(tankId: TankId, config: PlayerConfig) {
   let firePressing = false // 用来记录当前玩家是否按下了fire键
   let firePressed = false // 用来记录上一个tick内 玩家是否按下过fire键
@@ -18,7 +18,7 @@ export default function* playerController(tankId: TankId, config: PlayerConfig) 
     document.addEventListener('keydown', onKeyDown)
     document.addEventListener('keyup', onKeyUp)
     yield all([
-      directionController(tankId, getHumanPlayerInput),
+      directionController(tankId, getPlayerInput),
       fireController(tankId, () => firePressed || firePressing),
       resetFirePressedEveryTick(),
     ])
@@ -66,7 +66,7 @@ export default function* playerController(tankId: TankId, config: PlayerConfig) 
   }
 
   // 调用该函数来获取当前用户的移动操作(坦克级别)
-  function getHumanPlayerInput(tank: TankRecord): Input {
+  function getPlayerInput(tank: TankRecord): Input {
     const direction = pressed.length > 0 ? last(pressed) : null
     if (direction != null) {
       if (direction !== tank.direction) {

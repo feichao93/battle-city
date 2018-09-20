@@ -13,7 +13,7 @@ export default function* playerSaga(playerName: PlayerName, config: PlayerConfig
   yield takeEvery(A.BeforeEndStage, reserveTankOnStageEnd)
 
   while (true) {
-    const { tankId }: actions.ActivatePlayer = yield take(A.ActivatePlayer)
+    const { tankId }: actions.ActivatePlayer = yield take(playerActivated)
     const result = yield race({
       controller: playerController(tankId, config),
       tank: playerTankSaga(tankId),
@@ -26,6 +26,10 @@ export default function* playerSaga(playerName: PlayerName, config: PlayerConfig
   }
 
   // region function deftinitions
+  function playerActivated(action: actions.Action) {
+    return action.type === A.ActivatePlayer && action.playerName === playerName
+  }
+
   function* spawnPlayerTank() {
     const player: PlayerRecord = yield select(selectors.player, playerName)
 
@@ -61,7 +65,7 @@ export default function* playerSaga(playerName: PlayerName, config: PlayerConfig
     const tank = state.tanks.get(player.activeTankId)
     if (tank) {
       yield put(actions.setReservedTank(playerName, tank))
-      yield put(actions.deactivateTank(tank.tankId))
+      yield put(actions.setTankToDead(tank.tankId))
     }
   }
   // endregion

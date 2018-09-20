@@ -17,7 +17,7 @@ const emptyTransientKillInfo = Map({
   }),
 }) as Map<PlayerName, Map<TankLevel, KillCount>>
 
-const defaultRemainingEnemies = Repeat('basic' as TankLevel, 20).toList()
+const defaultRemainingBots = Repeat('basic' as TankLevel, 20).toList()
 type GameStatus = 'idle' | 'on' | 'stat' | 'gameover'
 
 const GameRecordBase = Record(
@@ -33,7 +33,7 @@ const GameRecordBase = Record(
     /** 即将开始的关卡的名称 */
     comingStageName: null as string,
     /** 当前关卡剩余的敌人的类型列表 */
-    remainingEnemies: defaultRemainingEnemies,
+    remainingBots: defaultRemainingBots,
     /** 当前关卡的击杀信息 */
     killInfo: Map<PlayerName, Map<TankLevel, KillCount>>(),
     /** 当前关卡的击杀信息, 用于进行动画播放 */
@@ -73,13 +73,13 @@ export default function game(state = new GameRecord(), action: Action) {
       currentStageName: action.stage.name,
       transientKillInfo: emptyTransientKillInfo,
       killInfo: Map(),
-      remainingEnemies: action.stage.enemies.flatMap(EnemyGroupConfig.unwind),
+      remainingBots: action.stage.enemies.flatMap(EnemyGroupConfig.unwind),
       showTotalKillCount: false,
     })
   } else if (action.type === A.EndStage) {
     return state.set('currentStageName', null)
   } else if (action.type === A.RemoveFirstRemainingEnemy) {
-    return state.update('remainingEnemies', enemies => enemies.shift())
+    return state.update('remainingBots', enemies => enemies.shift())
   } else if (action.type === A.IncKillCount) {
     const { playerName, level } = action
     return state.updateIn(['killInfo', playerName, level], x => (x == null ? 1 : x + 1))

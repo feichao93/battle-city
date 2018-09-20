@@ -3,7 +3,7 @@ import { A, Action } from '../utils/actions'
 import { dec, inc } from '../utils/common'
 
 export function playerReducerFactory(playerName: PlayerName) {
-  const initState = new PlayerRecord({ playerName, lives: 3, side: 'player' })
+  const initState = new PlayerRecord({ playerName, side: 'player' })
   return function players(state = initState, action: Action) {
     if (action.type === A.ActivatePlayer && action.playerName === playerName) {
       return state.set('activeTankId', action.tankId)
@@ -11,7 +11,7 @@ export function playerReducerFactory(playerName: PlayerName) {
       return state.set('lives', 3)
     } else if (action.type === A.SetReservedTank && action.playerName === playerName) {
       return state.set('reservedTank', action.tank)
-    } else if (action.type === A.DeactivateTank) {
+    } else if (action.type === A.SetTankToDead) {
       return state.activeTankId === action.tankId ? state.set('activeTankId', -1) : state
     } else if (action.type === A.DecrementPlayerLife && action.playerName === playerName) {
       return state.update('lives', dec(1))
