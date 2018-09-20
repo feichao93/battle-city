@@ -109,7 +109,7 @@ export class BattleField extends React.PureComponent {
 优化二： 经过优化一之后游戏在**短时间内生成大量组件**的情况下仍会出现掉帧的现象，例如坦克爆炸效果出现的时候。优化一避免了组件更新时重复渲染，但无法优化组件加载时的初次渲染过程，当组件复杂的时候，组件初次渲染就会有较大的开销。[这篇文章中提到了使用离屏画布提升 canvas 性能](https://www.html5rocks.com/zh/tutorials/canvas/performance/)，优化二的思路也是类似：**将组件渲染的内容保存到 SVG 图片中，下次渲染时直接使用准备好的图片。** 游戏中的爆炸效果、地形元素等组件的内容较为固定，其内容保存为图片后可以被多次复用。该优化实现代码如下：（[完整版代码](https://github.com/shinima/battle-city/blob/master/app/hocs/Image.tsx)）
 
 ```jsx
-import { renderToString } from 'react-dom/server'
+import { renderToStaticMarkup } from 'react-dom/server'
 
 const svgns = 'http://www.w3.org/2000/svg'
 // imageKey 到 object-url 的映射，一个 imageKey 对应了一张保存好的图片
@@ -120,7 +120,7 @@ class Image extends React.PureComponent {
     const { imageKey, width, height, transform, children } = this.props
     if (!cache.has(imageKey)) {
       const open = `<svg xmlns="${svgns}" width="${width}" height="${height}">`
-      const string = renderToString(<g>children</g>)
+      const string = renderToStaticMarkup(<g>children</g>)
       const close = '</svg>'
       const markup = open + string + close
       // 使用 react-dom/server 来生成 SVG 图片

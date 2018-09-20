@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types'
 import React from 'react'
-import { renderToString } from 'react-dom/server'
+import { renderToStaticMarkup } from 'react-dom/server'
 
 const withContext = require('recompose/withContext').default
 
@@ -52,7 +52,7 @@ export default class Image extends React.PureComponent<ImageProps> {
           }),
         )
         const element = React.createElement(enhancer(SimpleWrapper), null, children)
-        const string = renderToString(element)
+        const string = renderToStaticMarkup(element)
         const close = '</svg>'
         const markup = open + string + close
         const blob = new Blob([markup], { type: 'image/svg+xml' })

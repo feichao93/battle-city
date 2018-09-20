@@ -48,7 +48,7 @@ export enum A {
   HideHud = 'HideHud',
   ShowStatistics = 'ShowStatistics',
   HideStatistics = 'HideStatistics',
-  RemoveFirstRemainingEnemy = 'RemoveFirstRemainingEnemy',
+  RemoveFirstRemainingBot = 'RemoveFirstRemainingBot',
   IncrementPlayerLife = 'IncrementPlayerLife',
   DecrementPlayerLife = 'DecrementPlayerLife',
   ActivatePlayer = 'ActivatePlayer',
@@ -638,9 +638,9 @@ export const showStatistics = () => ({ type: A.ShowStatistics as A.ShowStatistic
 export type HideStatistics = ReturnType<typeof hideStatistics>
 export const hideStatistics = () => ({ type: A.HideStatistics as A.HideStatistics })
 
-export type RemoveFirstRemainingEnemy = ReturnType<typeof removeFirstRemainingEnemy>
-export const removeFirstRemainingEnemy = () => ({
-  type: A.RemoveFirstRemainingEnemy as A.RemoveFirstRemainingEnemy,
+export type RemoveFirstRemainingBot = ReturnType<typeof removeFirstRemainingBot>
+export const removeFirstRemainingBot = () => ({
+  type: A.RemoveFirstRemainingBot as A.RemoveFirstRemainingBot,
 })
 
 export type DestroyEagle = ReturnType<typeof destroyEagle>
@@ -692,7 +692,7 @@ export type Action =
   | HideHud
   | ShowStatistics
   | HideStatistics
-  | RemoveFirstRemainingEnemy
+  | RemoveFirstRemainingBot
   | IncrementPlayerLife
   | DecrementPlayerLife
   | ActivatePlayer

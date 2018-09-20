@@ -1,5 +1,5 @@
 import { Map, Record, Repeat } from 'immutable'
-import { EnemyGroupConfig } from '../types/StageConfig'
+import { BotGroupConfig } from '../types/StageConfig'
 import { A, Action } from '../utils/actions'
 import { inc } from '../utils/common'
 
@@ -82,13 +82,13 @@ export default function game(state = new GameRecord(), action: Action) {
       currentStageName: action.stage.name,
       transientKillInfo: emptyTransientKillInfo,
       killInfo: Map(),
-      remainingBots: action.stage.enemies.flatMap(EnemyGroupConfig.unwind),
+      remainingBots: action.stage.bots.flatMap(BotGroupConfig.unwind),
       showTotalKillCount: false,
     })
   } else if (action.type === A.EndStage) {
     return state.set('currentStageName', null)
-  } else if (action.type === A.RemoveFirstRemainingEnemy) {
-    return state.update('remainingBots', enemies => enemies.shift())
+  } else if (action.type === A.RemoveFirstRemainingBot) {
+    return state.update('remainingBots', bots => bots.shift())
   } else if (action.type === A.IncKillCount) {
     const { playerName, level } = action
     return state.updateIn(['killInfo', playerName, level], x => (x == null ? 1 : x + 1))

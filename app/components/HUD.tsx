@@ -4,14 +4,14 @@ import { State } from '../types'
 import PlayerRecord from '../types/PlayerRecord'
 import { BLOCK_SIZE as B, FIELD_SIZE } from '../utils/constants'
 import * as selectors from '../utils/selectors'
-import EnemyCountIndicator from './EnemyCountIndicator'
+import BotCountIndicator from './BotCountIndicator'
 import { PlayerTankThumbnail } from './icons'
 import Text from './Text'
 
 interface HUDContentProps {
   x?: number
   y?: number
-  remainingEnemyCount: number
+  remainingBotCount: number
   player1: PlayerRecord
   player2: PlayerRecord
   show: boolean
@@ -43,11 +43,11 @@ export class HUDContent extends React.PureComponent<HUDContentProps> {
   }
 
   render() {
-    const { remainingEnemyCount, show, x = 0, y = 0, inMultiPlayersMode } = this.props
+    const { remainingBotCount, show, x = 0, y = 0, inMultiPlayersMode } = this.props
 
     return (
       <g className="HUD" display={show ? 'inline' : 'none'} transform={`translate(${x}, ${y})`}>
-        <EnemyCountIndicator count={remainingEnemyCount} />
+        <BotCountIndicator count={remainingBotCount} />
         <g transform={`translate(0, ${6 * B})`}>
           {this.renderPlayer1Info()}
           {inMultiPlayersMode && this.renderPlayer2Info()}
@@ -59,7 +59,7 @@ export class HUDContent extends React.PureComponent<HUDContentProps> {
 
 function mapStateToProps(state: State) {
   return {
-    remainingEnemyCount: state.game.remainingBots.size,
+    remainingBotCount: state.game.remainingBots.size,
     player1: state.player1,
     player2: state.player2,
     show: state.game.showHUD,

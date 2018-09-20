@@ -23,7 +23,7 @@ function* addBotHelper() {
           yield Timing.delay(200)
           spawnPos = yield select(selectors.availableSpawnPosition)
         }
-        yield put(actions.removeFirstRemainingEnemy())
+        yield put(actions.removeFirstRemainingBot())
         const level = game.remainingBots.first()
         const hp = level === 'armor' ? 4 : 1
         const tank = new TankRecord({

@@ -16,7 +16,7 @@ export interface EditorStageConfig {
   difficulty: StageDifficulty
   custom: boolean
   itemList: List<MapItem>
-  enemies: List<EnemyGroupConfig>
+  bots: List<BotGroupConfig>
 }
 
 function serializeMapItemList(list: List<MapItem>): string[] {
@@ -66,19 +66,19 @@ export interface RawStageConfig {
   difficulty: StageDifficulty
   map: string[]
   /** 敌人描述, 例如: 20\*basic, 10\*fast */
-  enemies: string[]
+  bots: string[]
 }
 
-export class EnemyGroupConfig extends Record({
+export class BotGroupConfig extends Record({
   tankLevel: 'basic' as TankLevel,
   count: 0,
 }) {
   static fromJS(object: any) {
-    return new EnemyGroupConfig(object)
+    return new BotGroupConfig(object)
   }
 
-  static unwind(enemyGroupConfig: EnemyGroupConfig) {
-    return Repeat(enemyGroupConfig.tankLevel, enemyGroupConfig.count)
+  static unwind(botGroupConfig: BotGroupConfig) {
+    return Repeat(botGroupConfig.tankLevel, botGroupConfig.count)
   }
 
   incTankLevel() {
@@ -102,11 +102,11 @@ export class EnemyGroupConfig extends Record({
   }
 }
 
-export const defaultEnemiesConfig = List<EnemyGroupConfig>([
-  new EnemyGroupConfig({ tankLevel: 'basic', count: 10 }),
-  new EnemyGroupConfig({ tankLevel: 'fast', count: 4 }),
-  new EnemyGroupConfig({ tankLevel: 'power', count: 4 }),
-  new EnemyGroupConfig({ tankLevel: 'armor', count: 2 }),
+export const defaultBotsConfig = List<BotGroupConfig>([
+  new BotGroupConfig({ tankLevel: 'basic', count: 10 }),
+  new BotGroupConfig({ tankLevel: 'fast', count: 4 }),
+  new BotGroupConfig({ tankLevel: 'power', count: 4 }),
+  new BotGroupConfig({ tankLevel: 'armor', count: 2 }),
 ])
 
 const StageConfigRecord = Record({
@@ -115,7 +115,7 @@ const StageConfigRecord = Record({
   difficulty: 1 as StageDifficulty,
   map: new MapRecord(),
   // TODO renames to bots
-  enemies: defaultEnemiesConfig,
+  bots: defaultBotsConfig,
 })
 
 export default class StageConfig extends StageConfigRecord {
@@ -125,7 +125,7 @@ export default class StageConfig extends StageConfigRecord {
       custom: object.custom,
       difficulty: object.difficulty,
       map: StageConfig.parseStageMap(object.map),
-      enemies: StageConfig.parseStageEnemies(object.enemies),
+      bots: StageConfig.parseStageBots(object.bots),
     })
   }
 
@@ -268,9 +268,9 @@ export default class StageConfig extends StageConfigRecord {
     })
   }
 
-  static parseStageEnemies(enemies: RawStageConfig['enemies']) {
-    const array: EnemyGroupConfig[] = []
-    for (const descriptor of enemies) {
+  static parseStageBots(bots: RawStageConfig['bots']) {
+    const array: BotGroupConfig[] = []
+    for (const descriptor of bots) {
       const splited = descriptor.split('*').map(s => s.trim())
       DEV.ASSERT && console.assert(splited.length === 2)
 
@@ -279,11 +279,11 @@ export default class StageConfig extends StageConfigRecord {
       DEV.ASSERT && console.assert(!isNaN(count))
       DEV.ASSERT && console.assert(['basic', 'fast', 'power', 'armor'].includes(tankLevel))
 
-      array.push(new EnemyGroupConfig({ tankLevel, count }))
+      array.push(new BotGroupConfig({ tankLevel, count }))
     }
     return List(array)
       .setSize(4)
-      .map(v => (v ? v : new EnemyGroupConfig()))
+      .map(v => (v ? v : new BotGroupConfig()))
   }
 }
 
@@ -339,7 +339,7 @@ export namespace StageConfigConverter {
       custom: stage.custom,
       difficulty: stage.difficulty,
       itemList: List(items),
-      enemies: stage.enemies,
+      bots: stage.bots,
     }
   }
 
@@ -350,20 +350,20 @@ export namespace StageConfigConverter {
 
   // editor-to-stage
   export function e2s(editorStageConfig: EditorStageConfig): StageConfig {
-    const { name, custom, difficulty, itemList, enemies } = editorStageConfig
+    const { name, custom, difficulty, itemList, bots } = editorStageConfig
     const map = StageConfig.parseStageMap(serializeMapItemList(itemList))
-    return new StageConfig({ name, difficulty, custom, map, enemies })
+    return new StageConfig({ name, difficulty, custom, map, bots: bots })
   }
 
   // editor-to-raw
   export function e2r(editorStageConfig: EditorStageConfig): RawStageConfig {
-    const { name, custom, enemies, difficulty, itemList } = editorStageConfig
+    const { name, custom, bots, difficulty, itemList } = editorStageConfig
     return {
       name: name.toLowerCase(),
       custom,
       difficulty,
       map: serializeMapItemList(itemList),
-      enemies: enemies
+      bots: bots
         .filter(e => e.count > 0)
         .map(e => `${e.count}*${e.tankLevel}`)
         .toArray(),

@@ -65,7 +65,7 @@ export const demoStage = StageConfigConverter.r2s({
     'X  X  X  X  X  X  X  X  X  X  X  X  X  ',
     'X  X  X  X  X  X  X  X  X  X  X  X  E  ',
   ],
-  enemies: [],
+  bots: [],
 })
 
 export function* demoAIMasterSaga() {

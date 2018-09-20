@@ -222,7 +222,7 @@ namespace GalleryContent {
               <HUDContent
                 player1={player1}
                 player2={player2}
-                remainingEnemyCount={17}
+                remainingBotCount={17}
                 show
                 inMultiPlayersMode
               />

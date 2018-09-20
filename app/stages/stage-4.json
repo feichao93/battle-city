@@ -16,5 +16,5 @@
     "F  X  B3 B3 X  B8 Bc B4 B3 B3 X  F  F  ",
     "Tf F  X  X  X  Ba E  B5 X  X  F  F  Tf "
   ],
-  "enemies": ["10*power", "5*fast", "2*basic", "3*armor"]
+  "bots": ["10*power", "5*fast", "2*basic", "3*armor"]
 }
