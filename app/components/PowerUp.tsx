@@ -141,7 +141,9 @@ const powerUpDataArray = {
 
 export default class PowerUp extends React.PureComponent<{ powerUp: PowerUpRecord }> {
   render() {
-    const { powerUp: { visible, x, y, powerUpName } } = this.props
+    const {
+      powerUp: { visible, x, y, powerUpName },
+    } = this.props
     return (
       <Bitmap
         useImage

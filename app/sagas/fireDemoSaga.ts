@@ -1,6 +1,6 @@
 import { all, fork, put, take } from 'redux-saga/effects'
 import { delay } from 'redux-saga/utils'
-import { PlayerRecord, TankRecord } from '../types'
+import { TankRecord } from '../types'
 import { StageConfigConverter } from '../types/StageConfig'
 import * as actions from '../utils/actions'
 import { A, Action } from '../utils/actions'
@@ -11,8 +11,6 @@ import { spawnTank } from './common'
 import { explosionFromTank } from './common/destroyTanks'
 import directionController from './directionController'
 import fireController from './fireController'
-import playerController from './playerController'
-import playerTankSaga from './playerTankSaga'
 import tickEmitter from './tickEmitter'
 
 const always = (v: any) => () => v

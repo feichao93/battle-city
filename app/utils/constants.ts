@@ -136,3 +136,12 @@ export const AI_SPAWN_SPEED_MAP = {
 }
 
 export const SIMPLE_FIRE_LOOP_INTERVAL = 300
+
+// 每次拾取一个 power-up 就能获得 500 分
+export const POWER_UP_SCORE = 500
+
+// 坦克升级到最高级之后，每次拾取一个 star 获得 5000 分
+export const STAR_PICKED_BY_ARMOR_TANK_SCORE = 5000
+
+// 每获得 10000 分就能够增加生命
+export const LIFE_BONUS_SCORE = 10000

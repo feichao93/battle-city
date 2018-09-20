@@ -10,7 +10,9 @@ const coordinates = [
 const riverPart = (shape: number, dx: number, dy: number) => (
   <g transform={`translate(${dx},${dy})`}>
     <rect width={8} height={8} fill="#4242FF" />
-    {coordinates[shape].map(([x, y], i) => <Pixel key={i} x={x} y={y} fill="#B5EFEF" />)}
+    {coordinates[shape].map(([x, y], i) => (
+      <Pixel key={i} x={x} y={y} fill="#B5EFEF" />
+    ))}
   </g>
 )
 

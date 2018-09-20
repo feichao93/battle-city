@@ -1,6 +1,6 @@
 import { fork, put, takeEvery, takeLatest } from 'redux-saga/effects'
-import { A } from '../utils/actions'
 import * as actions from '../utils/actions'
+import { A } from '../utils/actions'
 import gameSaga from './gameSaga'
 import soundManager from './soundManager'
 import { syncFrom, syncTo } from './syncLocalStorage'

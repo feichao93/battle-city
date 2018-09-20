@@ -136,7 +136,9 @@ const data = {
 
 export default class Explosion extends React.PureComponent<{ explosion: ExplosionRecord }> {
   render() {
-    const { explosion: { cx, cy, shape } } = this.props
+    const {
+      explosion: { cx, cy, shape },
+    } = this.props
     const smallShape = shape === 's0' || shape === 's1' || shape === 's2'
     return (
       <Bitmap

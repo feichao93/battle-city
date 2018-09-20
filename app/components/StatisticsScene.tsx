@@ -10,7 +10,9 @@ import Text from './Text'
 
 export class StatisticsSceneContent extends React.PureComponent<{ game: GameRecord }> {
   render() {
-    const { game: { transientKillInfo, currentStageName, showTotalKillCount } } = this.props
+    const {
+      game: { transientKillInfo, currentStageName, showTotalKillCount },
+    } = this.props
     const player1KillInfo = transientKillInfo.get('player-1')
 
     const basic = player1KillInfo.get('basic')

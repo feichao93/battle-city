@@ -41,7 +41,7 @@ export default function tanks(state = Map() as TanksMap, action: Action) {
     )
   } else if (action.type === A.SetCooldown) {
     return state.update(action.tankId, tank => tank.set('cooldown', action.cooldown))
-  } else if (action.type === A.SetAIFrozenTimeout) {
+  } else if (action.type === A.SetBotFrozenTimeout) {
     return state.map(
       tank =>
         tank.side === 'bot' ? tank.set('moving', false).set('frozenTimeout', action.timeout) : tank,

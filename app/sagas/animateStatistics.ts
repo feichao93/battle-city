@@ -5,7 +5,7 @@ import * as actions from '../utils/actions'
 import { TANK_LEVELS } from '../utils/constants'
 import Timing from '../utils/Timing'
 
-export default function* statistics() {
+export default function* animateStatistics() {
   yield put(actions.showStatistics())
 
   const {

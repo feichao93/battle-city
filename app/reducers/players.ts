@@ -16,7 +16,7 @@ export function playerReducerFactory(playerName: PlayerName) {
     } else if (action.type === A.DecrementPlayerLife && action.playerName === playerName) {
       return state.update('lives', dec(1))
     } else if (action.type === A.IncrementPlayerLife && action.playerName === playerName) {
-      return state.update('lives', inc(1))
+      return state.update('lives', inc(action.count))
     } else {
       return state
     }

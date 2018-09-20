@@ -114,6 +114,7 @@ const StageConfigRecord = Record({
   custom: false,
   difficulty: 1 as StageDifficulty,
   map: new MapRecord(),
+  // TODO renames to bots
   enemies: defaultEnemiesConfig,
 })
 
@@ -296,7 +297,7 @@ export namespace StageConfigConverter {
       if (set) {
         const [brickRow, brickCol] = IndexHelper.getRowCol('brick', brickT)
         const t = Math.floor(brickRow / 4) * FIELD_BLOCK_SIZE + Math.floor(brickCol / 4)
-        const hex = 0b0001 << (2 * (Math.floor(brickRow / 2) % 2) + Math.floor(brickCol / 2) % 2)
+        const hex = 0b0001 << (2 * (Math.floor(brickRow / 2) % 2) + (Math.floor(brickCol / 2) % 2))
         if (items[t].type === 'B') {
           items[t] = items[t].update('hex', or(hex))
         } else {
@@ -308,7 +309,7 @@ export namespace StageConfigConverter {
       if (set) {
         const [steelRow, steelCol] = IndexHelper.getRowCol('steel', steelT)
         const t = Math.floor(steelRow / 2) * FIELD_BLOCK_SIZE + Math.floor(steelCol / 2)
-        const hex = 0b0001 << (2 * (steelRow % 2) + steelCol % 2)
+        const hex = 0b0001 << (2 * (steelRow % 2) + (steelCol % 2))
         if (items[t].type === 'T') {
           items[t] = items[t].update('hex', or(hex))
         } else {

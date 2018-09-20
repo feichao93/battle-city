@@ -11,7 +11,6 @@ import {
   ExplosionRecord,
   FlickerRecord,
   MapRecord,
-  PlayerRecord,
   PowerUpRecord,
   ScoreRecord,
   StageConfig,
@@ -27,7 +26,7 @@ export enum A {
   SetCooldown = 'SetCooldown',
   SetHelmetDuration = 'SetHelmetDuration',
   SetFrozenTimeout = 'SetFrozenTimeout',
-  SetAIFrozenTimeout = 'SetAIFrozenTimeout',
+  SetBotFrozenTimeout = 'SetBotFrozenTimeout',
   BeforeRemoveBullet = 'BeforeRemoveBullet',
   RemoveBullet = 'RemoveBullet',
   RemoveSteels = 'RemoveSteels',
@@ -73,6 +72,7 @@ export enum A {
   Hurt = 'Hurt',
   Kill = 'Kill',
   IncKillCount = 'IncKillCount',
+  IncPlayerScore = 'IncPlayerScore',
   UpdateTransientKillInfo = 'UpdateTransientKillInfo',
   ShowTotalKillCount = 'ShowTotalKillCount',
   SetPowerUp = 'SetPowerUp',
@@ -208,6 +208,15 @@ export function incKillCount(playerName: PlayerName, level: TankLevel) {
   }
 }
 
+export type IncPlayerScore = ReturnType<typeof incPlayerScore>
+export function incPlayerScore(playerName: PlayerName, count: number) {
+  return {
+    type: A.IncPlayerScore as A.IncPlayerScore,
+    playerName,
+    count,
+  }
+}
+
 export type StopMove = ReturnType<typeof stopMove>
 export function stopMove(tankId: TankId) {
   return {
@@ -225,10 +234,10 @@ export function setCooldown(tankId: TankId, cooldown: number) {
   }
 }
 
-export type SetAIFrozenTimeout = ReturnType<typeof setAIFrozenTimeout>
-export function setAIFrozenTimeout(timeout: number) {
+export type SetBotFrozenTimeout = ReturnType<typeof setBotFrozenTimeout>
+export function setBotFrozenTimeout(timeout: number) {
   return {
-    type: A.SetAIFrozenTimeout as A.SetAIFrozenTimeout,
+    type: A.SetBotFrozenTimeout as A.SetBotFrozenTimeout,
     timeout,
   }
 }
@@ -465,10 +474,10 @@ export function removePowerUpProperty(tankId: TankId) {
 }
 
 export type PickPowerUp = ReturnType<typeof pickPowerUp>
-export function pickPowerUp(player: PlayerRecord, tank: TankRecord, powerUp: PowerUpRecord) {
+export function pickPowerUp(playerName: PlayerName, tank: TankRecord, powerUp: PowerUpRecord) {
   return {
     type: A.PickPowerUp as A.PickPowerUp,
-    player,
+    playerName,
     tank,
     powerUp,
   }
@@ -491,10 +500,11 @@ export function removeScore(scoreId: ScoreId) {
 }
 
 export type IncrementPlayerLife = ReturnType<typeof incrementPlayerLife>
-export function incrementPlayerLife(playerName: PlayerName) {
+export function incrementPlayerLife(playerName: PlayerName, count = 1) {
   return {
     type: A.IncrementPlayerLife as A.IncrementPlayerLife,
     playerName,
+    count,
   }
 }
 
@@ -660,7 +670,7 @@ export type Action =
   | SetCooldown
   | SetHelmetDuration
   | SetFrozenTimeout
-  | SetAIFrozenTimeout
+  | SetBotFrozenTimeout
   | BeforeRemoveBullet
   | RemoveBullet
   | RemoveSteels
@@ -705,6 +715,7 @@ export type Action =
   | Hurt
   | Kill
   | IncKillCount
+  | IncPlayerScore
   | UpdateTransientKillInfo
   | ShowTotalKillCount
   | SetPowerUp

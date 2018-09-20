@@ -1,6 +1,7 @@
 import { Map, Record, Repeat } from 'immutable'
 import { EnemyGroupConfig } from '../types/StageConfig'
 import { A, Action } from '../utils/actions'
+import { inc } from '../utils/common'
 
 const emptyTransientKillInfo = Map({
   'player-1': Map({
@@ -18,6 +19,8 @@ const emptyTransientKillInfo = Map({
 }) as Map<PlayerName, Map<TankLevel, KillCount>>
 
 const defaultRemainingBots = Repeat('basic' as TankLevel, 20).toList()
+const defaultPlayerScores = Map<PlayerName, number>([['player-1', 0], ['player-2', 0]])
+
 type GameStatus = 'idle' | 'on' | 'stat' | 'gameover'
 
 const GameRecordBase = Record(
@@ -36,12 +39,14 @@ const GameRecordBase = Record(
     remainingBots: defaultRemainingBots,
     /** 当前关卡的击杀信息 */
     killInfo: Map<PlayerName, Map<TankLevel, KillCount>>(),
+    /** 玩家的得分信息 */
+    playersScores: defaultPlayerScores,
     /** 当前关卡的击杀信息, 用于进行动画播放 */
     transientKillInfo: emptyTransientKillInfo,
     /** 关卡击杀信息动画, 是否显示total的数量 */
     showTotalKillCount: false,
     /** AI坦克的冻结时间. 小于等于0表示没有冻结, 大于0表示还需要一段时间解冻 */
-    AIFrozenTimeout: 0,
+    botFrozenTimeout: 0,
 
     /** 是否显示HUD */
     showHUD: false,
@@ -56,7 +61,10 @@ export class GameRecord extends GameRecordBase {}
 
 export default function game(state = new GameRecord(), action: Action) {
   if (action.type === A.StartGame) {
-    return state.set('status', 'on').set('currentStageName', null)
+    return state
+      .set('status', 'on')
+      .set('currentStageName', null)
+      .set('playersScores', defaultPlayerScores)
   } else if (action.type === A.ResetGame) {
     return state.set('status', 'idle').set('currentStageName', null)
   } else if (action.type === A.ShowStatistics) {
@@ -68,6 +76,7 @@ export default function game(state = new GameRecord(), action: Action) {
       .set('status', 'gameover')
       .set('lastStageName', state.currentStageName)
       .set('currentStageName', null)
+      .set('playersScores', defaultPlayerScores)
   } else if (action.type === A.StartStage) {
     return state.merge({
       currentStageName: action.stage.name,
@@ -87,8 +96,8 @@ export default function game(state = new GameRecord(), action: Action) {
     return state.set('transientKillInfo', action.info)
   } else if (action.type === A.ShowTotalKillCount) {
     return state.set('showTotalKillCount', true)
-  } else if (action.type === A.SetAIFrozenTimeout) {
-    return state.set('AIFrozenTimeout', action.timeout)
+  } else if (action.type === A.SetBotFrozenTimeout) {
+    return state.set('botFrozenTimeout', action.timeout)
   } else if (action.type === A.GamePause) {
     return state.set('paused', true)
   } else if (action.type === A.GameResume) {
@@ -101,6 +110,10 @@ export default function game(state = new GameRecord(), action: Action) {
     return state.set('showHUD', false)
   } else if (action.type === A.UpdateComingStageName) {
     return state.set('comingStageName', action.stageName)
+  } else if (action.type === A.IncPlayerScore) {
+    return state.update('playersScores', scores =>
+      scores.update(action.playerName, inc(action.count)),
+    )
   } else {
     return state
   }

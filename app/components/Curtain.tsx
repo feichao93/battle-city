@@ -17,8 +17,8 @@ export default class Curtain extends React.PureComponent<P> {
       <g role={`curtain-${name}`} transform={`translate(${x}, ${y})`}>
         <defs>
           <clipPath id="default-curtain">
-            <rect x={0} y={0} width={width} height={height / 2 * t} />
-            <rect x={0} y={height * (1 - t / 2)} width={width} height={height / 2 * t} />
+            <rect x={0} y={0} width={width} height={(height / 2) * t} />
+            <rect x={0} y={height * (1 - t / 2)} width={width} height={(height / 2) * t} />
           </clipPath>
         </defs>
         <g clipPath="url(#default-curtain)">{children}</g>

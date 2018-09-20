@@ -7,8 +7,8 @@ import saga from '../hocs/saga'
 import rootReducer, { State, time } from '../reducers'
 import game, { GameRecord } from '../reducers/game'
 import tanks from '../reducers/tanks'
+import animateStatistics from '../sagas/animateStatistics'
 import fireDemoSaga from '../sagas/fireDemoSaga'
-import statistics from '../sagas/stageStatistics'
 import tickEmitter from '../sagas/tickEmitter'
 import { PlayerRecord, PowerUpRecord, TankRecord } from '../types'
 import { BLOCK_SIZE as B } from '../utils/constants'
@@ -176,7 +176,7 @@ namespace GalleryContent {
       killInfo: Map({ 'player-1': player1KillInfo } as any),
     }),
   }
-  @saga(ticked(statistics), combineReducers({ game }), StatisticsPreloadedState)
+  @saga(ticked(animateStatistics), combineReducers({ game }), StatisticsPreloadedState)
   export class Statistics extends React.PureComponent {
     render() {
       const { game } = this.props as { game: GameRecord }

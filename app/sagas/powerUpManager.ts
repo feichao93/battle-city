@@ -7,7 +7,13 @@ import { MapRecord, PowerUpRecord, ScoreRecord, State } from '../types'
 import * as actions from '../utils/actions'
 import { A } from '../utils/actions'
 import { asRect, frame as f, getNextId, randint } from '../utils/common'
-import { BLOCK_SIZE, N_MAP, POWER_UP_NAMES } from '../utils/constants'
+import {
+  BLOCK_SIZE,
+  N_MAP,
+  POWER_UP_NAMES,
+  POWER_UP_SCORE,
+  STAR_PICKED_BY_ARMOR_TANK_SCORE,
+} from '../utils/constants'
 import IndexHelper from '../utils/IndexHelper'
 import * as selectors from '../utils/selectors'
 import Timing from '../utils/Timing'
@@ -80,21 +86,21 @@ function* shovel() {
 
 function* timer() {
   try {
-    yield put(actions.setAIFrozenTimeout(5e3))
+    yield put(actions.setBotFrozenTimeout(5e3))
     while (true) {
       const { delta }: actions.Tick = yield take(actions.A.Tick)
       const {
-        game: { AIFrozenTimeout },
+        game: { botFrozenTimeout },
       }: State = yield select()
-      if (AIFrozenTimeout === 0) {
+      if (botFrozenTimeout === 0) {
         break
       }
-      const next = AIFrozenTimeout - delta
-      yield put(actions.setAIFrozenTimeout(next <= 0 ? 0 : next))
+      const next = botFrozenTimeout - delta
+      yield put(actions.setBotFrozenTimeout(next <= 0 ? 0 : next))
     }
   } finally {
     if (yield cancelled()) {
-      yield put(actions.setAIFrozenTimeout(0))
+      yield put(actions.setBotFrozenTimeout(0))
     }
   }
 }
@@ -110,12 +116,16 @@ function* grenade(action: actions.PickPowerUp) {
   }
 }
 
-function* star({ tank }: actions.PickPowerUp) {
-  yield put(actions.upgardeTank(tank.tankId))
+function* star({ tank, playerName }: actions.PickPowerUp) {
+  if (tank.level === 'armor') {
+    yield put(actions.incPlayerScore(playerName, STAR_PICKED_BY_ARMOR_TANK_SCORE))
+  } else {
+    yield put(actions.upgardeTank(tank.tankId))
+  }
 }
 
-function* tank({ player }: actions.PickPowerUp) {
-  yield put(actions.incrementPlayerLife(player.playerName))
+function* tank({ playerName }: actions.PickPowerUp) {
+  yield put(actions.incrementPlayerLife(playerName))
 }
 
 function* helmet({ tank }: actions.PickPowerUp) {
@@ -137,11 +147,12 @@ function* handleHelmetDuration() {
   }
 }
 
-function* scoreFromPickPowerUp({ powerUp: { x, y } }: actions.PickPowerUp) {
+function* scoreFromPickPowerUp({ powerUp: { x, y }, playerName }: actions.PickPowerUp) {
   const scoreId = getNextId('score')
   try {
-    const score = new ScoreRecord({ scoreId, score: 500, x, y })
+    const score = new ScoreRecord({ scoreId, score: POWER_UP_SCORE, x, y })
     yield put(actions.addScore(score))
+    yield put(actions.incPlayerScore(playerName, POWER_UP_SCORE))
     yield Timing.delay(f(48))
   } finally {
     yield put(actions.removeScore(scoreId))

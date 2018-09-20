@@ -3,6 +3,7 @@ import { State, TankRecord } from '../types'
 import * as actions from '../utils/actions'
 import { A } from '../utils/actions'
 import { asRect, testCollide } from '../utils/common'
+import { TANK_KILL_SCORE_MAP } from '../utils/constants'
 import * as selectors from '../utils/selectors'
 import Timing from '../utils/Timing'
 import { explosionFromTank } from './common/destroyTanks'
@@ -17,7 +18,7 @@ function* handleTankPickPowerUps(tankId: TankId) {
   }
 }
 
-export default function* playerTankSaga(tankId: TankId) {
+export default function* playerTankSaga(playerName: PlayerName, tankId: TankId) {
   const { hit: hitAction }: { hit: actions.Hit } = yield race({
     service: service(),
     hit: take(hitByBotPredicate),
@@ -44,6 +45,7 @@ export default function* playerTankSaga(tankId: TankId) {
   function* service() {
     yield takeEvery(A.AfterTick, handleTankPickPowerUps, tankId)
     yield takeLatest(hitByTeammatePredicate, hitByTeammateHandler)
+    yield takeEvery(killBot, killBotHandler)
   }
 
   function* hitByTeammateHandler(action: actions.Hit) {
@@ -54,16 +56,32 @@ export default function* playerTankSaga(tankId: TankId) {
         yield Timing.delay(150)
         const tank: TankRecord = yield select(selectors.tank, tankId)
         yield put(actions.setTankVisibility(tank.tankId, !tank.visible))
+        if (tank.frozenTimeout === 0) {
+          break
+        }
       }
     } finally {
       yield put(actions.setTankVisibility(tankId, true))
     }
   }
+
   function hitByBotPredicate(action: actions.Action) {
     return (
       action.type === A.Hit &&
       action.targetTank.tankId === tankId &&
       action.sourceTank.side === 'bot'
     )
+  }
+
+  function killBot(action: actions.Action) {
+    return action.type === A.Kill && action.sourceTank.tankId === tankId
+  }
+
+  function* killBotHandler({ method, sourceTank, targetTank }: actions.Kill) {
+    DEV.ASSERT && console.assert(sourceTank.tankId === tankId)
+    yield put(actions.incKillCount(playerName, targetTank.level))
+    if (method === 'bullet') {
+      yield put(actions.incPlayerScore(playerName, TANK_KILL_SCORE_MAP[targetTank.level]))
+    }
   }
 }

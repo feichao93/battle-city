@@ -15,6 +15,17 @@ export const isInMultiPlayersMode = (state: State) => {
   return params.has(MULTI_PLAYERS_SEARCH_KEY)
 }
 
+export const isAllPlayerDead = (state: State) => {
+  const inMultiPlayersMode = isInMultiPlayersMode(state)
+  if (inMultiPlayersMode) {
+    const { player1, player2 } = state
+    return player1.lives === 0 && !player1.isActive() && player2.lives === 0 && !player2.isActive()
+  } else {
+    const { player1 } = state
+    return player1.lives === 0 && !player1.isActive()
+  }
+}
+
 export const player = (state: State, playerName: PlayerName) => {
   return playerName === 'player-1' ? state.player1 : state.player2
 }
@@ -58,7 +69,6 @@ export const availableSpawnPosition = (state: State): Rect => {
     }
     result.push(option)
   }
-  // TODO 需要考虑坦克默认生成的三个地点都被占用的情况
   return _.sample(result)
 }
 

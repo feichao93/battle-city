@@ -2,13 +2,13 @@ import { replace } from 'react-router-redux'
 import { cancelled, put, select, take } from 'redux-saga/effects'
 import { State } from '../reducers'
 import { TankRecord } from '../types'
-import * as selectors from '../utils/selectors'
 import StageConfig from '../types/StageConfig'
 import * as actions from '../utils/actions'
 import { A } from '../utils/actions'
 import { frame as f } from '../utils/common'
+import * as selectors from '../utils/selectors'
 import Timing from '../utils/Timing'
-import statistics from './stageStatistics'
+import animateStatistics from './animateStatistics'
 
 function* animateCurtainAndLoadMap(stage: StageConfig) {
   try {
@@ -55,35 +55,24 @@ export default function* stageSaga(stage: StageConfig) {
     yield put(actions.startStage(stage))
 
     while (true) {
-      const action: actions.Action = yield take([A.Kill, A.SetTankToDead, A.DestroyEagle])
+      const action: actions.Action = yield take([A.SetTankToDead, A.DestroyEagle])
 
-      if (action.type === A.Kill) {
-        const { sourceTank, targetTank } = action
-
-        if (sourceTank.side === 'player') {
-          // 对 player 的击杀信息进行统计
-          const sourcePlayerName = yield select(selectors.playerName, sourceTank.tankId)
-          yield put(actions.incKillCount(sourcePlayerName, targetTank.level))
-        }
-      } else if (action.type === A.SetTankToDead) {
+      if (action.type === A.SetTankToDead) {
         const state: State = yield select()
         const tank: TankRecord = state.tanks.get(action.tankId)
         if (tank.side === 'bot') {
           const allBotDead = state.tanks.filter(t => t.side === 'bot').every(t => !t.alive)
           if (allBotDead && state.game.remainingBots.isEmpty()) {
             yield Timing.delay(DEV.FAST ? 1000 : 4000)
-            yield statistics()
+            yield animateStatistics()
             yield put(actions.beforeEndStage())
             yield put(actions.endStage())
             return { pass: true } as StageResult
           }
         } else {
-          const allPlayerDead = selectors.isInMultiPlayersMode(state)
-            ? state.player1.lives === 0 && state.player2.lives === 0
-            : state.player1.lives === 0
-          if (allPlayerDead) {
+          if (yield select(selectors.isAllPlayerDead)) {
             yield Timing.delay(DEV.FAST ? 1000 : 3000)
-            yield statistics()
+            yield animateStatistics()
             // 因为 gameSaga 会 put END_GAME 所以这里不需要 put END_STAGE
             return { pass: false, reason: 'dead' } as StageResult
           }

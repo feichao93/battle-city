@@ -7,7 +7,9 @@ interface P {
 
 export default class Flicker extends React.PureComponent<P> {
   render() {
-    const { flicker: { x, y, shape } } = this.props
+    const {
+      flicker: { x, y, shape },
+    } = this.props
     const transform = `translate(${x},${y})`
     if (shape === 0) {
       return (

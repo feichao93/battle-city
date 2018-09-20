@@ -15,10 +15,18 @@ const snowPart = (dx: number, dy: number) => (
     <Pixel x={4} y={0} fill={c} />
     <Pixel x={0} y={3} fill={a} />
     <Pixel x={0} y={4} fill={c} />
-    {_.range(8).map(t => <Pixel key={t} x={t} y={7 - t} fill={a} />)}
-    {_.range(7).map(t => <Pixel key={t} x={1 + t} y={7 - t} fill={c} />)}
-    {_.range(4).map(t => <Pixel key={t} x={4 + t} y={7 - t} fill={a} />)}
-    {_.range(3).map(t => <Pixel key={t} x={5 + t} y={7 - t} fill={c} />)}
+    {_.range(8).map(t => (
+      <Pixel key={t} x={t} y={7 - t} fill={a} />
+    ))}
+    {_.range(7).map(t => (
+      <Pixel key={t} x={1 + t} y={7 - t} fill={c} />
+    ))}
+    {_.range(4).map(t => (
+      <Pixel key={t} x={4 + t} y={7 - t} fill={a} />
+    ))}
+    {_.range(3).map(t => (
+      <Pixel key={t} x={5 + t} y={7 - t} fill={c} />
+    ))}
   </g>
 )
 

@@ -16,9 +16,9 @@ export default function* fireController(tankId: TankId, shouldFire: () => boolea
     const { bullets: allBullets }: State = yield select()
     const tank: TankRecord = yield select((s: State) => s.tanks.get(tankId))
     const {
-      game: { AIFrozenTimeout },
+      game: { botFrozenTimeout },
     }: State = yield select()
-    if (tank == null || (tank.side === 'bot' && AIFrozenTimeout > 0)) {
+    if (tank == null || (tank.side === 'bot' && botFrozenTimeout > 0)) {
       continue
     }
     let nextCooldown = tank.cooldown <= 0 ? 0 : tank.cooldown - delta
