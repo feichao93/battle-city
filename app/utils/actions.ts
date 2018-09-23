@@ -192,7 +192,7 @@ export function kill(targetTank: TankRecord, sourceTank: TankRecord, method: 'bu
 }
 
 export type UpdateTransientKillInfo = ReturnType<typeof updateTransientKillInfo>
-export function updateTransientKillInfo(info: Map<PlayerName, Map<TankLevel, KillCount>>) {
+export function updateTransientKillInfo(info: Map<PlayerName, Map<TankLevel, number>>) {
   return {
     type: A.UpdateTransientKillInfo as A.UpdateTransientKillInfo,
     info,

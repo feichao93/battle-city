@@ -170,10 +170,25 @@ namespace GalleryContent {
     }
   }
 
-  const player1KillInfo = Map([['basic', 10], ['fast', 4], ['power', 4], ['armor', 2]])
+  const player1KillInfo = Map<TankLevel, number>([
+    ['basic', 10],
+    ['fast', 4],
+    ['power', 0],
+    ['armor', 1],
+  ])
+  const player2KillInfo = Map<TankLevel, number>([
+    ['basic', 4],
+    ['fast', 0],
+    ['power', 2],
+    ['armor', 1],
+  ])
   const StatisticsPreloadedState = {
     game: new GameRecord({
-      killInfo: Map({ 'player-1': player1KillInfo } as any),
+      currentStageName: 'gallery',
+      killInfo: Map<PlayerName, typeof player1KillInfo>([
+        ['player-1', player1KillInfo],
+        ['player-2', player2KillInfo],
+      ]),
     }),
   }
   @saga(ticked(animateStatistics), combineReducers({ game }), StatisticsPreloadedState)
@@ -184,7 +199,12 @@ namespace GalleryContent {
         <g>
           <Text x={8} y={8} content="Statistics" fill="#dd2664" />
           <Transform k={0.8} x={25} y={32}>
-            <StatisticsSceneContent game={game} />
+            <StatisticsSceneContent
+              game={game}
+              inMultiPlayersMode={true}
+              player1Score={1000}
+              player2Score={12345}
+            />
           </Transform>
         </g>
       )

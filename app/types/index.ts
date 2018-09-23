@@ -63,7 +63,6 @@ declare global {
 
   type TankId = number
   type BulletId = number
-  type KillCount = number
   type PowerUpId = number
   type ScoreId = number
   type AreaId = number

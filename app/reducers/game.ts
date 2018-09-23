@@ -16,7 +16,7 @@ const emptyTransientKillInfo = Map({
     power: -1,
     armor: -1,
   }),
-}) as Map<PlayerName, Map<TankLevel, KillCount>>
+}) as Map<PlayerName, Map<TankLevel, number>>
 
 const defaultRemainingBots = Repeat('basic' as TankLevel, 20).toList()
 const defaultPlayerScores = Map<PlayerName, number>([['player-1', 0], ['player-2', 0]])
@@ -38,7 +38,7 @@ const GameRecordBase = Record(
     /** 当前关卡剩余的敌人的类型列表 */
     remainingBots: defaultRemainingBots,
     /** 当前关卡的击杀信息 */
-    killInfo: Map<PlayerName, Map<TankLevel, KillCount>>(),
+    killInfo: Map<PlayerName, Map<TankLevel, number>>(),
     /** 玩家的得分信息 */
     playersScores: defaultPlayerScores,
     /** 当前关卡的击杀信息, 用于进行动画播放 */
@@ -57,6 +57,7 @@ const GameRecordBase = Record(
   'GameRecord',
 )
 
+// TODO 需要重构 game-record 的结构
 export class GameRecord extends GameRecordBase {}
 
 export default function game(state = new GameRecord(), action: Action) {
