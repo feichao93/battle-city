@@ -1,3 +1,4 @@
+import { eventChannel } from 'redux-saga'
 import { fork, put, race, select, take, takeEvery } from 'redux-saga/effects'
 import { spawnTank } from '../sagas/common'
 import { PlayerConfig, PlayerRecord, State, TankRecord } from '../types'
@@ -13,6 +14,7 @@ export default function* playerSaga(playerName: PlayerName, config: PlayerConfig
   yield takeEvery(A.StartStage, spawnPlayerTank)
   yield takeEvery(A.BeforeEndStage, reserveTankOnStageEnd)
   yield takeEvery(playerScoreIncremented, handleIncPlayerScore)
+  yield fork(borrowLifeWatcher)
 
   while (true) {
     const { tankId }: actions.ActivatePlayer = yield take(playerActivated)
@@ -28,6 +30,37 @@ export default function* playerSaga(playerName: PlayerName, config: PlayerConfig
   }
 
   // region function deftinitions
+  function* borrowLifeWatcher() {
+    const chan = eventChannel(emit => {
+      const callback = (event: KeyboardEvent) => {
+        if (event.code === config.control.fire) {
+          emit('borrow')
+        }
+      }
+      document.addEventListener('keydown', callback)
+      return () => document.removeEventListener('keydown', callback)
+    })
+    try {
+      while (true) {
+        yield take(chan)
+        const state: State = yield select()
+        const inMultiPlayersMode = selectors.isInMultiPlayersMode(state)
+        const player: PlayerRecord = selectors.player(state, playerName)
+        if (inMultiPlayersMode && !player.isActive() && player.lives === 0) {
+          const lenderName = playerName === 'player-1' ? 'player-2' : 'player-1'
+          const lender = selectors.player(state, lenderName)
+          if (lender.lives > 0) {
+            yield put(actions.decrementPlayerLife(lenderName))
+            yield put(actions.incrementPlayerLife(playerName))
+            yield spawnPlayerTank()
+          }
+        }
+      }
+    } finally {
+      chan.close()
+    }
+  }
+
   function playerActivated(action: actions.Action) {
     return action.type === A.ActivatePlayer && action.playerName === playerName
   }

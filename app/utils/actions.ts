@@ -51,6 +51,7 @@ export enum A {
   RemoveFirstRemainingBot = 'RemoveFirstRemainingBot',
   IncrementPlayerLife = 'IncrementPlayerLife',
   DecrementPlayerLife = 'DecrementPlayerLife',
+  BorrowPlayerLife = 'BorrowPlayerLife',
   ActivatePlayer = 'ActivatePlayer',
   DeactivatePlayer = 'DeactivatePlayer',
   ReqAddPlayerTank = 'ReqAddPlayerTank',
@@ -441,6 +442,15 @@ export function decrementPlayerLife(playerName: PlayerName) {
   }
 }
 
+export type BorrowPlayerLife = ReturnType<typeof borrowPlayerLife>
+export function borrowPlayerLife(borrower: PlayerName, lender: PlayerName) {
+  return {
+    type: A.BorrowPlayerLife,
+    borrower,
+    lender,
+  }
+}
+
 export type StartGame = ReturnType<typeof startGame>
 export function startGame(stageIndex: number) {
   return {
@@ -695,6 +705,7 @@ export type Action =
   | RemoveFirstRemainingBot
   | IncrementPlayerLife
   | DecrementPlayerLife
+  | BorrowPlayerLife
   | ActivatePlayer
   | DeactivatePlayer
   | ReqAddPlayerTank
