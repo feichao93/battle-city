@@ -14,20 +14,24 @@ export default function* botSaga(tankId: TankId) {
   const ctx = new Bot(tankId)
   try {
     yield takeEvery(hitPredicate, hitHandler)
-    yield race([
-      all([
+    const result = yield race({
+      service: all([
         generateBulletCompleteNote(),
         directionController(tankId, ctx.directionControllerCallback),
         fireController(tankId, ctx.fireControllerCallback),
         AIWorkerSaga(ctx),
       ]),
-      take(killedPredicate),
-      take(A.EndGame),
-    ])
+      killed: take(killedPredicate),
+      endGame: take(A.EndGame),
+    })
     const tank: TankRecord = yield select(selectors.tank, tankId)
     yield put(actions.setTankToDead(tankId))
-    yield explosionFromTank(tank)
-    yield scoreFromKillTank(tank)
+    if (result.killed) {
+      yield explosionFromTank(tank)
+      if (result.killed.method === 'bullet') {
+        yield scoreFromKillTank(tank)
+      }
+    }
     yield put(actions.reqAddBot())
   } finally {
     const tank: TankRecord = yield select(selectors.tank, tankId)

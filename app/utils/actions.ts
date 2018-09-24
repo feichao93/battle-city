@@ -445,7 +445,7 @@ export function decrementPlayerLife(playerName: PlayerName) {
 export type BorrowPlayerLife = ReturnType<typeof borrowPlayerLife>
 export function borrowPlayerLife(borrower: PlayerName, lender: PlayerName) {
   return {
-    type: A.BorrowPlayerLife,
+    type: A.BorrowPlayerLife as A.BorrowPlayerLife,
     borrower,
     lender,
   }
