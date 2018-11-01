@@ -57,12 +57,12 @@ module.exports = function(env = {}) {
         {
           test: /\.tsx?$/,
           use: [
-            {
-              loader: 'babel-loader',
-              options: {
-                plugins: ['react-hot-loader/babel'],
-              },
-            },
+            // {
+            //   loader: 'babel-loader',
+            //   options: {
+            //     plugins: ['react-hot-loader/babel'],
+            //   },
+            // },
             {
               loader: 'ts-loader',
               options: {

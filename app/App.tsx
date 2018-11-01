@@ -1,5 +1,4 @@
 import React from 'react'
-import { hot } from 'react-hot-loader'
 import { connect } from 'react-redux'
 import { Redirect, Route, Switch } from 'react-router-dom'
 import { ConnectedRouter } from 'react-router-redux'
@@ -53,4 +52,4 @@ function mapStateToProps(state: State) {
   return { game: state.game }
 }
 
-export default hot(module)(connect(mapStateToProps)(App))
+export default connect(mapStateToProps)(App)

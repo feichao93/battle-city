@@ -1,4 +1,3 @@
-/// <reference path="../custom-tyings.d.ts" />
 // 使用 core-js 作为一些高版本 ES 的函数的 polyfill
 import 'core-js/fn/array/includes'
 import 'core-js/fn/object/entries'
@@ -14,7 +13,9 @@ import store from './utils/store'
 
 ReactDOM.render(
   <Provider store={store}>
-    <App />
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>
   </Provider>,
   document.getElementById('container'),
 )

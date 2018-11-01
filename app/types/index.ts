@@ -58,6 +58,7 @@ declare global {
 
   type TankLevel = 'basic' | 'fast' | 'power' | 'armor'
   type TankColor = 'green' | 'yellow' | 'silver' | 'red' | 'auto'
+  type TankStatus = 'alive' | 'dead' | 'spawning'
 
   type Direction = 'up' | 'down' | 'left' | 'right'
 

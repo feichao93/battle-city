@@ -5,21 +5,20 @@ import { match, Redirect, Route, Switch } from 'react-router-dom'
 import { goBack, push, replace } from 'react-router-redux'
 import { Dispatch } from 'redux'
 import { RawStageConfig, State } from '../types'
-import Popup from '../types/Popup'
 import { StageConfigConverter } from '../types/StageConfig'
 import * as actions from '../utils/actions'
 import { BLOCK_SIZE as B } from '../utils/constants'
-import PopupProvider, { PopupHandle } from './PopupProvider'
 import Screen from './Screen'
 import StagePreview from './StagePreview'
 import Text from './Text'
 import TextButton from './TextButton'
+import usePopup from './usePopup'
 
 type StageListProps = {
   dispatch: Dispatch
   tab: 'default' | 'custom'
   page: number
-  popupHandle: PopupHandle
+  popup: ReturnType<typeof usePopup>
 } & State
 
 const STAGE_COUNT_PER_PAGE = 6
@@ -30,10 +29,6 @@ class StageListPageUnconnected extends React.PureComponent<StageListProps> {
   private input: HTMLInputElement
   private resetButton: HTMLInputElement
   private form: HTMLFormElement
-
-  state = {
-    popup: null as Popup,
-  }
 
   componentDidMount() {
     this.form = document.createElement('form')
@@ -58,9 +53,7 @@ class StageListPageUnconnected extends React.PureComponent<StageListProps> {
   }
 
   onUploadFile = () => {
-    const {
-      popupHandle: { showAlertPopup, showConfirmPopup },
-    } = this.props
+    const { popup } = this.props
     const file = this.input.files[0]
     if (file == null) {
       return
@@ -73,11 +66,13 @@ class StageListPageUnconnected extends React.PureComponent<StageListProps> {
         const stage = StageConfigConverter.r2s(raw).set('custom', true)
         const { dispatch, stages, tab } = this.props
         if (stages.some(s => !s.custom && s.name === stage.name)) {
-          await showAlertPopup(`Stage ${stage.name} already exists.`)
+          await popup.showAlertPopup(`Stage ${stage.name} already exists.`)
           return
         }
         if (stages.some(s => s.custom && s.name === stage.name)) {
-          const confirmed = await showConfirmPopup('Override exsiting custome stage. continue?')
+          const confirmed = await popup.showConfirmPopup(
+            'Override exsiting custome stage. continue?',
+          )
           if (!confirmed) {
             return
           }
@@ -89,7 +84,7 @@ class StageListPageUnconnected extends React.PureComponent<StageListProps> {
         }
       } catch (error) {
         console.error(error)
-        await showAlertPopup('Failed to parse stage config file.')
+        await popup.showAlertPopup('Failed to parse stage config file.')
       } finally {
         this.resetButton.click()
       }
@@ -131,10 +126,8 @@ class StageListPageUnconnected extends React.PureComponent<StageListProps> {
   }
 
   async onDelete(stageName: string) {
-    const {
-      popupHandle: { showConfirmPopup },
-    } = this.props
-    if (await showConfirmPopup(`Delete stage ${stageName}?`)) {
+    const { popup } = this.props
+    if (await popup.showConfirmPopup(`Delete stage ${stageName}?`)) {
       this.props.dispatch(actions.removeCustomStage(stageName))
       this.props.dispatch(actions.syncCustomStages())
     }
@@ -150,13 +143,7 @@ class StageListPageUnconnected extends React.PureComponent<StageListProps> {
   }
 
   render() {
-    const {
-      tab,
-      page,
-      dispatch,
-      stages: allStages,
-      popupHandle: { popup },
-    } = this.props
+    const { tab, page, dispatch, stages: allStages, popup } = this.props
     const filteredStages = allStages.filter(
       s => (s.custom && tab === 'custom') || (!s.custom && tab === 'default'),
     )
@@ -251,7 +238,7 @@ class StageListPageUnconnected extends React.PureComponent<StageListProps> {
         <g className="hint" transform={`translate(${0.5 * B},${14.5 * B}) scale(0.5)`}>
           <Text fill="#999" content="This page is a little janky. Keep patient." />
         </g>
-        {popup}
+        {popup.element}
       </Screen>
     )
   }
@@ -263,39 +250,35 @@ interface PageMatch {
   match: match<{ page: string }>
 }
 
-export default class StageListPageWrapper extends React.PureComponent<{ match: match<any> }> {
-  render() {
-    const { match } = this.props
-    return (
-      <PopupProvider>
-        {popupHandle => (
-          <Switch>
-            <Route exact path="/list" render={() => <Redirect to="/list/default" />} />
-            <Route exact path="/list/default" render={() => <Redirect to="/list/default/1" />} />
-            <Route exact path="/list/custom" render={() => <Redirect to="/list/custom/1" />} />
-            <Route
-              path={`${match.url}/default/:page`}
-              render={({
-                match: {
-                  params: { page },
-                },
-              }: PageMatch) => (
-                <StageListPage popupHandle={popupHandle} tab="default" page={Number(page)} />
-              )}
-            />
-            <Route
-              path={`${match.url}/custom/:page`}
-              render={({
-                match: {
-                  params: { page },
-                },
-              }: PageMatch) => (
-                <StageListPage popupHandle={popupHandle} tab="custom" page={Number(page)} />
-              )}
-            />
-          </Switch>
+const StageListPageWrapper = React.memo(({ match }: { match: match<any> }) => {
+  const popup = usePopup()
+  return (
+    <Switch>
+      <Route exact path="/list" render={() => <Redirect to="/list/default" />} />
+      <Route exact path="/list/default" render={() => <Redirect to="/list/default/1" />} />
+      <Route exact path="/list/custom" render={() => <Redirect to="/list/custom/1" />} />
+      <Route
+        path={`${match.url}/default/:page`}
+        render={({
+          match: {
+            params: { page },
+          },
+        }: PageMatch) => (
+          <StageListPage popupHandle={popup} tab="default" page={Number(page)} />
         )}
-      </PopupProvider>
-    )
-  }
-}
+      />
+      <Route
+        path={`${match.url}/custom/:page`}
+        render={({
+          match: {
+            params: { page },
+          },
+        }: PageMatch) => (
+          <StageListPage popupHandle={popup} tab="custom" page={Number(page)} />
+        )}
+      />
+    </Switch>
+  )
+})
+
+export default StageListPageWrapper
