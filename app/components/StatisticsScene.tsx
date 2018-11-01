@@ -1,6 +1,6 @@
 import React from 'react'
-import { connect } from 'react-redux'
 import { GameRecord } from '../reducers/game'
+import { useRedux } from '../ReduxContext'
 import { State, TankRecord } from '../types'
 import { BLOCK_SIZE as B } from '../utils/constants'
 import * as selectors from '../utils/selectors'
@@ -170,20 +170,6 @@ export class StatisticsSceneContent extends React.PureComponent<StatisticsSceneP
   }
 }
 
-class StatisticsScene extends React.PureComponent<StatisticsSceneProps> {
-  render() {
-    const { game } = this.props
-
-    return (
-      <Screen>
-        <rect fill="#000000" x={0} y={0} width={16 * B} height={16 * B} />
-        <StatisticsSceneContent {...this.props} />
-        {game.paused ? <PauseIndicator x={6.25 * B} y={8 * B} /> : null}
-      </Screen>
-    )
-  }
-}
-
 function mapStateToProps(state: State) {
   return {
     game: state.game,
@@ -193,4 +179,15 @@ function mapStateToProps(state: State) {
   }
 }
 
-export default connect(mapStateToProps)(StatisticsScene)
+export default function StatisticsScene() {
+  const [state] = useRedux()
+  const props = mapStateToProps(state)
+
+  return (
+    <Screen>
+      <rect fill="#000000" x={0} y={0} width={16 * B} height={16 * B} />
+      <StatisticsSceneContent {...props} />
+      {props.game.paused ? <PauseIndicator x={6.25 * B} y={8 * B} /> : null}
+    </Screen>
+  )
+}

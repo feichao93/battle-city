@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import React from 'react'
-import { connect } from 'react-redux'
 import Image from '../hocs/Image'
+import ReduxContext from '../ReduxContext'
 import { State, TankRecord } from '../types'
 import { frame as f } from '../utils/common'
 import { BLOCK_SIZE, TANK_COLOR_SCHEMES } from '../utils/constants'
@@ -133,7 +133,7 @@ function calculateTankTransform(tank: TankRecord) {
 
 type P = {
   tank: TankRecord
-  time: number
+  time?: number
   showReservedIndicator?: boolean
 }
 
@@ -184,7 +184,12 @@ export class TankClassBase extends React.Component<P, S> {
 
 const mapStateToProps = ({ time }: State, { tank }: { tank: TankRecord }) => ({ time, tank })
 
-export const Tank = connect(mapStateToProps)(TankClassBase)
+export const Tank: typeof TankClassBase = (props: any) =>
+  (
+    <ReduxContext.Consumer>
+      {({ time }) => <TankClassBase time={time} {...props} />}
+    </ReduxContext.Consumer>
+  ) as any
 
 const BasicPlayerTank: TankComponent = ({ transform, color, shape }) => {
   const scheme = TANK_COLOR_SCHEMES[color]

@@ -8,7 +8,7 @@ import Screen from './Screen'
 import Text from './Text'
 import TextButton from './TextButton'
 
-const GameoverSceneContent = React.memo(({ onRestart }: { onRestart?: () => void }) => {
+export const GameoverSceneContent = React.memo(({ onRestart }: { onRestart?: () => void }) => {
   const size = ITEM_SIZE_MAP.BRICK
   const scale = 4
   return (

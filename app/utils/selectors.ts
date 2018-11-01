@@ -11,7 +11,11 @@ import IndexHelper from './IndexHelper'
 import values from './values'
 
 export const isInMultiPlayersMode = (state: State) => {
-  const params = new URLSearchParams(state.router.location.search)
+  const location = state.router.location
+  if (location == null) {
+    return false
+  }
+  const params = new URLSearchParams(location.search)
   return params.has(MULTI_PLAYERS_SEARCH_KEY)
 }
 

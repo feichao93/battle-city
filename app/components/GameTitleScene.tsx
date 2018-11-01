@@ -1,7 +1,6 @@
 import React from 'react'
-import { connect } from 'react-redux'
 import { push } from 'react-router-redux'
-import { Dispatch } from 'redux'
+import { useRedux } from '../ReduxContext'
 import { TankRecord } from '../types'
 import {
   BLOCK_SIZE as B,
@@ -170,19 +169,13 @@ export class GameTitleSceneContent extends React.PureComponent<
   }
 }
 
-export interface GameTitleSceneProps {
-  dispatch: Dispatch
+function GameTitleScene() {
+  const [state, dispatch] = useRedux()
+  return (
+    <Screen>
+      <GameTitleSceneContent push={url => dispatch(push(url))} />
+    </Screen>
+  )
 }
 
-class GameTitleScene extends React.PureComponent<GameTitleSceneProps> {
-  render() {
-    const { dispatch } = this.props
-    return (
-      <Screen>
-        <GameTitleSceneContent push={url => dispatch(push(url))} />
-      </Screen>
-    )
-  }
-}
-
-export default connect(undefined)(GameTitleScene as any)
+export default GameTitleScene

@@ -1,5 +1,5 @@
 import React from 'react'
-import { connect } from 'react-redux'
+import { useRedux } from '../ReduxContext'
 import { State } from '../types'
 import PlayerRecord from '../types/PlayerRecord'
 import { BLOCK_SIZE as B, FIELD_SIZE } from '../utils/constants'
@@ -67,6 +67,8 @@ function mapStateToProps(state: State) {
   }
 }
 
-export default connect(mapStateToProps)((props: HUDContentProps) => (
-  <HUDContent x={FIELD_SIZE + 1.5 * B} y={1.5 * B} {...props} />
-))
+export default function HUD() {
+  const [state] = useRedux()
+  const props = mapStateToProps(state)
+  return <HUDContent x={FIELD_SIZE + 1.5 * B} y={1.5 * B} {...props} />
+}

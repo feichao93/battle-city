@@ -24,7 +24,7 @@ import TankHelmet from './TankHelmet'
 import { Tank } from './tanks'
 import TextLayer from './TextLayer'
 
-const BattleFieldContent = React.memo((props: Partial<State & Point>) => {
+export const BattleFieldContent = (props: Partial<State & Point>) => {
   const { x = 0, y = 0, bullets, map, explosions, flickers, tanks, powerUps, scores } = props
   const { bricks, steels, rivers, snows, forests, eagle, restrictedAreas } = map.toObject()
   const aliveTanks = tanks.filter(t => t.alive)
@@ -73,7 +73,7 @@ const BattleFieldContent = React.memo((props: Partial<State & Point>) => {
       <TankPath />
     </g>
   )
-})
+}
 
 const BattleFieldScene = () => {
   const state = useContext(ReduxContext)

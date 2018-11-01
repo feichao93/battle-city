@@ -1,25 +1,13 @@
 import React from 'react'
-import { connect } from 'react-redux'
-import { State } from '../types'
+import ReduxContext from '../ReduxContext'
 import StageEnterCurtain from './StageEnterCurtain'
 
-interface P {
-  stageEnterCurtainT: number
-  comingStageName: string
+export default function CurtainsContainer() {
+  return (
+    <ReduxContext.Consumer>
+      {({ game: { stageEnterCurtainT: t, comingStageName } }) => (
+        <StageEnterCurtain content={`stage  ${comingStageName}`} t={t} />
+      )}
+    </ReduxContext.Consumer>
+  )
 }
-
-class CurtainsContainer extends React.PureComponent<P> {
-  render() {
-    const { stageEnterCurtainT: t, comingStageName } = this.props
-    return <StageEnterCurtain content={`stage  ${comingStageName}`} t={t} />
-  }
-}
-
-function mapStateToProps(state: State) {
-  return {
-    stageEnterCurtainT: state.game.stageEnterCurtainT,
-    comingStageName: state.game.comingStageName,
-  }
-}
-
-export default connect(mapStateToProps)(CurtainsContainer)

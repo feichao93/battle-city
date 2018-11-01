@@ -3,10 +3,12 @@ import React from 'react'
 import { Redirect, Route } from 'react-router'
 import { combineReducers } from 'redux'
 import { all } from 'redux-saga/effects'
-import saga from '../hocs/saga'
-import rootReducer, { State, time } from '../reducers'
+import useProvider from '../hooks/useProvider'
+import useSimpleSaga from '../hooks/useSimpleSaga'
+import rootReducer, { time } from '../reducers'
 import game, { GameRecord } from '../reducers/game'
 import tanks from '../reducers/tanks'
+import ReduxContext from '../ReduxContext'
 import animateStatistics from '../sagas/animateStatistics'
 import fireDemoSaga from '../sagas/fireDemoSaga'
 import tickEmitter from '../sagas/tickEmitter'
@@ -56,57 +58,57 @@ namespace GalleryContent {
   )
   const GrayText = (props: any) => <Text fill="#ccc" {...props} />
 
-  @saga(tickEmitter, combineReducers({ time, game }))
-  export class Tanks extends React.PureComponent {
-    render() {
-      return (
-        <g>
-          <Text x={8} y={8} content="tanks" fill="#dd2664" />
-          <Transform y={32}>
-            <GrayText x={8} y={8} content="player" />
-            <GrayText x={8} y={20} content="tanks" />
-            <Transform x={64}>
-              <X2Tank x={48 * 0} y={0} side="player" level="basic" color="yellow" />
-              <X2Tank x={48 * 1} y={0} side="player" level="fast" color="yellow" />
-              <X2Tank x={48 * 2} y={0} side="player" level="power" color="yellow" />
-              <X2Tank x={48 * 3} y={0} side="player" level="armor" color="yellow" />
-            </Transform>
+  const tanksReducer = combineReducers({ time, game })
+  export function Tanks() {
+    const store = useSimpleSaga(tickEmitter, tanksReducer)
+    const render = useProvider(store, ReduxContext)
+    return render(
+      <g>
+        <Text x={8} y={8} content="tanks" fill="#dd2664" />
+        <Transform y={32}>
+          <GrayText x={8} y={8} content="player" />
+          <GrayText x={8} y={20} content="tanks" />
+          <Transform x={64}>
+            <X2Tank x={48 * 0} y={0} side="player" level="basic" color="yellow" />
+            <X2Tank x={48 * 1} y={0} side="player" level="fast" color="yellow" />
+            <X2Tank x={48 * 2} y={0} side="player" level="power" color="yellow" />
+            <X2Tank x={48 * 3} y={0} side="player" level="armor" color="yellow" />
           </Transform>
-          <Transform y={80}>
-            <GrayText x={8} y={8} content="bot" />
-            <GrayText x={8} y={20} content="tanks" />
-            <Transform x={64}>
-              <X2Tank x={48 * 0} y={0} side="bot" level="basic" color="silver" />
-              <X2Tank x={48 * 1} y={0} side="bot" level="fast" color="silver" />
-              <X2Tank x={48 * 2} y={0} side="bot" level="power" color="silver" />
-              <X2Tank x={48 * 3} y={0} side="bot" level="armor" color="silver" />
-            </Transform>
+        </Transform>
+        <Transform y={80}>
+          <GrayText x={8} y={8} content="bot" />
+          <GrayText x={8} y={20} content="tanks" />
+          <Transform x={64}>
+            <X2Tank x={48 * 0} y={0} side="bot" level="basic" color="silver" />
+            <X2Tank x={48 * 1} y={0} side="bot" level="fast" color="silver" />
+            <X2Tank x={48 * 2} y={0} side="bot" level="power" color="silver" />
+            <X2Tank x={48 * 3} y={0} side="bot" level="armor" color="silver" />
           </Transform>
-          <Transform y={128}>
-            <GrayText x={8} y={0} content="armor" />
-            <GrayText x={8} y={12} content="tank" />
-            <GrayText x={8} y={24} content="hp 1-4" />
-            <Transform x={64}>
-              <X2Tank x={48 * 0} y={0} side="bot" level="armor" hp={1} />
-              <X2Tank x={48 * 1} y={0} side="bot" level="armor" hp={2} />
-              <X2Tank x={48 * 2} y={0} side="bot" level="armor" hp={3} />
-              <X2Tank x={48 * 3} y={0} side="bot" level="armor" hp={4} />
-            </Transform>
+        </Transform>
+        <Transform y={128}>
+          <GrayText x={8} y={0} content="armor" />
+          <GrayText x={8} y={12} content="tank" />
+          <GrayText x={8} y={24} content="hp 1-4" />
+          <Transform x={64}>
+            <X2Tank x={48 * 0} y={0} side="bot" level="armor" hp={1} />
+            <X2Tank x={48 * 1} y={0} side="bot" level="armor" hp={2} />
+            <X2Tank x={48 * 2} y={0} side="bot" level="armor" hp={3} />
+            <X2Tank x={48 * 3} y={0} side="bot" level="armor" hp={4} />
           </Transform>
-          <Transform y={176}>
-            <GrayText x={8} y={0} content="tank" />
-            <GrayText x={8} y={12} content="with" />
-            <GrayText x={8} y={24} content="powerup" />
-            <Transform x={64}>
-              <X2Tank x={48 * 0} y={0} side="bot" level="basic" withPowerUp />
-              <X2Tank x={48 * 1} y={0} side="bot" level="fast" withPowerUp />
-              <X2Tank x={48 * 2} y={0} side="bot" level="power" withPowerUp />
-              <X2Tank x={48 * 3} y={0} side="bot" level="armor" withPowerUp />
-            </Transform>
+        </Transform>
+        <Transform y={176}>
+          <GrayText x={8} y={0} content="tank" />
+          <GrayText x={8} y={12} content="with" />
+          <GrayText x={8} y={24} content="powerup" />
+          <Transform x={64}>
+            <X2Tank x={48 * 0} y={0} side="bot" level="basic" withPowerUp />
+            <X2Tank x={48 * 1} y={0} side="bot" level="fast" withPowerUp />
+            <X2Tank x={48 * 2} y={0} side="bot" level="power" withPowerUp />
+            <X2Tank x={48 * 3} y={0} side="bot" level="armor" withPowerUp />
           </Transform>
-        </g>
-      )
-    }
+        </Transform>
+      </g>,
+    )
   }
 
   export class Texts extends React.PureComponent {
@@ -127,34 +129,35 @@ namespace GalleryContent {
     }
   }
 
-  @saga(fireDemoSaga, rootReducer)
-  export class Fire extends React.PureComponent<Partial<State>> {
-    render() {
-      const { game } = this.props
-      return (
-        <g>
-          <Text x={8} y={8} content="fire" fill="#dd2664" />
-          <Transform x={16} y={40} k={2}>
-            <defs>
-              <clipPath id="fire-demo">
-                <rect width={112} height={32} />
-                <rect y={48} width={112} height={32} />
-              </clipPath>
-            </defs>
-            <g clipPath="url(#fire-demo)">
-              <BattleFieldContent {...this.props} />
-            </g>
-          </Transform>
-          <Transform x={16} y={40}>
-            {game.paused ? <PauseIndicator content="paused" noflash /> : null}
-            {game.paused ? <PauseIndicator content="paused" noflash y={6 * B} /> : null}
-          </Transform>
-          <Transform x={0.5 * B} y={13.5 * B} k={0.5}>
-            <Text fill="#999" content="Hint: Press ESC to pause" />
-          </Transform>
-        </g>
-      )
-    }
+  export function Fire() {
+    const store = useSimpleSaga(fireDemoSaga, rootReducer)
+    const render = useProvider(store, ReduxContext)
+    // TODO should not call store.getState()
+    const state = store.getState()
+
+    return render(
+      <g>
+        <Text x={8} y={8} content="fire" fill="#dd2664" />
+        <Transform x={16} y={40} k={2}>
+          <defs>
+            <clipPath id="fire-demo">
+              <rect width={112} height={32} />
+              <rect y={48} width={112} height={32} />
+            </clipPath>
+          </defs>
+          <g clipPath="url(#fire-demo)">
+            <BattleFieldContent {...state} />
+          </g>
+        </Transform>
+        <Transform x={16} y={40}>
+          {state.game.paused ? <PauseIndicator content="paused" noflash /> : null}
+          {state.game.paused ? <PauseIndicator content="paused" noflash y={6 * B} /> : null}
+        </Transform>
+        <Transform x={0.5 * B} y={13.5 * B} k={0.5}>
+          <Text fill="#999" content="Hint: Press ESC to pause" />
+        </Transform>
+      </g>,
+    )
   }
 
   export class TitleScene extends React.PureComponent {
@@ -191,24 +194,27 @@ namespace GalleryContent {
       ]),
     }),
   }
-  @saga(ticked(animateStatistics), combineReducers({ game }), StatisticsPreloadedState)
-  export class Statistics extends React.PureComponent {
-    render() {
-      const { game } = this.props as { game: GameRecord }
-      return (
-        <g>
-          <Text x={8} y={8} content="Statistics" fill="#dd2664" />
-          <Transform k={0.8} x={25} y={32}>
-            <StatisticsSceneContent
-              game={game}
-              inMultiPlayersMode={true}
-              player1Score={1000}
-              player2Score={12345}
-            />
-          </Transform>
-        </g>
-      )
-    }
+
+  const StatisticsReducerSaga = ticked(animateStatistics)
+  const StatisticsReducer = combineReducers({ game })
+  export function Statistics() {
+    const store = useSimpleSaga(StatisticsReducerSaga, StatisticsReducer, StatisticsPreloadedState)
+    const render = useProvider(store, ReduxContext)
+    const game = store.getState().game
+
+    return render(
+      <g>
+        <Text x={8} y={8} content="Statistics" fill="#dd2664" />
+        <Transform k={0.8} x={25} y={32}>
+          <StatisticsSceneContent
+            game={game}
+            inMultiPlayersMode={true}
+            player1Score={1000}
+            player2Score={12345}
+          />
+        </Transform>
+      </g>,
+    )
   }
 
   export class Gameover extends React.PureComponent {

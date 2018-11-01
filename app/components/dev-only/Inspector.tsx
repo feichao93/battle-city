@@ -1,6 +1,5 @@
-import _ from 'lodash'
 import React from 'react'
-import { connect } from 'react-redux'
+import ReduxContext from '../../ReduxContext'
 import { State, TankRecord, TanksMap } from '../../types'
 import * as selectors from '../../utils/selectors'
 
@@ -138,7 +137,9 @@ if (DEV.INSPECTOR) {
     }
   }
 
-  connectedInspector = connect<State>(_.identity)(Inspector)
+  connectedInspector = function() {
+    return <ReduxContext.Consumer>{state => <Inspector {...state} />}</ReduxContext.Consumer>
+  }
 }
 
 export default connectedInspector
