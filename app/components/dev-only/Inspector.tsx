@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import React from 'react'
 import { connect } from 'react-redux'
-import { ExplosionsMap, ScoresMap, State, TankRecord, TanksMap } from '../../types'
+import { State, TankRecord, TanksMap } from '../../types'
 import * as selectors from '../../utils/selectors'
 
 let connectedInspector: any = () => null as any
@@ -19,26 +19,20 @@ if (DEV.INSPECTOR) {
 
   interface S {
     view: View
-    allScores: ScoresMap
     allTanks: TanksMap
-    allExplosions: ExplosionsMap
   }
 
   class Inspector extends React.PureComponent<State, S> {
     state = {
       view: 'players' as View,
-      allScores: this.props.scores,
       allTanks: this.props.tanks.map(roundTank),
-      allExplosions: this.props.explosions,
     }
 
     componentWillReceiveProps(nextProps: State) {
-      const { scores, tanks, explosions } = this.props
-      const { allScores, allTanks, allExplosions } = this.state
+      const { tanks } = nextProps
+      const { allTanks } = this.state
       this.setState({
-        allScores: allScores.merge(scores),
         allTanks: allTanks.merge(tanks.map(roundTank)),
-        allExplosions: allExplosions.merge(explosions),
       })
     }
 
@@ -66,22 +60,24 @@ if (DEV.INSPECTOR) {
 
     renderExplosionsView() {
       const { explosions } = this.props
-      const { allExplosions } = this.state
       return (
         <div className="explosions-view">
-          {allExplosions.isEmpty() ? <p>EMPTY EXPLOSIONS</p> : null}
-          {allExplosions
-            .map(exp => (
-              <pre
-                key={exp.explosionId}
-                style={{
-                  textDecoration: explosions.has(exp.explosionId) ? 'none' : 'line-through',
-                }}
-              >
-                {JSON.stringify(exp, null, 2)}
-              </pre>
-            ))
-            .valueSeq()}
+          {explosions.isEmpty() ? (
+            <p>EMPTY EXPLOSIONS</p>
+          ) : (
+            explosions
+              .map(exp => (
+                <pre
+                  key={exp.explosionId}
+                  style={{
+                    textDecoration: explosions.has(exp.explosionId) ? 'none' : 'line-through',
+                  }}
+                >
+                  {JSON.stringify(exp, null, 2)}
+                </pre>
+              ))
+              .valueSeq()
+          )}
         </div>
       )
     }
