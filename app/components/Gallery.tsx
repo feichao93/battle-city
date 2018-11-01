@@ -369,7 +369,7 @@ class Gallery extends React.PureComponent<{ tab: string }> {
   }
 }
 
-export default () => (
+const GalleryWrapper: any = () => (
   <Route
     path="/gallery/:tab"
     children={({ match }) => {
@@ -381,3 +381,5 @@ export default () => (
     }}
   />
 )
+
+export default GalleryWrapper

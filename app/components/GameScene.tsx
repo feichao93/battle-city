@@ -1,10 +1,9 @@
 import { List } from 'immutable'
-import React from 'react'
-import { connect } from 'react-redux'
+import React, { useEffect } from 'react'
 import { match } from 'react-router'
 import { Dispatch } from 'redux'
 import { GameRecord } from '../reducers/game'
-import { State } from '../types'
+import { useRedux } from '../ReduxContext'
 import StageConfig from '../types/StageConfig'
 import * as actions from '../utils/actions'
 import BattleFieldScene from './BattleFieldScene'
@@ -17,17 +16,10 @@ export interface GameSceneProps {
   match: match<any>
 }
 
-class GameScene extends React.PureComponent<GameSceneProps> {
-  componentDidMount() {
-    this.didMountOrUpdate()
-  }
+export default function GameScene({ match }: GameSceneProps) {
+  const [{ game, stages }, dispatch] = useRedux()
 
-  componentDidUpdate() {
-    this.didMountOrUpdate()
-  }
-
-  didMountOrUpdate() {
-    const { game, dispatch, match, stages } = this.props
+  useEffect(() => {
     if (game.status === 'idle' || game.status === 'gameover') {
       // 如果游戏还没开始或已经结束 则开始游戏
       const stageName = match.params.stageName
@@ -46,24 +38,12 @@ class GameScene extends React.PureComponent<GameSceneProps> {
         dispatch(actions.startGame(stages.findIndex(s => s.name === stageName)))
       }
     }
-  }
+  })
+  useEffect(() => () => dispatch(actions.leaveGameScene()), [])
 
-  componentWillUnmount() {
-    this.props.dispatch(actions.leaveGameScene())
-  }
-
-  render() {
-    const { game } = this.props
-    if (game.status === 'stat') {
-      return <StatisticsScene />
-    } else {
-      return <BattleFieldScene />
-    }
+  if (game.status === 'stat') {
+    return <StatisticsScene />
+  } else {
+    return <BattleFieldScene />
   }
 }
-
-function mapStateToProps(state: State) {
-  return { game: state.game, stages: state.stages }
-}
-
-export default connect(mapStateToProps)(GameScene) as any

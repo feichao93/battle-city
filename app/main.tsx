@@ -6,17 +6,21 @@ import 'core-js/fn/string/pad-start'
 import 'normalize.css'
 import React from 'react'
 import ReactDOM from 'react-dom'
-import { Provider } from 'react-redux'
 import App from './App'
 import './battle-city.css'
+import useProvider from './hooks/useProvider'
 import ReduxContext from './ReduxContext'
 import store from './utils/store'
 
-ReactDOM.render(
-  <Provider store={store}>
-    <ReduxContext.Provider value={store.getState()}>
+function Main() {
+  const render = useProvider(store, ReduxContext)
+
+  return render(
+    <div>
+      <h1>{store.getState().game.status}</h1>
       <App />
-    </ReduxContext.Provider>
-  </Provider>,
-  document.getElementById('container'),
-)
+    </div>,
+  )
+}
+
+ReactDOM.render(<Main />, document.getElementById('container'))

@@ -1,12 +1,11 @@
 import { saveAs } from 'file-saver'
-import React from 'react'
-import { connect } from 'react-redux'
+import React, { useContext } from 'react'
 import { match, Redirect, Route, Switch } from 'react-router-dom'
 import { goBack, push, replace } from 'react-router-redux'
-import { Dispatch } from 'redux'
-import usePopup from '../hooks/usePopup'
 import useFileUploader from '../hooks/useFileUploader'
-import { RawStageConfig, State } from '../types'
+import usePopup from '../hooks/usePopup'
+import ReduxContext from '../ReduxContext'
+import { RawStageConfig } from '../types'
 import { StageConfigConverter } from '../types/StageConfig'
 import * as actions from '../utils/actions'
 import { BLOCK_SIZE as B } from '../utils/constants'
@@ -15,24 +14,18 @@ import StagePreview from './StagePreview'
 import Text from './Text'
 import TextButton from './TextButton'
 
-type StageListProps = {
-  dispatch: Dispatch
+interface StageListProps {
   tab: 'default' | 'custom'
   page: number
   popup: ReturnType<typeof usePopup>
-} & State
+}
 
 const STAGE_COUNT_PER_PAGE = 6
 const GAP = 25
 const LEN = 52 + GAP
 
-function StageListPageUnconnected({
-  tab,
-  page,
-  dispatch,
-  stages: allStages,
-  popup,
-}: StageListProps) {
+function StageListContent({ tab, page, popup }: StageListProps) {
+  const { stages: allStages, dispatch } = useContext(ReduxContext)
   const requestUploadFile = useFileUploader(onFileOpen)
 
   const filteredStages = allStages.filter(
@@ -195,14 +188,13 @@ function StageListPageUnconnected({
   )
 }
 
-const StageListPage = connect((s: State) => s)(StageListPageUnconnected)
-
-const StageListPageWrapper = React.memo(({ match }: { match: match<any> }) => {
+const StageList: any = React.memo(({ match }: { match: match<any> }) => {
   interface PageMatch {
     match: match<{ page: string }>
   }
 
   const popup = usePopup()
+
   return (
     <Switch>
       <Route exact path="/list" render={() => <Redirect to="/list/default" />} />
@@ -214,7 +206,7 @@ const StageListPageWrapper = React.memo(({ match }: { match: match<any> }) => {
           match: {
             params: { page },
           },
-        }: PageMatch) => <StageListPage popup={popup} tab="default" page={Number(page)} />}
+        }: PageMatch) => <StageListContent popup={popup} tab="default" page={Number(page)} />}
       />
       <Route
         path={`${match.url}/custom/:page`}
@@ -222,10 +214,10 @@ const StageListPageWrapper = React.memo(({ match }: { match: match<any> }) => {
           match: {
             params: { page },
           },
-        }: PageMatch) => <StageListPage popup={popup} tab="custom" page={Number(page)} />}
+        }: PageMatch) => <StageListContent popup={popup} tab="custom" page={Number(page)} />}
       />
     </Switch>
   )
 })
 
-export default StageListPageWrapper
+export default StageList

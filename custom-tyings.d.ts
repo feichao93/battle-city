@@ -32,7 +32,7 @@ declare module 'react' {
     initialState: T | (() => T),
   ): [T, (newState: T) => void | ((updater: (old: T) => T) => void)]
   function useEffect(create: () => void | (() => void), inputs?: ReadonlyArray<unknown>): void
-  function useContext<T>(foo: React.Context<T>): T
+  function useContext<T>(context: React.Context<T>): T
   function useReducer<S, A>(
     reducer: (state: S, action: A) => S,
     initialState: S,

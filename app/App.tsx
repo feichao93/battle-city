@@ -1,5 +1,4 @@
 import React from 'react'
-import { connect } from 'react-redux'
 import { Redirect, Route, Switch } from 'react-router-dom'
 import { ConnectedRouter } from 'react-router-redux'
 import About from './components/About'
@@ -10,46 +9,36 @@ import Gallery from './components/Gallery'
 import GameoverScene from './components/GameoverScene'
 import GameScene from './components/GameScene'
 import GameTitleScene from './components/GameTitleScene'
-import StageListPageWrapper from './components/StageList'
-import { GameRecord } from './reducers/game'
+import StageList from './components/StageList'
 import { firstStageName as fsn } from './stages'
-import { State } from './types'
 import history from './utils/history'
 
-class App extends React.PureComponent<{ game: GameRecord }> {
-  render() {
-    return (
-      <ConnectedRouter history={history}>
-        <div style={{ display: 'flex' }}>
-          <Switch>
-            <Route path="/list" component={StageListPageWrapper} />
-            <Route path="/editor" component={Editor} />
-            <Route path="/gallery" component={Gallery} />
-            <Route exact path="/gameover" component={GameoverScene} />
-            <Route
-              exact
-              path="/choose"
-              render={({ location }) => <Redirect to={`/choose/${fsn}${location.search}`} />}
-            />
-            <Route path="/choose/:stageName" component={ChooseStageScene} />
-            <Route
-              exact
-              path="/stage"
-              render={({ location }) => <Redirect to={`/stage/${fsn}${location.search}`} />}
-            />
-            <Route path="/stage/:stageName" component={GameScene} />
-            <Route component={GameTitleScene} />
-          </Switch>
-          {DEV.HIDE_ABOUT ? null : <About />}
-          {DEV.INSPECTOR && <Inspector />}
-        </div>
-      </ConnectedRouter>
-    )
-  }
-}
+const App = () => (
+  <ConnectedRouter history={history}>
+    <div style={{ display: 'flex' }}>
+      <Switch>
+        <Route path="/list" component={StageList} />
+        <Route path="/editor" component={Editor} />
+        <Route path="/gallery" component={Gallery} />
+        <Route exact path="/gameover" component={GameoverScene} />
+        <Route
+          exact
+          path="/choose"
+          render={({ location }) => <Redirect to={`/choose/${fsn}${location.search}`} />}
+        />
+        <Route path="/choose/:stageName" component={ChooseStageScene} />
+        <Route
+          exact
+          path="/stage"
+          render={({ location }) => <Redirect to={`/stage/${fsn}${location.search}`} />}
+        />
+        <Route path="/stage/:stageName" component={GameScene} />
+        <Route component={GameTitleScene} />
+      </Switch>
+      {DEV.HIDE_ABOUT ? null : <About />}
+      {DEV.INSPECTOR && <Inspector />}
+    </div>
+  </ConnectedRouter>
+)
 
-function mapStateToProps(state: State) {
-  return { game: state.game }
-}
-
-export default connect(mapStateToProps)(App)
+export default App

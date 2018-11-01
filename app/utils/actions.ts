@@ -6,6 +6,7 @@
  * */
 
 import { Map, Set } from 'immutable'
+import { RouterAction } from 'react-router-redux'
 import {
   BulletRecord,
   ExplosionRecord,
@@ -672,6 +673,7 @@ export type LeaveGameScene = ReturnType<typeof leaveGameScene>
 export const leaveGameScene = () => ({ type: A.LeaveGameScene as A.LeaveGameScene })
 
 export type Action =
+  | RouterAction
   | Move
   | StartMove
   | Tick
