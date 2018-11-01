@@ -9,13 +9,14 @@ import ReactDOM from 'react-dom'
 import { Provider } from 'react-redux'
 import App from './App'
 import './battle-city.css'
+import ReduxContext from './ReduxContext'
 import store from './utils/store'
 
 ReactDOM.render(
   <Provider store={store}>
-    <React.StrictMode>
+    <ReduxContext.Provider value={store.getState()}>
       <App />
-    </React.StrictMode>
+    </ReduxContext.Provider>
   </Provider>,
   document.getElementById('container'),
 )

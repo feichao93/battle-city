@@ -1,8 +1,8 @@
 import React, { useRef, useState } from 'react'
 import Popup from '../types/Popup'
 import { BLOCK_SIZE as B, SCREEN_HEIGHT, SCREEN_WIDTH } from '../utils/constants'
-import TextButton from './TextButton'
-import TextWithLineWrap from './TextWithLineWrap'
+import TextButton from '../components/TextButton'
+import TextWithLineWrap from '../components/TextWithLineWrap'
 
 interface PopupProps {
   popup: Popup

@@ -4,6 +4,8 @@ import { connect } from 'react-redux'
 import { match, Redirect, Route, Switch } from 'react-router-dom'
 import { goBack, push, replace } from 'react-router-redux'
 import { Dispatch } from 'redux'
+import usePopup from '../hooks/usePopup'
+import useFileUploader from '../hooks/useFileUploader'
 import { RawStageConfig, State } from '../types'
 import { StageConfigConverter } from '../types/StageConfig'
 import * as actions from '../utils/actions'
@@ -12,7 +14,6 @@ import Screen from './Screen'
 import StagePreview from './StagePreview'
 import Text from './Text'
 import TextButton from './TextButton'
-import usePopup from './usePopup'
 
 type StageListProps = {
   dispatch: Dispatch
@@ -25,46 +26,51 @@ const STAGE_COUNT_PER_PAGE = 6
 const GAP = 25
 const LEN = 52 + GAP
 
-class StageListPageUnconnected extends React.PureComponent<StageListProps> {
-  private input: HTMLInputElement
-  private resetButton: HTMLInputElement
-  private form: HTMLFormElement
+function StageListPageUnconnected({
+  tab,
+  page,
+  dispatch,
+  stages: allStages,
+  popup,
+}: StageListProps) {
+  const requestUploadFile = useFileUploader(onFileOpen)
 
-  componentDidMount() {
-    this.form = document.createElement('form')
-    this.resetButton = document.createElement('input')
-    this.input = document.createElement('input')
+  const filteredStages = allStages.filter(
+    s => (s.custom && tab === 'custom') || (!s.custom && tab === 'default'),
+  )
+  const startIndex = (page - 1) * STAGE_COUNT_PER_PAGE
+  const stages = filteredStages.slice(startIndex, startIndex + STAGE_COUNT_PER_PAGE)
 
-    this.resetButton.type = 'reset'
-    this.input.type = 'file'
-
-    this.form.style.display = 'none'
-
-    this.input.addEventListener('change', this.onUploadFile)
-
-    this.form.appendChild(this.input)
-    this.form.appendChild(this.resetButton)
-    document.body.appendChild(this.form)
+  let maxPage: number
+  if (tab === 'default') {
+    const defaultStageCount = allStages.filter(s => !s.custom).count()
+    maxPage = Math.ceil(defaultStageCount / STAGE_COUNT_PER_PAGE)
+  } else {
+    const customStageCount = allStages.filter(s => s.custom).count()
+    maxPage = Math.ceil(customStageCount / STAGE_COUNT_PER_PAGE)
   }
 
-  componentWillUnmount() {
-    this.input.removeEventListener('change', this.onUploadFile)
-    this.form.remove()
+  function onChoosePrevPage() {
+    const prev = Math.max(1, page - 1)
+    dispatch(replace(`/list/${tab}/${prev}`))
   }
 
-  onUploadFile = () => {
-    const { popup } = this.props
-    const file = this.input.files[0]
-    if (file == null) {
-      return
-    }
+  function onChooseNextPage() {
+    const next = Math.min(maxPage, page + 1)
+    dispatch(replace(`/list/${tab}/${next}`))
+  }
+
+  function onPlay(stageName: string) {
+    dispatch(push(`/stage/${stageName}`))
+  }
+
+  function onFileOpen(file: File) {
     const fileReader = new FileReader()
     fileReader.readAsText(file)
     fileReader.onloadend = async () => {
       try {
         const raw: RawStageConfig = JSON.parse(fileReader.result as string)
         const stage = StageConfigConverter.r2s(raw).set('custom', true)
-        const { dispatch, stages, tab } = this.props
         if (stages.some(s => !s.custom && s.name === stage.name)) {
           await popup.showAlertPopup(`Stage ${stage.name} already exists.`)
           return
@@ -85,56 +91,24 @@ class StageListPageUnconnected extends React.PureComponent<StageListProps> {
       } catch (error) {
         console.error(error)
         await popup.showAlertPopup('Failed to parse stage config file.')
-      } finally {
-        this.resetButton.click()
       }
     }
   }
 
-  getMaxPage() {
-    const { tab, stages } = this.props
-    if (tab === 'default') {
-      const defaultStageCount = stages.filter(s => !s.custom).count()
-      return Math.ceil(defaultStageCount / STAGE_COUNT_PER_PAGE)
-    } else {
-      const customStageCount = stages.filter(s => s.custom).count()
-      return Math.ceil(customStageCount / STAGE_COUNT_PER_PAGE)
-    }
-  }
-
-  onChoosePrevPage = () => {
-    const { dispatch, tab, page } = this.props
-    const prev = Math.max(1, page - 1)
-    dispatch(replace(`/list/${tab}/${prev}`))
-  }
-
-  onChooseNextPage = () => {
-    const { dispatch, tab, page } = this.props
-    const next = Math.min(this.getMaxPage(), page + 1)
-    dispatch(replace(`/list/${tab}/${next}`))
-  }
-
-  onPlay(stageName: string) {
-    this.props.dispatch(push(`/stage/${stageName}`))
-  }
-
-  onEdit(stageName: string) {
-    const { dispatch, stages } = this.props
+  function onEdit(stageName: string) {
     const stage = stages.find(s => s.name === stageName)
     dispatch(actions.setEditorContent(stage))
     dispatch(push('/editor'))
   }
 
-  async onDelete(stageName: string) {
-    const { popup } = this.props
+  async function onDelete(stageName: string) {
     if (await popup.showConfirmPopup(`Delete stage ${stageName}?`)) {
-      this.props.dispatch(actions.removeCustomStage(stageName))
-      this.props.dispatch(actions.syncCustomStages())
+      dispatch(actions.removeCustomStage(stageName))
+      dispatch(actions.syncCustomStages())
     }
   }
 
-  async onDownload(stageName: string) {
-    const { stages } = this.props
+  async function onDownload(stageName: string) {
     const stage = stages.find(s => s.name === stageName)
     const json = StageConfigConverter.s2r(stage)
     delete json.custom
@@ -142,115 +116,92 @@ class StageListPageUnconnected extends React.PureComponent<StageListProps> {
     saveAs(new Blob([content], { type: 'text/plain;charset=utf-8' }), `stage-${stage.name}.json`)
   }
 
-  render() {
-    const { tab, page, dispatch, stages: allStages, popup } = this.props
-    const filteredStages = allStages.filter(
-      s => (s.custom && tab === 'custom') || (!s.custom && tab === 'default'),
-    )
-    const startIndex = (page - 1) * STAGE_COUNT_PER_PAGE
-    const stages = filteredStages.slice(startIndex, startIndex + STAGE_COUNT_PER_PAGE)
-    return (
-      <Screen background="#333">
-        <Text content="stages" x={0.5 * B} y={0.5 * B} />
-        <TextButton
-          content="default"
-          x={4.5 * B}
-          y={0.5 * B}
-          selected={tab === 'default'}
-          onClick={tab !== 'default' ? () => dispatch(replace('/list/default')) : null}
-        />
-        <TextButton
-          content="custom"
-          x={8.5 * B}
-          y={0.5 * B}
-          selected={tab === 'custom'}
-          onClick={tab !== 'custom' ? () => dispatch(replace('/list/custom')) : null}
-        />
-        {stages.isEmpty() ? (
-          <Text x={0.5 * B} y={3 * B} content="No custom stage." fill="#666666" />
-        ) : null}
-        <g transform="translate(0, 40)">
-          {stages
-            .map((stage, index) => {
-              const x = GAP + (index % 3) * LEN
-              const y = 70 * Math.floor(index / 3)
-              return (
-                <g key={stage.name} transform={`translate(${x}, ${y}) `}>
-                  <StagePreview disableImageCache={tab === 'custom'} stage={stage} scale={0.25} />
-                  <g transform="scale(0.5)">
-                    <Text content={stage.name} fill="#dd2664" />
-                  </g>
-                  <g transform="translate(0, 56) scale(0.5)">
-                    <TextButton
-                      x={0 * B}
-                      y={0}
-                      content="play"
-                      onClick={() => this.onPlay(stage.name)}
-                    />
-                    <TextButton
-                      x={2.5 * B}
-                      y={0}
-                      content="edit"
-                      onClick={() => this.onEdit(stage.name)}
-                    />
-                    {stage.custom ? (
-                      <TextButton
-                        x={5 * B}
-                        y={0}
-                        content="x"
-                        onClick={() => this.onDelete(stage.name)}
-                      />
-                    ) : null}
-                    <TextButton
-                      x={6 * B}
-                      y={0}
-                      content={'\u2193'}
-                      onClick={() => this.onDownload(stage.name)}
-                    />
-                  </g>
+  return (
+    <Screen background="#333">
+      <Text content="stages" x={0.5 * B} y={0.5 * B} />
+      <TextButton
+        content="default"
+        x={4.5 * B}
+        y={0.5 * B}
+        selected={tab === 'default'}
+        onClick={tab !== 'default' ? () => dispatch(replace('/list/default')) : null}
+      />
+      <TextButton
+        content="custom"
+        x={8.5 * B}
+        y={0.5 * B}
+        selected={tab === 'custom'}
+        onClick={tab !== 'custom' ? () => dispatch(replace('/list/custom')) : null}
+      />
+      {stages.isEmpty() ? (
+        <Text x={0.5 * B} y={3 * B} content="No custom stage." fill="#666666" />
+      ) : null}
+      <g transform="translate(0, 40)">
+        {stages
+          .map((stage, index) => {
+            const x = GAP + (index % 3) * LEN
+            const y = 70 * Math.floor(index / 3)
+            return (
+              <g key={stage.name} transform={`translate(${x}, ${y}) `}>
+                <StagePreview disableImageCache={tab === 'custom'} stage={stage} scale={0.25} />
+                <g transform="scale(0.5)">
+                  <Text content={stage.name} fill="#dd2664" />
                 </g>
-              )
-            })
-            .toArray()}
-        </g>
-        <g transform={`translate(${6.5 * B}, 0)`}>
-          <TextButton
-            x={0}
-            y={12 * B}
-            content={'\u2190'}
-            onClick={this.onChoosePrevPage}
-            disabled={page === 1}
-          />
-          <Text x={1.25 * B} y={12 * B} content={String(page)} />
-          <TextButton
-            x={2.5 * B}
-            y={12 * B}
-            content={'\u2192'}
-            onClick={this.onChooseNextPage}
-            disabled={page >= this.getMaxPage()}
-          />
-        </g>
-        <g className="button-areas" transform={`translate(${5.5 * B}, ${13.5 * B})`}>
-          <TextButton content="editor" x={0 * B} y={0} onClick={() => dispatch(push('/editor'))} />
-          <TextButton content="upload" x={3.5 * B} y={0} onClick={() => this.input.click()} />
-          <TextButton content="back" x={7 * B} y={0} onClick={() => dispatch(goBack())} />
-        </g>
-        <g className="hint" transform={`translate(${0.5 * B},${14.5 * B}) scale(0.5)`}>
-          <Text fill="#999" content="This page is a little janky. Keep patient." />
-        </g>
-        {popup.element}
-      </Screen>
-    )
-  }
+                <g transform="translate(0, 56) scale(0.5)">
+                  <TextButton x={0 * B} y={0} content="play" onClick={() => onPlay(stage.name)} />
+                  <TextButton x={2.5 * B} y={0} content="edit" onClick={() => onEdit(stage.name)} />
+                  {stage.custom ? (
+                    <TextButton x={5 * B} y={0} content="x" onClick={() => onDelete(stage.name)} />
+                  ) : null}
+                  <TextButton
+                    x={6 * B}
+                    y={0}
+                    content={'\u2193'}
+                    onClick={() => onDownload(stage.name)}
+                  />
+                </g>
+              </g>
+            )
+          })
+          .toArray()}
+      </g>
+      <g transform={`translate(${6.5 * B}, 0)`}>
+        <TextButton
+          x={0}
+          y={12 * B}
+          content={'\u2190'}
+          onClick={onChoosePrevPage}
+          disabled={page === 1}
+        />
+        <Text x={1.25 * B} y={12 * B} content={String(page)} />
+        <TextButton
+          x={2.5 * B}
+          y={12 * B}
+          content={'\u2192'}
+          onClick={onChooseNextPage}
+          disabled={page >= maxPage}
+        />
+      </g>
+      <g className="button-areas" transform={`translate(${5.5 * B}, ${13.5 * B})`}>
+        <TextButton content="editor" x={0 * B} y={0} onClick={() => dispatch(push('/editor'))} />
+        <TextButton content="upload" x={3.5 * B} y={0} onClick={requestUploadFile} />
+        <TextButton content="back" x={7 * B} y={0} onClick={() => dispatch(goBack())} />
+      </g>
+      <g className="hint" transform={`translate(${0.5 * B},${14.5 * B}) scale(0.5)`}>
+        <Text fill="#999" content="This page is a little janky. Keep patient." />
+      </g>
+      {popup.element}
+    </Screen>
+  )
 }
 
 const StageListPage = connect((s: State) => s)(StageListPageUnconnected)
 
-interface PageMatch {
-  match: match<{ page: string }>
-}
-
 const StageListPageWrapper = React.memo(({ match }: { match: match<any> }) => {
+  interface PageMatch {
+    match: match<{ page: string }>
+  }
+
   const popup = usePopup()
   return (
     <Switch>
@@ -263,9 +214,7 @@ const StageListPageWrapper = React.memo(({ match }: { match: match<any> }) => {
           match: {
             params: { page },
           },
-        }: PageMatch) => (
-          <StageListPage popupHandle={popup} tab="default" page={Number(page)} />
-        )}
+        }: PageMatch) => <StageListPage popup={popup} tab="default" page={Number(page)} />}
       />
       <Route
         path={`${match.url}/custom/:page`}
@@ -273,9 +222,7 @@ const StageListPageWrapper = React.memo(({ match }: { match: match<any> }) => {
           match: {
             params: { page },
           },
-        }: PageMatch) => (
-          <StageListPage popupHandle={popup} tab="custom" page={Number(page)} />
-        )}
+        }: PageMatch) => <StageListPage popup={popup} tab="custom" page={Number(page)} />}
       />
     </Switch>
   )
