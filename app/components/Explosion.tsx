@@ -134,20 +134,16 @@ const data = {
   ],
 }
 
-export default class Explosion extends React.PureComponent<{ explosion: ExplosionRecord }> {
-  render() {
-    const {
-      explosion: { cx, cy, shape },
-    } = this.props
-    const smallShape = shape === 's0' || shape === 's1' || shape === 's2'
-    return (
-      <Bitmap
-        useImage
-        x={cx - (smallShape ? 8 : 16)}
-        y={cy - (smallShape ? 8 : 16)}
-        d={data[shape]}
-        scheme={schema}
-      />
-    )
-  }
+export default function Explosion({ explosion }: { explosion: ExplosionRecord }) {
+  const { cx, cy, shape } = explosion
+  const smallShape = shape === 's0' || shape === 's1' || shape === 's2'
+  return (
+    <Bitmap
+      useImage
+      x={cx - (smallShape ? 8 : 16)}
+      y={cy - (smallShape ? 8 : 16)}
+      d={data[shape]}
+      scheme={schema}
+    />
+  )
 }

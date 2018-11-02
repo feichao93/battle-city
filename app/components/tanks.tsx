@@ -131,7 +131,7 @@ function calculateTankTransform(tank: TankRecord) {
   return `translate(${dx}, ${dy})rotate(${rotate})`
 }
 
-interface TankProps {
+interface BaseTankProps {
   tank: TankRecord
   time: number
   showReservedIndicator?: boolean
@@ -139,10 +139,10 @@ interface TankProps {
 
 type S = { lastTireShape: number }
 
-export class BaseTank extends React.Component<TankProps, S> {
+export class BaseTank extends React.Component<BaseTankProps, S> {
   readonly startTime: number
 
-  constructor(props: TankProps) {
+  constructor(props: BaseTankProps) {
     super(props)
     this.startTime = props.time
     this.state = {
@@ -150,7 +150,7 @@ export class BaseTank extends React.Component<TankProps, S> {
     }
   }
 
-  componentWillReceiveProps(nextProps: TankProps) {
+  componentWillReceiveProps(nextProps: BaseTankProps) {
     if (this.props.tank.moving && !nextProps.tank.moving) {
       const lastTireShape = tireShapeTiming.find(nextProps.time - this.startTime)
       this.setState({ lastTireShape })
@@ -182,6 +182,10 @@ export class BaseTank extends React.Component<TankProps, S> {
   }
 }
 
+interface TankProps {
+  tank: TankRecord
+  showReservedIndicator?: boolean
+}
 export const Tank = ({ tank, showReservedIndicator }: TankProps) => {
   const [{ time }] = useRedux()
   return <BaseTank time={time} tank={tank} showReservedIndicator={showReservedIndicator} />

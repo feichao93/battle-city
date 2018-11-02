@@ -5,6 +5,7 @@ import App from './App'
 import './battle-city.css'
 import { Connect } from './hooks/useProvider'
 import './polyfills'
+import './preloading-images'
 import ReduxContext from './ReduxContext'
 import store from './utils/store'
 

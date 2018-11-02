@@ -1,9 +1,32 @@
-import React from 'react'
-import { renderToStaticMarkup } from 'react-dom/server'
+import React, { useContext } from 'react'
+import { Connect } from '../hooks/useProvider'
+import ReduxContext from '../ReduxContext'
+import buildSvg from '../utils/buildSvg'
+import store from '../utils/store'
 
 const cache = new Map<string, string>()
 
-const UnderImageContext = React.createContext(false)
+const IsBuildingCacheContext: any = React.createContext(false)
+const IsUnderImageContext = React.createContext(false)
+
+export function preload(ele: any) {
+  let { type, props } = ele
+  while (type !== Image) {
+    ;({ type, props } = type(props))
+  }
+  DEV.ASSERT && console.assert(type === Image)
+  const url = buildSvg(
+    props.width,
+    props.height,
+    <Connect store={store} context={ReduxContext}>
+      <IsBuildingCacheContext.Provider value={true}>
+        {props.children}
+      </IsBuildingCacheContext.Provider>
+    </Connect>,
+  )
+
+  cache.set(props.imageKey, url)
+}
 
 export interface ImageProps {
   disabled?: boolean
@@ -16,47 +39,31 @@ export interface ImageProps {
   style?: any
 }
 
-export default class Image extends React.PureComponent<ImageProps> {
-  static contextType = UnderImageContext
+export default function Image(props: ImageProps) {
+  const isBuilding = useContext(IsBuildingCacheContext)
+  const underImage = useContext(IsUnderImageContext)
 
-  render() {
-    const underImageComponent = this.context
-    const { disabled = false, imageKey, width, height, transform, children, ...other } = this.props
+  const { disabled = false, imageKey, width, height, transform, children, ...other } = props
 
-    // TODO 优化性能？
-    if (true) {
-      // underImageComponent 不能嵌套，如果已经在一个 ImageComponent 下的话，那么只能使用原始的render方法
-      return (
+  if (isBuilding || underImage || disabled || !cache.has(imageKey)) {
+    return (
+      // @ts-ignore
+      <IsUnderImageContext.Provider value={true}>
         <g transform={transform} {...other}>
           {children}
         </g>
-      )
-    } else {
-      if (!cache.has(imageKey)) {
-        DEV.LOG_PERF && console.time(`Image: loading content of ${imageKey}`)
-        const open = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">`
-        const string = renderToStaticMarkup(
-          <UnderImageContext.Provider value={true}>
-            <g>{children}</g>
-          </UnderImageContext.Provider>,
-        )
-        const close = '</svg>'
-        const markup = open + string + close
-        const blob = new Blob([markup], { type: 'image/svg+xml' })
-        const url = URL.createObjectURL(blob)
-        cache.set(imageKey, url)
-        DEV.LOG_PERF && console.timeEnd(`Image: loading content of ${imageKey}`)
-      }
-      return (
-        <image
-          data-imagekey={imageKey}
-          transform={transform}
-          href={cache.get(imageKey)}
-          width={width}
-          height={height}
-          {...other}
-        />
-      )
-    }
+      </IsUnderImageContext.Provider>
+    )
+  } else {
+    return (
+      <image
+        data-imagekey={imageKey}
+        transform={transform}
+        href={cache.get(imageKey)}
+        width={width}
+        height={height}
+        {...other}
+      />
+    )
   }
 }

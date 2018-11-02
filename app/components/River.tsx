@@ -16,22 +16,19 @@ const riverPart = (shape: number, dx: number, dy: number) => (
   </g>
 )
 
-type RiverProps = {
+interface RiverProps {
   x: number
   y: number
   shape: 0 | 1
 }
 
-export default class River extends React.PureComponent<RiverProps> {
-  render() {
-    const { x, y, shape } = this.props
-    return (
-      <Image imageKey={`River/${shape}`} transform={`translate(${x},${y})`} width="16" height="16">
-        {riverPart(shape, 0, 0)}
-        {riverPart(shape, 8, 0)}
-        {riverPart(shape, 8, 8)}
-        {riverPart(shape, 0, 8)}
-      </Image>
-    )
-  }
+export default function River({ x, y, shape }: RiverProps) {
+  return (
+    <Image imageKey={`River/${shape}`} transform={`translate(${x},${y})`} width="16" height="16">
+      {riverPart(shape, 0, 0)}
+      {riverPart(shape, 8, 0)}
+      {riverPart(shape, 8, 8)}
+      {riverPart(shape, 0, 8)}
+    </Image>
+  )
 }

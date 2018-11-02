@@ -20,16 +20,13 @@ const d = [
   'daacaaad',
 ]
 
-export default class Forest extends React.PureComponent<Point> {
-  render() {
-    const { x, y } = this.props
-    return (
-      <Image imageKey="Forest" transform={`translate(${x},${y})`} width="16" height="16">
-        <Bitmap x={0} y={0} d={d} scheme={scheme} />
-        <Bitmap x={8} y={0} d={d} scheme={scheme} />
-        <Bitmap x={0} y={8} d={d} scheme={scheme} />
-        <Bitmap x={8} y={8} d={d} scheme={scheme} />
-      </Image>
-    )
-  }
+export default function Forest({ x, y }: Point) {
+  return (
+    <Image imageKey="Forest" transform={`translate(${x},${y})`} width="16" height="16">
+      <Bitmap x={0} y={0} d={d} scheme={scheme} />
+      <Bitmap x={8} y={0} d={d} scheme={scheme} />
+      <Bitmap x={0} y={8} d={d} scheme={scheme} />
+      <Bitmap x={8} y={8} d={d} scheme={scheme} />
+    </Image>
+  )
 }

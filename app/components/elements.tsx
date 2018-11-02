@@ -32,25 +32,23 @@ function resolveImageKey(d: string[]) {
   return imageKeyMap.get(d)
 }
 
-export class Bitmap extends React.PureComponent<BitMapProps> {
-  render() {
-    const { x, y, d, scheme, style = {}, useImage } = this.props
-    const width = d[0].length
-    const height = d.length
-    const content = d.map((cs, dy) =>
-      Array.from(cs).map((c, dx) => <Pixel key={dy * width + dx} x={dx} y={dy} fill={scheme[c]} />),
-    )
-    return (
-      <Image
-        disabled={!useImage}
-        imageKey={`Bitmap/${resolveImageKey(d)}`}
-        transform={`translate(${x},${y})`}
-        width={width}
-        height={height}
-        style={style}
-      >
-        {content}
-      </Image>
-    )
-  }
-}
+export const Bitmap = React.memo((props: BitMapProps) => {
+  const { x, y, d, scheme, style = {}, useImage } = props
+  const width = d[0].length
+  const height = d.length
+  const content = d.map((cs, dy) =>
+    Array.from(cs).map((c, dx) => <Pixel key={dy * width + dx} x={dx} y={dy} fill={scheme[c]} />),
+  )
+  return (
+    <Image
+      disabled={!useImage}
+      imageKey={`Bitmap/${resolveImageKey(d)}`}
+      transform={`translate(${x},${y})`}
+      width={width}
+      height={height}
+      style={style}
+    >
+      {content}
+    </Image>
+  )
+})
