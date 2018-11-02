@@ -7,20 +7,17 @@ import {
   MULTI_PLAYERS_SEARCH_KEY,
   TANK_SIZE,
 } from './constants'
+import history from './history'
 import IndexHelper from './IndexHelper'
 import values from './values'
 
-export const isInMultiPlayersMode = (state: State) => {
-  const location = state.router.location
-  if (location == null) {
-    return false
-  }
-  const params = new URLSearchParams(location.search)
+export const isInMultiPlayersMode = () => {
+  const params = new URLSearchParams(history.location.search)
   return params.has(MULTI_PLAYERS_SEARCH_KEY)
 }
 
 export const isAllPlayerDead = (state: State) => {
-  const inMultiPlayersMode = isInMultiPlayersMode(state)
+  const inMultiPlayersMode = isInMultiPlayersMode()
   if (inMultiPlayersMode) {
     const { player1, player2 } = state
     return player1.lives === 0 && !player1.isActive() && player2.lives === 0 && !player2.isActive()

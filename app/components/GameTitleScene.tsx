@@ -1,6 +1,4 @@
 import React from 'react'
-import { push } from 'react-router-redux'
-import { useRedux } from '../ReduxContext'
 import { TankRecord } from '../types'
 import {
   BLOCK_SIZE as B,
@@ -8,6 +6,7 @@ import {
   MULTI_PLAYERS_SEARCH_KEY,
   PLAYER_CONFIGS,
 } from '../utils/constants'
+import history from '../utils/history'
 import BrickWall from './BrickWall'
 import Screen from './Screen'
 import { Tank } from './tanks'
@@ -169,13 +168,10 @@ export class GameTitleSceneContent extends React.PureComponent<
   }
 }
 
-function GameTitleScene() {
-  const [state, dispatch] = useRedux()
+export default function GameTitleScene() {
   return (
     <Screen>
-      <GameTitleSceneContent push={url => dispatch(push(url))} />
+      <GameTitleSceneContent push={url => history.push(url)} />
     </Screen>
   )
 }
-
-export default GameTitleScene

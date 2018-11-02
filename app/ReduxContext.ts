@@ -3,11 +3,12 @@ import { Dispatch } from 'redux'
 import { State } from './reducers'
 import { Action } from './utils/actions'
 
-const ReduxContext = React.createContext<State & { dispatch: Dispatch<Action> }>(undefined)
+const ReduxContext = React.createContext<{ state: State; dispatch: Dispatch<Action> }>(undefined)
 
 export default ReduxContext
 
+/** @deprecated */
 export function useRedux(): [State, Dispatch] {
-  const { dispatch, ...state } = useContext(ReduxContext)
+  const { state, dispatch } = useContext(ReduxContext)
   return [state, dispatch]
 }

@@ -1,5 +1,5 @@
 import React from 'react'
-import ReduxContext from '../../ReduxContext'
+import { useRedux } from '../../ReduxContext'
 import { State, TankRecord, TanksMap } from '../../types'
 import * as selectors from '../../utils/selectors'
 
@@ -47,7 +47,7 @@ if (DEV.INSPECTOR) {
 
     renderPlayersView() {
       const { player1, player2 } = this.props
-      const inMultiPlayersMode = selectors.isInMultiPlayersMode(this.props)
+      const inMultiPlayersMode = selectors.isInMultiPlayersMode()
       return (
         <div className="players-view">
           <pre>{inMultiPlayersMode ? '多人模式' : '单人模式'}</pre>
@@ -138,7 +138,8 @@ if (DEV.INSPECTOR) {
   }
 
   connectedInspector = function() {
-    return <ReduxContext.Consumer>{state => <Inspector {...state} />}</ReduxContext.Consumer>
+    const [state] = useRedux()
+    return <Inspector {...state} />
   }
 }
 

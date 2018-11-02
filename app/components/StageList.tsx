@@ -1,14 +1,14 @@
 import { saveAs } from 'file-saver'
-import React, { useContext } from 'react'
+import React from 'react'
 import { match, Redirect, Route, Switch } from 'react-router-dom'
-import { goBack, push, replace } from 'react-router-redux'
 import useFileUploader from '../hooks/useFileUploader'
 import usePopup from '../hooks/usePopup'
-import ReduxContext from '../ReduxContext'
+import { useRedux } from '../ReduxContext'
 import { RawStageConfig } from '../types'
 import { StageConfigConverter } from '../types/StageConfig'
 import * as actions from '../utils/actions'
 import { BLOCK_SIZE as B } from '../utils/constants'
+import history from '../utils/history'
 import Screen from './Screen'
 import StagePreview from './StagePreview'
 import Text from './Text'
@@ -25,7 +25,7 @@ const GAP = 25
 const LEN = 52 + GAP
 
 function StageListContent({ tab, page, popup }: StageListProps) {
-  const { stages: allStages, dispatch } = useContext(ReduxContext)
+  const [{ stages: allStages }, dispatch] = useRedux()
   const requestUploadFile = useFileUploader(onFileOpen)
 
   const filteredStages = allStages.filter(
@@ -45,16 +45,16 @@ function StageListContent({ tab, page, popup }: StageListProps) {
 
   function onChoosePrevPage() {
     const prev = Math.max(1, page - 1)
-    dispatch(replace(`/list/${tab}/${prev}`))
+    history.replace(`/list/${tab}/${prev}`)
   }
 
   function onChooseNextPage() {
     const next = Math.min(maxPage, page + 1)
-    dispatch(replace(`/list/${tab}/${next}`))
+    history.replace(`/list/${tab}/${next}`)
   }
 
   function onPlay(stageName: string) {
-    dispatch(push(`/stage/${stageName}`))
+    history.push(`/stage/${stageName}`)
   }
 
   function onFileOpen(file: File) {
@@ -79,7 +79,7 @@ function StageListContent({ tab, page, popup }: StageListProps) {
         dispatch(actions.setCustomStage(stage))
         dispatch(actions.syncCustomStages())
         if (tab !== 'custom') {
-          dispatch(replace('/list/custom'))
+          history.replace('/list/custom')
         }
       } catch (error) {
         console.error(error)
@@ -91,7 +91,7 @@ function StageListContent({ tab, page, popup }: StageListProps) {
   function onEdit(stageName: string) {
     const stage = stages.find(s => s.name === stageName)
     dispatch(actions.setEditorContent(stage))
-    dispatch(push('/editor'))
+    history.push('/editor')
   }
 
   async function onDelete(stageName: string) {
@@ -117,14 +117,14 @@ function StageListContent({ tab, page, popup }: StageListProps) {
         x={4.5 * B}
         y={0.5 * B}
         selected={tab === 'default'}
-        onClick={tab !== 'default' ? () => dispatch(replace('/list/default')) : null}
+        onClick={tab !== 'default' ? () => history.replace('/list/default') : null}
       />
       <TextButton
         content="custom"
         x={8.5 * B}
         y={0.5 * B}
         selected={tab === 'custom'}
-        onClick={tab !== 'custom' ? () => dispatch(replace('/list/custom')) : null}
+        onClick={tab !== 'custom' ? () => history.replace('/list/custom') : null}
       />
       {stages.isEmpty() ? (
         <Text x={0.5 * B} y={3 * B} content="No custom stage." fill="#666666" />
@@ -176,9 +176,9 @@ function StageListContent({ tab, page, popup }: StageListProps) {
         />
       </g>
       <g className="button-areas" transform={`translate(${5.5 * B}, ${13.5 * B})`}>
-        <TextButton content="editor" x={0 * B} y={0} onClick={() => dispatch(push('/editor'))} />
+        <TextButton content="editor" x={0 * B} y={0} onClick={() => history.push('/editor')} />
         <TextButton content="upload" x={3.5 * B} y={0} onClick={requestUploadFile} />
-        <TextButton content="back" x={7 * B} y={0} onClick={() => dispatch(goBack())} />
+        <TextButton content="back" x={7 * B} y={0} onClick={() => history.goBack()} />
       </g>
       <g className="hint" transform={`translate(${0.5 * B},${14.5 * B}) scale(0.5)`}>
         <Text fill="#999" content="This page is a little janky. Keep patient." />
@@ -188,7 +188,7 @@ function StageListContent({ tab, page, popup }: StageListProps) {
   )
 }
 
-const StageList: any = React.memo(({ match }: { match: match<any> }) => {
+const StageList = React.memo(({ match }: { match: match<any> }) => {
   interface PageMatch {
     match: match<{ page: string }>
   }

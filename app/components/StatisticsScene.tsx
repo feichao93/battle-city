@@ -175,7 +175,7 @@ function mapStateToProps(state: State) {
     game: state.game,
     player1Score: state.player1.score,
     player2Score: state.player2.score,
-    inMultiPlayersMode: selectors.isInMultiPlayersMode(state),
+    inMultiPlayersMode: selectors.isInMultiPlayersMode(),
   }
 }
 

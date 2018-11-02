@@ -1,4 +1,3 @@
-import { replace } from 'react-router-redux'
 import { cancelled, put, select, take } from 'redux-saga/effects'
 import { State } from '../reducers'
 import { TankRecord } from '../types'
@@ -6,6 +5,7 @@ import StageConfig from '../types/StageConfig'
 import * as actions from '../utils/actions'
 import { A } from '../utils/actions'
 import { frame as f } from '../utils/common'
+import history from '../utils/history'
 import * as selectors from '../utils/selectors'
 import Timing from '../utils/Timing'
 import animateStatistics from './animateStatistics'
@@ -45,8 +45,7 @@ export interface StageResult {
  * 当玩家清空关卡时stage-saga退出, 并向game-saga返回该关卡结果
  */
 export default function* stageSaga(stage: StageConfig) {
-  const { router }: State = yield select()
-  yield put(replace(`/stage/${stage.name}${router.location.search}`))
+  history.replace(`/stage/${stage.name}${history.location.search}`)
 
   try {
     yield animateCurtainAndLoadMap(stage)

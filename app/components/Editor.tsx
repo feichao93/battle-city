@@ -1,20 +1,20 @@
 import { is, List, Repeat } from 'immutable'
 import React from 'react'
-import { connect } from 'react-redux'
 import { match, Redirect, Route } from 'react-router-dom'
-import { goBack, replace } from 'react-router-redux'
 import { Dispatch } from 'redux'
-import { StageConfig, StageDifficulty, State, TankRecord } from '../types/index'
+import usePopup from '../hooks/usePopup'
+import { useRedux } from '../ReduxContext'
+import { StageConfig, StageDifficulty, TankRecord } from '../types/index'
 import { defaultBotsConfig, MapItem, MapItemType, StageConfigConverter } from '../types/StageConfig'
 import * as actions from '../utils/actions'
 import { add, dec, inc } from '../utils/common'
 import { BLOCK_SIZE as B, FIELD_BLOCK_SIZE as FBZ, ZOOM_LEVEL } from '../utils/constants'
+import history from '../utils/history'
 import AreaButton from './AreaButton'
 import BrickWall from './BrickWall'
 import Eagle from './Eagle'
 import Forest from './Forest'
 import Grid from './Grid'
-import PopupProvider, { PopupHandle } from './PopupProvider'
 import River from './River'
 import Screen from './Screen'
 import Snow from './Snow'
@@ -76,7 +76,7 @@ export interface EditorProps {
   dispatch: Dispatch
   initialCotnent: StageConfig
   stages: List<StageConfig>
-  popupHandle: PopupHandle
+  popup: ReturnType<typeof usePopup>
 }
 
 class Editor extends React.Component<EditorProps> {
@@ -147,37 +147,28 @@ class Editor extends React.Component<EditorProps> {
   }
 
   onMouseDown = (event: React.MouseEvent<SVGSVGElement>) => {
-    const {
-      view,
-      popupHandle: { popup },
-    } = this.props
-    if (view === 'map' && popup == null && this.getT(event) !== -1) {
+    const { view, popup } = this.props
+    if (view === 'map' && popup.element == null && this.getT(event) !== -1) {
       this.pressed = true
     }
   }
 
   onMouseMove = (event: React.MouseEvent<SVGSVGElement>) => {
-    const {
-      view,
-      popupHandle: { popup },
-    } = this.props
+    const { view, popup } = this.props
     const { t: lastT } = this.state
     const t = this.getT(event)
     if (t !== lastT) {
       this.setState({ t })
     }
-    if (view === 'map' && popup == null && this.pressed) {
+    if (view === 'map' && popup.element == null && this.pressed) {
       this.setAsCurrentItem(t)
     }
   }
 
   onMouseUp = (event: React.MouseEvent<SVGSVGElement>) => {
-    const {
-      view,
-      popupHandle: { popup },
-    } = this.props
+    const { view, popup } = this.props
     this.pressed = false
-    if (view === 'map' && popup == null) {
+    if (view === 'map' && popup.element == null) {
       this.setAsCurrentItem(this.getT(event))
     }
   }
@@ -229,7 +220,7 @@ class Editor extends React.Component<EditorProps> {
   async check() {
     const {
       stages,
-      popupHandle: { showAlertPopup, showConfirmPopup },
+      popup: { showAlertPopup, showConfirmPopup },
     } = this.props
     const { name, bots, itemList } = this.state
     const totalBotCount = bots.map(e => e.count).reduce(add)
@@ -237,7 +228,7 @@ class Editor extends React.Component<EditorProps> {
     // 检查stageName
     if (name === '') {
       await showAlertPopup('Please enter stage name.')
-      this.props.dispatch(replace('/editor/config'))
+      history.replace('/editor/config')
       return false
     }
 
@@ -281,7 +272,7 @@ class Editor extends React.Component<EditorProps> {
   onBack = async () => {
     const { dispatch } = this.props
     dispatch(actions.setEditorContent(this.getStage()))
-    dispatch(goBack())
+    history.goBack()
   }
 
   onSave = async () => {
@@ -290,13 +281,13 @@ class Editor extends React.Component<EditorProps> {
       const stage = StageConfigConverter.e2s(Object.assign({ custom: true }, this.state))
       dispatch(actions.setCustomStage(stage))
       dispatch(actions.syncCustomStages())
-      dispatch(replace('/list/custom'))
+      history.replace('/list/custom')
     }
   }
 
   onShowHelpInfo = async () => {
     const {
-      popupHandle: { showAlertPopup },
+      popup: { showAlertPopup },
     } = this.props
     await showAlertPopup('1. Choose an item type below.')
     await showAlertPopup('2. Click or pan in the left.')
@@ -503,11 +494,7 @@ class Editor extends React.Component<EditorProps> {
   }
 
   render() {
-    const {
-      dispatch,
-      view,
-      popupHandle: { popup },
-    } = this.props
+    const { dispatch, view, popup } = this.props
 
     return (
       <Screen
@@ -526,55 +513,48 @@ class Editor extends React.Component<EditorProps> {
             x={0.5 * B}
             y={0.5 * B}
             selected={view === 'config'}
-            onClick={() => dispatch(replace('/editor/config'))}
+            onClick={() => history.replace('/editor/config')}
           />
           <TextButton
             content="map"
             x={4 * B}
             y={0.5 * B}
             selected={view === 'map'}
-            onClick={() => dispatch(replace('/editor/map'))}
+            onClick={() => history.replace('/editor/map')}
           />
           <TextButton content="save" x={10 * B} y={0.5 * B} onClick={this.onSave} />
           <TextButton content="back" x={12.5 * B} y={0.5 * B} onClick={this.onBack} />
         </g>
-        {popup}
+        {popup.element}
       </Screen>
     )
   }
 }
 
-const EditorWrapper = ({
-  match,
-  dispatch,
-  initialCotnent,
-  stages,
-}: EditorProps & { match: match<{ view: string }> }) => (
-  <Route
-    path={`${match.url}/:view`}
-    children={({ match }) => {
-      // match 在这里可能为 null
-      const view = match && match.params.view
-      if (!['map', 'config'].includes(view)) {
-        return <Redirect to="/editor/config" />
-      }
-      return (
-        <PopupProvider>
-          {popupHandle => (
-            <Editor
-              view={view}
-              dispatch={dispatch}
-              initialCotnent={initialCotnent}
-              stages={stages}
-              popupHandle={popupHandle}
-            />
-          )}
-        </PopupProvider>
-      )
-    }}
-  />
-)
+const EditorWrapper = ({ match }: EditorProps & { match: match<{ view: string }> }) => {
+  const popup = usePopup()
+  const [{ editorContent: initialCotnent, stages }, dispatch] = useRedux()
+  return (
+    <Route
+      path={`${match.url}/:view`}
+      children={({ match }) => {
+        // match 在这里可能为 null
+        const view = match && match.params.view
+        if (!['map', 'config'].includes(view)) {
+          return <Redirect to="/editor/config" />
+        }
+        return (
+          <Editor
+            view={view}
+            dispatch={dispatch}
+            initialCotnent={initialCotnent}
+            stages={stages}
+            popup={popup}
+          />
+        )
+      }}
+    />
+  )
+}
 
-const mapStateToProps = (s: State) => ({ initialCotnent: s.editorContent, stages: s.stages })
-
-export default connect(mapStateToProps)(EditorWrapper)
+export default EditorWrapper

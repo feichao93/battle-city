@@ -63,7 +63,7 @@ function mapStateToProps(state: State) {
     player1: state.player1,
     player2: state.player2,
     show: state.game.showHUD,
-    inMultiPlayersMode: selectors.isInMultiPlayersMode(state),
+    inMultiPlayersMode: selectors.isInMultiPlayersMode(),
   }
 }
 

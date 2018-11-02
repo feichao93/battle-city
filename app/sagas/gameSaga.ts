@@ -1,4 +1,3 @@
-import { replace } from 'react-router-redux'
 import { all, put, race, select, take } from 'redux-saga/effects'
 import { delay } from 'redux-saga/utils'
 import { State } from '../reducers'
@@ -7,6 +6,7 @@ import * as actions from '../utils/actions'
 import { A } from '../utils/actions'
 import { getNextId } from '../utils/common'
 import { BLOCK_SIZE, PLAYER_CONFIGS } from '../utils/constants'
+import history from '../utils/history'
 import * as selectors from '../utils/selectors'
 import Timing from '../utils/Timing'
 import botMasterSaga from './botMasterSaga'
@@ -106,7 +106,7 @@ export default function* gameSaga(action: actions.StartGame | actions.ResetGame)
 
   if (result.flow) {
     DEV.LOG && console.log('GAME ENDED')
-    yield put(replace('/gameover'))
+    history.replace('/gameover')
   }
   yield put(actions.beforeEndGame())
   yield put(actions.endGame())

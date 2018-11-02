@@ -1,8 +1,8 @@
-import React, { useContext, useEffect } from 'react'
-import { replace } from 'react-router-redux'
+import React, { useEffect } from 'react'
 import useKeyboard from '../hooks/useKeyboard'
-import ReduxContext from '../ReduxContext'
+import { useRedux } from '../ReduxContext'
 import { BLOCK_SIZE as B, ITEM_SIZE_MAP } from '../utils/constants'
+import history from '../utils/history'
 import BrickWall from './BrickWall'
 import Screen from './Screen'
 import Text from './Text'
@@ -57,17 +57,14 @@ export const GameoverSceneContent = React.memo(({ onRestart }: { onRestart?: () 
 })
 
 // TODO 需要考虑 multi-players 的情况
-const GameoverScene: any = () => {
-  const { game, dispatch } = useContext(ReduxContext)
-  console.log(game.status)
+export default function GameoverScene() {
+  const [{ game }] = useRedux()
 
   useKeyboard('keydown', onKeyDown)
   useEffect(
     () => {
       if (game.status === 'idle') {
-        debugger
-        console.log('replacing...')
-        dispatch(replace('/'))
+        history.replace('/')
       }
     },
     [game.status],
@@ -81,9 +78,9 @@ const GameoverScene: any = () => {
 
   function onRestart() {
     if (game.lastStageName) {
-      dispatch(replace(`/choose/${game.lastStageName}`))
+      history.replace(`/choose/${game.lastStageName}`)
     } else {
-      dispatch(replace(`/choose`))
+      history.replace(`/choose`)
     }
   }
 
@@ -93,5 +90,3 @@ const GameoverScene: any = () => {
     </Screen>
   )
 }
-
-export default GameoverScene

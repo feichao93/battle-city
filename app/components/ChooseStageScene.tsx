@@ -1,9 +1,9 @@
-import React, { useContext } from 'react'
+import React from 'react'
 import { match, Redirect } from 'react-router-dom'
-import { push, replace } from 'react-router-redux'
 import useKeyboard from '../hooks/useKeyboard'
-import ReduxContext from '../ReduxContext'
+import { useRedux } from '../ReduxContext'
 import { BLOCK_SIZE as B, PLAYER_CONFIGS } from '../utils/constants'
+import history from '../utils/history'
 import Screen from './Screen'
 import StagePreview from './StagePreview'
 import Text from './Text'
@@ -14,9 +14,9 @@ interface ChooseStageSceneProps {
   match: match<{ stageName: string }>
 }
 
-const ChooseStageScene: any = ({ match, location }: ChooseStageSceneProps) => {
+const ChooseStageScene = ({ match, location }: ChooseStageSceneProps) => {
   useKeyboard('keydown', onKeyDown)
-  const { stages, dispatch } = useContext(ReduxContext)
+  const [{ stages }] = useRedux()
 
   const stageNames = stages.map(s => s.name)
   const { stageName } = match.params
@@ -38,7 +38,7 @@ const ChooseStageScene: any = ({ match, location }: ChooseStageSceneProps) => {
   }
 
   function onChoose(stageName: string) {
-    dispatch(replace(`/choose/${stageName}${location.search}`))
+    history.replace(`/choose/${stageName}${location.search}`)
   }
 
   function onChoosePrevStage() {
@@ -55,7 +55,7 @@ const ChooseStageScene: any = ({ match, location }: ChooseStageSceneProps) => {
 
   function onStartPlay() {
     const { stageName } = match.params
-    dispatch(push(`/stage/${stageName}${location.search}`))
+    history.push(`/stage/${stageName}${location.search}`)
   }
 
   return (
@@ -87,7 +87,7 @@ const ChooseStageScene: any = ({ match, location }: ChooseStageSceneProps) => {
           onClick={onChooseNextStage}
         />
         <TextButton content="play" stroke="#96d332" x={6 * B} y={0} onClick={onStartPlay} />
-        <TextButton content="back" x={9 * B} y={0} onClick={() => dispatch(replace('/'))} />
+        <TextButton content="back" x={9 * B} y={0} onClick={() => history.replace('/')} />
       </g>
       <g className="hint" transform={`translate(${0.5 * B},${14.5 * B}) scale(0.5)`}>
         <Text fill="#999" content="Press left or right to choose stages. Press fire to start." />

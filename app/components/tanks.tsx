@@ -1,8 +1,8 @@
 import _ from 'lodash'
 import React from 'react'
 import Image from '../hocs/Image'
-import ReduxContext from '../ReduxContext'
-import { State, TankRecord } from '../types'
+import { useRedux } from '../ReduxContext'
+import { TankRecord } from '../types'
 import { frame as f } from '../utils/common'
 import { BLOCK_SIZE, TANK_COLOR_SCHEMES } from '../utils/constants'
 import Timing from '../utils/Timing'
@@ -131,18 +131,18 @@ function calculateTankTransform(tank: TankRecord) {
   return `translate(${dx}, ${dy})rotate(${rotate})`
 }
 
-type P = {
+interface TankProps {
   tank: TankRecord
-  time?: number
+  time: number
   showReservedIndicator?: boolean
 }
 
 type S = { lastTireShape: number }
 
-export class TankClassBase extends React.Component<P, S> {
+export class BaseTank extends React.Component<TankProps, S> {
   readonly startTime: number
 
-  constructor(props: P) {
+  constructor(props: TankProps) {
     super(props)
     this.startTime = props.time
     this.state = {
@@ -150,7 +150,7 @@ export class TankClassBase extends React.Component<P, S> {
     }
   }
 
-  componentWillReceiveProps(nextProps: P) {
+  componentWillReceiveProps(nextProps: TankProps) {
     if (this.props.tank.moving && !nextProps.tank.moving) {
       const lastTireShape = tireShapeTiming.find(nextProps.time - this.startTime)
       this.setState({ lastTireShape })
@@ -182,14 +182,10 @@ export class TankClassBase extends React.Component<P, S> {
   }
 }
 
-const mapStateToProps = ({ time }: State, { tank }: { tank: TankRecord }) => ({ time, tank })
-
-export const Tank: typeof TankClassBase = (props: any) =>
-  (
-    <ReduxContext.Consumer>
-      {({ time }) => <TankClassBase time={time} {...props} />}
-    </ReduxContext.Consumer>
-  ) as any
+export const Tank = ({ tank, showReservedIndicator }: TankProps) => {
+  const [{ time }] = useRedux()
+  return <BaseTank time={time} tank={tank} showReservedIndicator={showReservedIndicator} />
+}
 
 const BasicPlayerTank: TankComponent = ({ transform, color, shape }) => {
   const scheme = TANK_COLOR_SCHEMES[color]

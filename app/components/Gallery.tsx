@@ -1,14 +1,13 @@
 import { Map } from 'immutable'
-import React from 'react'
+import React, { useContext } from 'react'
 import { Redirect, Route } from 'react-router'
 import { combineReducers } from 'redux'
 import { all } from 'redux-saga/effects'
-import useProvider from '../hooks/useProvider'
-import useSimpleSaga from '../hooks/useSimpleSaga'
-import rootReducer, { time } from '../reducers'
+import { Connect } from '../hooks/useProvider'
+import useSimpleReduxStore from '../hooks/useSimpleReduxStore'
+import rootReducer, { State, time } from '../reducers'
 import game, { GameRecord } from '../reducers/game'
 import tanks from '../reducers/tanks'
-import ReduxContext from '../ReduxContext'
 import animateStatistics from '../sagas/animateStatistics'
 import fireDemoSaga from '../sagas/fireDemoSaga'
 import tickEmitter from '../sagas/tickEmitter'
@@ -25,7 +24,7 @@ import PowerUp from './PowerUp'
 import Score from './Score'
 import Screen from './Screen'
 import { StatisticsSceneContent } from './StatisticsScene'
-import { Tank } from './tanks'
+import { BaseTank } from './tanks'
 import Text from './Text'
 import TextButton from './TextButton'
 import TextWithLineWrap from './TextWithLineWrap'
@@ -37,6 +36,8 @@ function ticked(fn: any) {
     yield all([tickEmitter(), fn()])
   }
 }
+
+const GalleryContext: any = React.createContext<any>(null)
 
 namespace GalleryContent {
   const powerUpNames: PowerUpName[] = ['tank', 'star', 'grenade', 'timer', 'helmet', 'shovel']
@@ -51,63 +52,70 @@ namespace GalleryContent {
   const Transform = ({ x = 0, y = 0, k = 1, children }: TransformProps) => (
     <g transform={`translate(${x}, ${y}) scale(${k})`}>{children}</g>
   )
-  const X2Tank = ({ x, y, side, color = 'auto', level, hp = 1, withPowerUp }: any) => (
-    <Transform x={x} y={y} k={2}>
-      <Tank tank={new TankRecord({ side, color, level, hp, withPowerUp })} />
-    </Transform>
-  )
+  const X2Tank = ({ x, y, side, color = 'auto', level, hp = 1, withPowerUp }: any) => {
+    const { state } = useContext(GalleryContext)
+    return (
+      <Transform x={x} y={y} k={2}>
+        <BaseTank
+          time={state.time}
+          tank={new TankRecord({ side, color, level, hp, withPowerUp })}
+        />
+      </Transform>
+    )
+  }
   const GrayText = (props: any) => <Text fill="#ccc" {...props} />
 
   const tanksReducer = combineReducers({ time, game })
   export function Tanks() {
-    const store = useSimpleSaga(tickEmitter, tanksReducer)
-    const render = useProvider(store, ReduxContext)
-    return render(
-      <g>
-        <Text x={8} y={8} content="tanks" fill="#dd2664" />
-        <Transform y={32}>
-          <GrayText x={8} y={8} content="player" />
-          <GrayText x={8} y={20} content="tanks" />
-          <Transform x={64}>
-            <X2Tank x={48 * 0} y={0} side="player" level="basic" color="yellow" />
-            <X2Tank x={48 * 1} y={0} side="player" level="fast" color="yellow" />
-            <X2Tank x={48 * 2} y={0} side="player" level="power" color="yellow" />
-            <X2Tank x={48 * 3} y={0} side="player" level="armor" color="yellow" />
+    const store = useSimpleReduxStore(tickEmitter, tanksReducer)
+    return (
+      <Connect store={store} context={GalleryContext}>
+        <g>
+          <Text x={8} y={8} content="tanks" fill="#dd2664" />
+          <Transform y={32}>
+            <GrayText x={8} y={8} content="player" />
+            <GrayText x={8} y={20} content="tanks" />
+            <Transform x={64}>
+              <X2Tank x={48 * 0} y={0} side="player" level="basic" color="yellow" />
+              <X2Tank x={48 * 1} y={0} side="player" level="fast" color="yellow" />
+              <X2Tank x={48 * 2} y={0} side="player" level="power" color="yellow" />
+              <X2Tank x={48 * 3} y={0} side="player" level="armor" color="yellow" />
+            </Transform>
           </Transform>
-        </Transform>
-        <Transform y={80}>
-          <GrayText x={8} y={8} content="bot" />
-          <GrayText x={8} y={20} content="tanks" />
-          <Transform x={64}>
-            <X2Tank x={48 * 0} y={0} side="bot" level="basic" color="silver" />
-            <X2Tank x={48 * 1} y={0} side="bot" level="fast" color="silver" />
-            <X2Tank x={48 * 2} y={0} side="bot" level="power" color="silver" />
-            <X2Tank x={48 * 3} y={0} side="bot" level="armor" color="silver" />
+          <Transform y={80}>
+            <GrayText x={8} y={8} content="bot" />
+            <GrayText x={8} y={20} content="tanks" />
+            <Transform x={64}>
+              <X2Tank x={48 * 0} y={0} side="bot" level="basic" color="silver" />
+              <X2Tank x={48 * 1} y={0} side="bot" level="fast" color="silver" />
+              <X2Tank x={48 * 2} y={0} side="bot" level="power" color="silver" />
+              <X2Tank x={48 * 3} y={0} side="bot" level="armor" color="silver" />
+            </Transform>
           </Transform>
-        </Transform>
-        <Transform y={128}>
-          <GrayText x={8} y={0} content="armor" />
-          <GrayText x={8} y={12} content="tank" />
-          <GrayText x={8} y={24} content="hp 1-4" />
-          <Transform x={64}>
-            <X2Tank x={48 * 0} y={0} side="bot" level="armor" hp={1} />
-            <X2Tank x={48 * 1} y={0} side="bot" level="armor" hp={2} />
-            <X2Tank x={48 * 2} y={0} side="bot" level="armor" hp={3} />
-            <X2Tank x={48 * 3} y={0} side="bot" level="armor" hp={4} />
+          <Transform y={128}>
+            <GrayText x={8} y={0} content="armor" />
+            <GrayText x={8} y={12} content="tank" />
+            <GrayText x={8} y={24} content="hp 1-4" />
+            <Transform x={64}>
+              <X2Tank x={48 * 0} y={0} side="bot" level="armor" hp={1} />
+              <X2Tank x={48 * 1} y={0} side="bot" level="armor" hp={2} />
+              <X2Tank x={48 * 2} y={0} side="bot" level="armor" hp={3} />
+              <X2Tank x={48 * 3} y={0} side="bot" level="armor" hp={4} />
+            </Transform>
           </Transform>
-        </Transform>
-        <Transform y={176}>
-          <GrayText x={8} y={0} content="tank" />
-          <GrayText x={8} y={12} content="with" />
-          <GrayText x={8} y={24} content="powerup" />
-          <Transform x={64}>
-            <X2Tank x={48 * 0} y={0} side="bot" level="basic" withPowerUp />
-            <X2Tank x={48 * 1} y={0} side="bot" level="fast" withPowerUp />
-            <X2Tank x={48 * 2} y={0} side="bot" level="power" withPowerUp />
-            <X2Tank x={48 * 3} y={0} side="bot" level="armor" withPowerUp />
+          <Transform y={176}>
+            <GrayText x={8} y={0} content="tank" />
+            <GrayText x={8} y={12} content="with" />
+            <GrayText x={8} y={24} content="powerup" />
+            <Transform x={64}>
+              <X2Tank x={48 * 0} y={0} side="bot" level="basic" withPowerUp />
+              <X2Tank x={48 * 1} y={0} side="bot" level="fast" withPowerUp />
+              <X2Tank x={48 * 2} y={0} side="bot" level="power" withPowerUp />
+              <X2Tank x={48 * 3} y={0} side="bot" level="armor" withPowerUp />
+            </Transform>
           </Transform>
-        </Transform>
-      </g>,
+        </g>
+      </Connect>
     )
   }
 
@@ -130,33 +138,38 @@ namespace GalleryContent {
   }
 
   export function Fire() {
-    const store = useSimpleSaga(fireDemoSaga, rootReducer)
-    const render = useProvider(store, ReduxContext)
-    // TODO should not call store.getState()
-    const state = store.getState()
+    const store = useSimpleReduxStore(fireDemoSaga, rootReducer)
 
-    return render(
-      <g>
-        <Text x={8} y={8} content="fire" fill="#dd2664" />
-        <Transform x={16} y={40} k={2}>
-          <defs>
-            <clipPath id="fire-demo">
-              <rect width={112} height={32} />
-              <rect y={48} width={112} height={32} />
-            </clipPath>
-          </defs>
-          <g clipPath="url(#fire-demo)">
-            <BattleFieldContent {...state} />
-          </g>
-        </Transform>
-        <Transform x={16} y={40}>
-          {state.game.paused ? <PauseIndicator content="paused" noflash /> : null}
-          {state.game.paused ? <PauseIndicator content="paused" noflash y={6 * B} /> : null}
-        </Transform>
-        <Transform x={0.5 * B} y={13.5 * B} k={0.5}>
-          <Text fill="#999" content="Hint: Press ESC to pause" />
-        </Transform>
-      </g>,
+    return (
+      <Connect store={store} context={GalleryContext}>
+        <g>
+          <Text x={8} y={8} content="fire" fill="#dd2664" />
+          <Transform x={16} y={40} k={2}>
+            <defs>
+              <clipPath id="fire-demo">
+                <rect width={112} height={32} />
+                <rect y={48} width={112} height={32} />
+              </clipPath>
+            </defs>
+            <g clipPath="url(#fire-demo)">
+              <GalleryContext.Consumer>
+                {({ state }: { state: State }) => <BattleFieldContent {...state} />}
+              </GalleryContext.Consumer>
+            </g>
+          </Transform>
+          <GalleryContext.Consumer>
+            {({ state }: { state: State }) => (
+              <Transform x={16} y={40}>
+                {state.game.paused ? <PauseIndicator content="paused" noflash /> : null}
+                {state.game.paused ? <PauseIndicator content="paused" noflash y={6 * B} /> : null}
+              </Transform>
+            )}
+          </GalleryContext.Consumer>
+          <Transform x={0.5 * B} y={13.5 * B} k={0.5}>
+            <Text fill="#999" content="Hint: Press ESC to pause" />
+          </Transform>
+        </g>
+      </Connect>
     )
   }
 
@@ -198,22 +211,30 @@ namespace GalleryContent {
   const StatisticsReducerSaga = ticked(animateStatistics)
   const StatisticsReducer = combineReducers({ game })
   export function Statistics() {
-    const store = useSimpleSaga(StatisticsReducerSaga, StatisticsReducer, StatisticsPreloadedState)
-    const render = useProvider(store, ReduxContext)
-    const game = store.getState().game
+    const store = useSimpleReduxStore(
+      StatisticsReducerSaga,
+      StatisticsReducer,
+      StatisticsPreloadedState,
+    )
 
-    return render(
-      <g>
-        <Text x={8} y={8} content="Statistics" fill="#dd2664" />
-        <Transform k={0.8} x={25} y={32}>
-          <StatisticsSceneContent
-            game={game}
-            inMultiPlayersMode={true}
-            player1Score={1000}
-            player2Score={12345}
-          />
-        </Transform>
-      </g>,
+    return (
+      <Connect store={store} context={GalleryContext}>
+        <g>
+          <Text x={8} y={8} content="Statistics" fill="#dd2664" />
+          <Transform k={0.8} x={25} y={32}>
+            <GalleryContext.Consumer>
+              {({ state: { game } }: { state: State }) => (
+                <StatisticsSceneContent
+                  game={game}
+                  inMultiPlayersMode={true}
+                  player1Score={1000}
+                  player2Score={12345}
+                />
+              )}
+            </GalleryContext.Consumer>
+          </Transform>
+        </g>
+      </Connect>
     )
   }
 
@@ -375,17 +396,17 @@ class Gallery extends React.PureComponent<{ tab: string }> {
   }
 }
 
-const GalleryWrapper: any = () => (
-  <Route
-    path="/gallery/:tab"
-    children={({ match }) => {
-      if (match != null && tabs.includes(match.params.tab)) {
-        return <Gallery tab={match.params.tab} />
-      } else {
-        return <Redirect to={`/gallery/${tabs[0]}`} />
-      }
-    }}
-  />
-)
-
-export default GalleryWrapper
+export default function GalleryWrapper() {
+  return (
+    <Route
+      path="/gallery/:tab"
+      children={({ match }) => {
+        if (match != null && tabs.includes(match.params.tab)) {
+          return <Gallery tab={match.params.tab} />
+        } else {
+          return <Redirect to={`/gallery/${tabs[0]}`} />
+        }
+      }}
+    />
+  )
+}

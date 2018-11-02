@@ -1,11 +1,19 @@
 const path = require('path')
 const webpack = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
-const moment = require('moment')
 const packageInfo = require('./package.json')
 const getDevConfig = require('./devConfig')
 
-moment.locale('zh-cn')
+function getNow() {
+  const d = new Date()
+  const YYYY = d.getFullYear()
+  const MM = String(d.getMonth() + 1).padStart(2, '0')
+  const DD = String(d.getDate()).padStart(2, '0')
+  const HH = String(d.getHours()).padStart(2, '0')
+  const mm = String(d.getMinutes()).padStart(2, '0')
+  const ss = String(d.getSeconds()).padStart(2, '0')
+  return `${YYYY}-${MM}-${DD} ${HH}:${mm}:${ss}`
+}
 
 function processDevConfig(config) {
   const result = {}
@@ -15,28 +23,10 @@ function processDevConfig(config) {
   return result
 }
 
-module.exports = function(env = {}) {
-  const prod = Boolean(env.prod)
-
-  const plugins = [
-    new webpack.DefinePlugin({
-      COMPILE_VERSION: JSON.stringify(packageInfo.version),
-      COMPILE_DATE: JSON.stringify(moment().format('YYYY-MM-DD HH:mm:ss')),
-      // 将 devConfig.js 中的配置数据加入到 DefinePlugin 中
-      ...processDevConfig(getDevConfig(!prod)),
-    }),
-    new HtmlWebpackPlugin({
-      title: 'battle-city',
-      filename: 'index.html',
-      template: path.resolve(__dirname, 'app/index.tmpl.html'),
-    }),
-    !prod && new webpack.HotModuleReplacementPlugin(),
-  ].filter(Boolean)
+module.exports = function(_env, argv) {
+  const prod = argv.mode === 'production'
 
   return {
-    mode: prod ? 'production' : 'development',
-    devtool: prod ? false : 'source-map',
-    context: __dirname,
     target: 'web',
 
     entry: path.resolve(__dirname, 'app/main.tsx'),
@@ -47,7 +37,6 @@ module.exports = function(env = {}) {
     },
 
     resolve: {
-      modules: [path.resolve(__dirname, 'app'), 'node_modules'],
       extensions: ['.js', '.jsx', '.ts', '.tsx'],
     },
 
@@ -57,12 +46,6 @@ module.exports = function(env = {}) {
         {
           test: /\.tsx?$/,
           use: [
-            // {
-            //   loader: 'babel-loader',
-            //   options: {
-            //     plugins: ['react-hot-loader/babel'],
-            //   },
-            // },
             {
               loader: 'ts-loader',
               options: {
@@ -79,7 +62,20 @@ module.exports = function(env = {}) {
       ],
     },
 
-    plugins,
+    plugins: [
+      new webpack.DefinePlugin({
+        COMPILE_VERSION: JSON.stringify(packageInfo.version),
+        COMPILE_DATE: JSON.stringify(getNow()),
+        // 将 devConfig.js 中的配置数据加入到 DefinePlugin 中
+        ...processDevConfig(getDevConfig(!prod)),
+      }),
+      new HtmlWebpackPlugin({
+        title: 'battle-city',
+        filename: 'index.html',
+        template: path.resolve(__dirname, 'app/index.tmpl.html'),
+      }),
+      !prod && new webpack.HotModuleReplacementPlugin(),
+    ].filter(Boolean),
 
     devServer: {
       contentBase: __dirname,

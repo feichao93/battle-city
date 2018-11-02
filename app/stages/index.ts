@@ -1,7 +1,7 @@
 import { List } from 'immutable'
 import StageConfig from '../types/StageConfig'
 
-const requireStage = (require as any).context('stages', false, /\.json/)
+const requireStage = (require as any).context('.', false, /\.json/)
 const filenames = List<string>(requireStage.keys())
 
 let defaultStages = filenames

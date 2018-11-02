@@ -5,7 +5,7 @@ interface P {
   areas: Map<AreaId, Rect>
 }
 
-let RestrictedAreaLayer: React.ComponentClass<P> = (() => null as any) as any
+let RestrictedAreaLayer: any = () => null as any
 
 if (DEV.RESTRICTED_AREA) {
   RestrictedAreaLayer = class extends React.PureComponent<P> {

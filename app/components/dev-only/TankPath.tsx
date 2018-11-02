@@ -1,6 +1,6 @@
 import { Map as IMap } from 'immutable'
 import React from 'react'
-import ReduxContext from '../../ReduxContext'
+import { useRedux } from '../../ReduxContext'
 
 let TankPath: any = () => null as any
 
@@ -15,41 +15,39 @@ if (DEV.TANK_PATH) {
     return colorMap.get(name)
   }
 
-  TankPath = () => (
-    <ReduxContext.Consumer>
-      {({ devOnly }) => {
-        const { pathmap } = devOnly.toObject()
-        const pointsMap: IMap<string, string> = pathmap.map((path: number[]) => {
-          return path
-            .map(t => {
-              const row = Math.floor(t / 26)
-              const col = t % 26
-              return `${col * 8},${row * 8}`
-            })
-            .join(' ')
-        })
+  TankPath = () => {
+    const [{ devOnly }] = useRedux()
+    const { pathmap } = devOnly.toObject()
 
-        return (
-          <g className="tank-path">
-            {pointsMap
-              .map((points, playerName) => (
-                <polyline
-                  key={playerName}
-                  points={points}
-                  fill="none"
-                  strokeWidth="3"
-                  stroke={getColor(playerName)}
-                  strokeOpacity="0.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              ))
-              .toArray()}
-          </g>
-        )
-      }}
-    </ReduxContext.Consumer>
-  )
+    const pointsMap: IMap<string, string> = pathmap.map((path: number[]) => {
+      return path
+        .map(t => {
+          const row = Math.floor(t / 26)
+          const col = t % 26
+          return `${col * 8},${row * 8}`
+        })
+        .join(' ')
+    })
+
+    return (
+      <g className="tank-path">
+        {pointsMap
+          .map((points, playerName) => (
+            <polyline
+              key={playerName}
+              points={points}
+              fill="none"
+              strokeWidth="3"
+              stroke={getColor(playerName)}
+              strokeOpacity="0.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          ))
+          .toArray()}
+      </g>
+    )
+  }
 }
 
 export default TankPath

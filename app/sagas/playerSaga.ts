@@ -44,7 +44,7 @@ export default function* playerSaga(playerName: PlayerName, config: PlayerConfig
       while (true) {
         yield take(chan)
         const state: State = yield select()
-        const inMultiPlayersMode = selectors.isInMultiPlayersMode(state)
+        const inMultiPlayersMode = selectors.isInMultiPlayersMode()
         const player: PlayerRecord = selectors.player(state, playerName)
         if (inMultiPlayersMode && !player.isActive() && player.lives === 0) {
           const lenderName = playerName === 'player-1' ? 'player-2' : 'player-1'

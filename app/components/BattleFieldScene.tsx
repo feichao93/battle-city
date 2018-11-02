@@ -1,6 +1,6 @@
-import React, { useContext } from 'react'
+import React from 'react'
 import { State } from '../reducers'
-import ReduxContext from '../ReduxContext'
+import { useRedux } from '../ReduxContext'
 import { BLOCK_SIZE as B } from '../utils/constants'
 import BrickLayer from './BrickLayer'
 import Bullet from './Bullet'
@@ -28,6 +28,7 @@ export const BattleFieldContent = (props: Partial<State & Point>) => {
   const { x = 0, y = 0, bullets, map, explosions, flickers, tanks, powerUps, scores } = props
   const { bricks, steels, rivers, snows, forests, eagle, restrictedAreas } = map.toObject()
   const aliveTanks = tanks.filter(t => t.alive)
+
   return (
     <g className="battle-field" transform={`translate(${x},${y})`}>
       <rect width={13 * B} height={13 * B} fill="#000000" />
@@ -76,7 +77,7 @@ export const BattleFieldContent = (props: Partial<State & Point>) => {
 }
 
 const BattleFieldScene = () => {
-  const state = useContext(ReduxContext)
+  const [state] = useRedux()
 
   return (
     <Screen>

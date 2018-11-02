@@ -1,16 +1,9 @@
-import PropTypes from 'prop-types'
 import React from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 
-const withContext = require('recompose/withContext').default
-
 const cache = new Map<string, string>()
 
-class SimpleWrapper extends React.Component {
-  render() {
-    return <g>{this.props.children}</g>
-  }
-}
+const UnderImageContext = React.createContext(false)
 
 export interface ImageProps {
   disabled?: boolean
@@ -24,16 +17,14 @@ export interface ImageProps {
 }
 
 export default class Image extends React.PureComponent<ImageProps> {
-  static contextTypes = {
-    store: PropTypes.any,
-    underImageComponent: PropTypes.bool,
-  }
+  static contextType = UnderImageContext
 
   render() {
-    const { store, underImageComponent } = this.context
+    const underImageComponent = this.context
     const { disabled = false, imageKey, width, height, transform, children, ...other } = this.props
 
-    if (disabled || underImageComponent) {
+    // TODO 优化性能？
+    if (true) {
       // underImageComponent 不能嵌套，如果已经在一个 ImageComponent 下的话，那么只能使用原始的render方法
       return (
         <g transform={transform} {...other}>
@@ -44,15 +35,11 @@ export default class Image extends React.PureComponent<ImageProps> {
       if (!cache.has(imageKey)) {
         DEV.LOG_PERF && console.time(`Image: loading content of ${imageKey}`)
         const open = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">`
-        const enhancer = withContext(
-          { underImageComponent: PropTypes.bool, store: PropTypes.any },
-          () => ({
-            underImageComponent: true,
-            store,
-          }),
+        const string = renderToStaticMarkup(
+          <UnderImageContext.Provider value={true}>
+            <g>{children}</g>
+          </UnderImageContext.Provider>,
         )
-        const element = React.createElement(enhancer(SimpleWrapper), null, children)
-        const string = renderToStaticMarkup(element)
         const close = '</svg>'
         const markup = open + string + close
         const blob = new Blob([markup], { type: 'image/svg+xml' })

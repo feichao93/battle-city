@@ -1,6 +1,5 @@
 import React from 'react'
-import { Redirect, Route, Switch } from 'react-router-dom'
-import { ConnectedRouter } from 'react-router-redux'
+import { Redirect, Route, Router, Switch } from 'react-router-dom'
 import About from './components/About'
 import ChooseStageScene from './components/ChooseStageScene'
 import Inspector from './components/dev-only/Inspector'
@@ -14,31 +13,31 @@ import { firstStageName as fsn } from './stages'
 import history from './utils/history'
 
 const App = () => (
-  <ConnectedRouter history={history}>
+  <Router history={history}>
     <div style={{ display: 'flex' }}>
       <Switch>
-        <Route path="/list" component={StageList} />
-        <Route path="/editor" component={Editor} />
-        <Route path="/gallery" component={Gallery} />
-        <Route exact path="/gameover" component={GameoverScene} />
+        <Route path="/list" component={StageList as any} />
+        <Route path="/editor" component={Editor as any} />
+        <Route path="/gallery" component={Gallery as any} />
+        <Route exact path="/gameover" component={GameoverScene as any} />
         <Route
           exact
           path="/choose"
           render={({ location }) => <Redirect to={`/choose/${fsn}${location.search}`} />}
         />
-        <Route path="/choose/:stageName" component={ChooseStageScene} />
+        <Route path="/choose/:stageName" component={ChooseStageScene as any} />
         <Route
           exact
           path="/stage"
           render={({ location }) => <Redirect to={`/stage/${fsn}${location.search}`} />}
         />
-        <Route path="/stage/:stageName" component={GameScene} />
-        <Route component={GameTitleScene} />
+        <Route path="/stage/:stageName" component={GameScene as any} />
+        <Route component={GameTitleScene as any} />
       </Switch>
       {DEV.HIDE_ABOUT ? null : <About />}
       {DEV.INSPECTOR && <Inspector />}
     </div>
-  </ConnectedRouter>
+  </Router>
 )
 
 export default App

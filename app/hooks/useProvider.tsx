@@ -1,17 +1,19 @@
 import React, { useEffect, useState } from 'react'
-import { Provider } from 'react-redux'
 import { Action as BaseAction, Dispatch, Store } from 'redux'
 
-export default function useProvider<S, A extends BaseAction>(
-  store: Store<S, A>,
-  Context: React.Context<S & { dispatch: Dispatch<A> }>,
-) {
-  const [state, setState] = useState<S>(store.getState)
-  useEffect(() => store.subscribe(() => setState(store.getState())))
+export interface ConnectProps<S, A extends BaseAction> {
+  store: Store<S, A>
+  context: React.Context<{ state: S; dispatch: Dispatch<A> }>
+  children: React.ReactNode
+}
 
-  return (children: React.ReactNode) => (
-    <Provider store={store}>
-      <Context.Provider value={{ ...state, dispatch: store.dispatch }}>{children}</Context.Provider>
-    </Provider>
+/** Connect a redux store to a React.Context, and render the children inside this <Context.Provider /> */
+export function Connect<S, A extends BaseAction>({ store, context, children }: ConnectProps<S, A>) {
+  const [state, setState] = useState(store.getState)
+  useEffect(() => store.subscribe(() => setState(store.getState())))
+  return React.createElement(
+    context.Provider,
+    { value: { state, dispatch: store.dispatch } },
+    children,
   )
 }
