@@ -38,11 +38,14 @@ function* addBotHelper() {
         })
         const difficulty = stages.find(s => s.name === game.currentStageName).difficulty
         const spawnSpeed = AI_SPAWN_SPEED_MAP[difficulty]
+        yield put(actions.setIsSpawningBotTank(true))
         yield spawnTank(tank, spawnSpeed)
+        yield put(actions.setIsSpawningBotTank(false))
         yield fork(botSaga, tank.tankId)
       }
     }
   } finally {
+    yield put(actions.setIsSpawningBotTank(false))
     reqChannel.close()
   }
 }

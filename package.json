@@ -4,8 +4,8 @@
   "description": "Battle city remake built with react.",
   "author": "Shi Feichao <842351815@qq.com> (http://shinima.pw)",
   "scripts": {
-    "start": "webpack-dev-server",
-    "build": "webpack --env.prod && copyfiles sound/* dist"
+    "start": "webpack-dev-server --mode=development",
+    "build": "webpack --mode=production && copyfiles sound/* dist"
   },
   "dependencies": {
     "@types/history": "^4.6.2",

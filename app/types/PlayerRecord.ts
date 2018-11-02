@@ -8,6 +8,7 @@ const PlayerRecordBase = Record({
   lives: 0,
   score: 0,
   reservedTank: null as TankRecord,
+  isSpawningTank: false,
 })
 
 export default class PlayerRecord extends PlayerRecordBase {

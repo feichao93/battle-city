@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { State, TankFireInfo } from '../types'
+import { PlayerRecord, State, TankFireInfo } from '../types'
 import { asRect, testCollide } from './common'
 import {
   BLOCK_SIZE as B,
@@ -15,15 +15,22 @@ export const isInMultiPlayersMode = (state: State) => {
   return params.has(MULTI_PLAYERS_SEARCH_KEY)
 }
 
+function isPlayerDead(player: PlayerRecord) {
+  return player.lives === 0 && !player.isActive() && !player.isSpawningTank
+}
+
 export const isAllPlayerDead = (state: State) => {
   const inMultiPlayersMode = isInMultiPlayersMode(state)
   if (inMultiPlayersMode) {
-    const { player1, player2 } = state
-    return player1.lives === 0 && !player1.isActive() && player2.lives === 0 && !player2.isActive()
+    return isPlayerDead(state.player1) && isPlayerDead(state.player2)
   } else {
-    const { player1 } = state
-    return player1.lives === 0 && !player1.isActive()
+    return isPlayerDead(state.player1)
   }
+}
+
+export const isAllBotDead = ({ tanks, game }: State) => {
+  const noAliveBotTank = tanks.filter(t => t.side === 'bot').every(t => !t.alive)
+  return noAliveBotTank && game.remainingBots.isEmpty() && !game.isSpawningBotTank
 }
 
 export const player = (state: State, playerName: PlayerName) => {

@@ -58,11 +58,9 @@ export default function* stageSaga(stage: StageConfig) {
       const action: actions.Action = yield take([A.SetTankToDead, A.DestroyEagle])
 
       if (action.type === A.SetTankToDead) {
-        const state: State = yield select()
-        const tank: TankRecord = state.tanks.get(action.tankId)
+        const tank: TankRecord = yield select(selectors.tank, action.tankId)
         if (tank.side === 'bot') {
-          const allBotDead = state.tanks.filter(t => t.side === 'bot').every(t => !t.alive)
-          if (allBotDead && state.game.remainingBots.isEmpty()) {
+          if (yield select(selectors.isAllBotDead)) {
             yield Timing.delay(DEV.FAST ? 1000 : 4000)
             yield animateStatistics()
             yield put(actions.beforeEndStage())

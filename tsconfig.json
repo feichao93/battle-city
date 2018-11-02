@@ -12,5 +12,5 @@
     "target": "es2017",
     "jsx": "react"
   },
-  "include": ["./app/**/*"]
+  "include": ["./app/**/*", "custom-tyings.d.ts"]
 }

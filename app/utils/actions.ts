@@ -53,7 +53,6 @@ export enum A {
   DecrementPlayerLife = 'DecrementPlayerLife',
   BorrowPlayerLife = 'BorrowPlayerLife',
   ActivatePlayer = 'ActivatePlayer',
-  DeactivatePlayer = 'DeactivatePlayer',
   ReqAddPlayerTank = 'ReqAddPlayerTank',
   ReqAddBot = 'ReqAddAIPlayer',
   SetExplosion = 'AddOrUpdateExplosion',
@@ -62,6 +61,8 @@ export enum A {
   MoveTexts = 'UpdateTextPosition',
   DestroyEagle = 'DestroyEagle',
   StartSpawnTank = 'StartSpawnTank',
+  SetPlayerTankSpawningStatus = 'SetPlayerTankSpawningStatus',
+  SetIsSpawningBotTank = 'SetIsSpawningBotTankStatus',
   AddTank = 'AddTank',
   StartMove = 'StartMove',
   SetTankToDead = 'SetTankToDead',
@@ -364,6 +365,23 @@ export function startSpawnTank(tank: TankRecord) {
   }
 }
 
+export type SetPlayerTankSpawningStatus = ReturnType<typeof setPlayerTankSpawningStatus>
+export function setPlayerTankSpawningStatus(playerName: PlayerName, isSpawning: boolean) {
+  return {
+    type: A.SetPlayerTankSpawningStatus as A.SetPlayerTankSpawningStatus,
+    playerName,
+    isSpawning,
+  }
+}
+
+export type SetIsSpawningBotTank = ReturnType<typeof setIsSpawningBotTank>
+export function setIsSpawningBotTank(isSpawning: boolean) {
+  return {
+    type: A.SetIsSpawningBotTank as A.SetIsSpawningBotTank,
+    isSpawning,
+  }
+}
+
 export type AddTank = ReturnType<typeof addTank>
 export function addTank(tank: TankRecord) {
   return {
@@ -386,14 +404,6 @@ export function activatePlayer(playerName: PlayerName, tankId: TankId) {
     type: A.ActivatePlayer as A.ActivatePlayer,
     playerName,
     tankId,
-  }
-}
-
-export type DeactivatePlayer = ReturnType<typeof deactivatePlayer>
-export function deactivatePlayer(playerName: PlayerName) {
-  return {
-    type: A.DeactivatePlayer as A.DeactivatePlayer,
-    playerName,
   }
 }
 
@@ -707,7 +717,6 @@ export type Action =
   | DecrementPlayerLife
   | BorrowPlayerLife
   | ActivatePlayer
-  | DeactivatePlayer
   | ReqAddPlayerTank
   | ReqAddBot
   | SetExplosion
@@ -716,6 +725,8 @@ export type Action =
   | MoveTexts
   | DestroyEagle
   | StartSpawnTank
+  | SetPlayerTankSpawningStatus
+  | SetIsSpawningBotTank
   | AddTank
   | SetTankToDead
   | StopMove

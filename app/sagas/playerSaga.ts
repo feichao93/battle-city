@@ -24,7 +24,6 @@ export default function* playerSaga(playerName: PlayerName, config: PlayerConfig
       stageEnd: take(A.EndStage),
     })
     if (result.tank) {
-      yield put(actions.deactivatePlayer(playerName))
       yield fork(spawnPlayerTank)
     }
   }
@@ -78,19 +77,24 @@ export default function* playerSaga(playerName: PlayerName, config: PlayerConfig
       yield put(actions.decrementPlayerLife(playerName))
     }
 
-    if (tankPrototype) {
-      const tankId = getNextId('tank')
-      yield spawnTank(
-        tankPrototype.merge({
-          tankId,
-          alive: true,
-          x: config.spawnPos.x,
-          y: config.spawnPos.y,
-          direction: 'up',
-          helmetDuration: frame(135),
-        }),
-      )
-      yield put(actions.activatePlayer(playerName, tankId))
+    try {
+      if (tankPrototype) {
+        const tankId = getNextId('tank')
+        yield put(actions.setPlayerTankSpawningStatus(playerName, true))
+        yield spawnTank(
+          tankPrototype.merge({
+            tankId,
+            alive: true,
+            x: config.spawnPos.x,
+            y: config.spawnPos.y,
+            direction: 'up',
+            helmetDuration: frame(135),
+          }),
+        )
+        yield put(actions.activatePlayer(playerName, tankId))
+      }
+    } finally {
+      yield put(actions.setPlayerTankSpawningStatus(playerName, false))
     }
   }
 
