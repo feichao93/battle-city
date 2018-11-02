@@ -36,14 +36,12 @@ module.exports = function(env = {}, argv) {
     new HtmlWebpackPlugin({
       title: 'battle-city',
       filename: 'index.html',
-      template: path.resolve(__dirname, `app/index.${argv.mode}.html`),
+      template: path.resolve(__dirname, `app/index.html`),
     }),
     !prod && new webpack.HotModuleReplacementPlugin(),
   ].filter(Boolean)
 
   return {
-    mode: prod ? 'production' : 'development',
-    devtool: prod ? false : 'source-map',
     context: __dirname,
     target: 'web',
 
@@ -55,16 +53,8 @@ module.exports = function(env = {}, argv) {
     },
 
     resolve: {
-      modules: [path.resolve(__dirname, 'app'), 'node_modules'],
       extensions: ['.js', '.jsx', '.ts', '.tsx'],
     },
-
-    externals: prod
-      ? {
-          react: 'React',
-          'react-dom': 'ReactDOM',
-        }
-      : undefined,
 
     module: {
       rules: [
@@ -98,7 +88,6 @@ module.exports = function(env = {}, argv) {
 
     devServer: {
       contentBase: __dirname,
-      host: '0.0.0.0',
       hot: true,
     },
   }
