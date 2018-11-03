@@ -60,8 +60,13 @@ export class GameoverSceneContent extends React.PureComponent<{ onRestart?: () =
   }
 }
 
-// TODO 需要考虑 multi-players 的情况
-class GameoverScene extends React.PureComponent<{ dispatch: Dispatch; game: GameRecord }> {
+interface GameoverSceneProps {
+  dispatch: Dispatch
+  game: GameRecord
+  router: any
+}
+
+class GameoverScene extends React.PureComponent<GameoverSceneProps> {
   componentDidMount() {
     document.addEventListener('keydown', this.onKeyDown)
     const { game, dispatch } = this.props
@@ -82,11 +87,12 @@ class GameoverScene extends React.PureComponent<{ dispatch: Dispatch; game: Game
   }
 
   onRestart = () => {
-    const { game, dispatch } = this.props
+    const { game, dispatch, router } = this.props
+    const search = router.location.search
     if (game.lastStageName) {
-      dispatch(replace(`/choose/${game.lastStageName}`))
+      dispatch(replace(`/choose/${game.lastStageName}${search}`))
     } else {
-      dispatch(replace(`/choose`))
+      dispatch(replace(`/choose${search}`))
     }
   }
 
@@ -99,4 +105,6 @@ class GameoverScene extends React.PureComponent<{ dispatch: Dispatch; game: Game
   }
 }
 
-export default connect((state: State) => ({ game: state.game }))(GameoverScene)
+const mapStateToProps = (state: State) => ({ game: state.game, router: state.router })
+
+export default connect(mapStateToProps)(GameoverScene)

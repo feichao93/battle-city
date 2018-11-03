@@ -106,7 +106,8 @@ export default function* gameSaga(action: actions.StartGame | actions.ResetGame)
 
   if (result.flow) {
     DEV.LOG && console.log('GAME ENDED')
-    yield put(replace('/gameover'))
+    const { router }: State = yield select()
+    yield put(replace(`/gameover${router.location.search}`))
   }
   yield put(actions.beforeEndGame())
   yield put(actions.endGame())

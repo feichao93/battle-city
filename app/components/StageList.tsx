@@ -4,11 +4,13 @@ import { connect } from 'react-redux'
 import { match, Redirect, Route, Switch } from 'react-router-dom'
 import { goBack, push, replace } from 'react-router-redux'
 import { Dispatch } from 'redux'
+import Image from '../hocs/Image'
 import { RawStageConfig, State } from '../types'
 import Popup from '../types/Popup'
 import { StageConfigConverter } from '../types/StageConfig'
 import * as actions from '../utils/actions'
-import { BLOCK_SIZE as B } from '../utils/constants'
+import { BLOCK_SIZE as B, MULTI_PLAYERS_SEARCH_KEY } from '../utils/constants'
+import { Pixel } from './elements'
 import PopupProvider, { PopupHandle } from './PopupProvider'
 import Screen from './Screen'
 import StagePreview from './StagePreview'
@@ -25,6 +27,58 @@ type StageListProps = {
 const STAGE_COUNT_PER_PAGE = 6
 const GAP = 25
 const LEN = 52 + GAP
+
+interface EditStageButtonProps {
+  x: number
+  y: number
+  onClick(): void
+  fill?: string
+}
+
+const EDIT_BUTTON_PIXELS: [number, number][] = [
+  [5, 0],
+  [4, 1],
+  [5, 1],
+  [6, 1],
+  [3, 2],
+  [5, 2],
+  [6, 2],
+  [7, 2],
+  [2, 3],
+  [6, 3],
+  [5, 4],
+  [4, 5],
+]
+
+const EditStageButton = ({ x, y, onClick, fill }: EditStageButtonProps) => {
+  const spreadX = 0.25 * B
+  const spreadY = 0.125 * B
+  return (
+    <g className="text-button">
+      <rect
+        className="text-area"
+        x={x - spreadX}
+        y={y - spreadY}
+        width={0.5 * B + 2 * spreadX}
+        height={0.5 * B + 2 * spreadY}
+        onClick={onClick}
+        strokeDasharray="2"
+      />
+      <Image
+        imageKey={`EditStageButton/${fill}`}
+        transform={`translate(${x}, ${y})`}
+        style={{ pointerEvents: 'none' }}
+        width={8}
+        height={8}
+      >
+        {EDIT_BUTTON_PIXELS.map(([x, y], index) => (
+          <Pixel key={index} x={x} y={y} fill={fill} />
+        ))}
+        <path d="M1,4 h1 v1 h1 v1 h1 v1 h-3 v-3" fill={fill} />
+      </Image>
+    </g>
+  )
+}
 
 class StageListPageUnconnected extends React.PureComponent<StageListProps> {
   private input: HTMLInputElement
@@ -119,10 +173,6 @@ class StageListPageUnconnected extends React.PureComponent<StageListProps> {
     dispatch(replace(`/list/${tab}/${next}`))
   }
 
-  onPlay(stageName: string) {
-    this.props.dispatch(push(`/stage/${stageName}`))
-  }
-
   onEdit(stageName: string) {
     const { dispatch, stages } = this.props
     const stage = stages.find(s => s.name === stageName)
@@ -197,14 +247,22 @@ class StageListPageUnconnected extends React.PureComponent<StageListProps> {
                     <TextButton
                       x={0 * B}
                       y={0}
-                      content="play"
-                      onClick={() => this.onPlay(stage.name)}
+                      content={'\u2160'}
+                      onClick={() => dispatch(push(`/stage/${stage.name}`))}
                     />
                     <TextButton
-                      x={2.5 * B}
+                      x={1 * B}
                       y={0}
-                      content="edit"
+                      content={'\u2161'}
+                      onClick={() =>
+                        dispatch(push(`/stage/${stage.name}?${MULTI_PLAYERS_SEARCH_KEY}`))
+                      }
+                    />
+                    <EditStageButton
+                      x={2 * B}
+                      y={0}
                       onClick={() => this.onEdit(stage.name)}
+                      fill="#ccc"
                     />
                     {stage.custom ? (
                       <TextButton

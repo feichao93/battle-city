@@ -12,7 +12,6 @@ export interface TextWithLineWrapProps {
   lineSpacing?: number
 }
 
-// todo 针对单词进行换行
 export default ({
   x,
   y,

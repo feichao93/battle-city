@@ -1,4 +1,5 @@
 import React from 'react'
+import Image from '../hocs/Image'
 
 // 该文件内每个字符的尺寸都是 8 * 8
 
@@ -365,17 +366,18 @@ export default class Text extends React.PureComponent<Props> {
       <g className="text" transform={`translate(${x},${y})`} style={style}>
         {Array.from(content.toLowerCase()).map((char, i) => {
           const Component = chars[char]
-          if (Component != null) {
-            return (
-              <g key={i} transform={`translate(${8 * i},0)`}>
-                <Component fill={fill} />
-              </g>
-            )
-          } else {
-            // eslint-disable-next-line no-console
-            console.warn(`Character '${char}' Not Implemented.`)
-            return null
-          }
+          DEV.ASSERT && console.assert(Component != null, `Character '${char}' Not Implemented.`)
+          return (
+            <Image
+              key={i}
+              transform={`translate(${8 * i},0)`}
+              imageKey={`Char/${char}/${fill}`}
+              width="8"
+              height="8"
+            >
+              <Component fill={fill} />
+            </Image>
+          )
         })}
       </g>
     )
