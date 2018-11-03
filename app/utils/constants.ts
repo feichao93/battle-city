@@ -96,7 +96,7 @@ export const PLAYER_CONFIGS: { [key: string]: PlayerConfig } = {
       left: 'ArrowLeft',
       down: 'ArrowDown',
       right: 'ArrowRight',
-      fire: 'Space',
+      fire: 'Slash',
     },
     spawnPos: {
       x: 8 * BLOCK_SIZE,

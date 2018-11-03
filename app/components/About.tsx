@@ -29,10 +29,31 @@ const AboutEditor = () => (
 
 const AboutGame = () => (
   <div>
-    <p className="bold">WASD 控制坦克方向</p>
-    <p className="bold">J 控制开火</p>
-    <p className="bold">ESC 暂停游戏</p>
-    <p>后退以返回关卡选择页面</p>
+    <p>
+      <b>ESC</b>
+      ：暂停游戏
+      <br />
+      <b>后退</b>
+      ：返回到关卡选择页面
+    </p>
+    <p>
+      玩家一
+      <br />
+      <b>WASD</b>
+      ：控制方向
+      <br />
+      <b>J</b>
+      ：控制开火
+    </p>
+    <p>
+      玩家二
+      <br />
+      <b>方向键</b>
+      ：控制方向
+      <br />
+      <b>/</b>
+      ：控制开火
+    </p>
   </div>
 )
 

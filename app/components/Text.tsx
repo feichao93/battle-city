@@ -368,15 +368,9 @@ export default class Text extends React.PureComponent<Props> {
           const Component = chars[char]
           DEV.ASSERT && console.assert(Component != null, `Character '${char}' Not Implemented.`)
           return (
-            <Image
-              key={i}
-              transform={`translate(${8 * i},0)`}
-              imageKey={`Char/${char}/${fill}`}
-              width="8"
-              height="8"
-            >
+            <g key={i} transform={`translate(${8 * i},0)`}>
               <Component fill={fill} />
-            </Image>
+            </g>
           )
         })}
       </g>

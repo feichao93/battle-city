@@ -169,14 +169,13 @@ function determineWhichPowerUpToSpawn(state: State): PowerUpName {
     }
   }
 
-  // 如果玩家坦克仍然是 BASIC/FAST，则增加 star 的概率
+  // 如果玩家坦克仍然是 BASIC，则增加 star 的概率
   const player1Tank = selectors.tank(state, state.player1.activeTankId)
   const player2Tank = selectors.tank(state, state.player2.activeTankId)
-  const hasPoorTank =
-    (player1Tank && (player1Tank.level === 'basic' || player1Tank.level === 'fast')) ||
-    (player2Tank && (player2Tank.level === 'basic' || player2Tank.level === 'fast'))
-  if (hasPoorTank) {
-    if (Math.random() < 0.5) {
+  const hasBasicTank =
+    (player1Tank && player1Tank.level === 'basic') || (player2Tank && player2Tank.level === 'basic')
+  if (hasBasicTank) {
+    if (Math.random() < 0.4) {
       return 'star'
     }
   }
