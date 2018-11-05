@@ -69,8 +69,8 @@ const AboutChoose = () => (
 const AboutTitle = () => (
   <div>
     <p>
-      目前只支持单人进行游戏。请使用最新的 chrome 浏览器，并适当调整浏览器的缩放比例（1080P 下设置为
-      200% 缩放），以获得最好的游戏体验。
+      请使用最新的 chrome 浏览器，并适当调整浏览器的缩放比例（1080P 下设置为 200%
+      缩放），以获得最好的游戏体验。
     </p>
     <p className="bold">W 上一个选项</p>
     <p className="bold">S 下一个选项</p>
