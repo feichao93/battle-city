@@ -1,5 +1,4 @@
-import { all, fork, put, take } from 'redux-saga/effects'
-import { delay } from 'redux-saga/utils'
+import { all, fork, put, take, delay } from 'redux-saga/effects'
 import { TankRecord } from '../types'
 import { StageConfigConverter } from '../types/StageConfig'
 import * as actions from '../utils/actions'
