@@ -29,6 +29,7 @@ export function* syncTo() {
   }
 }
 
+/** 从 localStorage 中读取自定义关卡信息 */
 export function* syncFrom() {
   try {
     DEV.LOG && console.log('Sync custom stages from localStorage')

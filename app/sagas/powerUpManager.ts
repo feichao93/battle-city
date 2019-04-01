@@ -1,9 +1,10 @@
+import { Set as ISet } from 'immutable'
 import _ from 'lodash'
 import { cancelled, fork, put, race, select, take, takeEvery, takeLatest } from 'redux-saga/effects'
 import { calculateFireEstimateMap, getFireResist } from '../ai/fire-utils'
 import getAllSpots from '../ai/getAllSpots'
 import { around, getTankSpot } from '../ai/spot-utils'
-import { MapRecord, PowerUpRecord, ScoreRecord, State } from '../types'
+import { MapRecord, PowerUpRecord, ScoreRecord, State, TanksMap } from '../types'
 import * as actions from '../utils/actions'
 import { A } from '../utils/actions'
 import { asRect, frame as f, getNextId, randint } from '../utils/common'
@@ -20,7 +21,8 @@ import Timing from '../utils/Timing'
 import { destroyTank } from './common/destroyTanks'
 import powerUpLifecycle from './powerUpLifecycle'
 
-function convertToBricks(map: MapRecord) {
+/** 将 eagle 周围的元素变为 bricks */
+function convertToBricks(map: MapRecord, tanks: TanksMap) {
   const { eagle, steels, bricks } = map
   const eagleSurroundingBox = {
     x: eagle.x - 8,
@@ -29,8 +31,13 @@ function convertToBricks(map: MapRecord) {
     height: 32 - 1,
   }
 
-  const btset = new Set(IndexHelper.iter('brick', eagleSurroundingBox))
+  const surroundingBTSet = new Set(IndexHelper.iter('brick', eagleSurroundingBox))
   const eagleBTSet = new Set(IndexHelper.iter('brick', asRect(eagle, -0.1)))
+  const tanksBTSet = new Set(tanks
+    .map(tank => ISet(IndexHelper.iter('brick', asRect(tank, -0.1))))
+    .toSet()
+    .flatten() as ISet<number>)
+
   const ttset = new Set(
     Array.from(IndexHelper.iterRowCol('brick', eagleSurroundingBox)).map(([brow, bcol]) => {
       const trow = Math.floor(brow / 2)
@@ -39,13 +46,16 @@ function convertToBricks(map: MapRecord) {
     }),
   )
 
-  const steels2 = steels.map((set, t) => (ttset.has(t) ? false : set))
-  const bricks2 = bricks.map((set, t) => (btset.has(t) && !eagleBTSet.has(t) ? true : set))
+  const nextSteels = steels.map((set, t) => (ttset.has(t) ? false : set))
+  const nextBricks = bricks.map((set, t) =>
+    surroundingBTSet.has(t) && !eagleBTSet.has(t) && !tanksBTSet.has(t) ? true : set,
+  )
 
-  return map.set('steels', steels2).set('bricks', bricks2)
+  return map.set('steels', nextSteels).set('bricks', nextBricks)
 }
 
-function convertToSteels(map: MapRecord) {
+/** 将 eagle 周围的元素变为 steels */
+function convertToSteels(map: MapRecord, tanks: TanksMap) {
   const { eagle, steels, bricks } = map
   const eagleSurroundingBox = {
     x: eagle.x - 8,
@@ -55,8 +65,13 @@ function convertToSteels(map: MapRecord) {
   }
   const surroundingTTSet = new Set(IndexHelper.iter('steel', eagleSurroundingBox))
   const eagleTTSet = new Set(IndexHelper.iter('steel', asRect(eagle, -0.1)))
-  const nextSteels = steels.map(
-    (set, t) => (surroundingTTSet.has(t) && !eagleTTSet.has(t) ? true : set),
+  const tanksTTSet = new Set(tanks
+    .map(tank => ISet(IndexHelper.iter('steel', asRect(tank, -0.1))))
+    .toSet()
+    .flatten() as ISet<number>)
+
+  const nextSteels = steels.map((set, t) =>
+    surroundingTTSet.has(t) && !eagleTTSet.has(t) && !tanksTTSet.has(t) ? true : set,
   )
 
   const surroundBTSet = new Set(IndexHelper.iter('brick', eagleSurroundingBox))
@@ -67,20 +82,25 @@ function convertToSteels(map: MapRecord) {
 
 function* shovel() {
   try {
-    yield put(actions.updateMap(convertToSteels((yield select()).map)))
+    const { map: map1, tanks: tanks1 } = yield select()
+    yield put(actions.updateMap(convertToSteels(map1, tanks1)))
 
     yield Timing.delay(f(1076))
 
     // 总共闪烁6次
     for (let i = 0; i < 6; i++) {
-      yield put(actions.updateMap(convertToBricks((yield select()).map)))
+      const { map: map2, tanks: tanks2 }: State = yield select()
+      yield put(actions.updateMap(convertToBricks(map2, tanks2)))
       yield Timing.delay(f(16))
-      yield put(actions.updateMap(convertToSteels((yield select()).map)))
+
+      const { map: map3, tanks: tanks3 }: State = yield select()
+      yield put(actions.updateMap(convertToSteels(map3, tanks3)))
       yield Timing.delay(f(16))
     }
   } finally {
     // 最后变回brick-wall
-    yield put(actions.updateMap(convertToBricks((yield select()).map)))
+    const { map: map4, tanks: tanks4 }: State = yield select()
+    yield put(actions.updateMap(convertToBricks(map4, tanks4)))
   }
 }
 
