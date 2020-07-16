@@ -2842,10 +2842,10 @@ locate-path@^3.0.0:
     p-locate "^3.0.0"
     path-exists "^3.0.0"
 
-lodash@^4.17.11, lodash@^4.17.14, lodash@^4.17.3, lodash@^4.17.4, lodash@^4.17.5:
-  version "4.17.14"
-  resolved "https://registry.npm.taobao.org/lodash/download/lodash-4.17.14.tgz#9ce487ae66c96254fe20b599f21b6816028078ba"
-  integrity sha1-nOSHrmbJYlT+ILWZ8htoFgKAeLo=
+lodash@^4.17.11, lodash@^4.17.14, lodash@^4.17.19, lodash@^4.17.3, lodash@^4.17.4:
+  version "4.17.19"
+  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.19.tgz#e48ddedbe30b3321783c5b4301fbd353bc1e4a4b"
+  integrity sha512-JNvd8XER9GQX0v2qJgsaN/mzFCNA5BRe/j8JN9d+tWyGLSodKQHKFicdwNYzWwI3wjRnaKPsGj1XkBjx/F96DQ==
 
 loglevel@^1.6.3:
   version "1.6.3"
