@@ -7,7 +7,7 @@
   "scripts": {
     "start": "webpack-dev-server --mode=development",
     "build": "webpack --mode=production && copyfiles sound/* dist",
-    "deploy": "gh-pages -b master -d build",
+    "deploy": "gh-pages -d build"
   },
   "dependencies": {
     "@types/history": "^4.6.2",
