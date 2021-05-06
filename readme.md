@@ -1,6 +1,6 @@
 # 坦克大战复刻版（Battle City Remake）
 
-游戏地址: [http://shinima.pw/battle-city/](http://shinima.pw/battle-city/)
+游戏地址: https://shinima.github.io/battle-city
 
 游戏详细介绍见知乎专栏文章: [https://zhuanlan.zhihu.com/p/35551654](https://zhuanlan.zhihu.com/p/35551654)
 

@@ -1,6 +1,6 @@
 # 基于 React 的高质量坦克大战复刻版
 
-坦克大战当年红遍大江南北，很多和我一样的九零后应该都有着对这个游戏的记忆。现在显示器分辨率越来越高，使用矢量图来实现像素风格游戏，可以获得非常高的展现质量。[该复刻版](http://shinima.pw/battle-city/) 是我花了很长时间折腾的坦克大战复刻版本，所有元素都使用矢量图（SVG）进行渲染，针对网页的交互方式重新设计了关卡编辑器，该复刻版新增了关卡选择功能、自定义关卡管理功能等，另外它还包括了一个 Gallery 页面用于展示所有的游戏元素，想必它一定可以勾起你的儿时回忆。
+坦克大战当年红遍大江南北，很多和我一样的九零后应该都有着对这个游戏的记忆。现在显示器分辨率越来越高，使用矢量图来实现像素风格游戏，可以获得非常高的展现质量。[该复刻版](https://shinima.github.io/battle-city/) 是我花了很长时间折腾的坦克大战复刻版本，所有元素都使用矢量图（SVG）进行渲染，针对网页的交互方式重新设计了关卡编辑器，该复刻版新增了关卡选择功能、自定义关卡管理功能等，另外它还包括了一个 Gallery 页面用于展示所有的游戏元素，想必它一定可以勾起你的儿时回忆。
 
 **针对鼠标交互设计的关卡编辑器**
 
@@ -20,7 +20,7 @@
 
 ![fire-demo](imgs/gallery-fire.jpg)
 
-[点击这里开始游戏](http://shinima.pw/battle-city/)。欢迎大家在 GitHub 上 star [本项目](https://github.com/shinima/battle-city)，如果发现游戏的 BUG 也可以直接发起 issue。本文后面的内容会大致介绍整个游戏的开发过程，对 React / Redux 感兴趣的前端同学可以继续往下看。
+[点击这里开始游戏](https://shinima.github.io/battle-city/)。欢迎大家在 GitHub 上 star [本项目](https://github.com/shinima/battle-city)，如果发现游戏的 BUG 也可以直接发起 issue。本文后面的内容会大致介绍整个游戏的开发过程，对 React / Redux 感兴趣的前端同学可以继续往下看。
 
 ---
 
@@ -86,13 +86,21 @@ export class BattleField extends React.PureComponent {
         <BrickLayer bricks={bricks} />
         <SnowLayer snows={snows} />
         <Eagle x={eagle.x} y={eagle.y} broken={eagle.broken} />
-        <g className="bullet-layer">{bullets.map((b, i) => <Bullet key={i} bullet={b} />)}</g>
+        <g className="bullet-layer">
+          {bullets.map((b, i) => (
+            <Bullet key={i} bullet={b} />
+          ))}
+        </g>
         <g className="tank-layer">
-          {activeTanks.map(tank => <Tank key={tank.tankId} tank={tank} />)}
+          {activeTanks.map(tank => (
+            <Tank key={tank.tankId} tank={tank} />
+          ))}
         </g>
         <ForestLayer forests={forests} />
         <g className="power-up-layer">
-          {powerUps.map(p => <PowerUp key={p.powerUpId} powerUp={p} />)}
+          {powerUps.map(p => (
+            <PowerUp key={p.powerUpId} powerUp={p} />
+          ))}
         </g>
       </g>
     )
@@ -181,13 +189,13 @@ interface State {
 
 实现游戏逻辑比较重要的一点是，每一个 saga 实例都需要有明确的生命周期，这意味着我们需要回答下面这些问题：
 
-* 一个运行中的 saga 实例代表着什么？
-  * 例如一个 `playerSaga` 实例代表「一个正在游戏中的人类玩家」;
-  * 一个 `playerController` 实例代表「一个人类玩家的控制器」。
-* 什么时候创建 saga 实例？什么时候结束 saga 运行？
-* 一个 saga 实例运行之后可能会管理一些游戏元素（子弹/地形/坦克等），如果该 saga 实例被 cancel，那么需要执行哪些清理操作？（cancel 时的清理操作一般放在 finally block 中）
-* 一个 saga 实例运行时，可以保证哪些条件一定满足？
-  * 例如 `AIWorkerSaga` 实例在运行时，可以保证该电脑玩家的坦克一直处于活跃状态（因为一旦电脑玩家的坦克被击毁，`AIWorkerSaga` 实例会立马被 cancel），这样在该 saga 内就不再需要判断坦克是否被击毁了。
+- 一个运行中的 saga 实例代表着什么？
+  - 例如一个 `playerSaga` 实例代表「一个正在游戏中的人类玩家」;
+  - 一个 `playerController` 实例代表「一个人类玩家的控制器」。
+- 什么时候创建 saga 实例？什么时候结束 saga 运行？
+- 一个 saga 实例运行之后可能会管理一些游戏元素（子弹/地形/坦克等），如果该 saga 实例被 cancel，那么需要执行哪些清理操作？（cancel 时的清理操作一般放在 finally block 中）
+- 一个 saga 实例运行时，可以保证哪些条件一定满足？
+  - 例如 `AIWorkerSaga` 实例在运行时，可以保证该电脑玩家的坦克一直处于活跃状态（因为一旦电脑玩家的坦克被击毁，`AIWorkerSaga` 实例会立马被 cancel），这样在该 saga 内就不再需要判断坦克是否被击毁了。
 
 ## 五、电脑玩家逻辑
 
