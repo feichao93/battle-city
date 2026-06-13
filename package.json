@@ -32,6 +32,7 @@
     "react-dom": "^15.3.2",
     "react-hot-loader": "^4.0.0",
     "react-redux": "^5.0.7",
+    "react-router": "^4.3.1",
     "react-router-dom": "^4.2.2",
     "react-router-redux": "5.0.0-alpha.9",
     "recompose": "^0.30.0",
@@ -56,9 +57,7 @@
     "webpack-cli": "^3.1.0",
     "webpack-dev-server": "^3.1.1"
   },
-  "resolutions": {
-    "@types/react": "15.6.7"
-  },
+  "packageManager": "pnpm@11.6.0",
   "prettier": {
     "printWidth": 100,
     "semi": false,
