@@ -25,14 +25,31 @@ interface BulletCollisions {
   hitBrick: boolean
   hitSteel: boolean
   hitBorder: boolean
+  /** 本帧最早一次子弹对撞时的位置；之后的路程不再参与碰撞 */
+  stop: Point | null
 }
 
 function emptyCollisions(): BulletCollisions {
-  return { rects: [], explode: false, any: false, hitBrick: false, hitSteel: false, hitBorder: false }
+  return {
+    rects: [],
+    explode: false,
+    any: false,
+    hitBrick: false,
+    hitSteel: false,
+    hitBorder: false,
+    stop: null,
+  }
 }
 
 function eagleRect(eagle: Point): Rect {
   return { x: eagle.x, y: eagle.y, width: BLOCK_SIZE, height: BLOCK_SIZE }
+}
+
+function keepEarlier(b: Bullet, c: BulletCollisions, p: Point): void {
+  const travelled = (q: Point) => Math.abs(q.x - b.lastX) + Math.abs(q.y - b.lastY)
+  if (c.stop == null || travelled(p) < travelled(c.stop)) {
+    c.stop = p
+  }
 }
 
 /** 子弹命中坦克事件，交由 BattleScene 结算（扣血/击杀/冻结/失命） */
@@ -94,7 +111,17 @@ export function updateBullets(
         c2.any = true
         c1.rects.push({ x: p1.x, y: p1.y, width: 0, height: 0 })
         c2.rects.push({ x: p2.x, y: p2.y, width: 0, height: 0 })
+        keepEarlier(bullets[i], c1, p1)
+        keepEarlier(bullets[j], c2, p2)
       }
+    }
+  }
+  // 对撞时子弹已经消失，截断本帧轨迹，免得后面还打中对撞点之后的坦克或砖
+  for (const b of bullets) {
+    const stop = infoMap.get(b.bulletId)?.stop
+    if (stop != null) {
+      b.x = stop.x
+      b.y = stop.y
     }
   }
 

@@ -7,7 +7,7 @@ import {
 
 const LINES = Array.from({ length: FBZ }, (_, i) => i + 1)
 
-/** 编辑器虚线网格；t 为鼠标所在 block，其四周的线高亮。移植自原版 Grid */
+/** 编辑器虚线网格；t 为鼠标所在 block，其四周的线高亮 */
 export default function Grid({ t = -1 }: { t?: number }) {
   const hrow = t === -1 ? -1 : Math.floor(t / FBZ)
   const hcol = t === -1 ? -1 : t % FBZ

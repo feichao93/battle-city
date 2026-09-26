@@ -4,7 +4,7 @@ import type { TankColor } from '../engine/types'
 
 type ColorTiming = [TankColor, number][]
 
-/** bot 变色时间线（帧），抄 app/components/tanks.tsx TankColorConfig */
+/** bot 变色时间线（帧） */
 const WITH_POWER_UP_COLORS: ColorTiming = [
   ['red', 8],
   ['silver', 8],

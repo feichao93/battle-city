@@ -85,7 +85,7 @@ function AboutOverlay({ onClose }: { onClose: () => void }) {
   )
 }
 
-/** 标题页：忠实还原旧项目 GameTitleScene 的像素布局与内容。 */
+/** 标题页 */
 export default function Title() {
   const [aboutOpen, setAboutOpen] = useState(false)
   useOverlayKeys(aboutOpen, () => setAboutOpen(false))

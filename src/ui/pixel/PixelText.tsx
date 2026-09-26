@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactElement } from 'react'
 
-// 8×8 像素位图字体。移植自旧项目 app/components/Text.tsx，
+// 8×8 像素位图字体，
 // 每个字符在 8×8 的格子内用 <path>/<rect> 拼出。
 
 type CharComponent = (props: { fill: string }) => ReactElement
@@ -358,7 +358,7 @@ export function supportsChar(char: string): boolean {
   return char.length === 1 && char.toLowerCase() in chars
 }
 
-/** 按固定字符数折行的像素文本，行距 = 字高 + lineSpacing。移植自原版 TextWithLineWrap */
+/** 按固定字符数折行的像素文本，行距 = 字高 + lineSpacing */
 export function WrappedText({
   content,
   maxLength,

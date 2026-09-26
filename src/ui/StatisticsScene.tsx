@@ -10,6 +10,7 @@ import type { StatisticsView } from '../engine/StatisticsAnimation'
 import type { TankLevel } from '../engine/types'
 import PixelText from './pixel/PixelText'
 import TankSvg from './pixel/TankSvg'
+import { useUIStore } from './store'
 
 /** 各等级所在行的 y（旧版 StatisticsScene） */
 const ROW_Y: Record<TankLevel, number> = { basic: 8, fast: 9.5, power: 11, armor: 12.5 }
@@ -22,6 +23,7 @@ export default function StatisticsScene({
   view: StatisticsView
   scores: number[]
 }) {
+  const hiScore = useUIStore((s) => s.hiScore)
   return (
     <svg
       width={SCREEN_WIDTH * ZOOM_LEVEL}
@@ -29,20 +31,34 @@ export default function StatisticsScene({
       viewBox={`0 0 ${SCREEN_WIDTH} ${SCREEN_HEIGHT}`}
       style={{ position: 'absolute', top: 0, left: 0, imageRendering: 'pixelated' }}
     >
-      <StatisticsContent view={view} scores={scores} />
+      <StatisticsContent view={view} scores={scores} hiScore={hiScore} />
     </svg>
   )
 }
 
-/** 结算页内容，布局移植自旧版 app/components/StatisticsScene.tsx；画廊的 statistics 页复用 */
-export function StatisticsContent({ view, scores }: { view: StatisticsView; scores: number[] }) {
+/** 结算页内容；画廊的 statistics 页复用 */
+export function StatisticsContent({
+  view,
+  scores,
+  hiScore,
+}: {
+  view: StatisticsView
+  scores: number[]
+  hiScore: number
+}) {
+  const hiScoreText = String(hiScore)
   const [p1, p2] = view.counts
   return (
     <g className="statistics-scene">
       <rect fill="#000000" width={SCREEN_WIDTH} height={SCREEN_HEIGHT} />
       <g transform={`translate(${-0.5 * B}, ${-1.5 * B})`}>
         <PixelText content="HI-SCORE" x={4.5 * B} y={3.5 * B} fill="#e44437" />
-        <PixelText content="20000" x={10 * B} y={3.5 * B} fill="#feac4e" />
+        <PixelText
+          content={hiScoreText}
+          x={12.5 * B - hiScoreText.length * 0.5 * B}
+          y={3.5 * B}
+          fill="#feac4e"
+        />
         <PixelText content={`STAGE  ${view.stageName}`} x={6.5 * B} y={4.5 * B} fill="#ffffff" />
 
         {/* 中间的 4 辆坦克 & 白线 */}

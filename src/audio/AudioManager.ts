@@ -1,6 +1,6 @@
 import type { AudioPort, SoundName } from '../engine/types'
 
-// 复用旧项目的 .ogg 音效（仓库根 /sound）。Vite 以 ?url 形式给出可访问 URL。
+// 音效是仓库根 /sound 下的 .ogg。Vite 以 ?url 形式给出可访问 URL。
 const soundUrls = import.meta.glob('../../sound/*.ogg', {
   eager: true,
   query: '?url',

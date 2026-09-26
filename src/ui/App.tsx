@@ -15,7 +15,7 @@ export default function App() {
   return <CurrentScreen />
 }
 
-/** 参数缺失或无效时要跳转到的规范路径，与原版 Redirect 规则一致 */
+/** 参数缺失或无效时要跳转到的规范路径 */
 function redirectOf(
   route: Route,
   stages: RawStageConfig[],

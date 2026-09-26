@@ -1,4 +1,4 @@
-// HUD 用的小图标。移植自 app/components/icons.tsx 与 BotCountIndicator.tsx。
+// HUD 用的小图标。
 
 /** 玩家命数前的小坦克缩略图（8×8） */
 export function PlayerTankThumbnail({ x, y }: { x: number; y: number }) {

@@ -9,7 +9,7 @@ import { updateBullets, type BulletTankHit } from './systems/bullet'
 import { fireTank } from './systems/fire'
 import type { AudioPort, RawStageConfig } from './types'
 
-/** 演示地图，抄 app/sagas/fireDemoSaga.ts */
+/** 演示地图 */
 const DEMO_STAGE: RawStageConfig = {
   name: 'demo',
   difficulty: 1,

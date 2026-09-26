@@ -4,7 +4,7 @@ import type Tank from './Tank'
 
 export type FlickerShape = 0 | 1 | 2 | 3
 
-/** 出生星星的时间线（帧），抄 app/sagas/common/flickerSaga.ts */
+/** 出生星星的时间线（帧） */
 const TIMELINE: ReadonlyArray<{ shape: FlickerShape; frames: number }> = [
   { shape: 3, frames: 3 },
   { shape: 2, frames: 3 },

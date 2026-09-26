@@ -1,7 +1,7 @@
 import type { ExplosionShape } from '../../engine/types'
 import { bitmap, type ColorScheme } from './draw'
 
-// 爆炸字符网格，坐标抄 app/components/Explosion.tsx
+// 爆炸字符网格
 const scheme: ColorScheme = { ' ': 'none', W: '#fffffe', P: '#590d79', R: '#b53121' }
 
 // 小爆炸 16×16（子弹命中）

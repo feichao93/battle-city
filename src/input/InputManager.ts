@@ -1,4 +1,4 @@
-import { controlCodes, directionCodes, type PlayerControl } from './bindings'
+import { controlCodes, type PlayerControl } from './bindings'
 
 /**
  * 键盘输入管理：跟踪当前按下的键，并记录方向键的按下顺序，
@@ -15,17 +15,23 @@ export default class InputManager {
   private readonly suppressed = new Set<string>()
   /** 自上个 tick 起按过的键，含自动重复和被 suppress 的键；只用来判断玩家在不在场 */
   private readonly touchedSince = new Set<string>()
+  /** 需要 preventDefault 的键：实际绑定的键位（空格、Tab 等有默认行为），外加方向键和 / */
+  private readonly handledCodes: Set<string>
+
+  constructor(controls: PlayerControl[] = []) {
+    this.handledCodes = new Set([...ALWAYS_HANDLED, ...controls.flatMap(controlCodes)])
+  }
 
   private readonly onKeyDown = (e: KeyboardEvent): void => {
     this.keyDown(e.code)
-    if (HANDLED_CODES.has(e.code)) {
+    if (this.handledCodes.has(e.code)) {
       e.preventDefault()
     }
   }
 
   private readonly onKeyUp = (e: KeyboardEvent): void => {
     this.keyUp(e.code)
-    if (HANDLED_CODES.has(e.code)) {
+    if (this.handledCodes.has(e.code)) {
       e.preventDefault()
     }
   }
@@ -46,14 +52,24 @@ export default class InputManager {
     this.order = this.order.filter((c) => c !== code)
   }
 
+  /** 切到别的窗口后松开的键收不到 keyup，失焦时当作全部松开 */
+  private readonly onBlur = (): void => this.clear()
+
   attach(target: GlobalEventHandlers = document): void {
     target.addEventListener('keydown', this.onKeyDown)
     target.addEventListener('keyup', this.onKeyUp)
+    window.addEventListener('blur', this.onBlur)
   }
 
   detach(target: GlobalEventHandlers = document): void {
     target.removeEventListener('keydown', this.onKeyDown)
     target.removeEventListener('keyup', this.onKeyUp)
+    window.removeEventListener('blur', this.onBlur)
+    this.clear()
+  }
+
+  /** 清空全部输入状态，包括 suppressed：不像 releaseAll 那样等 keyup，因为 keyup 可能永远不来 */
+  private clear(): void {
     this.down.clear()
     this.order = []
     this.firePressedSince.clear()
@@ -115,13 +131,5 @@ export default class InputManager {
   }
 }
 
-/** 需要 preventDefault 的键（方向键会滚动页面，/ 会触发快速查找） */
-const HANDLED_CODES = new Set<string>([
-  'ArrowUp',
-  'ArrowDown',
-  'ArrowLeft',
-  'ArrowRight',
-  'Slash',
-  ...directionCodes({ up: 'KeyW', down: 'KeyS', left: 'KeyA', right: 'KeyD', fire: 'KeyJ' }),
-  'KeyJ',
-])
+/** 不管键位怎么设都拦截：方向键会滚动页面，/ 会触发快速查找 */
+const ALWAYS_HANDLED = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Slash']

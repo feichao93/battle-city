@@ -68,7 +68,6 @@ export function validPowerUpPositions(map: TerrainMap): Array<{ x: number; y: nu
 
 /**
  * 决定生成哪种道具：老鹰暴露 → 偏 shovel；玩家仍是 basic → 偏 star；否则随机。
- * 抄 app/sagas/powerUpManager.ts determineWhichPowerUpToSpawn。
  */
 export function determinePowerUpName(
   map: TerrainMap,

@@ -28,6 +28,15 @@ export type Route =
   | { screen: 'gallery'; tab: GalleryTab | null }
   | { screen: 'options' }
 
+/** 地址栏里可能出现 "%" 这样的非法编码；解不开就原样返回，交给后面的无效路由回退 */
+function decodeSegment(segment: string): string {
+  try {
+    return decodeURIComponent(segment)
+  } catch {
+    return segment
+  }
+}
+
 export function parseHash(hash: string): Route {
   const raw = hash.replace(/^#/, '')
   const queryIndex = raw.indexOf('?')
@@ -36,7 +45,7 @@ export function parseHash(hash: string): Route {
   const [head = '', a, b] = path
     .split('/')
     .filter((s) => s !== '')
-    .map(decodeURIComponent)
+    .map(decodeSegment)
 
   switch (head) {
     case 'choose':

@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { BLOCK_SIZE, TANK_COLOR_SCHEMES } from '../../engine/constants'
 import type { Direction, TankSide as Side, TankColor, TankLevel } from '../../engine/types'
 
-// 坦克像素 SVG。移植自 app/components/tanks.tsx（静态版，不含动画 Timing）。
+// 坦克像素 SVG（静态版，不含动画 Timing）。
 
 function range(n: number): number[] {
   return Array.from({ length: n }, (_, i) => i)

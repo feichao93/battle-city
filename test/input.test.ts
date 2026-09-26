@@ -64,4 +64,32 @@ describe('InputManager', () => {
     expect(input.touched(p2)).toBe(true)
     input.detach()
   })
+
+  it('窗口失焦时清空输入，包括 releaseAll 之后还没松开的键', () => {
+    const input = new InputManager()
+    input.attach()
+    key('keydown', PLAYER1_CONTROL.up)
+    key('keydown', PLAYER1_CONTROL.fire)
+    input.releaseAll()
+    key('keydown', PLAYER1_CONTROL.left)
+    window.dispatchEvent(new Event('blur'))
+    expect(input.held(PLAYER1_CONTROL)).toBe(false)
+    expect(input.consumeFire(PLAYER1_CONTROL)).toBe(false)
+    input.detach()
+  })
+
+  it('按实际键位拦截浏览器默认行为：开火改成空格后空格也拦截', () => {
+    const control = { ...PLAYER1_CONTROL, fire: 'Space' }
+    const input = new InputManager([control])
+    input.attach()
+    const press = (code: string) => {
+      const event = new KeyboardEvent('keydown', { code, cancelable: true })
+      document.dispatchEvent(event)
+      return event.defaultPrevented
+    }
+    expect(press('Space')).toBe(true)
+    expect(press('ArrowUp')).toBe(true)
+    expect(press('KeyJ')).toBe(false)
+    input.detach()
+  })
 })

@@ -19,7 +19,7 @@ interface StatisticsFrame {
 /** TOTAL 出现后停留的时长 */
 const TOTAL_HOLD = 1000
 
-/** 关卡结算的逐行计数动画，时间线抄 app/sagas/animateStatistics.ts */
+/** 关卡结算的逐行计数动画 */
 export default class StatisticsAnimation {
   readonly view: StatisticsView
   private readonly frames: StatisticsFrame[] = []

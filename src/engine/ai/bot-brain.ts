@@ -62,7 +62,7 @@ function randomPassableSpot(spots: Spot[], random: () => number): number {
 }
 
 /**
- * 单个 bot 的帧循环状态机，等价于旧 saga 的 wander / attackEagle / blocked。
+ * 单个 bot 的帧循环状态机。
  * - simpleFireLoop：移动期间按概率开火
  * - blocked：连续 200ms 未位移则放弃当前路径重规划
  * - 进攻路线打砖更近（或只能打砖过去）时走打砖路线，路上遇到砖停下开火

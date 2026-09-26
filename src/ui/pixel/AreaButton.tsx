@@ -10,7 +10,7 @@ interface AreaButtonProps {
   spreadY?: number
 }
 
-/** 透明矩形热区按钮，悬停时描边。移植自原版 AreaButton */
+/** 透明矩形热区按钮，悬停时描边 */
 export default function AreaButton({
   x = 0,
   y = 0,

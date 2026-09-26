@@ -13,7 +13,7 @@ interface TextInputProps {
   onFocusChange?: (focused: boolean) => void
 }
 
-/** 像素文本输入框：聚焦后直接接收按键，只接受像素字体支持的字符。移植自原版 TextInput */
+/** 像素文本输入框：聚焦后直接接收按键，只接受像素字体支持的字符 */
 export default function TextInput({
   x,
   y,

@@ -128,6 +128,14 @@ export default class SpriteAtlas {
   }
 }
 
+let shared: SpriteAtlas | null = null
+
+/** 整个页面共用一份图集：Texture.from(canvas) 会进 Pixi 全局缓存，每局新建一份就会越积越多 */
+export function sharedAtlas(): SpriteAtlas {
+  shared ??= new SpriteAtlas()
+  return shared
+}
+
 /** 砖块子格 (row,col) 对应的 shape key */
 export function brickShapeKey(row: number, col: number): string {
   return `brick/${brickShape(row, col)}`

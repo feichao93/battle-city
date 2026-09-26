@@ -1,7 +1,7 @@
 import type { PowerUpName } from '../../engine/types'
 import { bitmap, type ColorScheme } from './draw'
 
-// 道具 16×16 字符网格，抄 app/components/PowerUp.tsx
+// 道具 16×16 字符网格
 const scheme: ColorScheme = { ' ': 'none', w: '#FFFFFF', g: '#ADADAD', b: '#00424A' }
 
 const DATA: Record<PowerUpName, string[]> = {

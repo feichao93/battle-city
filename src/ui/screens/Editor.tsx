@@ -91,7 +91,7 @@ function shiftLevel(level: TankLevel, delta: 1 | -1): TankLevel {
   return TANK_LEVELS[TANK_LEVELS.indexOf(level) + delta]
 }
 
-/** 关卡编辑器：还原原版 Editor（config / map 两个视图 + 保存校验），并支持全键盘操作 */
+/** 关卡编辑器：config / map 两个视图 + 保存校验，支持全键盘操作 */
 export default function Editor({ view }: { view: EditorView }) {
   const customStages = useUIStore((s) => s.customStages)
   const addCustomStage = useUIStore((s) => s.addCustomStage)
@@ -134,7 +134,8 @@ export default function Editor({ view }: { view: EditorView }) {
     !popupOpen && !editingName,
   )
 
-  const canPaint = view === 'map' && !popupOpen
+  // 帮助浮层盖在地图上，点它关闭时的鼠标事件会冒泡到这里
+  const canPaint = view === 'map' && !popupOpen && help.overlay == null
   const totalBotCount = stage.bots.reduce((sum, g) => sum + g.count, 0)
 
   // 用鼠标切换视图时焦点可能还停在另一个视图的区域里，就近换成当前视图的区域
@@ -559,8 +560,9 @@ export default function Editor({ view }: { view: EditorView }) {
         if (canPaint && pressedRef.current) paint(t)
       }}
       onMouseUp={(e) => {
+        const pressed = pressedRef.current
         pressedRef.current = false
-        if (canPaint) paint(blockAt(e))
+        if (canPaint && pressed) paint(blockAt(e))
       }}
       onMouseLeave={() => {
         pressedRef.current = false

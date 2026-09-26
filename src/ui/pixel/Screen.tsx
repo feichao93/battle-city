@@ -13,7 +13,7 @@ interface ScreenProps {
 
 /**
  * 像素屏幕容器：固定 256×240 逻辑尺寸、放大 ZOOM_LEVEL 倍，
- * 最近邻采样保持像素感。移植自旧项目 app/components/Screen.tsx。
+ * 最近邻采样保持像素感。
  */
 export default function Screen({
   children,

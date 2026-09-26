@@ -7,19 +7,6 @@ settings:
 importers:
 
   .:
-    dependencies:
-      pixi.js:
-        specifier: ^8.6.6
-        version: 8.19.0
-      react:
-        specifier: ^19.0.0
-        version: 19.2.7
-      react-dom:
-        specifier: ^19.0.0
-        version: 19.2.7(react@19.2.7)
-      zustand:
-        specifier: ^5.0.2
-        version: 5.0.14(@types/react@19.2.17)(react@19.2.7)
     devDependencies:
       '@types/react':
         specifier: ^19.0.2
@@ -33,9 +20,18 @@ importers:
       jsdom:
         specifier: ^25.0.1
         version: 25.0.1
+      pixi.js:
+        specifier: ^8.6.6
+        version: 8.19.0
       prettier:
         specifier: ^3.4.2
         version: 3.8.4
+      react:
+        specifier: ^19.0.0
+        version: 19.2.7
+      react-dom:
+        specifier: ^19.0.0
+        version: 19.2.7(react@19.2.7)
       typescript:
         specifier: ^5.7.2
         version: 5.7.2
@@ -45,6 +41,9 @@ importers:
       vitest:
         specifier: ^3.2.4
         version: 3.2.6(@types/node@25.9.3)(jsdom@25.0.1)
+      zustand:
+        specifier: ^5.0.2
+        version: 5.0.14(@types/react@19.2.17)(react@19.2.7)
 
 packages:
 

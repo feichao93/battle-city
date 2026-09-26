@@ -3,6 +3,7 @@ import { BLOCK_SIZE as B } from '../../engine/constants'
 import { parseStage } from '../../engine/map/parseStage'
 import type { RawStageConfig } from '../../engine/types'
 import { stages as builtinStages } from '../../stages'
+import { MAX_BOT_GROUPS } from '../editor/editorStage'
 import { useMenuKeys, type MenuKey } from '../menuKeys'
 import FocusFrame from '../pixel/FocusFrame'
 import PixelText from '../pixel/PixelText'
@@ -13,6 +14,8 @@ import useHelp from '../pixel/useHelp'
 import usePopup from '../pixel/usePopup'
 import { goBack, push, replace, stagePath, type StageListTab } from '../router'
 import { useUIStore } from '../store'
+
+const TOO_MANY_GROUPS = `At most ${MAX_BOT_GROUPS} bot groups are supported.`
 
 const PER_PAGE = 6
 const COLUMNS = 3
@@ -47,7 +50,7 @@ const EDIT_ICON_PIXELS: Array<[number, number]> = [
   [4, 5],
 ]
 
-/** 铅笔图标按钮，像素坐标抄原版 EditStageButton */
+/** 铅笔图标按钮 */
 function EditStageButton({
   x,
   y,
@@ -94,7 +97,7 @@ function download(stage: RawStageConfig) {
   URL.revokeObjectURL(url)
 }
 
-/** 关卡列表：还原原版 StageList（default/custom 标签 + 预览网格 + 翻页 + 编辑/下载/上传） */
+/** 关卡列表：default/custom 标签 + 预览网格 + 翻页 + 编辑/下载/上传 */
 export default function StageList({ tab, page }: { tab: StageListTab; page: number }) {
   const customStages = useUIStore((s) => s.customStages)
   const deleteCustomStage = useUIStore((s) => s.deleteCustomStage)
@@ -137,7 +140,11 @@ export default function StageList({ tab, page }: { tab: StageListTab; page: numb
   const play = (stage: RawStageConfig, multi: boolean) =>
     push(stagePath('stage', stage.name, multi))
 
-  const edit = (stage: RawStageConfig) => {
+  const edit = async (stage: RawStageConfig) => {
+    if (stage.bots.length > MAX_BOT_GROUPS) {
+      await showAlert(TOO_MANY_GROUPS)
+      return
+    }
     setEditorContent(stage)
     push('/editor')
   }
@@ -157,6 +164,10 @@ export default function StageList({ tab, page }: { tab: StageListTab; page: numb
     } catch (error) {
       console.error(error)
       await showAlert('Failed to parse stage config file.')
+      return
+    }
+    if (stage.bots.length > MAX_BOT_GROUPS) {
+      await showAlert(TOO_MANY_GROUPS)
       return
     }
     if (builtinStages.some((s) => s.name === stage.name)) {
@@ -292,7 +303,12 @@ export default function StageList({ tab, page }: { tab: StageListTab; page: numb
           onClick={tab !== 'custom' ? () => switchTab('custom') : undefined}
         />
         {current.area === 'tabs' && (
-          <FocusFrame x={4 * B} y={0.125 * B} width={8 * B} height={0.75 * B} />
+          <FocusFrame
+            x={4.25 * B - 2}
+            y={0.375 * B - 2}
+            width={7.5 * B + 4}
+            height={0.75 * B + 4}
+          />
         )}
 
         {pageStages.length === 0 && (

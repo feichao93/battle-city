@@ -44,4 +44,10 @@ describe('editorStage', () => {
       { tankLevel: 'basic', count: 0 },
     ])
   })
+
+  it('超过 4 组敌人的关卡不能打开编辑，免得保存时截掉多出的组', () => {
+    const raw = editorToRaw(emptyEditorStage())
+    const bots = ['4*basic', '4*fast', '4*power', '4*armor', '4*basic']
+    expect(() => rawToEditor({ ...raw, bots })).toThrow()
+  })
 })

@@ -10,7 +10,7 @@ const SMALL_TIMELINE: ReadonlyArray<{ shape: ExplosionShape; duration: number }>
   { shape: 's2', duration: frame(2) },
 ]
 
-/** 大爆炸（坦克）时间线：s0→s1→s2→b0→b1→s2，抄 app/sagas/common/destroyTanks */
+/** 大爆炸（坦克）时间线：s0→s1→s2→b0→b1→s2 */
 const BIG_TIMELINE: ReadonlyArray<{ shape: ExplosionShape; duration: number }> = [
   { shape: 's0', duration: frame(7) },
   { shape: 's1', duration: frame(5) },

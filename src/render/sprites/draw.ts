@@ -1,6 +1,6 @@
 /**
  * 离屏 Canvas 2D 绘制原语。
- * 旧项目的精灵用 SVG <rect>/<path>/<Pixel> 拼成，这里 1:1 移植坐标到 Canvas 2D：
+ * 精灵坐标沿用 SVG <rect>/<path>/<Pixel> 的写法，映射到 Canvas 2D：
  * - rect  → fillRect
  * - path  → new Path2D(svgPathString) + fill（Canvas 原生支持 SVG path 语法）
  * - pixel → 1×1 fillRect

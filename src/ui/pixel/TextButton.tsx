@@ -20,7 +20,7 @@ interface TextButtonProps {
 }
 
 /**
- * 可点击的像素文本按钮。移植自旧项目 app/components/TextButton.tsx。
+ * 可点击的像素文本按钮。
  * 命中区域为文本外扩 spreadX/spreadY 的矩形。
  */
 export default function TextButton({

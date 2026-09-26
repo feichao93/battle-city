@@ -1,6 +1,6 @@
 import { path, rect } from './draw'
 
-// 分数弹出 16×16：百位数字 + 两个 0，坐标抄 app/components/Score.tsx
+// 分数弹出 16×16：百位数字 + 两个 0
 export const SCORES = [100, 200, 300, 400, 500] as const
 
 const COLOR = '#ffffff'

@@ -67,4 +67,12 @@ describe('parseStage', () => {
       expect(total, `stage ${raw.name} bots 合计`).toBe(20)
     }
   })
+
+  it('每组数量必须是 0–99 的整数', () => {
+    const withBots = (bots: string[]) => ({ ...stages[0], bots })
+    expect(() => parseStage(withBots(['99*basic', '0*fast']))).not.toThrow()
+    for (const bad of ['1e309*basic', '100*basic', '-1*basic', '1.5*basic']) {
+      expect(() => parseStage(withBots([bad])), bad).toThrow()
+    }
+  })
 })

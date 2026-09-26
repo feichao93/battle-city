@@ -1,7 +1,7 @@
 import { ITEM_SIZE_MAP } from '../../engine/constants'
 import { brickShape } from '../../render/sprites/terrain'
 
-/** 单块 4×4 砖。移植自 app/components/BrickWall.tsx。 */
+/** 单块 4×4 砖 */
 export default function BrickWall({ x, y }: { x: number; y: number }) {
   const shape = brickShape(Math.floor(y / ITEM_SIZE_MAP.BRICK), Math.floor(x / ITEM_SIZE_MAP.BRICK))
   return (

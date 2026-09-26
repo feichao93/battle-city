@@ -1,7 +1,7 @@
 import type { FlickerShape } from '../../engine/entities/Flicker'
 import { rect } from './draw'
 
-// 出生星星 16×16，坐标抄 app/components/Flicker.tsx
+// 出生星星 16×16
 const SHAPES: Record<FlickerShape, [number, number, number, number][]> = {
   0: [
     [3, 7, 9, 1],

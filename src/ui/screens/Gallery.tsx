@@ -206,7 +206,7 @@ function StatisticsTab() {
     <g>
       <TabTitle content="Statistics" />
       <Transform k={0.8} x={25} y={32}>
-        <StatisticsContent view={animation.view} scores={[1000, 12345]} />
+        <StatisticsContent view={animation.view} scores={[1000, 12345]} hiScore={20000} />
       </Transform>
     </g>
   )
@@ -382,7 +382,7 @@ const NAV_X: Record<GalleryTab, number> = {
   info: 27 * B,
 }
 
-/** 画廊：还原原版 Gallery，逐页展示游戏中的各类元素 */
+/** 画廊：逐页展示游戏中的各类元素 */
 export default function Gallery({ tab }: { tab: GalleryTab }) {
   const index = GALLERY_TABS.indexOf(tab)
   const Content = TAB_CONTENT[tab]

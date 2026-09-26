@@ -20,6 +20,8 @@ import PathFollower from '../src/engine/ai/path-follower'
 import { getTankSpot, spotToTankPos } from '../src/engine/ai/spots'
 import { getAIFireCount, getFireResist } from '../src/engine/ai/fire-estimate'
 import { updateBullets, type BulletTankHit } from '../src/engine/systems/bullet'
+import { fireTank } from '../src/engine/systems/fire'
+import { STEP_MS } from '../src/engine/Game'
 import { applyInput, applyPlayerMove } from '../src/engine/systems/movement'
 import { bulletInterval, bulletLimit, bulletPower, moveSpeed } from '../src/engine/values'
 import type { Input, RawStageConfig, SoundName } from '../src/engine/types'
@@ -408,6 +410,25 @@ describe('bullet 命中坦克', () => {
 
   it('队友没戴头盔时算命中', () => {
     expect(shootMate(0).hits).toHaveLength(1)
+  })
+
+  it('来弹在炮口被对射抵消后，同一帧里不再打中玩家', () => {
+    const tank = new Tank({ side: 'player', x: 80, y: 80, direction: 'right' })
+    const incoming = new Bullet({
+      side: 'bot',
+      tankId: -1,
+      direction: 'left',
+      speed: 0.24,
+      power: 2,
+      x: 98,
+      y: 86,
+    })
+    const bullets = [incoming]
+    fireTank(tank, true, STEP_MS, bullets, { play: () => {} })
+    const hits: BulletTankHit[] = []
+    updateBullets(bullets, makeMap(), [], { play: () => {} }, STEP_MS, [tank], hits)
+    expect(bullets).toEqual([])
+    expect(hits).toEqual([])
   })
 })
 

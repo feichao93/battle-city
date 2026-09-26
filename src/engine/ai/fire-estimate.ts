@@ -34,7 +34,6 @@ function anyBrick(map: TerrainMap, r: Rect): boolean {
 
 /**
  * 从 spot t 沿四个方向逐格累计「打到该格所需穿过的砖/钢数」，得到一张 estMap。
- * 抄 app/ai/Spot.ts getIdealFireEstMap。
  */
 export function getIdealFireEstMap(map: TerrainMap, t: number): Map<number, FireEstimate> {
   const estMap = new Map<number, FireEstimate>()

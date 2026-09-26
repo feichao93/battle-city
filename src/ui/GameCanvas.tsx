@@ -8,7 +8,7 @@ import GameSession, { type PlayerConfig } from '../engine/GameSession'
 import type { StatisticsView } from '../engine/StatisticsAnimation'
 import InputManager from '../input/InputManager'
 import Renderer from '../render/Renderer'
-import SpriteAtlas from '../render/SpriteAtlas'
+import { sharedAtlas } from '../render/SpriteAtlas'
 import BattleOverlay, { type BattleView } from './BattleOverlay'
 import type { PauseAction } from './PauseMenu'
 import StatisticsScene from './StatisticsScene'
@@ -164,7 +164,7 @@ function Battle(props: {
         setAwaitingKey(false)
       }
 
-      const activeRenderer = new Renderer(app, new SpriteAtlas())
+      const activeRenderer = new Renderer(app, sharedAtlas())
       renderer = activeRenderer
 
       const players: PlayerConfig[] = [
@@ -187,7 +187,7 @@ function Battle(props: {
       let ended = false
       let currentStageName = startStageName
 
-      game = new Game(session, new InputManager(), (s) => {
+      game = new Game(session, new InputManager(players.map((p) => p.control)), (s) => {
         const scene = s.scene
         if (scene != null) {
           if (scene !== mountedScene) {

@@ -21,7 +21,7 @@ function at(ctx: CanvasRenderingContext2D, x: number, y: number, paint: Paint): 
   ctx.restore()
 }
 
-/** 坦克之下的地形：河 → 钢 → 砖 → 雪 → 老鹰（图层顺序同原版 StagePreview） */
+/** 坦克之下的地形：河 → 钢 → 砖 → 雪 → 老鹰 */
 function paintGround(ctx: CanvasRenderingContext2D, map: TerrainMap): void {
   map.forEachRiver((x, y) => at(ctx, x, y, (c) => drawRiver(c, 0)))
   map.forEachSteel((x, y) => at(ctx, x, y, drawSteel))

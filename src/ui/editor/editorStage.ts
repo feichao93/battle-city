@@ -13,9 +13,11 @@ export interface EditorStage {
   difficulty: RawStageConfig['difficulty']
   /** 13×13 个 block，按行优先排列 */
   items: MapItem[]
-  /** 固定 4 组，与原版编辑器一致 */
+  /** 固定 MAX_BOT_GROUPS 组，与原版编辑器一致 */
   bots: BotGroupConfig[]
 }
+
+export const MAX_BOT_GROUPS = 4
 
 export const EMPTY_ITEM: MapItem = { type: 'X', hex: 0xf }
 
@@ -38,6 +40,10 @@ export function emptyEditorStage(): EditorStage {
 /** 从子格还原 block：象限内任一子格存在即视为该象限存在（与原版 s2e 一致） */
 export function rawToEditor(raw: RawStageConfig): EditorStage {
   const parsed = parseStage(raw)
+  // 多出的组没有地方显示，保存时会被静默截掉
+  if (parsed.bots.length > MAX_BOT_GROUPS) {
+    throw new Error(`Editor supports at most ${MAX_BOT_GROUPS} bot groups`)
+  }
   const items = new Array<MapItem>(FIELD_BLOCK_SIZE ** 2).fill(EMPTY_ITEM)
   const addQuadrant = (type: 'B' | 'T', t: number, bit: number) => {
     items[t] = items[t].type === type ? { type, hex: items[t].hex | bit } : { type, hex: bit }

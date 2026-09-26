@@ -2,7 +2,7 @@ import { TANK_COLOR_SCHEMES } from '../../engine/constants'
 import type { TankColor, TankLevel, TankSide } from '../../engine/types'
 import { bitmap, path, pixel, rect, type ColorScheme } from './draw'
 
-// 坦克像素绘制（朝上，16×16）。坐标 1:1 抄自 app/components/tanks.tsx，
+// 坦克像素绘制（朝上，16×16），
 // 与 src/ui/pixel/TankSvg.tsx 的 SVG 版本一致。其它方向由渲染层旋转 sprite 处理；
 // shape 0/1 为履带动画两帧。
 

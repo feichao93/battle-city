@@ -2,7 +2,7 @@ import type Tank from './entities/Tank'
 
 /**
  * 坦克数值规格（移速、弹速、弹间隔、弹数、威力）。
- * 数值沿用旧实现 app/utils/values.ts，bot 移速按 NES 原版修正。
+ * bot 移速取 NES 原版数值。
  */
 
 /** 移动速度（px/ms） */

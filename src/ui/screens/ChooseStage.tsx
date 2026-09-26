@@ -8,7 +8,7 @@ import useHelp from '../pixel/useHelp'
 import { push, replace, stagePath } from '../router'
 import { allStages, useUIStore } from '../store'
 
-/** 选关轮播：忠实还原旧项目 ChooseStageScene（prev/cur/next 预览 + 左右/开火）。 */
+/** 选关轮播：prev/cur/next 预览 + 左右/开火 */
 export default function ChooseStage({ stageName, multi }: { stageName: string; multi: boolean }) {
   const customStages = useUIStore((s) => s.customStages)
   const stages = allStages(customStages)

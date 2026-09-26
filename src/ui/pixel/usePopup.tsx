@@ -15,7 +15,7 @@ export interface PopupHandle {
   showConfirm(message: string): Promise<boolean>
 }
 
-/** 像素风 alert / confirm 弹窗，移植自原版 PopupProvider */
+/** 像素风 alert / confirm 弹窗 */
 export default function usePopup(): PopupHandle {
   const [state, setState] = useState<PopupState>(null)
   const resolveRef = useRef<(ok: boolean) => void>(() => {})

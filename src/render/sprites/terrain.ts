@@ -5,21 +5,21 @@ export function brickShape(row: number, col: number): boolean {
   return (row + col) % 2 === 0
 }
 
-/** 砖块 4×4。坐标抄 app/components/BrickWall.tsx */
+/** 砖块 4×4 */
 export function drawBrick(ctx: CanvasRenderingContext2D, shape: boolean): void {
   rect(ctx, 0, 0, 4, 4, '#636363')
   rect(ctx, shape ? 0 : 1, 0, shape ? 4 : 3, 3, '#6B0800')
   rect(ctx, shape ? 0 : 2, 1, shape ? 4 : 2, 2, '#9C4A00')
 }
 
-/** 钢块 8×8。坐标抄 app/components/SteelWall.tsx */
+/** 钢块 8×8 */
 export function drawSteel(ctx: CanvasRenderingContext2D): void {
   rect(ctx, 0, 0, 8, 8, '#ADADAD')
   rect(ctx, 2, 2, 4, 4, '#FFFFFF')
   path(ctx, 'M6,2 h1 v-1 h1 v7 h-7 v-1 h1 v-1 h4 v-4', '#636363')
 }
 
-// 河流：两帧动画，每帧 8×8 高光点坐标。抄 app/components/River.tsx
+// 河流：两帧动画，每帧 8×8 高光点坐标
 const riverCoords: ReadonlyArray<ReadonlyArray<readonly [number, number]>> = [
   [
     [5, 0],
@@ -61,7 +61,7 @@ export function drawRiver(ctx: CanvasRenderingContext2D, shape: 0 | 1): void {
   drawRiverPart(ctx, shape, 0, 8)
 }
 
-// 森林：8×8 字符网格，四角平铺成 16×16。抄 app/components/Forest.tsx
+// 森林：8×8 字符网格，四角平铺成 16×16
 const forestScheme: ColorScheme = { a: '#8CD600', b: '#005208', c: '#084A00', d: 'none' }
 const forestGrid = [
   'dbbbcbad',
@@ -82,7 +82,7 @@ export function drawForest(ctx: CanvasRenderingContext2D): void {
   bitmap(ctx, forestGrid, forestScheme, 8, 8)
 }
 
-// 雪地：8×8 part，四角平铺。抄 app/components/Snow.tsx
+// 雪地：8×8 part，四角平铺
 const SNOW_A = '#ffffff'
 const SNOW_B = '#adadad'
 const SNOW_C = '#636363'
@@ -108,7 +108,7 @@ export function drawSnow(ctx: CanvasRenderingContext2D): void {
   drawSnowPart(ctx, 0, 8)
 }
 
-// 老鹰 16×16。抄 app/components/Eagle.tsx
+// 老鹰 16×16
 const eaglePoints: ReadonlyArray<readonly [number, number]> = [
   [8, 3],
   [3, 6],

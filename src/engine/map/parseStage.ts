@@ -125,12 +125,15 @@ export function parseStageMap(map: string[]): Omit<ParsedStage, 'name' | 'diffic
   return { bricks, steels, rivers, snows, forests, eagle }
 }
 
+/** 每组 bot 数量上限，和编辑器里的加减范围一致；不设上限时 "1e309*basic" 会让出场队列无限展开 */
+const MAX_GROUP_COUNT = 99
+
 /** 解析敌人描述数组，例如 ["18*basic", "2*fast"] */
 export function parseStageBots(bots: string[]): BotGroupConfig[] {
   return bots.map((descriptor) => {
     const [countStr, level] = descriptor.split('*').map((s) => s.trim())
     const count = Number(countStr)
-    if (Number.isNaN(count)) {
+    if (!Number.isInteger(count) || count < 0 || count > MAX_GROUP_COUNT) {
       throw new Error(`Invalid bot count in "${descriptor}"`)
     }
     if (!['basic', 'fast', 'power', 'armor'].includes(level)) {
