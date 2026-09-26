@@ -17,6 +17,8 @@ export interface BattleView {
   hudVisible: boolean
   remainingBots: number
   lives: number[]
+  /** 各玩家当前是否由 AI 托管 */
+  autopilot: boolean[]
   /** 各玩家能否向队友借命 */
   canBorrowLife: boolean[]
   /** 入场幕布闭合程度 0~1 */
@@ -57,7 +59,11 @@ export default function BattleOverlay({
     >
       {view.hudVisible && (
         <g transform={`translate(${FIELD_SIZE + 1.5 * B}, ${1.5 * B})`}>
-          <HudContent remainingBots={view.remainingBots} lives={view.lives} />
+          <HudContent
+            remainingBots={view.remainingBots}
+            lives={view.lives}
+            autopilot={view.autopilot}
+          />
         </g>
       )}
       {view.hudVisible &&
@@ -73,18 +79,41 @@ export default function BattleOverlay({
 }
 
 /** 战场右侧的 HUD：剩余 bot 数与各玩家命数；画廊的 misc 页复用 */
-export function HudContent({ remainingBots, lives }: { remainingBots: number; lives: number[] }) {
+export function HudContent({
+  remainingBots,
+  lives,
+  autopilot,
+}: {
+  remainingBots: number
+  lives: number[]
+  autopilot: boolean[]
+}) {
   return (
     <g className="hud">
       <BotCountIndicator count={remainingBots} />
       <g transform={`translate(0, ${6 * B})`}>
         {lives.map((n, i) => (
           <g key={i} transform={`translate(0, ${i * B})`}>
-            <PixelText x={0} y={0} content={i === 0 ? 'Ⅰp' : 'Ⅱp'} fill="#000000" />
+            <PlayerLabel numeral={i === 0 ? 'Ⅰ' : 'Ⅱ'} autopilot={autopilot[i]} />
             <PlayerTankThumbnail x={0} y={0.5 * B} />
             <PixelText x={0.5 * B} y={0.5 * B} content={String(Math.max(0, n))} fill="#000000" />
           </g>
         ))}
+      </g>
+    </g>
+  )
+}
+
+/** 玩家标签 Ⅰp；托管时 p 换成红色半尺寸的 cpu（HUD 列宽 24px，8 + 12 正好放得下） */
+function PlayerLabel({ numeral, autopilot }: { numeral: string; autopilot: boolean }) {
+  if (!autopilot) {
+    return <PixelText x={0} y={0} content={`${numeral}p`} fill="#000000" />
+  }
+  return (
+    <g>
+      <PixelText x={0} y={0} content={numeral} fill="#000000" />
+      <g transform="translate(8, 3) scale(0.5)">
+        <PixelText x={0} y={0} content="cpu" fill="#db2b00" />
       </g>
     </g>
   )

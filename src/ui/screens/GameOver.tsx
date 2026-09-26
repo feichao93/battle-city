@@ -28,6 +28,18 @@ function ScoreLines({ result, hiScore, y }: { result: LastGame; hiScore: number;
       {lines.map((line, i) => (
         <PixelText key={i} x={x} y={y + i * LINE_HEIGHT} content={line} />
       ))}
+      {result.autopilot.map(
+        (cpu, i) =>
+          cpu && (
+            <PixelText
+              key={i}
+              x={x + (lines[i].length + 1) * 8}
+              y={y + i * LINE_HEIGHT}
+              content="cpu"
+              fill="#db2b00"
+            />
+          ),
+      )}
       {result.newHiScore && <NewHiScore y={y + lines.length * LINE_HEIGHT + 4} />}
     </g>
   )

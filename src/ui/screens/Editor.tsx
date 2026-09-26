@@ -17,7 +17,6 @@ import {
 } from '../editor/editorStage'
 import Grid from '../editor/Grid'
 import TerrainIcon, { type TerrainIconName } from '../editor/TerrainIcon'
-import { directionLabel, keyLabel } from '../keyLabels'
 import { menuKeyOf, useMenuKeys, type MenuKey } from '../menuKeys'
 import AreaButton from '../pixel/AreaButton'
 import FocusFrame from '../pixel/FocusFrame'
@@ -28,6 +27,7 @@ import StagePreview from '../pixel/StagePreview'
 import TankSvg from '../pixel/TankSvg'
 import TextButton from '../pixel/TextButton'
 import TextInput from '../pixel/TextInput'
+import useHelp from '../pixel/useHelp'
 import usePopup from '../pixel/usePopup'
 import { goBack, replace, type EditorView } from '../router'
 import { useUIStore } from '../store'
@@ -62,12 +62,12 @@ const BOT_ROW_HEIGHT = 1.5 * B
 const MENU_ITEMS = ['config', 'map', 'save', 'back'] as const
 
 /**
- * 键盘焦点。map 视图：地图光标、画笔栏（'?' 为帮助按钮）、砖/钢的形状象限；
+ * 键盘焦点。map 视图：地图光标、画笔栏、砖/钢的形状象限；
  * config 视图：字段；两个视图共用底部菜单。
  */
 type Focus =
   | { area: 'map'; t: number }
-  | { area: 'tools'; tool: MapItemType | '?' }
+  | { area: 'tools'; tool: MapItemType }
   | { area: 'shape'; target: number | 'f' }
   | { area: 'config'; field: number }
   | { area: 'menu'; index: number }
@@ -97,7 +97,6 @@ export default function Editor({ view }: { view: EditorView }) {
   const addCustomStage = useUIStore((s) => s.addCustomStage)
   const setEditorContent = useUIStore((s) => s.setEditorContent)
   const bindings = useUIStore((s) => s.bindings)
-  const control = bindings.p1
   const [stage, setStage] = useState<EditorStage>(() => {
     const content = useUIStore.getState().editorContent
     return content == null ? emptyEditorStage() : rawToEditor(content)
@@ -117,6 +116,23 @@ export default function Editor({ view }: { view: EditorView }) {
   // 按住开火键移动地图光标时连续涂抹
   const keyPaintingRef = useRef(false)
   const lastMapTRef = useRef(MAP_CENTER)
+  const help = useHelp(
+    [
+      [
+        {
+          rows: [
+            ['direction', 'move'],
+            ['fire', 'paint / ok'],
+            ['1-7', 'brush'],
+            ['right', 'edit shape'],
+            ['left/right', 'adjust'],
+            ['esc', 'back'],
+          ],
+        },
+      ],
+    ],
+    !popupOpen && !editingName,
+  )
 
   const canPaint = view === 'map' && !popupOpen
   const totalBotCount = stage.bots.reduce((sum, g) => sum + g.count, 0)
@@ -211,12 +227,6 @@ export default function Editor({ view }: { view: EditorView }) {
     goBack()
   }
 
-  const onShowHelp = async () => {
-    await showAlert('1. Choose an item type below.')
-    await showAlert('2. Click or pan in the left.')
-    await showAlert('3. After selecting Brick or Steel you can change the item shape')
-  }
-
   const runMenu = (index: number) => {
     const item = MENU_ITEMS[index]
     if (item === 'config' || item === 'map') replace(`/editor/${item}`)
@@ -272,21 +282,19 @@ export default function Editor({ view }: { view: EditorView }) {
     setFocus({ area: 'map', t: next })
   }
 
-  const onToolsKey = (key: MenuKey, tool: MapItemType | '?') => {
-    const order: Array<MapItemType | '?'> = ['?', ...TOOLS]
-    const index = order.indexOf(tool)
-    const select = (next: MapItemType | '?') => {
-      if (next !== '?') setItemType(next)
+  const onToolsKey = (key: MenuKey, tool: MapItemType) => {
+    const index = TOOLS.indexOf(tool)
+    const select = (next: MapItemType) => {
+      setItemType(next)
       setFocus({ area: 'tools', tool: next })
     }
-    if (key === 'up' && index > 0) select(order[index - 1])
+    if (key === 'up' && index > 0) select(TOOLS[index - 1])
     else if (key === 'down') {
-      if (index < order.length - 1) select(order[index + 1])
+      if (index < TOOLS.length - 1) select(TOOLS[index + 1])
       else setFocus(menuFocusOfView())
     } else if (key === 'right' && (tool === 'B' || tool === 'T')) {
       setFocus({ area: 'shape', target: QUADRANTS[0] })
-    } else if (key === 'confirm' && tool === '?') void onShowHelp()
-    else if (key === 'left' || key === 'confirm' || key === 'back') {
+    } else if (key === 'left' || key === 'confirm' || key === 'back') {
       setFocus({ area: 'map', t: lastMapTRef.current })
     }
   }
@@ -412,15 +420,6 @@ export default function Editor({ view }: { view: EditorView }) {
         />
       )}
       <g className="tools" transform={`translate(${TOOLS_X},0)`}>
-        <TextButton
-          content="?"
-          x={2.25 * B}
-          y={0.25 * B}
-          spreadX={0.05 * B}
-          spreadY={0.05 * B}
-          focused={toolFocus === '?'}
-          onClick={onShowHelp}
-        />
         <PixelText content="→" fill="#E91E63" x={0.25 * B} y={0.25 * B + TOOL_Y[itemType]} />
 
         <rect x={B} y={TOOL_Y.X} width={B} height={B} fill="black" />
@@ -441,7 +440,7 @@ export default function Editor({ view }: { view: EditorView }) {
             onClick={() => setItemType(type)}
           />
         ))}
-        {toolFocus != null && toolFocus !== '?' && (
+        {toolFocus != null && (
           <FocusFrame x={0} y={TOOL_Y[toolFocus] - 2} width={3 * B} height={B + 4} />
         )}
         {itemType === 'B' && renderHexAdjust('B')}
@@ -548,24 +547,6 @@ export default function Editor({ view }: { view: EditorView }) {
     </g>
   )
 
-  const dirs = directionLabel(control)
-  const fire = keyLabel(control.fire)
-  const upDown = `${keyLabel(control.up)}/${keyLabel(control.down)}`
-  const leftRight = `${keyLabel(control.left)}/${keyLabel(control.right)}`
-  let hint: string
-  if (editingName) hint = 'type stage name  enter done'
-  else if (current.area === 'map') hint = `${dirs} move  ${fire} paint  1-7 brush  esc back`
-  else if (current.area === 'tools') {
-    hint = `${upDown} brush  ${fire} done`
-    if (current.tool === 'B' || current.tool === 'T') hint += `  ${keyLabel(control.right)} shape`
-  } else if (current.area === 'shape') hint = `${dirs} move  ${fire} toggle  esc brushes`
-  else if (current.area === 'config') {
-    hint =
-      current.field === 0
-        ? `${upDown} select  ${fire} edit name  esc back`
-        : `${upDown} select  ${leftRight} adjust  esc back`
-  } else hint = `${leftRight} choose  ${fire} ok  esc back`
-
   return (
     <Screen
       background="#333"
@@ -600,8 +581,10 @@ export default function Editor({ view }: { view: EditorView }) {
           />
         ))}
       </g>
-      <HintText content={hint} />
+      {editingName && <HintText content="type stage name  enter done" />}
+      {!editingName && help.button}
       {popup}
+      {help.overlay}
     </Screen>
   )
 }

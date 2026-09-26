@@ -14,6 +14,10 @@ export interface GameResult {
   scores: number[]
   /** 是否打完了全部关卡 */
   cleared: boolean
+  /** 开着托管且全程没有人按过键：AI 对 AI 的演示局，不更新最高分 */
+  aiOnly: boolean
+  /** 最后一关胜负确定时各玩家是否为托管，结束页据此标注 cpu */
+  autopilot: boolean[]
 }
 
 /** 结束页和标题页读取的上一局结果 */
@@ -36,10 +40,13 @@ interface UIState {
   customStages: RawStageConfig[]
   /** 自定义键位（持久化） */
   bindings: { p1: PlayerControl; p2: PlayerControl }
+  /** 玩家空闲时由 AI 托管（持久化）；开局时读取，对局中不变 */
+  autopilot: boolean
 
   setBinding: (player: 'p1' | 'p2', action: ControlAction, code: string) => void
   resetBindings: () => void
-  /** 记录一局的结果并更新最高分 */
+  setAutopilot: (autopilot: boolean) => void
+  /** 记录一局的结果并更新最高分（AI 对 AI 的局不更新） */
   finishGame: (result: GameResult) => void
 
   setEditorContent: (stage: RawStageConfig | null) => void
@@ -55,6 +62,7 @@ export const useUIStore = create<UIState>()(
       editorContent: null,
       customStages: [],
       bindings: { p1: { ...PLAYER1_CONTROL }, p2: { ...PLAYER2_CONTROL } },
+      autopilot: true,
 
       setBinding: (player, action, code) =>
         set((s) => ({
@@ -62,12 +70,14 @@ export const useUIStore = create<UIState>()(
         })),
       resetBindings: () =>
         set({ bindings: { p1: { ...PLAYER1_CONTROL }, p2: { ...PLAYER2_CONTROL } } }),
+      setAutopilot: (autopilot) => set({ autopilot }),
       finishGame: (result) =>
         set((s) => {
           const best = Math.max(...result.scores)
+          const newHiScore = !result.aiOnly && best > s.hiScore
           return {
-            lastGame: { ...result, newHiScore: best > s.hiScore },
-            hiScore: Math.max(s.hiScore, best),
+            lastGame: { ...result, newHiScore },
+            hiScore: newHiScore ? best : s.hiScore,
           }
         }),
 
@@ -88,6 +98,7 @@ export const useUIStore = create<UIState>()(
         customStages: s.customStages,
         bindings: s.bindings,
         hiScore: s.hiScore,
+        autopilot: s.autopilot,
       }),
     },
   ),

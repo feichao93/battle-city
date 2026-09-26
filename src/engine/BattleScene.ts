@@ -27,15 +27,25 @@ import ScorePopup from './entities/ScorePopup'
 import type TerrainMap from './map/TerrainMap'
 import type { CollisionWorld } from './physics/collision'
 import { testCollide, type Rect } from './physics/geometry'
-import BotBrain, { type BotContext } from './ai/bot-brain'
+import BotBrain from './ai/bot-brain'
+import type { AIContext, TankController, TankIntent } from './ai/controller'
+import TeammateBrain from './ai/teammate-brain'
 import { buildSpots, type Spot } from './ai/spots'
 import { updateBullets, type BulletTankHit } from './systems/bullet'
 import { updateAnimations } from './systems/animation'
 import { fireTank } from './systems/fire'
-import { getPlayerInput } from './systems/input'
-import { applyPlayerMove } from './systems/movement'
+import { keyboardController } from './systems/input'
+import { applyInput, applyPlayerMove } from './systems/movement'
 import { determinePowerUpName, updatePowerUps, validPowerUpPositions } from './systems/powerup'
-import type { PlayerState } from './GameSession'
+import type { PlayerState, SessionOptions } from './GameSession'
+import {
+  bulletSnapshot,
+  powerUpSnapshot,
+  round,
+  tankSnapshot,
+  terrainSnapshot,
+  type SceneSnapshot,
+} from './snapshot'
 import { emptyCounts } from './StatisticsAnimation'
 import type InputManager from '../input/InputManager'
 import type { AudioPort, TankLevel } from './types'
@@ -57,11 +67,14 @@ const FREEZE_DURATION = 1000
 
 interface PlayerSlot {
   state: PlayerState
+  /** 出生闪烁结束后才有值；有值即可以操作 */
   tank: Tank | null
   /** 正在出生的坦克，闪烁结束后成为 tank */
   flicker: Flicker | null
   /** >0：等待复活计时（爆炸播完才开始出生） */
   respawnTimer: number
+  /** 托管时驾驶坦克的 AI；交还或换了一辆坦克时丢弃 */
+  brain: TankController | null
 }
 
 /**
@@ -87,6 +100,8 @@ export default class BattleScene {
   private shovelBlinkToggles = 0
   private shovelSteelShown = false
   private readonly brains = new Map<number, BotBrain>()
+  /** 各坦克本 tick 的操作，只给快照用 */
+  private readonly intents = new Map<number, TankIntent>()
   private readonly audio: AudioPort
 
   /** 缓存的 spot 图，地形变动（version 改变）时重建 */
@@ -102,6 +117,7 @@ export default class BattleScene {
   private readonly botFlickers: Flicker[] = []
   private readonly maxBotsOnField: number
   private readonly botSpawnInterval: number
+  private readonly stageNumber: number
   /** 距下次允许出生的剩余时间；为 0 时一有空位就出生 */
   private botSpawnTimer = 0
   private nextBotSpawnIndex = 0
@@ -117,15 +133,23 @@ export default class BattleScene {
     players: PlayerState[],
     /** 关卡序号，从 1 开始，决定出生间隔 */
     stageNumber: number,
+    private readonly options: SessionOptions,
   ) {
     this.map = map
     this.audio = audio
     this.remainingBots = [...botGroups]
-    this.players = players.map((state) => ({ state, tank: null, flicker: null, respawnTimer: 0 }))
+    this.players = players.map((state) => ({
+      state,
+      tank: null,
+      flicker: null,
+      respawnTimer: 0,
+      brain: null,
+    }))
     this.killInfo = players.map(() => emptyCounts(0))
     const multi = players.length > 1
     this.maxBotsOnField = multi ? MAX_BOT_ON_FIELD.multi : MAX_BOT_ON_FIELD.single
     this.botSpawnInterval = botSpawnInterval(stageNumber, multi)
+    this.stageNumber = stageNumber
   }
 
   /** 开战：玩家开始出生，第一辆 bot 在下一次 step 立即出生 */
@@ -161,6 +185,11 @@ export default class BattleScene {
   /** 各玩家剩余命数 */
   get lives(): number[] {
     return this.players.map((p) => p.state.lives)
+  }
+
+  /** 该玩家的坦克在场且出生闪烁已结束 */
+  controllable(playerIndex: number): boolean {
+    return this.players[playerIndex].tank != null
   }
 
   /** 尚未开始出生的 bot 数（HUD 右侧的小坦克图标） */
@@ -213,6 +242,7 @@ export default class BattleScene {
     })
     slot.flicker = new Flicker(tank)
     slot.respawnTimer = 0
+    slot.brain = null
   }
 
   /** 出生计时只在真正出生时重置：满员时停在 0，一有空位就出生 */
@@ -318,14 +348,15 @@ export default class BattleScene {
 
   private spawnPowerUp(): void {
     const playerTanks = this.players.map((p) => p.tank).filter((t): t is Tank => t != null)
-    const name = determinePowerUpName(this.map, playerTanks)
+    const { random } = this.options
+    const name = determinePowerUpName(this.map, playerTanks, random)
     const positions = validPowerUpPositions(this.map)
     const pos =
       positions.length > 0
-        ? positions[Math.floor(Math.random() * positions.length)]
+        ? positions[Math.floor(random() * positions.length)]
         : {
-            x: (Math.floor(Math.random() * 25) / 2) * BLOCK_SIZE,
-            y: (Math.floor(Math.random() * 25) / 2) * BLOCK_SIZE,
+            x: (Math.floor(random() * 25) / 2) * BLOCK_SIZE,
+            y: (Math.floor(random() * 25) / 2) * BLOCK_SIZE,
           }
     this.powerUps.push(new PowerUp(name, pos.x, pos.y))
     this.audio.play('powerup_appear')
@@ -373,26 +404,55 @@ export default class BattleScene {
   }
   // endregion
 
+  private aiContext(): AIContext {
+    return {
+      world: this.world,
+      map: this.map,
+      tanks: this.tanks,
+      bullets: this.bullets,
+      powerUps: this.powerUps,
+      spots: this.spots,
+      random: this.options.random,
+      time: this.time,
+      stageNumber: this.stageNumber,
+      players: this.players.map((slot) => slot.tank),
+      pilots: this.players.map((slot) => slot.state.pilot),
+    }
+  }
+
+  /** 玩家和 bot 共用的执行顺序：移动 → 计时 → 开火。冰面滑行等玩家规则只在 applyPlayerMove 里 */
+  private drive(tank: Tank, controller: TankController, ctx: AIContext, delta: number): void {
+    const move = controller.move(tank, ctx, delta)
+    if (tank.side === 'player') {
+      applyPlayerMove(ctx.world, tank, move, delta, this.audio)
+    } else {
+      applyInput(ctx.world, tank, move, delta)
+    }
+    this.decayTimers(tank, delta)
+    const fire = controller.fire(tank, ctx, delta)
+    fireTank(tank, fire, delta, this.bullets, this.audio)
+    this.intents.set(tank.tankId, { move, fire })
+  }
+
+  private playerController(slot: PlayerSlot, input: InputManager): TankController {
+    if (slot.state.pilot === 'human') {
+      slot.brain = null
+      return keyboardController(input, slot.state.control)
+    }
+    slot.brain ??= new TeammateBrain()
+    return slot.brain
+  }
+
   /** 推进一个定步 */
   step(delta: number, input: InputManager): void {
     // Input/AI → Movement → Fire
+    const ctx = this.aiContext()
     for (const slot of this.players) {
       const tank = slot.tank
       if (tank == null || !tank.alive) {
         continue
       }
-      const intent = getPlayerInput(input, slot.state.control, tank)
-      applyPlayerMove(this.world, tank, intent, delta, this.audio)
-      this.decayTimers(tank, delta)
-      fireTank(tank, input.consumeFire(slot.state.control), delta, this.bullets, this.audio)
-    }
-    const botCtx: BotContext = {
-      world: this.world,
-      map: this.map,
-      tanks: this.tanks,
-      bullets: this.bullets,
-      audio: this.audio,
-      spots: this.spots,
+      this.drive(tank, this.playerController(slot, input), ctx, delta)
     }
     const botsFrozen = this.botFreezeTicks > 0
     for (const tank of this.tanks) {
@@ -401,12 +461,12 @@ export default class BattleScene {
       }
       if (botsFrozen) {
         tank.moving = false
+        this.intents.delete(tank.tankId)
         continue
       }
       const brain = this.brains.get(tank.tankId)
       if (brain != null) {
-        brain.step(tank, botCtx, delta)
-        this.decayTimers(tank, delta)
+        this.drive(tank, brain, ctx, delta)
       }
     }
     const freezeTickCrossed =
@@ -418,7 +478,10 @@ export default class BattleScene {
 
     // Bullet（含命中结算）→ Explosion
     const hits: BulletTankHit[] = []
-    updateBullets(this.bullets, this.map, this.explosions, this.audio, delta, this.tanks, hits)
+    const { bullets, map, explosions, audio, tanks } = this
+    for (const tankId of updateBullets(bullets, map, explosions, audio, delta, tanks, hits)) {
+      this.brains.get(tankId)?.onBaseHit()
+    }
     for (const hit of hits) {
       this.applyHit(hit)
     }
@@ -453,6 +516,37 @@ export default class BattleScene {
     }
 
     this.time += delta
+  }
+
+  /** 本关状态的纯数据快照，测试断言和调试用 */
+  snapshot(): SceneSnapshot {
+    return {
+      time: round(this.time),
+      status: this.status,
+      loseReason: this.loseReason,
+      remainingBots: this.remainingBots.length,
+      botsFrozen: this.botFreezeTicks > 0,
+      terrain: terrainSnapshot(this.map),
+      eagle:
+        this.map.eagle == null
+          ? null
+          : { x: this.map.eagle.x, y: this.map.eagle.y, broken: this.map.eagleBroken },
+      slots: this.players.map((slot) => ({
+        tankId: slot.tank?.tankId ?? null,
+        state:
+          slot.tank != null
+            ? 'alive'
+            : slot.flicker != null
+              ? 'spawning'
+              : slot.respawnTimer > 0
+                ? 'respawning'
+                : 'out',
+      })),
+      tanks: this.tanks.map((t) => tankSnapshot(t, this.intents.get(t.tankId) ?? null)),
+      spawning: this.flickers.map((f) => ({ side: f.tank.side, x: f.x, y: f.y })),
+      bullets: this.bullets.map(bulletSnapshot),
+      powerUps: this.powerUps.map(powerUpSnapshot),
+    }
   }
 
   // region 道具拾取与效果
@@ -623,6 +717,7 @@ export default class BattleScene {
         this.tanks[w++] = t
       } else {
         this.brains.delete(t.tankId)
+        this.intents.delete(t.tankId)
       }
     }
     this.tanks.length = w

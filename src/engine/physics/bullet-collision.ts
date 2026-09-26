@@ -72,6 +72,10 @@ function calculateHitTime(b1: Bullet, b2: Bullet): number {
     if (b2.direction === 'down') {
       return (b1.lastY - b2.lastY - BULLET_SIZE) / (b1.speed + b2.speed)
     } else if (b2.direction === 'up') {
+      // 并排同向飞行永远追不上；不单独处理的话下面交换参数会无限递归
+      if (b1.lastY === b2.lastY) {
+        return -1
+      }
       if (b1.lastY < b2.lastY) {
         return (b2.lastY - b1.lastY - BULLET_SIZE) / (b2.speed - b1.speed)
       } else {

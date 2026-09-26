@@ -6,6 +6,8 @@ export interface StatisticsView {
   /** 各玩家按等级的击杀数；-1 表示该行还没播放到 */
   counts: Record<TankLevel, number>[]
   showTotal: boolean
+  /** 本关胜负确定时各玩家是否为托管，标题显示为 CPU */
+  autopilot: boolean[]
 }
 
 interface StatisticsFrame {
@@ -24,11 +26,12 @@ export default class StatisticsAnimation {
   private readonly end: number
   private elapsed = 0
 
-  constructor(stageName: string, killInfo: Record<TankLevel, number>[]) {
+  constructor(stageName: string, killInfo: Record<TankLevel, number>[], autopilot: boolean[]) {
     this.view = {
       stageName,
       counts: killInfo.map(() => emptyCounts(-1)),
       showTotal: false,
+      autopilot,
     }
     let t = 500
     for (const level of TANK_LEVELS) {

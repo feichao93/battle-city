@@ -141,7 +141,7 @@ function MiscTab() {
         </Transform>
         <Transform y={16}>
           <rect width={16 + 4} height={128 + 4} fill="#757575" />
-          <HudContent remainingBots={17} lives={[3, 1]} />
+          <HudContent remainingBots={17} lives={[3, 1]} autopilot={[false, true]} />
         </Transform>
       </Transform>
       <Transform x={96} y={32}>
@@ -193,7 +193,9 @@ const GALLERY_KILL_INFO: Record<TankLevel, number>[] = [
 ]
 
 function StatisticsTab() {
-  const [animation] = useState(() => new StatisticsAnimation('gallery', GALLERY_KILL_INFO))
+  const [animation] = useState(
+    () => new StatisticsAnimation('gallery', GALLERY_KILL_INFO, [false, true]),
+  )
   const time = useAnimationTime()
   const lastTimeRef = useRef(0)
   useEffect(() => {
@@ -215,12 +217,16 @@ const SAMPLE_GAMEOVER: LastGame = {
   scores: [12300, 4500],
   cleared: false,
   newHiScore: false,
+  aiOnly: false,
+  autopilot: [false, true],
 }
 const SAMPLE_CLEARED: LastGame = {
   stageName: '35',
   scores: [23400],
   cleared: true,
   newHiScore: true,
+  aiOnly: false,
+  autopilot: [false],
 }
 
 function GameoverTab() {

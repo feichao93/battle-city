@@ -34,6 +34,11 @@ export function directionCodes(control: PlayerControl): string[] {
   return DIR_KEYS.map((k) => control[k])
 }
 
+/** 该玩家的全部 5 个键 code */
+export function controlCodes(control: PlayerControl): string[] {
+  return [...directionCodes(control), control.fire]
+}
+
 /** 把 code 还原为方向，非方向键返回 null */
 export function codeToDirection(code: string, control: PlayerControl): Direction | null {
   for (const dir of DIR_KEYS) {

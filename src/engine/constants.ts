@@ -99,6 +99,10 @@ export const INITIAL_LIVES = 3
 /** 玩家复活无敌头盔时长（帧 → ms） */
 export const SPAWN_HELMET_DURATION = frame(135)
 
+/** 玩家托管：每关开战后一直没按键时，可操作满 START 就托管；按过键之后连续空闲 IDLE 托管（ms） */
+export const AUTOPILOT_START = 2000
+export const AUTOPILOT_IDLE = 5000
+
 /** AI 判定「卡住」的超时（ms）与位移阈值 */
 export const BLOCK_TIMEOUT = 200
 export const BLOCK_DISTANCE_THRESHOLD = 0.01
@@ -110,10 +114,11 @@ export const TIMER_FREEZE_TICKS = 10
 export const TIMER_FREEZE_TICK = frame(64)
 /**
  * 冰面（雪地）滑行，只作用于玩家坦克：在冰上从静止按下方向键时剩余滑行量置为 START（px），
- * 大于 LOCK 期间忽略方向键、沿朝向继续走；松开后滑完剩余量。对应 NES 滑行计数 28 与 ≥ 16 的锁定
+ * 大于 LOCK 期间忽略方向键、沿朝向继续走；松开后滑完剩余量。
+ * NES 是滑 28、剩余 ≥ 16 时锁定，试玩觉得太滑，减到约一个坦克长
  */
-export const SNOW_SLIDE_START = 28
-export const SNOW_SLIDE_LOCK = 15
+export const SNOW_SLIDE_START = 16
+export const SNOW_SLIDE_LOCK = 8
 /** helmet 道具的无敌时长（帧 → ms） */
 export const HELMET_POWERUP_DURATION = frame(630)
 /** shovel：变钢持续（帧 → ms）、闪烁间隔、闪烁次数 */

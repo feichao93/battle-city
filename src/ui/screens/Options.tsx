@@ -7,6 +7,7 @@ import HintText from '../pixel/HintText'
 import PixelText from '../pixel/PixelText'
 import Screen from '../pixel/Screen'
 import TextButton from '../pixel/TextButton'
+import useHelp from '../pixel/useHelp'
 import { replace } from '../router'
 import { useUIStore, type ControlAction } from '../store'
 
@@ -15,16 +16,20 @@ type PlayerId = 'p1' | 'p2'
 const ACTIONS: ControlAction[] = ['up', 'down', 'left', 'right', 'fire']
 const PLAYERS: PlayerId[] = ['p1', 'p2']
 const PLAYER_LABELS = ['Ⅰp', 'Ⅱp']
-/** 键位表下方的两个菜单项，光标行号接在动作之后 */
-const RESET_ROW = ACTIONS.length
-const BACK_ROW = ACTIONS.length + 1
+/** 键位表下方依次是托管开关和两个菜单项，光标行号接在动作之后 */
+const AUTOPILOT_ROW = ACTIONS.length
+const RESET_ROW = ACTIONS.length + 1
+const BACK_ROW = ACTIONS.length + 2
 
 const LABEL_X = 2 * B
 const COLUMN_X = [7 * B, 11 * B]
 const HEADER_Y = 3 * B
 const ROW_Y = 4.5 * B
 const ROW_HEIGHT = 1.25 * B
-const MENU_Y = [11 * B, 12 * B]
+const AUTOPILOT_Y = 10.75 * B
+/** autopilot 这个标签比动作名长，值往右挪半格，给光标留出位置 */
+const SETTING_X = 7.5 * B
+const MENU_Y = [12 * B, 13 * B]
 const CONFLICT_FILL = '#db2b00'
 
 /** 被绑定了不止一次的键码 */
@@ -46,12 +51,29 @@ export default function Options() {
   const bindings = useUIStore((s) => s.bindings)
   const setBinding = useUIStore((s) => s.setBinding)
   const resetBindings = useUIStore((s) => s.resetBindings)
+  const autopilot = useUIStore((s) => s.autopilot)
+  const setAutopilot = useUIStore((s) => s.setAutopilot)
   const [row, setRow] = useState(0)
   const [col, setCol] = useState(0)
   const [capturing, setCapturing] = useState(false)
+  const help = useHelp(
+    [
+      [
+        {
+          rows: [
+            ['direction', 'move'],
+            ['fire/enter', 'change'],
+            ['esc', 'back'],
+          ],
+        },
+      ],
+    ],
+    !capturing,
+  )
 
   const confirm = (targetRow: number) => {
-    if (targetRow === RESET_ROW) resetBindings()
+    if (targetRow === AUTOPILOT_ROW) setAutopilot(!autopilot)
+    else if (targetRow === RESET_ROW) resetBindings()
     else if (targetRow === BACK_ROW) replace('/')
     else setCapturing(true)
   }
@@ -60,6 +82,7 @@ export default function Options() {
     if (key === 'back') replace('/')
     else if (key === 'up') setRow((row - 1 + BACK_ROW + 1) % (BACK_ROW + 1))
     else if (key === 'down') setRow((row + 1) % (BACK_ROW + 1))
+    else if ((key === 'left' || key === 'right') && row === AUTOPILOT_ROW) setAutopilot(!autopilot)
     else if (key === 'left' || key === 'right') setCol(1 - col)
     else confirm(row)
   }, !capturing)
@@ -77,11 +100,20 @@ export default function Options() {
   })
 
   const conflicted = conflictedCodes(bindings)
-  const cursorX = row < RESET_ROW ? COLUMN_X[col] - 12 : LABEL_X - 12
-  const cursorY = row < RESET_ROW ? ROW_Y + row * ROW_HEIGHT : MENU_Y[row - RESET_ROW]
+  let cursorX = LABEL_X - 12
+  let cursorY = row >= RESET_ROW ? MENU_Y[row - RESET_ROW] : AUTOPILOT_Y
+  if (row < AUTOPILOT_ROW) {
+    cursorX = COLUMN_X[col] - 12
+    cursorY = ROW_Y + row * ROW_HEIGHT
+  } else if (row === AUTOPILOT_ROW) {
+    cursorX = SETTING_X - 12
+  }
 
-  let hint = 'fire/enter change  esc back'
-  if (capturing) {
+  // 按键说明收在 ? 里，这里只留状态提示
+  let hint: string | null = null
+  if (row === AUTOPILOT_ROW) {
+    hint = 'cpu drives players who stay idle'
+  } else if (capturing) {
     hint = `press new key for ${PLAYER_LABELS[col]} ${ACTIONS[row]}  esc cancel`
   }
 
@@ -119,6 +151,15 @@ export default function Options() {
           })}
         </g>
       ))}
+      <PixelText content="autopilot" x={LABEL_X} y={AUTOPILOT_Y} />
+      <TextButton
+        content={autopilot ? 'on' : 'off'}
+        x={SETTING_X}
+        y={AUTOPILOT_Y}
+        textFill="white"
+        onMouseOver={() => !capturing && setRow(AUTOPILOT_ROW)}
+        onClick={() => confirm(AUTOPILOT_ROW)}
+      />
       {['reset', 'back'].map((label, i) => (
         <TextButton
           key={label}
@@ -132,9 +173,16 @@ export default function Options() {
       ))}
       <PixelText content="→" x={cursorX} y={cursorY} />
       {conflicted.size > 0 && (
-        <HintText content="red keys are bound more than once" y={13.5 * B} fill={CONFLICT_FILL} />
+        <HintText
+          content="red keys are bound more than once"
+          x={COLUMN_X[0]}
+          y={MENU_Y[0] + 0.125 * B}
+          fill={CONFLICT_FILL}
+        />
       )}
-      <HintText content={hint} />
+      {hint != null && <HintText content={hint} />}
+      {help.button}
+      {help.overlay}
     </Screen>
   )
 }

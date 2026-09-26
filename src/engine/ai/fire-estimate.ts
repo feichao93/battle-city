@@ -95,7 +95,7 @@ function mergeEstMap(
   return a
 }
 
-/** 对多个弱点 spot 求并集 estMap（取火力阻力更优者） */
+/** 对多个弱点 spot 求并集 estMap；同一格取阻力更大者，沿用旧版 saga 的合并方式 */
 export function calculateFireEstimateMap(
   weakSpots: number[],
   map: TerrainMap,

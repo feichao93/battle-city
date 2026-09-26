@@ -9,20 +9,31 @@
     />
     <title>Battle City</title>
     <style>
+      :root {
+        color-scheme: light dark;
+      }
       html,
       body {
         margin: 0;
         padding: 0;
         background: #fff;
       }
+      .github-corner svg {
+        fill: #222222;
+        color: #fff;
+      }
+      @media (prefers-color-scheme: dark) {
+        html,
+        body {
+          background: #1e1e1e;
+        }
+        .github-corner svg {
+          fill: #fff;
+          color: #1e1e1e;
+        }
+      }
       * {
         box-sizing: border-box;
-      }
-      #root {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 100vh;
       }
       canvas {
         display: block;
@@ -58,7 +69,7 @@
         width="80"
         height="80"
         viewBox="0 0 250 250"
-        style="fill: #222222; color: #fff; position: absolute; top: 0; border: 0; right: 0; z-index: 100"
+        style="position: absolute; top: 0; border: 0; right: 0; z-index: 100"
         aria-hidden="true"
       >
         <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>

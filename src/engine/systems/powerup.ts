@@ -70,20 +70,24 @@ export function validPowerUpPositions(map: TerrainMap): Array<{ x: number; y: nu
  * 决定生成哪种道具：老鹰暴露 → 偏 shovel；玩家仍是 basic → 偏 star；否则随机。
  * 抄 app/sagas/powerUpManager.ts determineWhichPowerUpToSpawn。
  */
-export function determinePowerUpName(map: TerrainMap, playerTanks: Tank[]): PowerUpName {
+export function determinePowerUpName(
+  map: TerrainMap,
+  playerTanks: Tank[],
+  random: () => number,
+): PowerUpName {
   if (map.eagle != null) {
     const eagleSpot = getTankSpot(map.eagle)
     const estMap = calculateFireEstimateMap(around(eagleSpot), map)
     const exposed = [...estMap.keys()].some(
       (t) => t !== eagleSpot && getFireResist(estMap.get(t)!) === 0,
     )
-    if (exposed && Math.random() < 0.5) {
+    if (exposed && random() < 0.5) {
       return 'shovel'
     }
   }
-  if (playerTanks.some((t) => t.level === 'basic') && Math.random() < 0.4) {
+  if (playerTanks.some((t) => t.level === 'basic') && random() < 0.4) {
     return 'star'
   }
   const names: PowerUpName[] = ['tank', 'star', 'grenade', 'timer', 'helmet', 'shovel']
-  return names[Math.floor(Math.random() * names.length)]
+  return names[Math.floor(random() * names.length)]
 }

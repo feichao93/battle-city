@@ -9,7 +9,8 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "arena": "ARENA=1 vitest run test/arena.test.ts"
   },
   "dependencies": {
     "pixi.js": "^8.6.6",

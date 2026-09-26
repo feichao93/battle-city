@@ -1,3 +1,4 @@
+import { eagleGuard } from '../ai/lane'
 import { BLOCK_SIZE, BULLET_SIZE, FIELD_SIZE, STEEL_POWER } from '../constants'
 import type Bullet from '../entities/Bullet'
 import Explosion from '../entities/Explosion'
@@ -44,6 +45,7 @@ export interface BulletTankHit {
  * 子弹系统：移动所有子弹 → 检测碰撞（老鹰/子弹对撞/砖/钢/边界）→
  * 结算爆炸落点、破坏地形、生成爆炸、播放音效，并移除已消亡子弹。
  * 注意：子弹 vs 坦克的命中（扣血/冻结）在 P4 接入。
+ * 返回本帧打掉老鹰外墙的砖或打中老鹰的 bot（tankId）。
  */
 export function updateBullets(
   bullets: Bullet[],
@@ -53,9 +55,9 @@ export function updateBullets(
   delta: number,
   tanks: Tank[],
   hits: BulletTankHit[],
-): void {
+): number[] {
   if (bullets.length === 0) {
-    return
+    return []
   }
 
   // 1. 移动
@@ -149,28 +151,23 @@ export function updateBullets(
       if (!testCollide(tank.rect(), mbr, -0.02)) {
         continue
       }
-      if (b.side === 'player') {
-        c.any = true
-        c.explode = true
-        c.rects.push(tank.rect())
-        hits.push({ bullet: b, target: tank })
-        break
-      } else if (tank.side === 'player') {
-        if (tank.helmetDuration > 0) {
-          c.any = true // 头盔挡弹，子弹消失但不伤人、不爆炸
-        } else {
-          c.any = true
-          c.explode = true
-          c.rects.push(tank.rect())
-          hits.push({ bullet: b, target: tank })
-        }
-        break
+      if (b.side === 'bot' && tank.side === 'bot') {
+        continue // bot→bot：穿过
       }
-      // bot→bot：穿过
+      c.any = true
+      if (tank.side === 'player' && tank.helmetDuration > 0) {
+        break // 头盔挡弹（敌方和队友的都挡），子弹消失但不伤人、不爆炸
+      }
+      c.explode = true
+      c.rects.push(tank.rect())
+      hits.push({ bullet: b, target: tank })
+      break
     }
   }
 
   // 5. 结算
+  const guard = eagleGuard(map)
+  const baseHitters: number[] = []
   for (const b of bullets) {
     const c = infoMap.get(b.bulletId)
     if (c == null || !c.any) {
@@ -191,12 +188,20 @@ export function updateBullets(
 
     // 破坏地形（基于落点的 spread 范围）
     const spread = spreadBullet(b)
-    map.removeBricks(map.brickIndicesIn(spread))
+    const bricks = map.brickIndicesIn(spread)
+    const hitsGuard =
+      guard != null && bricks.some((t) => testCollide(guard, map.brickRectAt(t), -0.01))
+    map.removeBricks(bricks)
     if (b.power >= STEEL_POWER) {
       map.removeSteels(map.steelIndicesIn(spread))
     }
+    let hitsEagle = false
     if (map.eagle != null && !map.eagleBroken && testCollide(eagleRect(map.eagle), spread)) {
       map.destroyEagle()
+      hitsEagle = true
+    }
+    if (b.side === 'bot' && (hitsGuard || hitsEagle)) {
+      baseHitters.push(b.tankId)
     }
 
     // 音效（仅玩家子弹）
@@ -217,4 +222,5 @@ export function updateBullets(
     }
   }
   bullets.length = w
+  return baseHitters
 }

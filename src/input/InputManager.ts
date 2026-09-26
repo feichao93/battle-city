@@ -1,4 +1,4 @@
-import { directionCodes, type PlayerControl } from './bindings'
+import { controlCodes, directionCodes, type PlayerControl } from './bindings'
 
 /**
  * 键盘输入管理：跟踪当前按下的键，并记录方向键的按下顺序，
@@ -13,27 +13,37 @@ export default class InputManager {
   private firePressedSince = new Set<string>()
   /** releaseAll 时仍按着的键：松开之前都不算按下，自动重复的 keydown 也忽略 */
   private readonly suppressed = new Set<string>()
+  /** 自上个 tick 起按过的键，含自动重复和被 suppress 的键；只用来判断玩家在不在场 */
+  private readonly touchedSince = new Set<string>()
 
   private readonly onKeyDown = (e: KeyboardEvent): void => {
-    const { code } = e
-    if (!this.down.has(code) && !this.suppressed.has(code)) {
-      this.down.add(code)
-      this.order.push(code)
-      this.firePressedSince.add(code)
-    }
-    if (HANDLED_CODES.has(code)) {
+    this.keyDown(e.code)
+    if (HANDLED_CODES.has(e.code)) {
       e.preventDefault()
     }
   }
 
   private readonly onKeyUp = (e: KeyboardEvent): void => {
-    const { code } = e
+    this.keyUp(e.code)
+    if (HANDLED_CODES.has(e.code)) {
+      e.preventDefault()
+    }
+  }
+
+  /** 按下一个键；DOM 事件走这里，无头运行（测试、回放）时直接调用。自动重复同样调用 */
+  keyDown(code: string): void {
+    this.touchedSince.add(code)
+    if (!this.down.has(code) && !this.suppressed.has(code)) {
+      this.down.add(code)
+      this.order.push(code)
+      this.firePressedSince.add(code)
+    }
+  }
+
+  keyUp(code: string): void {
     this.down.delete(code)
     this.suppressed.delete(code)
     this.order = this.order.filter((c) => c !== code)
-    if (HANDLED_CODES.has(code)) {
-      e.preventDefault()
-    }
   }
 
   attach(target: GlobalEventHandlers = document): void {
@@ -48,6 +58,7 @@ export default class InputManager {
     this.order = []
     this.firePressedSince.clear()
     this.suppressed.clear()
+    this.touchedSince.clear()
   }
 
   /** 把当前按着的键都视为已松开，需要重新按下才生效 */
@@ -58,6 +69,7 @@ export default class InputManager {
     this.down.clear()
     this.order = []
     this.firePressedSince.clear()
+    this.touchedSince.clear()
   }
 
   isDown(code: string): boolean {
@@ -86,9 +98,20 @@ export default class InputManager {
     return this.firePressedSince.has(control.fire)
   }
 
-  /** 在每个逻辑 tick 末尾清空开火边沿标记 */
+  /** 自上个 tick 起该玩家有没有按过任一绑定键 */
+  touched(control: PlayerControl): boolean {
+    return controlCodes(control).some((code) => this.touchedSince.has(code))
+  }
+
+  /** 该玩家是否有绑定键正按着，含 releaseAll 之后还没松开的 */
+  held(control: PlayerControl): boolean {
+    return controlCodes(control).some((code) => this.down.has(code) || this.suppressed.has(code))
+  }
+
+  /** 在每个逻辑 tick 末尾清空边沿标记 */
   endTick(): void {
     this.firePressedSince.clear()
+    this.touchedSince.clear()
   }
 }
 

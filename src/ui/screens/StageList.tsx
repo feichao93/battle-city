@@ -3,14 +3,13 @@ import { BLOCK_SIZE as B } from '../../engine/constants'
 import { parseStage } from '../../engine/map/parseStage'
 import type { RawStageConfig } from '../../engine/types'
 import { stages as builtinStages } from '../../stages'
-import { directionLabel, keyLabel } from '../keyLabels'
 import { useMenuKeys, type MenuKey } from '../menuKeys'
 import FocusFrame from '../pixel/FocusFrame'
-import HintText from '../pixel/HintText'
 import PixelText from '../pixel/PixelText'
 import Screen from '../pixel/Screen'
 import StagePreview from '../pixel/StagePreview'
 import TextButton from '../pixel/TextButton'
+import useHelp from '../pixel/useHelp'
 import usePopup from '../pixel/usePopup'
 import { goBack, push, replace, stagePath, type StageListTab } from '../router'
 import { useUIStore } from '../store'
@@ -101,8 +100,30 @@ export default function StageList({ tab, page }: { tab: StageListTab; page: numb
   const deleteCustomStage = useUIStore((s) => s.deleteCustomStage)
   const addCustomStage = useUIStore((s) => s.addCustomStage)
   const setEditorContent = useUIStore((s) => s.setEditorContent)
-  const control = useUIStore((s) => s.bindings.p1)
   const { popup, open: popupOpen, showAlert, showConfirm } = usePopup()
+  const help = useHelp(
+    [
+      [
+        {
+          title: 'stages',
+          rows: [
+            ['direction', 'move'],
+            ['fire', 'select'],
+            ['esc', 'back'],
+          ],
+        },
+        {
+          title: 'stage buttons',
+          rows: [
+            ['left/right', 'choose'],
+            ['fire', 'ok'],
+            ['esc', 'cancel'],
+          ],
+        },
+      ],
+    ],
+    !popupOpen,
+  )
   const inputRef = useRef<HTMLInputElement>(null)
   const [focus, setFocus] = useState<Focus>({ area: 'cards', index: 0, action: null })
 
@@ -252,11 +273,6 @@ export default function StageList({ tab, page }: { tab: StageListTab; page: numb
     }
   }, !popupOpen)
 
-  const hint =
-    current.area === 'cards' && current.action != null
-      ? `${keyLabel(control.left)}/${keyLabel(control.right)} choose  ${keyLabel(control.fire)} ok  esc cancel`
-      : `${directionLabel(control)} move  ${keyLabel(control.fire)} select  esc back`
-
   return (
     <>
       <Screen background="#333">
@@ -353,8 +369,9 @@ export default function StageList({ tab, page }: { tab: StageListTab; page: numb
             />
           ))}
         </g>
-        <HintText content={hint} />
+        {help.button}
         {popup}
+        {help.overlay}
       </Screen>
       <input
         ref={inputRef}

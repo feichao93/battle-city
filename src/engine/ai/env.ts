@@ -87,13 +87,19 @@ function movedTankRect(tank: Tank, axis: 'x' | 'y', amount: number): Rect {
 
 function aheadLength(
   tank: Tank,
+  direction: Direction,
   size: number,
   hasCell: (r: Rect) => boolean,
 ): number {
-  const { axis, delta } = getDirectionInfo(tank.direction)
+  const { axis, delta } = getDirectionInfo(direction)
   for (let step = 1; step < 64; step += 1) {
     const rect = movedTankRect(tank, axis, delta * step * size)
-    if (rect.x + rect.width <= 0 || rect.x >= FIELD_SIZE || rect.y + rect.height <= 0 || rect.y >= FIELD_SIZE) {
+    if (
+      rect.x + rect.width <= 0 ||
+      rect.x >= FIELD_SIZE ||
+      rect.y + rect.height <= 0 ||
+      rect.y >= FIELD_SIZE
+    ) {
       return Infinity
     }
     if (hasCell(rect)) {
@@ -103,16 +109,28 @@ function aheadLength(
   return Infinity
 }
 
-/** 朝当前方向观察前方最近障碍 */
-function lookAhead(map: TerrainMap, tank: Tank): BarrierInfoEntry {
-  const brickLen = aheadLength(tank, ITEM_SIZE_MAP.BRICK, (r) => map.brickIndicesIn(r).length > 0)
-  const steelLen = aheadLength(tank, ITEM_SIZE_MAP.STEEL, (r) => map.steelIndicesIn(r).length > 0)
-  const riverLen = aheadLength(tank, ITEM_SIZE_MAP.RIVER, (r) => map.collideRiver(r, -0.02))
+/** 朝 direction 观察前方最近障碍 */
+function lookAhead(map: TerrainMap, tank: Tank, direction: Direction): BarrierInfoEntry {
+  const brickLen = aheadLength(
+    tank,
+    direction,
+    ITEM_SIZE_MAP.BRICK,
+    (r) => map.brickIndicesIn(r).length > 0,
+  )
+  const steelLen = aheadLength(
+    tank,
+    direction,
+    ITEM_SIZE_MAP.STEEL,
+    (r) => map.steelIndicesIn(r).length > 0,
+  )
+  const riverLen = aheadLength(tank, direction, ITEM_SIZE_MAP.RIVER, (r) =>
+    map.collideRiver(r, -0.02),
+  )
   if (brickLen === Infinity && steelLen === Infinity && riverLen === Infinity) {
     let border: number
-    if (tank.direction === 'up') border = tank.y
-    else if (tank.direction === 'down') border = FIELD_SIZE - tank.y - TANK_SIZE
-    else if (tank.direction === 'left') border = tank.x
+    if (direction === 'up') border = tank.y
+    else if (direction === 'down') border = FIELD_SIZE - tank.y - TANK_SIZE
+    else if (direction === 'left') border = tank.x
     else border = FIELD_SIZE - tank.x - TANK_SIZE
     return { type: 'border', length: border }
   } else if (steelLen <= brickLen && steelLen <= riverLen) {
@@ -141,29 +159,21 @@ export function getEnv(map: TerrainMap, tanks: Tank[], tank: Tank): TankEnv {
   }
   const nearestPlayer = nearest != null ? new RelativePosition(tank, nearest) : null
 
-  const probe = (direction: Direction): BarrierInfoEntry => {
-    const saved = tank.direction
-    tank.direction = direction
-    const result = lookAhead(map, tank)
-    tank.direction = saved
-    return result
-  }
-
   return {
     eagle,
     nearestPlayer,
     barrier: {
-      up: probe('up'),
-      down: probe('down'),
-      left: probe('left'),
-      right: probe('right'),
+      up: lookAhead(map, tank, 'up'),
+      down: lookAhead(map, tank, 'down'),
+      left: lookAhead(map, tank, 'left'),
+      right: lookAhead(map, tank, 'right'),
     },
   }
 }
 
 /** 根据环境概率性地决定是否开火 */
-export function determineFire(tank: Tank, env: TankEnv): boolean {
-  const random = Math.random()
+export function determineFire(tank: Tank, env: TankEnv, rand: () => number): boolean {
+  const random = rand()
   const ahead = env.barrier[tank.direction]
 
   if (ahead.type === 'brick' && random < FireThreshold.destroyable(ahead.length)) {

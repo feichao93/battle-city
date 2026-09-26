@@ -16,7 +16,10 @@ import { canTankMove } from '../src/engine/physics/collision'
 import { getBulletCollision, getMBR, spreadBullet } from '../src/engine/physics/bullet-collision'
 import { buildSpots } from '../src/engine/ai/spots'
 import { findPath } from '../src/engine/ai/pathfinding'
+import PathFollower from '../src/engine/ai/path-follower'
+import { getTankSpot, spotToTankPos } from '../src/engine/ai/spots'
 import { getAIFireCount, getFireResist } from '../src/engine/ai/fire-estimate'
+import { updateBullets, type BulletTankHit } from '../src/engine/systems/bullet'
 import { applyInput, applyPlayerMove } from '../src/engine/systems/movement'
 import { bulletInterval, bulletLimit, bulletPower, moveSpeed } from '../src/engine/values'
 import type { Input, RawStageConfig, SoundName } from '../src/engine/types'
@@ -130,6 +133,8 @@ describe('snow slide（冰面滑行）', () => {
   const TICK = 1000 / 60
   const STEP = 0.045 * TICK // 玩家每 tick 位移 0.75px
   const FORWARD: Input = { type: 'forward' }
+  /** 起滑之后方向键无效的 tick 数 */
+  const LOCK_TICKS = Math.ceil((SNOW_SLIDE_START - SNOW_SLIDE_LOCK) / STEP)
 
   /** 默认在第 2~5 列、第 2~10 行铺雪；坦克在 (32, 128)，中心落在第 8 行第 2 列 */
   function setup(overrides: Record<string, string> = {}, snow = true) {
@@ -170,7 +175,7 @@ describe('snow slide（冰面滑行）', () => {
     expect(inside.tank.slide).toBe(SNOW_SLIDE_START)
   })
 
-  it('冰上起滑：滑行量置 28 并播放音效，本 tick 正常前进', () => {
+  it('冰上起滑：滑行量置满并播放音效，本 tick 正常前进', () => {
     const { tank, sounds, move } = setup()
     move(FORWARD)
     expect(tank.slide).toBe(SNOW_SLIDE_START)
@@ -178,20 +183,20 @@ describe('snow slide（冰面滑行）', () => {
     expect(tank.y).toBeCloseTo(128 - STEP, 5)
   })
 
-  it('锁定期忽略方向键，沿朝向前进；18 tick 后转向生效', () => {
+  it('锁定期忽略方向键，沿朝向前进；锁定期过后转向生效', () => {
     const { tank, move } = setup()
     move(FORWARD)
-    for (let i = 0; i < 18; i += 1) {
+    for (let i = 0; i < LOCK_TICKS; i += 1) {
       move({ type: 'turn', direction: 'right' })
       expect(tank.direction).toBe('up')
     }
-    expect(tank.y).toBeCloseTo(128 - 19 * STEP, 5)
+    expect(tank.y).toBeCloseTo(128 - (LOCK_TICKS + 1) * STEP, 5)
     expect(tank.slide).toBeLessThanOrEqual(SNOW_SLIDE_LOCK)
     move({ type: 'turn', direction: 'right' })
     expect(tank.direction).toBe('right')
   })
 
-  it('点按一次：共滑 1 + 28px 后停下', () => {
+  it('点按一次：走 1 步后滑满滑行量停下', () => {
     const { tank, move } = setup()
     move(FORWARD)
     for (let i = 0; i < 60; i += 1) move(null)
@@ -201,7 +206,7 @@ describe('snow slide（冰面滑行）', () => {
 
   it('解锁后按住前进：正常行驶，滑行量不变，履带转动', () => {
     const { tank, move } = setup()
-    for (let i = 0; i < 19; i += 1) move(FORWARD)
+    for (let i = 0; i < LOCK_TICKS + 1; i += 1) move(FORWARD)
     const slide = tank.slide
     const y = tank.y
     move(FORWARD)
@@ -212,7 +217,7 @@ describe('snow slide（冰面滑行）', () => {
 
   it('解锁后转向再松手：沿新朝向滑行，转向时坐标对齐到 8 的倍数', () => {
     const { tank, move } = setup()
-    for (let i = 0; i < 19; i += 1) move(FORWARD)
+    for (let i = 0; i < LOCK_TICKS + 1; i += 1) move(FORWARD)
     move({ type: 'turn', direction: 'right' })
     expect(tank.y % 8).toBe(0)
     const x = tank.x
@@ -226,7 +231,7 @@ describe('snow slide（冰面滑行）', () => {
     const { tank, move } = setup({ '7,2': 'Bf' })
     move(FORWARD)
     expect(tank.y).toBe(128)
-    for (let i = 0; i < 38; i += 1) move(null)
+    for (let i = 0; i < Math.ceil(SNOW_SLIDE_START / STEP); i += 1) move(null)
     expect(tank.y).toBe(128)
     expect(tank.slide).toBe(0)
   })
@@ -234,7 +239,7 @@ describe('snow slide（冰面滑行）', () => {
   it('锁定期冲出冰面：立即恢复操控，剩余滑行量保留；回到冰面后重新锁定', () => {
     // 只有第 8 行（y 128~144）是雪
     const { tank, move } = setup({ '8,2': 'S' }, false)
-    tank.y = 130
+    tank.y = 125
     move(FORWARD)
     while (tank.y + 8 >= 128) move(null)
     const slide = tank.slide
@@ -253,15 +258,15 @@ describe('snow slide（冰面滑行）', () => {
     expect(tank.y).toBeCloseTo(130 + STEP, 5)
   })
 
-  it('剩余 1~15px 回到冰面：按键正常行驶、不重新起滑，松手滑完剩余量', () => {
+  it('剩余量不超过锁定线时回到冰面：按键正常行驶、不重新起滑，松手滑完剩余量', () => {
     const { tank, sounds, move } = setup()
-    tank.slide = 10
+    tank.slide = 5
     move(FORWARD)
     expect(sounds).toEqual([])
-    expect(tank.slide).toBe(10)
+    expect(tank.slide).toBe(5)
     for (let i = 0; i < 20; i += 1) move(null)
     expect(tank.slide).toBe(0)
-    expect(128 - tank.y).toBeCloseTo(STEP + 10, 5)
+    expect(128 - tank.y).toBeCloseTo(STEP + 5, 5)
   })
 
   it('冰上被定身：按键不起滑，已有滑行量照样滑完；冰面外定身仍可转向', () => {
@@ -327,6 +332,24 @@ describe('bullet 碰撞（MBR / 对撞求交）', () => {
     expect(r.width).toBeGreaterThan(3) // 横向扩展
   })
 
+  it('并排同向飞行的子弹不相撞', () => {
+    resetBulletIds()
+    const make = (x: number, speed: number) => {
+      const b = new Bullet({
+        side: 'player',
+        tankId: 1,
+        direction: 'up',
+        speed,
+        power: 1,
+        x,
+        y: 100,
+      })
+      b.lastY = 102
+      return b
+    }
+    expect(getBulletCollision(make(10, 0.12), make(12, 0.24), 17)).toBeNull()
+  })
+
   it('对向飞行的子弹会相撞', () => {
     resetBulletIds()
     const b1 = new Bullet({
@@ -355,6 +378,39 @@ describe('bullet 碰撞（MBR / 对撞求交）', () => {
   })
 })
 
+describe('bullet 命中坦克', () => {
+  /** P1 的子弹正要打到下方的队友 */
+  function shootMate(helmetDuration: number) {
+    const mate = new Tank({ side: 'player', x: 96, y: 96, helmetDuration })
+    const bullet = new Bullet({
+      side: 'player',
+      tankId: -1,
+      direction: 'down',
+      speed: 0.12,
+      power: 1,
+      x: 102,
+      y: 90,
+    })
+    const bullets = [bullet]
+    const explosions: never[] = []
+    const hits: BulletTankHit[] = []
+    const audio = { play: () => {} }
+    updateBullets(bullets, makeMap(), explosions, audio, 100, [mate], hits)
+    return { hits, bullets, explosions }
+  }
+
+  it('队友戴着头盔时子弹静默消失，不算命中', () => {
+    const { hits, bullets, explosions } = shootMate(1000)
+    expect(hits).toEqual([])
+    expect(bullets).toEqual([])
+    expect(explosions).toEqual([])
+  })
+
+  it('队友没戴头盔时算命中', () => {
+    expect(shootMate(0).hits).toHaveLength(1)
+  })
+})
+
 describe('AI 寻路（BFS）', () => {
   it('空地可达，路径首尾正确', () => {
     const spots = buildSpots(makeMap())
@@ -369,6 +425,45 @@ describe('AI 寻路（BFS）', () => {
   it('目标不可通行时返回 null', () => {
     const spots = buildSpots(makeMap())
     expect(findPath(spots, 5 * 26 + 5, 0)).toBeNull() // t=0 为边界，canPass=false
+  })
+})
+
+describe('PathFollower', () => {
+  const TICK = 1000 / 60
+
+  it('沿路径逐段转向、前进，走完返回 arrived 并停在目标 spot', () => {
+    const map = makeMap()
+    const world = { map, tanks: [] as Tank[], restrictedAreas: [] }
+    const tank = new Tank({ side: 'bot', direction: 'down', x: 32, y: 32 })
+    const target = 20 * 26 + 12
+    const follower = new PathFollower()
+    expect(follower.begin(tank, findPath(buildSpots(map), getTankSpot(tank), target))).toBe(true)
+    let status = 'moving'
+    for (let i = 0; i < 2000 && status === 'moving'; i += 1) {
+      const result = follower.step(tank, TICK)
+      applyInput(world, tank, result.move, TICK)
+      status = result.status
+    }
+    expect(status).toBe('arrived')
+    expect({ x: tank.x, y: tank.y }).toEqual(spotToTankPos(target))
+  })
+
+  it('连续 200ms 没有位移返回 blocked；冻结期间不计', () => {
+    const map = makeMap()
+    const tank = new Tank({ side: 'player', direction: 'up', x: 32, y: 32 })
+    const path = findPath(buildSpots(map), getTankSpot(tank), 10 * 26 + 5)
+    const follower = new PathFollower()
+    follower.begin(tank, path)
+    tank.frozenTimeout = 1000
+    for (let i = 0; i < 30; i += 1) {
+      expect(follower.step(tank, TICK).status).toBe('moving')
+    }
+    tank.frozenTimeout = 0
+    // 12 个 tick 累加为 199.99…ms，第 13 个 tick 才超时
+    const statuses: string[] = []
+    for (let i = 0; i < 13; i += 1) statuses.push(follower.step(tank, TICK).status)
+    expect(statuses.slice(0, 12).every((s) => s === 'moving')).toBe(true)
+    expect(statuses[12]).toBe('blocked')
   })
 })
 

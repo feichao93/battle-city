@@ -1,8 +1,9 @@
 import BattleScene from './BattleScene'
-import { frame, INITIAL_LIVES } from './constants'
+import { AUTOPILOT_IDLE, AUTOPILOT_START, frame, INITIAL_LIVES } from './constants'
 import TerrainMap from './map/TerrainMap'
 import StatisticsAnimation, { type StatisticsView } from './StatisticsAnimation'
 import { expandBots, parseStage } from './map/parseStage'
+import { round, type SessionSnapshot } from './snapshot'
 import type { PlayerControl } from '../input/bindings'
 import type InputManager from '../input/InputManager'
 import type { AudioPort, Point, RawStageConfig, TankColor, TankLevel } from './types'
@@ -23,6 +24,9 @@ const GAMEOVER_END = GAMEOVER_RISE_DURATION + 500
 
 export type SessionPhase = 'enter' | 'playing' | 'statistics' | 'gameover' | 'ended'
 
+/** 谁在驾驶该玩家的坦克 */
+export type Pilot = 'human' | 'autopilot'
+
 /** 跨关保留的玩家状态，BattleScene 持有同一引用并原地修改 */
 export interface PlayerState {
   control: PlayerControl
@@ -32,9 +36,23 @@ export interface PlayerState {
   score: number
   /** 上一关结束时存活坦克的等级；下一关直接以该等级出生且不扣命 */
   reservedTankLevel: TankLevel | null
+  /** 跨关保留：上一关结束时托管的玩家，下一关出生后仍由 AI 驾驶 */
+  pilot: Pilot
+  /** 坦克可以操作、本关胜负未定时连续没有按键的时间（ms） */
+  idleTime: number
+  /** 本关开战后按过键没有：没按过时空闲 AUTOPILOT_START 就托管，按过之后是 AUTOPILOT_IDLE */
+  touchedThisStage: boolean
 }
 
 export type PlayerConfig = Pick<PlayerState, 'control' | 'color' | 'spawnPos'>
+
+/** 开局时确定、整局不变的选项；GameSession 原样传给每一关的 BattleScene */
+export interface SessionOptions {
+  /** Options 页的托管开关；false 时不计空闲、不托管 */
+  autopilot: boolean
+  /** 引擎内所有随机决策的来源；测试传 seededRandom 以便复现 */
+  random: () => number
+}
 
 /**
  * 一局游戏：跨关玩家状态 + 关卡流程状态机（入场幕布 → 对战 → 结算 → 下一关 / GAME OVER）。
@@ -53,11 +71,16 @@ export default class GameSession {
   /** 出结果后到进入结算的剩余等待；null 表示本关尚未出结果 */
   private endingTimer: number | null = null
 
+  /** 本关胜负确定那一刻各玩家是否为托管，结算页和结束页据此标注 CPU；胜负未定时为 null */
+  stageEndAutopilot: boolean[] | null = null
+  private hadHumanInput = false
+
   constructor(
     private readonly stages: RawStageConfig[],
     startStageIndex: number,
     playerConfigs: PlayerConfig[],
     private readonly audio: AudioPort,
+    private readonly options: SessionOptions,
   ) {
     this.stageIndex = startStageIndex
     this.players = playerConfigs.map((config) => ({
@@ -65,6 +88,9 @@ export default class GameSession {
       lives: INITIAL_LIVES,
       score: 0,
       reservedTankLevel: null,
+      pilot: 'human',
+      idleTime: 0,
+      touchedThisStage: false,
     }))
   }
 
@@ -108,8 +134,36 @@ export default class GameSession {
     return this.players.map((p) => p.score)
   }
 
+  /** 开着托管且本局从头到尾没有人按过键：AI 对 AI 的演示局，不更新最高分 */
+  get aiOnly(): boolean {
+    return this.options.autopilot && !this.hadHumanInput
+  }
+
+  /** 对局状态的纯数据快照，可直接 JSON 序列化；配合 textView 画成文本 */
+  snapshot(): SessionSnapshot {
+    return {
+      phase: this.phase,
+      phaseTime: round(this.phaseTime),
+      stageIndex: this.stageIndex,
+      stageName: this.stage.name,
+      cleared: this.cleared,
+      aiOnly: this.aiOnly,
+      stageEndAutopilot: this.stageEndAutopilot,
+      players: this.players.map((p) => ({
+        lives: p.lives,
+        score: p.score,
+        pilot: p.pilot,
+        idleTime: round(p.idleTime),
+        reservedTankLevel: p.reservedTankLevel,
+      })),
+      scene: this.scene?.snapshot() ?? null,
+    }
+  }
+
   step(delta: number, input: InputManager): void {
     this.phaseTime += delta
+    // 先于战场推进，交还托管的那次按键在同一个 tick 生效
+    this.updatePilots(delta, input)
     switch (this.phase) {
       case 'enter':
         this.stepEnter(delta)
@@ -132,6 +186,37 @@ export default class GameSession {
     }
   }
 
+  /**
+   * 任一阶段按了自己的绑定键就交还（包括结算页、入场幕布，这时按键只作为信号）；
+   * 只有对战中、胜负未定、坦克可以操作时才累计空闲，阵亡等待时暂停不清零
+   */
+  private updatePilots(delta: number, input: InputManager): void {
+    if (!this.options.autopilot || this.phase === 'ended') {
+      return
+    }
+    const scene = this.scene
+    const counting = this.phase === 'playing' && scene != null && scene.status === 'playing'
+    this.players.forEach((player, i) => {
+      if (input.touched(player.control) || input.held(player.control)) {
+        player.pilot = 'human'
+        player.idleTime = 0
+        this.hadHumanInput = true
+        if (this.phase === 'playing') {
+          player.touchedThisStage = true
+        }
+        return
+      }
+      if (player.pilot === 'autopilot' || !counting || !scene.controllable(i)) {
+        return
+      }
+      player.idleTime += delta
+      const limit = player.touchedThisStage ? AUTOPILOT_IDLE : AUTOPILOT_START
+      if (player.idleTime >= limit) {
+        player.pilot = 'autopilot'
+      }
+    })
+  }
+
   private enterPhase(phase: SessionPhase): void {
     this.phase = phase
     this.phaseTime = 0
@@ -146,6 +231,11 @@ export default class GameSession {
     }
     if (this.phaseTime >= ENTER_END) {
       this.endingTimer = null
+      this.stageEndAutopilot = null
+      for (const player of this.players) {
+        player.idleTime = 0
+        player.touchedThisStage = false
+      }
       this.scene!.start()
       this.enterPhase('playing')
     }
@@ -159,6 +249,7 @@ export default class GameSession {
       expandBots(parseStage(raw).bots),
       this.players,
       this.stageIndex + 1,
+      this.options,
     )
   }
 
@@ -167,6 +258,10 @@ export default class GameSession {
     scene.step(delta, input)
 
     if (this.endingTimer == null) {
+      if (scene.status !== 'playing') {
+        // 打完最后一辆 bot 后玩家往往就松手了，等到结算页再看会把真人误判成托管
+        this.stageEndAutopilot = this.players.map((p) => p.pilot === 'autopilot')
+      }
       if (scene.status === 'won') {
         this.endingTimer = WON_DELAY
       } else if (scene.status === 'lost') {
@@ -187,7 +282,11 @@ export default class GameSession {
   }
 
   private startStatistics(scene: BattleScene): void {
-    this.statisticsAnimation = new StatisticsAnimation(this.stage.name, scene.killInfo)
+    this.statisticsAnimation = new StatisticsAnimation(
+      this.stage.name,
+      scene.killInfo,
+      this.stageEndAutopilot!,
+    )
     this.enterPhase('statistics')
   }
 

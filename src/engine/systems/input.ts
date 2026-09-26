@@ -1,5 +1,6 @@
 import type InputManager from '../../input/InputManager'
 import { codeToDirection, directionCodes, type PlayerControl } from '../../input/bindings'
+import type { TankController } from '../ai/controller'
 import type Tank from '../entities/Tank'
 import type { Input } from '../types'
 
@@ -27,4 +28,12 @@ export function getPlayerInput(
     return { type: 'turn', direction }
   }
   return { type: 'forward' }
+}
+
+/** 键盘驾驶：方向键给移动意图；开火键按住或本 tick 内按下过就开火 */
+export function keyboardController(input: InputManager, control: PlayerControl): TankController {
+  return {
+    move: (tank) => getPlayerInput(input, control, tank),
+    fire: () => input.consumeFire(control),
+  }
 }

@@ -58,7 +58,12 @@ export function StatisticsContent({ view, scores }: { view: StatisticsView; scor
         ))}
         <rect x={6.5 * B} y={13.3 * B} width={4 * B} height={2} fill="white" />
 
-        <PixelText content={'Ⅰ-PLAYER'} x={2 * B} y={5.5 * B} fill="#e44437" />
+        <PixelText
+          content={playerTitle('Ⅰ', view.autopilot[0])}
+          x={2 * B}
+          y={5.5 * B}
+          fill="#e44437"
+        />
         <PixelText content={String(scores[0]).padStart(8)} x={2 * B} y={6.5 * B} fill="#feac4e" />
         {TANK_LEVELS.map((level) => {
           const n = p1[level]
@@ -83,7 +88,12 @@ export function StatisticsContent({ view, scores }: { view: StatisticsView; scor
 
         {p2 != null && (
           <g>
-            <PixelText content={'Ⅱ-PLAYER'} x={11.5 * B} y={5.5 * B} fill="#e44437" />
+            <PixelText
+              content={playerTitle('Ⅱ', view.autopilot[1])}
+              x={11.5 * B}
+              y={5.5 * B}
+              fill="#e44437"
+            />
             <PixelText content={String(scores[1])} x={11.5 * B} y={6.5 * B} fill="#feac4e" />
             {TANK_LEVELS.map((level) => {
               const n = p2[level]
@@ -110,6 +120,11 @@ export function StatisticsContent({ view, scores }: { view: StatisticsView; scor
       </g>
     </g>
   )
+}
+
+/** 托管打完的玩家标成 CPU；Ⅱ-PLAYER 已经排到屏幕右边缘，只能替换不能追加 */
+function playerTitle(numeral: string, autopilot: boolean): string {
+  return `${numeral}-${autopilot ? 'CPU' : 'PLAYER'}`
 }
 
 function total(counts: Record<TankLevel, number>): number {

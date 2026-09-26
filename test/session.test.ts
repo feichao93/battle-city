@@ -1,73 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { STEP_MS } from '../src/engine/Game'
-import GameSession from '../src/engine/GameSession'
-import { botSpawnInterval, frame, PLAYER_SPAWN_POS } from '../src/engine/constants'
-import InputManager from '../src/input/InputManager'
-import { PLAYER1_CONTROL, PLAYER2_CONTROL } from '../src/input/bindings'
-import type { PlayerConfig } from '../src/engine/GameSession'
-import type { RawStageConfig, SoundName } from '../src/engine/types'
-
-/** overrides 以 "row,col" 指定地形编码，其余为空地，(12, 6) 为老鹰 */
-function makeStage(
-  name: string,
-  bots: string[] = ['1*basic'],
-  overrides: Record<string, string> = {},
-): RawStageConfig {
-  const map: string[] = []
-  for (let row = 0; row < 13; row += 1) {
-    const items: string[] = []
-    for (let col = 0; col < 13; col += 1) {
-      items.push(overrides[`${row},${col}`] ?? (row === 12 && col === 6 ? 'E' : 'X'))
-    }
-    map.push(items.join(' '))
-  }
-  return { name, difficulty: 1, map, bots }
-}
-
-const P1: PlayerConfig = {
-  control: PLAYER1_CONTROL,
-  color: 'yellow',
-  spawnPos: PLAYER_SPAWN_POS.player1,
-}
-const P2: PlayerConfig = {
-  control: PLAYER2_CONTROL,
-  color: 'green',
-  spawnPos: PLAYER_SPAWN_POS.player2,
-}
-
-function setup(stages: RawStageConfig[], players = [P1]) {
-  const sounds: SoundName[] = []
-  const session = new GameSession(stages, 0, players, { play: (name) => sounds.push(name) })
-  const input = new InputManager()
-  const run = (ms: number) => {
-    for (let t = 0; t < ms; t += STEP_MS) {
-      session.step(STEP_MS, input)
-      input.endTick()
-    }
-  }
-  return { session, sounds, run, input }
-}
-
-/** 推进到本关开战 */
-function runUntilPlaying(session: GameSession, run: (ms: number) => void) {
-  while (session.phase !== 'playing') {
-    run(STEP_MS)
-  }
-}
-
-/** 推进到玩家和首个 bot 都走完出生闪烁 */
-function runUntilSpawned(session: GameSession, run: (ms: number) => void) {
-  const tanks = () => session.scene!.tanks
-  while (!tanks().some((t) => t.side === 'player') || !tanks().some((t) => t.side === 'bot')) {
-    run(STEP_MS)
-  }
-}
-
-function killAllBots(session: GameSession) {
-  for (const t of session.scene!.tanks) {
-    if (t.side === 'bot') t.alive = false
-  }
-}
+import { botSpawnInterval, frame, SNOW_SLIDE_START } from '../src/engine/constants'
+import { PLAYER1_CONTROL } from '../src/input/bindings'
+import { killAllBots, makeStage, P1, P2, runUntilPlaying, runUntilSpawned, setup } from './helpers'
 
 describe('GameSession', () => {
   it('入场幕布：合拢后载入地图并播放 stage_start，展开后开战', () => {
@@ -291,6 +226,6 @@ describe('GameSession', () => {
     expect(sounds).toContain('snow_slide')
 
     run(1000)
-    expect(y - tank.y).toBeCloseTo(0.75 + 28, 1)
+    expect(y - tank.y).toBeCloseTo(0.75 + SNOW_SLIDE_START, 1)
   })
 })

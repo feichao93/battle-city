@@ -22,6 +22,7 @@ const INITIAL_VIEW: BattleView = {
   hudVisible: false,
   remainingBots: 0,
   lives: [],
+  autopilot: [],
   canBorrowLife: [],
   curtain: 0,
   stageName: '',
@@ -34,6 +35,7 @@ function toView(session: GameSession): BattleView {
     hudVisible: session.hudVisible,
     remainingBots: scene?.remainingBotCount ?? 0,
     lives: scene?.lives ?? [],
+    autopilot: session.players.map((p) => p.pilot === 'autopilot'),
     canBorrowLife: scene?.canBorrowLife ?? [],
     curtain: session.curtain,
     stageName: session.stage.name,
@@ -105,7 +107,7 @@ function Battle(props: {
     const container = containerRef.current
     if (container == null) return
 
-    const { customStages, bindings } = useUIStore.getState()
+    const { customStages, bindings, autopilot } = useUIStore.getState()
     const stages = allStages(customStages)
 
     let app: Application | null = null
@@ -176,6 +178,7 @@ function Battle(props: {
         stages.findIndex((stage) => stage.name === startStageName),
         players,
         audio,
+        { autopilot, random: Math.random },
       )
 
       let mountedScene: BattleScene | null = null
@@ -223,9 +226,13 @@ function Battle(props: {
 
         if (s.phase === 'ended' && !ended) {
           ended = true
-          useUIStore
-            .getState()
-            .finishGame({ stageName: s.stage.name, scores: s.scores, cleared: s.cleared })
+          useUIStore.getState().finishGame({
+            stageName: s.stage.name,
+            scores: s.scores,
+            cleared: s.cleared,
+            aiOnly: s.aiOnly,
+            autopilot: s.stageEndAutopilot ?? s.players.map(() => false),
+          })
           replace(`/gameover${playersSearch(multi)}`)
         }
       })

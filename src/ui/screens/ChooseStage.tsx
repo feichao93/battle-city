@@ -1,18 +1,16 @@
 import { BLOCK_SIZE as B } from '../../engine/constants'
-import HintText from '../pixel/HintText'
 import PixelText from '../pixel/PixelText'
 import Screen from '../pixel/Screen'
 import StagePreview from '../pixel/StagePreview'
-import { keyLabel } from '../keyLabels'
 import { useMenuKeys } from '../menuKeys'
 import TextButton from '../pixel/TextButton'
+import useHelp from '../pixel/useHelp'
 import { push, replace, stagePath } from '../router'
 import { allStages, useUIStore } from '../store'
 
 /** 选关轮播：忠实还原旧项目 ChooseStageScene（prev/cur/next 预览 + 左右/开火）。 */
 export default function ChooseStage({ stageName, multi }: { stageName: string; multi: boolean }) {
   const customStages = useUIStore((s) => s.customStages)
-  const control = useUIStore((s) => s.bindings.p1)
   const stages = allStages(customStages)
   const index = stages.findIndex((s) => s.name === stageName)
 
@@ -22,6 +20,17 @@ export default function ChooseStage({ stageName, multi }: { stageName: string; m
   const next = () => index < stages.length - 1 && choose(index + 1)
   const play = () => push(stagePath('stage', stageName, multi))
   const back = () => replace('/')
+  const help = useHelp([
+    [
+      {
+        rows: [
+          ['left/right', 'choose stage'],
+          ['fire', 'start'],
+          ['esc', 'back'],
+        ],
+      },
+    ],
+  ])
 
   useMenuKeys((key) => {
     if (key === 'left') prev()
@@ -60,9 +69,8 @@ export default function ChooseStage({ stageName, multi }: { stageName: string; m
         <TextButton content="play" stroke="#96d332" x={6 * B} y={0} onClick={play} />
         <TextButton content="back" x={9 * B} y={0} onClick={back} />
       </g>
-      <HintText
-        content={`${keyLabel(control.left)}/${keyLabel(control.right)} choose stage  ${keyLabel(control.fire)} start  esc back`}
-      />
+      {help.button}
+      {help.overlay}
     </Screen>
   )
 }
