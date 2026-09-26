@@ -1,0 +1,20 @@
+﻿{
+  "name": "7",
+  "difficulty": 2,
+  "map": [
+    "X  X  X  X  X  X  X  T3 T3 X  X  X  X  ",
+    "X  X  Tf T3 T3 T3 X  X  X  X  Tf X  X  ",
+    "X  X  Tf X  X  X  F  X  T3 Tf Tf X  X  ",
+    "X  Tf X  X  X  F  Tf X  X  X  Tf X  X  ",
+    "X  X  X  X  F  Tf Tf X  X  X  T3 Tf X  ",
+    "X  Tf X  F  Tf Tf Tf X  Tf X  X  X  X  ",
+    "X  Ta X  Tf Tf X  X  X  Tf Tf X  X  X  ",
+    "T5 X  X  X  Tf X  Tf Tf Tf X  X  Ta X  ",
+    "X  Ta Tf X  X  X  Tf Tf F  X  X  Tf X  ",
+    "X  Tf X  X  X  X  Tf F  X  X  Tf Tf X  ",
+    "X  T3 T3 Tf X  X  F  X  X  Tf X  X  X  ",
+    "X  X  X  X  X  B8 Bc B4 X  T3 X  Tc Tf ",
+    "Tc Tc X  X  X  Ba E  B5 X  X  X  X  X  "
+  ],
+  "bots": ["3*basic", "4*fast", "6*power", "7*basic"]
+}

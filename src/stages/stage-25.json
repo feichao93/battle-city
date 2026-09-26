@@ -1,0 +1,20 @@
+﻿{
+  "name": "25",
+  "difficulty": 3,
+  "map": [
+    "X  X  X  Tf X  Bf X  Bf X  Bf X  Tf X  ",
+    "X  Bf X  Bf X  X  X  X  X  Tf X  X  X  ",
+    "X  Bf X  Bf X  X  Tf X  X  Tf X  Tf Tf ",
+    "X  Bf X  X  X  Bf X  Tf Bf X  X  X  Tf ",
+    "X  X  X  X  Bf Bf X  Bf Bf X  Tf X  X  ",
+    "X  X  Tf X  Bf X  X  Bf Bf X  Bf Bf X  ",
+    "Tf X  Tf X  X  Bf X  Tf X  X  Tf Bf X  ",
+    "X  X  Bf Bf X  Bf X  X  X  Bf Tf X  X  ",
+    "X  Tf Bf Bf X  Bf Bf X  Bf Bf X  X  Bf ",
+    "X  Bf X  X  X  Bf Tf X  X  X  X  Bf Bf ",
+    "X  X  X  Bf X  Bf Bf Tf X  Tf X  X  Bf ",
+    "Bf X  Bf Bf X  B8 Bc B4 X  Bf Tf X  X  ",
+    "Bf X  Bf X  X  Ba E  B5 X  Bf Bf Bf X  "
+  ],
+  "bots": ["2*power", "8*fast", "10*armor"]
+}

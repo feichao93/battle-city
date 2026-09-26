@@ -1,16 +1,22 @@
 {
   "compilerOptions": {
-    "experimentalDecorators": true,
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
     "esModuleInterop": true,
-    "outDir": "./build/",
-    "sourceMap": true,
-    "noImplicitAny": true,
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "noStrictGenericChecks": true,
+    "isolatedModules": true,
     "skipLibCheck": true,
-    "target": "es2017",
-    "jsx": "react"
+    "jsx": "react-jsx",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "noEmit": true,
+    "types": ["vite/client", "vitest/globals"]
   },
-  "include": ["./app/**/*", "custom-tyings.d.ts"]
+  "include": ["src", "test", "vite.config.ts"],
+  "exclude": ["app", "node_modules", "dist"]
 }

@@ -1,17 +1,12 @@
 # pnpm 10+/11 的配置入口（package.json 的 "pnpm" 字段已不再被读取）
 
-# 依赖版本覆盖：把所有 @types/react 收敛到直接依赖声明的 ^15 版本，
-# 避免 @types/react-redux 等把 @types/react 拉到 ^16。
-overrides:
-  '@types/react': $@types/react
-
 # 三方依赖构建脚本审查（pnpm 11 的 allowBuilds 机制）：
 #   - 未在此列出的包，默认视为「未审查」且禁止执行 install/postinstall 等脚本。
 #   - strictDepBuilds 保持默认 true：一旦有新依赖引入未审查的构建脚本，
 #     `pnpm install` 会以非零退出码失败，提醒人工复核 —— 即「严格控制」。
-# 以下两个已人工审查并明确禁止执行（值为 false）：
-#   core-js  —— postinstall 仅打印捐助信息，无功能影响
-#   fsevents —— macOS 原生文件监听，缺失时 chokidar 自动回退（dev server 照常）
+# 以下为已人工审查的条目：
+#   esbuild  —— Vite 依赖，postinstall 仅校验已随平台包安装好的原生二进制，允许执行
+#   fsevents —— macOS 原生文件监听，缺失时 chokidar 自动回退（dev server 照常），禁止
 allowBuilds:
-  core-js: false
+  esbuild: true
   fsevents: false

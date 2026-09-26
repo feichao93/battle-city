@@ -1,0 +1,20 @@
+﻿{
+  "name": "34",
+  "difficulty": 4,
+  "map": [
+    "X  X  X  X  B5 Ba X  X  X  X  X  X  X  ",
+    "B5 B5 B5 Ba X  B5 X  X  B5 B5 X  X  X  ",
+    "B5 B5 B5 Bf Bf X  X  X  B5 Bf B5 X  X  ",
+    "Ba Ba X  Bf B5 X  X  Ba B5 Bf Bf X  X  ",
+    "X  B5 X  Bf Ba B5 X  B5 Bf Bf Bf X  X  ",
+    "X  B5 Ba X  X  Bf B5 Bf Ba Ba Bf X  X  ",
+    "X  B5 X  X  Ba Bf Bf B5 X  B5 Bf X  X  ",
+    "X  Ba X  X  B5 Bf Bf B5 X  B5 Bf X  X  ",
+    "X  Ba B3 B3 X  Bf Bf Bf X  B5 B5 B3 Bf ",
+    "X  Ba X  X  Ba B5 Bf Ba B5 B5 B5 Ba Ba ",
+    "X  X  B5 X  Bf Ba B5 Bf Bf X  X  Ba X  ",
+    "X  X  B5 Ba B5 B8 Bc B4 Bf B5 X  B5 X  ",
+    "X  X  B5 Ba X  Ba E  B5 X  Bf Bf X  X  "
+  ],
+  "bots": ["4*power", "10*fast", "6*armor"]
+}

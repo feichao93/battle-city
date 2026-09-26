@@ -1,0 +1,20 @@
+﻿{
+  "name": "16",
+  "difficulty": 1,
+  "map": [
+    "X  X  X  X  X  X  X  X  X  X  X  X  X  ",
+    "X  X  Tf F  Tf X  X  X  X  X  X  X  X  ",
+    "X  X  X  F  X  F  Tc X  X  X  X  X  X  ",
+    "X  F  X  X  X  X  F  Bc X  X  X  X  X  ",
+    "X  F  F  X  X  F  X  F  Tc X  X  X  X  ",
+    "X  F  X  F  X  F  X  X  F  Bc X  X  X  ",
+    "X  F  X  X  F  X  X  X  F  F  Tc X  X  ",
+    "X  X  F  X  X  X  X  F  F  F  F  Bc X  ",
+    "X  X  X  F  X  X  F  X  F  F  F  F  X  ",
+    "Bf X  X  X  X  X  F  X  X  F  F  F  Tf ",
+    "Bf Bf X  X  X  X  X  F  X  F  F  F  F  ",
+    "Tf Bf Bf X  X  B8 Bc B4 F  X  F  F  F  ",
+    "Tf Tf Bf Bf X  Ba E  B5 F  X  X  F  F  "
+  ],
+  "bots": ["16*basic", "2*fast", "2*armor"]
+}

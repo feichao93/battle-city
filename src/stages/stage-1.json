@@ -1,0 +1,20 @@
+﻿{
+  "name": "1",
+  "difficulty": 1,
+  "map": [
+    "X  X  X  X  X  X  X  X  X  X  X  X  X  ",
+    "X  Bf X  Bf X  Bf X  Bf X  Bf X  Bf X  ",
+    "X  Bf X  Bf X  Bf X  Bf X  Bf X  Bf X  ",
+    "X  Bf X  Bf X  Bf Tf Bf X  Bf X  Bf X  ",
+    "X  Bf X  Bf X  B3 X  B3 X  Bf X  Bf X  ",
+    "X  B3 X  B3 X  Bc X  Bc X  B3 X  B3 X  ",
+    "Bc X  Bc Bc X  B3 X  B3 X  Bc Bc X  Bc ",
+    "T3 X  B3 B3 X  Bc X  Bc X  B3 B3 X  T3 ",
+    "X  Bc X  Bc X  Bf Bf Bf X  Bc X  Bc X  ",
+    "X  Bf X  Bf X  Bf X  Bf X  Bf X  Bf X  ",
+    "X  Bf X  Bf X  B3 X  B3 X  Bf X  Bf X  ",
+    "X  Bf X  Bf X  B8 Bc B4 X  Bf X  Bf X  ",
+    "X  X  X  X  X  Ba E  B5 X  X  X  X  X  "
+  ],
+  "bots": ["18*basic", "2*fast"]
+}

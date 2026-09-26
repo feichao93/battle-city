@@ -1,0 +1,30 @@
+/* 像素文本按钮命中区样式，移植自旧项目 app/battle-city.css */
+.text-area {
+  fill: transparent;
+  cursor: pointer;
+}
+
+.text-area:hover,
+.text-area.focused {
+  fill: #865b69;
+}
+
+.text-area.selected,
+.text-area:active {
+  fill: #e91e63;
+}
+
+.text-area.disabled {
+  fill: transparent;
+  cursor: default;
+}
+
+.area-button {
+  fill: transparent;
+  cursor: pointer;
+  transition: stroke 250ms;
+}
+
+.area-button:hover {
+  stroke: #e91e63;
+}
