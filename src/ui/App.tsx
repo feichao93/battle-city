@@ -1,5 +1,6 @@
 import { useLayoutEffect } from 'react'
 import type { RawStageConfig } from '../engine/types'
+import Lobby from '../lan/Lobby'
 import GameCanvas from './GameCanvas'
 import { GALLERY_TABS, replace, stagePath, useRoute, type Route } from './router'
 import ChooseStage from './screens/ChooseStage'
@@ -79,5 +80,7 @@ function CurrentScreen() {
       return <Gallery tab={route.tab!} />
     case 'options':
       return <Options />
+    case 'lobby':
+      return <Lobby view={route.view} />
   }
 }

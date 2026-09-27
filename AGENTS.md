@@ -6,7 +6,8 @@
 
 ## 命令
 
-- `pnpm dev`：http://localhost:5173/battle-city/（hash 路由，如 `#/stage/3`、`#/editor/map`）
+- `pnpm dev`：http://localhost:5173/battle-city/（hash 路由，如 `#/stage/3`、`#/editor/map`）；dev server 自带联机中继，`--host` 后局域网可连 `#/lobby`
+- `node bin/battle-city.js host`：联机主机（监听 0.0.0.0 + `/lan` websocket），需先 `pnpm build:npm`
 - `pnpm test`；单个文件 `./node_modules/.bin/vitest run test/xxx.test.ts`
 - `./node_modules/.bin/tsc --noEmit`
 - `pnpm arena`：托管 AI 对 bot 的无头对局统计，`ARENA_SEEDS` 控制每关种子数（默认 3），种子多时要跑几分钟
@@ -17,7 +18,8 @@
 
 - `src/engine`：纯逻辑，无 DOM；`ai/`（BotBrain、TeammateBrain 等）
 - `src/render`：PixiJS 渲染；`src/ui`：React + SVG 像素界面；`src/input`、`src/audio`、`src/stages`
-- `bin/battle-city.js`：npm 包的 CLI（零依赖静态服务器）
+- `bin/battle-city.js`：npm 包的 CLI（静态服务器；`host` 子命令挂上 `bin/lan-relay.js` 联机中继，依赖 `ws`）
+- `src/lan`：局域网联机（主机权威：房主浏览器跑引擎，客机发输入、收画面渲染）
 - `resources/`：收集的资料（原版素材图、`nes-values/` NES 原版数值与 AI 调研）
 - `build/<version>/`：正式版本产物，gh-pages 经 jsDelivr 加载；该目录被 gitignore，需 `git add -f`
 - `staging/`（gitignore）：`staging/NOTE.md` 进度追踪，`staging/dev/*.html` 设计文档

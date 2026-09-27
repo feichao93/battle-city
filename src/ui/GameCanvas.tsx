@@ -10,7 +10,6 @@ import InputManager from '../input/InputManager'
 import Renderer from '../render/Renderer'
 import { sharedAtlas } from '../render/SpriteAtlas'
 import BattleOverlay, { type BattleView } from './BattleOverlay'
-import type { PauseAction } from './PauseMenu'
 import StatisticsScene from './StatisticsScene'
 import { playersSearch, replace, stagePath } from './router'
 import { allStages, useUIStore } from './store'
@@ -18,7 +17,9 @@ import { allStages, useUIStore } from './store'
 // 全局像素风：纹理放大时用最近邻采样
 TextureSource.defaultOptions.scaleMode = 'nearest'
 
-const INITIAL_VIEW: BattleView = {
+type LeaveAction = 'restart' | 'stage-select' | 'title'
+
+export const INITIAL_VIEW: BattleView = {
   hudVisible: false,
   remainingBots: 0,
   lives: [],
@@ -29,7 +30,7 @@ const INITIAL_VIEW: BattleView = {
   gameoverProgress: null,
 }
 
-function toView(session: GameSession): BattleView {
+export function toView(session: GameSession): BattleView {
   const scene = session.scene
   return {
     hudVisible: session.hudVisible,
@@ -61,7 +62,7 @@ export default function GameCanvas({ stageName, multi }: { stageName: string; mu
     replace(stagePath('stage', name, multi))
   }
 
-  const onLeave = (action: Exclude<PauseAction, 'resume'>) => {
+  const onLeave = (action: LeaveAction) => {
     if (action === 'restart') {
       setStart((prev) => ({ stageName: sessionStageRef.current, run: prev.run + 1 }))
     } else if (action === 'stage-select') {
@@ -87,7 +88,7 @@ function Battle(props: {
   multi: boolean
   onStageChange: (stageName: string) => void
   /** 暂停菜单里除 resume 以外的选项 */
-  onLeave: (action: Exclude<PauseAction, 'resume'>) => void
+  onLeave: (action: LeaveAction) => void
 }) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [view, setView] = useState<BattleView>(INITIAL_VIEW)
@@ -291,8 +292,12 @@ function Battle(props: {
           paused
             ? {
                 controls,
-                onSelect: (action) =>
-                  action === 'resume' ? togglePauseRef.current?.() : props.onLeave(action),
+                items: [
+                  { label: 'resume', onSelect: () => togglePauseRef.current?.() },
+                  { label: 'restart stage', onSelect: () => props.onLeave('restart') },
+                  { label: 'stage select', onSelect: () => props.onLeave('stage-select') },
+                  { label: 'title', onSelect: () => props.onLeave('title') },
+                ],
               }
             : null
         }

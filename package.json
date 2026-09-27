@@ -49,6 +49,7 @@
   "devDependencies": {
     "@types/react": "^19.0.2",
     "@types/react-dom": "^19.0.2",
+    "@types/ws": "^8.18.1",
     "@vitejs/plugin-react": "^4.3.4",
     "jsdom": "^25.0.1",
     "pixi.js": "^8.6.6",
@@ -66,5 +67,8 @@
     "semi": false,
     "singleQuote": true,
     "trailingComma": "all"
+  },
+  "dependencies": {
+    "ws": "^8.21.0"
   }
 }

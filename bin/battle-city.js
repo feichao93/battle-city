@@ -6,11 +6,17 @@ import { createServer } from 'node:http'
 import { extname, join, normalize } from 'node:path'
 import { createInterface } from 'node:readline'
 import { fileURLToPath } from 'node:url'
+import { createLanRelay, lanUrls } from './lan-relay.js'
 
 const HELP = `用法：battle-city [--port <端口>]
+      battle-city host [--port <端口>]
 
-在本机启动坦克大战的 web server，按 Enter 在浏览器中打开。
+默认在本机启动坦克大战的 web server，按 Enter 在浏览器中打开。
   --port, -p   起始端口，默认 8080；被占用时依次往后找
+
+host 以联机主机启动：监听局域网，打印可分享的大厅地址。同一局域网的玩家打开该地址，
+在大厅里创建或加入房间即可双人对战（创建者的浏览器运行游戏）。
+
   --help, -h   显示帮助`
 
 const ROOT = fileURLToPath(new URL('../www/', import.meta.url))
@@ -30,15 +36,18 @@ const MIME = {
 
 function parseArgs(argv) {
   let port = 8080
+  let host = false
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i]
-    if (arg === '--help' || arg === '-h') {
+    const [name, inline] = arg.startsWith('--') && arg.includes('=') ? arg.split(/=(.*)/) : [arg]
+    const value = () => inline ?? argv[(i += 1)]
+    if (i === 0 && name === 'host') {
+      host = true
+    } else if (name === '--help' || name === '-h') {
       console.log(HELP)
       process.exit(0)
-    } else if (arg === '--port' || arg === '-p') {
-      port = Number(argv[(i += 1)])
-    } else if (arg.startsWith('--port=')) {
-      port = Number(arg.slice('--port='.length))
+    } else if (name === '--port' || name === '-p') {
+      port = Number(value())
     } else {
       console.error(`未知参数：${arg}\n\n${HELP}`)
       process.exit(1)
@@ -48,7 +57,7 @@ function parseArgs(argv) {
     console.error('端口必须是 1–65535 之间的整数')
     process.exit(1)
   }
-  return { port }
+  return { port, host }
 }
 
 async function handle(req, res) {
@@ -71,12 +80,12 @@ async function handle(req, res) {
   createReadStream(file).pipe(res)
 }
 
-/** 从 port 开始找一个能监听的端口 */
-function listen(server, port) {
+/** 从 port 开始找一个能监听的端口；联机主机监听全部网卡，否则只监听本机 */
+function listen(server, port, hostname) {
   return new Promise((resolve, reject) => {
     const onError = (err) => {
       server.off('listening', onListening)
-      if (err.code === 'EADDRINUSE' && port < 65535) resolve(listen(server, port + 1))
+      if (err.code === 'EADDRINUSE' && port < 65535) resolve(listen(server, port + 1, hostname))
       else reject(err)
     }
     const onListening = () => {
@@ -85,7 +94,7 @@ function listen(server, port) {
     }
     server.once('error', onError)
     server.once('listening', onListening)
-    server.listen(port, '127.0.0.1')
+    server.listen(port, hostname)
   })
 }
 
@@ -101,14 +110,27 @@ function openBrowser(url) {
   child.unref()
 }
 
-const { port } = parseArgs(process.argv.slice(2))
+const { port, host } = parseArgs(process.argv.slice(2))
+const relay = host ? createLanRelay() : null
 const server = createServer((req, res) => {
+  if (relay?.handleRequest(req, res)) return
   handle(req, res).catch(() => res.writeHead(500).end())
 })
-const actualPort = await listen(server, port)
-const url = `http://localhost:${actualPort}/`
+server.on('upgrade', (req, socket, head) => {
+  if (!relay?.handleUpgrade(req, socket, head)) socket.destroy()
+})
+const actualPort = await listen(server, port, host ? '0.0.0.0' : '127.0.0.1')
+const url = `http://localhost:${actualPort}/${host ? '#/lobby' : ''}`
 
-console.log(`\n  Battle City v${version}\n\n  ${url}\n`)
+if (host) {
+  const shared = lanUrls(actualPort)
+  const lines = shared.length > 0 ? shared : ['（没有找到局域网地址，请检查网络连接）']
+  console.log(`\n  Battle City v${version} 联机主机\n\n  本机    ${url}\n`)
+  console.log(`  局域网  ${lines.join('\n          ')}\n`)
+  console.log('  把局域网地址发给同一网络里的另一位玩家\n')
+} else {
+  console.log(`\n  Battle City v${version}\n\n  ${url}\n`)
+}
 if (process.stdin.isTTY) {
   console.log('  按 Enter 在浏览器中打开，Ctrl+C 退出\n')
   createInterface({ input: process.stdin }).on('line', () => openBrowser(url))

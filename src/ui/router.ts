@@ -5,6 +5,8 @@ export const MULTI_PLAYERS_SEARCH = '?multi-players'
 
 export type StageListTab = 'default' | 'custom'
 export type EditorView = 'config' | 'map'
+/** 联机外壳：房间列表 / 创建房间 / 房间等待页（对战也在房间页里进行） */
+export type LobbyView = 'list' | 'create' | 'room'
 
 export const GALLERY_TABS = [
   'tanks',
@@ -27,6 +29,7 @@ export type Route =
   | { screen: 'editor'; view: EditorView | null }
   | { screen: 'gallery'; tab: GalleryTab | null }
   | { screen: 'options' }
+  | { screen: 'lobby'; view: LobbyView }
 
 /** 地址栏里可能出现 "%" 这样的非法编码；解不开就原样返回，交给后面的无效路由回退 */
 function decodeSegment(segment: string): string {
@@ -68,6 +71,8 @@ export function parseHash(hash: string): Route {
       }
     case 'options':
       return { screen: 'options' }
+    case 'lobby':
+      return { screen: 'lobby', view: a === 'create' || a === 'room' ? a : 'list' }
     default:
       // 原版未匹配的路径一律渲染标题页
       return { screen: 'title' }

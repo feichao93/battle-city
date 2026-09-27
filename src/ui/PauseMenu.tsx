@@ -5,14 +5,10 @@ import { useMenuKeys } from './menuKeys'
 import PixelText from './pixel/PixelText'
 import TextButton from './pixel/TextButton'
 
-export type PauseAction = 'resume' | 'restart' | 'stage-select' | 'title'
-
-const ITEMS: { action: PauseAction; label: string }[] = [
-  { action: 'resume', label: 'resume' },
-  { action: 'restart', label: 'restart stage' },
-  { action: 'stage-select', label: 'stage select' },
-  { action: 'title', label: 'title' },
-]
+export interface PauseItem {
+  label: string
+  onSelect: () => void
+}
 
 const BOX_X = 32
 const BOX_Y = 48
@@ -26,55 +22,64 @@ function centerX(text: string): number {
   return 120 - text.length * 4
 }
 
-export interface PauseMenuProps {
-  /** 本局各玩家的键位 */
-  controls: PlayerControl[]
-  onSelect: (action: PauseAction) => void
-}
-
-/**
- * 战场中央的暂停菜单：上下选择、确认键执行，也可以用鼠标；
- * 下方列出各玩家的键位。Esc 恢复由 GameCanvas 处理。
- */
-export default function PauseMenu({ controls, onSelect }: PauseMenuProps) {
-  const [index, setIndex] = useState(0)
-
-  useMenuKeys((key) => {
-    if (key === 'down') setIndex((index + 1) % ITEMS.length)
-    else if (key === 'up') setIndex((index - 1 + ITEMS.length) % ITEMS.length)
-    else if (key === 'confirm') onSelect(ITEMS[index].action)
-  })
-
-  const controlsY = ITEM_Y + ITEMS.length * LINE_HEIGHT + 8
-  const hintY = controlsY + controls.length * LINE_HEIGHT + 4
-  const boxHeight = hintY + 8 + 8 - BOX_Y
-  const hint = 'esc resume'
-
+function PauseBox({ height }: { height: number }) {
   return (
-    <g className="pause-menu" style={{ pointerEvents: 'auto' }}>
+    <>
       <rect
         x={BOX_X + 0.5}
         y={BOX_Y + 0.5}
         width={BOX_WIDTH - 1}
-        height={boxHeight - 1}
+        height={height - 1}
         fill="#000000"
         stroke="#ffffff"
       />
       <PixelText x={centerX('pause')} y={BOX_Y + 8} content="pause" fill="#db2b00" />
-      {ITEMS.map((item, i) => (
+    </>
+  )
+}
+
+export interface PauseMenuProps {
+  items: PauseItem[]
+  /** 本机玩家的键位 */
+  controls: PlayerControl[]
+  /** controls[0] 的玩家下标；联机客机是 2P，传 1 */
+  firstPlayer?: number
+}
+
+/**
+ * 战场中央的暂停菜单：上下选择、确认键执行，也可以用鼠标；
+ * 下方列出各玩家的键位。Esc 恢复由调用方处理。
+ */
+export default function PauseMenu({ items, controls, firstPlayer = 0 }: PauseMenuProps) {
+  const [index, setIndex] = useState(0)
+
+  useMenuKeys((key) => {
+    if (key === 'down') setIndex((index + 1) % items.length)
+    else if (key === 'up') setIndex((index - 1 + items.length) % items.length)
+    else if (key === 'confirm') items[index].onSelect()
+  })
+
+  const controlsY = ITEM_Y + items.length * LINE_HEIGHT + 8
+  const hintY = controlsY + controls.length * LINE_HEIGHT + 4
+  const hint = 'esc resume'
+
+  return (
+    <g className="pause-menu" style={{ pointerEvents: 'auto' }}>
+      <PauseBox height={hintY + 8 + 8 - BOX_Y} />
+      {items.map((item, i) => (
         <TextButton
-          key={item.action}
+          key={item.label}
           x={64}
           y={ITEM_Y + i * LINE_HEIGHT}
           content={item.label}
           textFill="white"
           onMouseOver={() => setIndex(i)}
-          onClick={() => onSelect(item.action)}
+          onClick={item.onSelect}
         />
       ))}
       <PixelText x={52} y={ITEM_Y + index * LINE_HEIGHT} content="→" />
       {controls.map((control, i) => {
-        const line = `${PLAYER_NAMES[i]} move ${directionLabel(control)} fire ${keyLabel(control.fire)}`
+        const line = `${PLAYER_NAMES[firstPlayer + i]} move ${directionLabel(control)} fire ${keyLabel(control.fire)}`
         return (
           <PixelText
             key={i}
@@ -86,6 +91,16 @@ export default function PauseMenu({ controls, onSelect }: PauseMenuProps) {
         )
       })}
       <PixelText x={centerX(hint)} y={hintY} content={hint} fill="#999999" />
+    </g>
+  )
+}
+
+/** 联机时对方暂停了：本机只能等，没有菜单 */
+export function PauseNotice({ text }: { text: string }) {
+  return (
+    <g>
+      <PauseBox height={ITEM_Y + 8 + 8 - BOX_Y} />
+      <PixelText x={centerX(text)} y={ITEM_Y} content={text} fill="#999999" />
     </g>
   )
 }

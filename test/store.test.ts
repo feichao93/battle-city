@@ -27,6 +27,13 @@ describe('store', () => {
     expect(useUIStore.getState().lastGame!.newHiScore).toBe(true)
   })
 
+  it('联机分数只刷新最高分', () => {
+    useUIStore.getState().recordScores([500, 25000])
+    expect(useUIStore.getState()).toMatchObject({ hiScore: 25000, lastGame: null })
+    useUIStore.getState().recordScores([100])
+    expect(useUIStore.getState().hiScore).toBe(25000)
+  })
+
   it('托管开关默认开启并持久化', () => {
     expect(useUIStore.getState().autopilot).toBe(true)
     useUIStore.getState().setAutopilot(false)

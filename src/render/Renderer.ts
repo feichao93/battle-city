@@ -29,6 +29,30 @@ const RIVER_PERIOD = 600
 /** 头盔护盾每 2 帧切换一次 */
 const HELMET_PERIOD = frame(2)
 
+/** 各 sync 方法只读这些字段；联机客机用同形状的普通对象喂进来 */
+export type TankView = Pick<
+  Tank,
+  | 'tankId'
+  | 'alive'
+  | 'side'
+  | 'level'
+  | 'color'
+  | 'hp'
+  | 'withPowerUp'
+  | 'bornAt'
+  | 'direction'
+  | 'x'
+  | 'y'
+  | 'moving'
+  | 'visible'
+  | 'helmetDuration'
+>
+export type BulletView = Pick<Bullet, 'bulletId' | 'x' | 'y'>
+export type ExplosionView = Pick<Explosion, 'id' | 'cx' | 'cy' | 'shape'>
+export type PowerUpView = Pick<PowerUp, 'id' | 'name' | 'x' | 'y' | 'visible'>
+export type FlickerView = Pick<Flicker, 'id' | 'x' | 'y' | 'shape'>
+export type ScorePopupView = Pick<ScorePopup, 'id' | 'score' | 'x' | 'y' | 'visible'>
+
 interface TankSpriteEntry {
   sprite: Sprite
   /** 停止移动时保留最后一帧 shape */
@@ -185,7 +209,7 @@ export default class Renderer {
    * 每帧把坦克实体同步到 sprite：位置取格子中心（anchor 0.5 + rotation 表现朝向），
    * 履带 shape 由 moving + 仿真时间决定。已消失的坦克回收其 sprite。
    */
-  syncTanks(tanks: Tank[], time: number): void {
+  syncTanks(tanks: TankView[], time: number): void {
     const seen = new Set<number>()
     for (const tank of tanks) {
       if (!tank.alive) {
@@ -231,7 +255,7 @@ export default class Renderer {
   }
 
   /** 同步子弹 sprite（3×3，左上角对齐 bullet.x/y） */
-  syncBullets(bullets: Bullet[]): void {
+  syncBullets(bullets: BulletView[]): void {
     this.syncPool(
       this.bulletSprites,
       this.bulletLayer,
@@ -245,7 +269,7 @@ export default class Renderer {
   }
 
   /** 同步爆炸 sprite（anchor 0.5 居中于 cx/cy，逐帧切换 shape） */
-  syncExplosions(explosions: Explosion[]): void {
+  syncExplosions(explosions: ExplosionView[]): void {
     this.syncPool(
       this.explosionSprites,
       this.explosionLayer,
@@ -260,7 +284,7 @@ export default class Renderer {
   }
 
   /** 同步道具 sprite（16×16，闪烁时切换可见性） */
-  syncPowerUps(powerUps: PowerUp[]): void {
+  syncPowerUps(powerUps: PowerUpView[]): void {
     this.syncPool(
       this.powerUpSprites,
       this.powerUpLayer,
@@ -275,7 +299,7 @@ export default class Renderer {
   }
 
   /** 同步出生星星 sprite */
-  syncFlickers(flickers: Flicker[]): void {
+  syncFlickers(flickers: FlickerView[]): void {
     this.syncPool(
       this.flickerSprites,
       this.flickerLayer,
@@ -289,7 +313,7 @@ export default class Renderer {
   }
 
   /** 同步分数弹出 sprite */
-  syncScorePopups(popups: ScorePopup[]): void {
+  syncScorePopups(popups: ScorePopupView[]): void {
     this.syncPool(
       this.scoreSprites,
       this.scoreLayer,

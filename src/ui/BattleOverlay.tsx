@@ -8,7 +8,7 @@ import {
   ZOOM_LEVEL,
 } from '../engine/constants'
 import { BotCountIndicator, PlayerTankThumbnail } from './pixel/icons'
-import PauseMenu, { type PauseMenuProps } from './PauseMenu'
+import PauseMenu, { PauseNotice, type PauseMenuProps } from './PauseMenu'
 import PixelText from './pixel/PixelText'
 import useBlink from './pixel/useBlink'
 
@@ -36,11 +36,14 @@ export interface BattleView {
 export default function BattleOverlay({
   view,
   pauseMenu,
+  pauseNotice = null,
   awaitingKey,
 }: {
   view: BattleView
   /** 暂停时显示的菜单；null 表示未暂停 */
   pauseMenu: PauseMenuProps | null
+  /** 联机时对方暂停了，显示这行提示 */
+  pauseNotice?: string | null
   /** 音频未解锁，等待玩家按键后才开局 */
   awaitingKey: boolean
 }) {
@@ -73,6 +76,7 @@ export default function BattleOverlay({
       {view.gameoverProgress != null && <GameoverText progress={view.gameoverProgress} />}
       {view.curtain > 0 && <StageEnterCurtain t={view.curtain} stageName={view.stageName} />}
       {pauseMenu != null && <PauseMenu {...pauseMenu} />}
+      {pauseNotice != null && <PauseNotice text={pauseNotice} />}
       {awaitingKey && <PressAnyKey />}
     </svg>
   )

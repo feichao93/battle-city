@@ -46,12 +46,19 @@ interface UIState {
   setBinding: (player: 'p1' | 'p2', action: ControlAction, code: string) => void
   resetBindings: () => void
   setAutopilot: (autopilot: boolean) => void
-  /** 记录一局的结果并更新最高分（AI 对 AI 的局不更新） */
+  /** 记录一局的结果并更新最高分 */
   finishGame: (result: GameResult) => void
+  /** 联机对局只更新最高分，不动单机结束页用的 lastGame */
+  recordScores: (scores: number[]) => void
 
   setEditorContent: (stage: RawStageConfig | null) => void
   addCustomStage: (stage: RawStageConfig) => void
   deleteCustomStage: (name: string) => void
+}
+
+/** 双人各算各的，取本局最高的个人分 */
+function nextHiScore(hiScore: number, scores: number[]): number {
+  return Math.max(hiScore, ...scores)
 }
 
 export const useUIStore = create<UIState>()(
@@ -73,13 +80,10 @@ export const useUIStore = create<UIState>()(
       setAutopilot: (autopilot) => set({ autopilot }),
       finishGame: (result) =>
         set((s) => {
-          const best = Math.max(...result.scores)
-          const newHiScore = !result.aiOnly && best > s.hiScore
-          return {
-            lastGame: { ...result, newHiScore },
-            hiScore: newHiScore ? best : s.hiScore,
-          }
+          const hiScore = result.aiOnly ? s.hiScore : nextHiScore(s.hiScore, result.scores)
+          return { lastGame: { ...result, newHiScore: hiScore > s.hiScore }, hiScore }
         }),
+      recordScores: (scores) => set((s) => ({ hiScore: nextHiScore(s.hiScore, scores) })),
 
       setEditorContent: (editorContent) => set({ editorContent }),
       // 同名关卡原位覆盖，保持列表顺序

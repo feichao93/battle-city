@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { BLOCK_SIZE as B } from '../../engine/constants'
+import { probeLan } from '../../lan/client'
 import { BrickPatternDef, brickPatternFill } from '../pixel/BrickWall'
 import { OverlayFrame, useOverlayKeys } from '../pixel/Overlay'
 import PixelText, { textWidth } from '../pixel/PixelText'
@@ -15,12 +16,17 @@ import { useUIStore } from '../store'
 const VERSION = `v${__APP_VERSION__}`
 const GITHUB_URL = 'https://github.com/feichao93/battle-city'
 
-/** 原版的四个菜单项；options 是重写版新增的，做成右下角的齿轮，不改动原版菜单 */
-type Choice = 'single-player' | 'multi-players' | 'stage-list' | 'gallery'
+/**
+ * 原版的四个菜单项；options 是重写版新增的，做成右下角的齿轮，不改动原版菜单。
+ * lan 只在 `battle-city host` 起的服务上出现
+ */
+type Choice = 'single-player' | 'multi-players' | 'lan' | 'stage-list' | 'gallery'
 const CHOICES: Choice[] = ['single-player', 'multi-players', 'stage-list', 'gallery']
+const LAN_CHOICES: Choice[] = ['single-player', 'multi-players', 'lan', 'stage-list', 'gallery']
 const CHOICE_LABELS: Record<Choice, string> = {
   'single-player': '1 player',
   'multi-players': '2 players',
+  lan: 'lan battle',
   'stage-list': 'stage list',
   gallery: 'gallery',
 }
@@ -88,6 +94,14 @@ function AboutOverlay({ onClose }: { onClose: () => void }) {
 /** 标题页 */
 export default function Title() {
   const [aboutOpen, setAboutOpen] = useState(false)
+  const [lan, setLan] = useState(false)
+  useEffect(() => {
+    let active = true
+    void probeLan().then((ok) => active && setLan(ok))
+    return () => {
+      active = false
+    }
+  }, [])
   useOverlayKeys(aboutOpen, () => setAboutOpen(false))
   const help = useHelp(
     [
@@ -107,6 +121,7 @@ export default function Title() {
   const onChoose = (c: Choice) => {
     if (c === 'single-player') push('/choose')
     else if (c === 'multi-players') push(`/choose${MULTI_PLAYERS_SEARCH}`)
+    else if (c === 'lan') push('/lobby')
     else if (c === 'stage-list') push('/list')
     else push('/gallery')
   }
@@ -122,7 +137,7 @@ export default function Title() {
   }, [bindings])
   return (
     <Screen background="#000000">
-      <TitleContent onChoose={onChoose} />
+      <TitleContent onChoose={onChoose} lan={lan} />
       <g transform={`translate(${0.5 * B}, ${14.5 * B}) scale(0.5)`}>
         <TextButton content={VERSION} textFill="#999" onClick={() => setAboutOpen(true)} />
       </g>
@@ -147,15 +162,24 @@ function ScoreLine() {
 }
 
 /** 标题画面内容（含菜单选择与键盘操作）；画廊的 title-scene 页复用 */
-export function TitleContent({ onChoose }: { onChoose: (choice: Choice) => void }) {
+export function TitleContent({
+  onChoose,
+  lan = false,
+}: {
+  onChoose: (choice: Choice) => void
+  lan?: boolean
+}) {
   const [choice, setChoice] = useState<Choice>('single-player')
+  const choices = lan ? LAN_CHOICES : CHOICES
+  // 多出联机一项时收紧行距，不压到下面的版权行
+  const rowHeight = lan ? 0.8 * B : B
 
   useMenuKeys((key) => {
-    const index = CHOICES.indexOf(choice)
+    const index = choices.indexOf(choice)
     if (key === 'down') {
-      setChoice(CHOICES[(index + 1) % CHOICES.length])
+      setChoice(choices[(index + 1) % choices.length])
     } else if (key === 'up') {
-      setChoice(CHOICES[(index - 1 + CHOICES.length) % CHOICES.length])
+      setChoice(choices[(index - 1 + choices.length) % choices.length])
     } else if (key === 'confirm') {
       onChoose(choice)
     }
@@ -181,12 +205,12 @@ export function TitleContent({ onChoose }: { onChoose: (choice: Choice) => void 
           fill={brickPatternFill(scale)}
         />
       </g>
-      {CHOICES.map((c, i) => (
+      {choices.map((c, i) => (
         <TextButton
           key={c}
           content={CHOICE_LABELS[c]}
           x={5.5 * B}
-          y={(8 + i) * B}
+          y={8 * B + i * rowHeight}
           textFill="white"
           onMouseOver={() => setChoice(c)}
           onClick={() => onChoose(c)}
@@ -198,7 +222,7 @@ export function TitleContent({ onChoose }: { onChoose: (choice: Choice) => void 
         color="yellow"
         direction="right"
         x={4 * B}
-        y={(7.75 + CHOICES.indexOf(choice)) * B}
+        y={7.75 * B + choices.indexOf(choice) * rowHeight}
       />
       <PixelText content={'© 1980 1985 NAMCO LTD.'} x={2 * B} y={12.5 * B} />
       <PixelText content="ALL RIGHTS RESERVED" x={3 * B} y={13.5 * B} />

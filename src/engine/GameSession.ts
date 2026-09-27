@@ -18,9 +18,10 @@ const ENTER_END = CURTAIN_OPEN_AT + frame(30)
 const WON_DELAY = 4000
 const DEAD_DELAY = 3000
 
-/** 战场内 GAME OVER 字样上升时长 + 停留（旧版 gameSaga.animateGameover） */
+/** 战场内 GAME OVER 字样上升时长（旧版 gameSaga.animateGameover） */
 export const GAMEOVER_RISE_DURATION = 2000
-const GAMEOVER_END = GAMEOVER_RISE_DURATION + 500
+/** 升到位后再停 3s：老鹰常常一下就被打掉，要留时间看清战场 */
+const GAMEOVER_END = GAMEOVER_RISE_DURATION + 3000
 
 export type SessionPhase = 'enter' | 'playing' | 'statistics' | 'gameover' | 'ended'
 

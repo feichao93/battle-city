@@ -265,6 +265,15 @@ const chars: Chars = {
       <rect x="3" y="6" width="3" height="1" />
     </g>
   ),
+  // 联机大厅要显示 hash 路由地址
+  '#': ({ fill }) => (
+    <g fill={fill}>
+      <rect x="2" y="0" width="1" height="7" />
+      <rect x="5" y="0" width="1" height="7" />
+      <rect x="0" y="2" width="8" height="1" />
+      <rect x="0" y="4" width="8" height="1" />
+    </g>
+  ),
   // Ⅰ 罗马数字 I
   ['Ⅰ'.toLowerCase()]: ({ fill }) => (
     <path fill={fill} d="M2,0 h4 v1 h-1 v5 h1 v1 h-4 v-1 h1 v-5 h-1 v-1" />

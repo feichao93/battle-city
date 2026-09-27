@@ -80,7 +80,10 @@ describe('GameSession', () => {
 
     run(1000)
     expect(session.gameoverProgress).toBeCloseTo(0.5, 1)
-    run(1600)
+    // 升到位后停 3s
+    run(3900)
+    expect(session.phase).toBe('gameover')
+    run(200)
     expect(session.phase).toBe('ended')
   })
 
