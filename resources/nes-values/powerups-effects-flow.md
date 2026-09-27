@@ -148,7 +148,7 @@
 
 - 出生星星结束、坦克激活时 `$E3B8` 给玩家写 `$89 = 3`（D:6144–6145 ($E3C1–$E3C3)）。开局出生和死亡复活都走 `$E363 → 星星 → $E3B8` 这条路径，**ROM 里没有区分**。
 - 时长：3 个 64 帧单位 = 129~192 f（2150~3200 ms），由激活时刻相对 64 帧边界的相位决定。
-- 旧笔记 `docs/values/readme.md` 里的 135 f（开局）和 180 f（复活）都落在这个区间内，差别来自相位，不是规则不同。
+- 旧笔记 `web-measured.md` 里的 135 f（开局）和 180 f（复活）都落在这个区间内，差别来自相位，不是规则不同。
 - helmet 道具直接把计数写成 10，会覆盖剩余的出生头盔。
 - 护盾生效：`$89` 非零时，敌方子弹打中玩家只是静默消失（D:6735–6741 ($E753)）；队友子弹同理（D:6932 ($E894)）。
 - 我们当前：`SPAWN_HELMET_DURATION = frame(135)`（`constants.ts:100`），开局与复活相同。数值在区间内，一致。
@@ -367,8 +367,8 @@
 
 我们当前：
 
-- 命用完：玩家爆炸 36 f 后判负 → 3000 ms → 结算 → GAME OVER 升起 2500 ms → 结束页（等按 R）。
-- 老鹰被毁：立即 GAME OVER 升起 2500 ms → 结束页，**不进结算**。
+- 命用完：玩家爆炸 36 f 后判负 → 3000 ms → 结算 → GAME OVER 升起 2000 ms、再停 3000 ms → 结束页（等按 R）。
+- 老鹰被毁：立即 GAME OVER 升起 2000 ms、再停 3000 ms（战场照常运行）→ 结束页，**不进结算**。
 - 顺序、时长、老鹰被毁是否结算都与 NES 不一致。`game_over` 音效在升起字样时播放，NES 在砖纹画面才播。
 
 可信度：高（砖纹画面时长为中）。
@@ -435,4 +435,4 @@ ROM 的音效是往 `$0300~$031B` 写 1，由 NMI 里的声音驱动读取。地
 - [M] megabars/battle-city-port，`reverse/NOTES.md`、`modern/src/gameplay.ts`：https://github.com/megabars/battle-city-port
 - [V] vgrichina/battlecity，`REVERSE.md`：https://github.com/vgrichina/battlecity/blob/main/REVERSE.md
 - 同目录 `tank-and-bullet.md`（移动、子弹、带道具坦克闪烁等）。
-- 旧笔记 `docs/values/readme.md`（网页版实测）。
+- 旧笔记 `web-measured.md`（网页版实测）。

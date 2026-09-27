@@ -209,16 +209,11 @@ describe('玩家托管', () => {
     expect(dead.session.stageEndAutopilot).toEqual([true])
   })
 
-  it('开关关闭时不计时、不托管，aiOnly 为 false', () => {
-    const { session, run, runUntilControllable, pilots } = autopilotSetup(
-      [walledStage('1')],
-      [P1],
-      false,
-    )
+  it('开关关闭时不计时、不托管', () => {
+    const { run, runUntilControllable, pilots } = autopilotSetup([walledStage('1')], [P1], false)
     runUntilControllable()
     run(20_000)
     expect(pilots()).toEqual(['human'])
-    expect(session.aiOnly).toBe(false)
   })
 
   it('托管的玩家没命时 AI 不借命；按开火键同一个 tick 交还并借命', () => {
@@ -240,22 +235,6 @@ describe('玩家托管', () => {
     key('keyup', PLAYER1_CONTROL.fire)
     expect(pilots()).toEqual(['human', 'autopilot'])
     expect(scene['players'][0].flicker).not.toBeNull()
-  })
-
-  it('全程没有人类输入时 aiOnly 为 true；按过一次键就为 false', () => {
-    const idle = autopilotSetup([walledStage('1')])
-    idle.runUntilControllable()
-    idle.run(2050)
-    idle.session.scene!.map.eagleBroken = true
-    while (idle.session.phase !== 'ended') idle.run(STEP_MS)
-    expect(idle.session.aiOnly).toBe(true)
-
-    const touched = autopilotSetup([walledStage('1')])
-    touched.tap(PLAYER1_CONTROL.up)
-    touched.runUntilControllable()
-    touched.run(2050)
-    expect(touched.pilots()).toEqual(['autopilot'])
-    expect(touched.session.aiOnly).toBe(false)
   })
 
   it('暂停菜单里按过又松开的键不算输入；恢复时仍按着的键算', () => {

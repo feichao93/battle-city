@@ -5,7 +5,6 @@ const result = (patch: Partial<GameResult>): GameResult => ({
   stageName: '1',
   scores: [30000],
   cleared: false,
-  aiOnly: false,
   autopilot: [false],
   ...patch,
 })
@@ -16,15 +15,15 @@ describe('store', () => {
     useUIStore.setState({ hiScore: DEFAULT_HI_SCORE, lastGame: null, autopilot: true })
   })
 
-  it('AI 对 AI 的局照常记录结果，但不刷新最高分', () => {
-    useUIStore.getState().finishGame(result({ aiOnly: true, autopilot: [true] }))
+  it('托管打出的分数也照常刷新最高分', () => {
+    useUIStore.getState().finishGame(result({ autopilot: [true] }))
     const { hiScore, lastGame } = useUIStore.getState()
-    expect(hiScore).toBe(DEFAULT_HI_SCORE)
-    expect(lastGame).toMatchObject({ scores: [30000], newHiScore: false, autopilot: [true] })
+    expect(hiScore).toBe(30000)
+    expect(lastGame).toMatchObject({ scores: [30000], newHiScore: true, autopilot: [true] })
 
-    useUIStore.getState().finishGame(result({}))
+    useUIStore.getState().finishGame(result({ scores: [100] }))
     expect(useUIStore.getState().hiScore).toBe(30000)
-    expect(useUIStore.getState().lastGame!.newHiScore).toBe(true)
+    expect(useUIStore.getState().lastGame!.newHiScore).toBe(false)
   })
 
   it('联机分数只刷新最高分', () => {

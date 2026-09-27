@@ -11,11 +11,9 @@ export interface FireEstimate {
   steelCount: number
 }
 
-/** 据 FireEstimate 计算 AI 需要开几枪才能打穿 */
+/** 据 FireEstimate 计算 AI 进攻老鹰时连开几枪；最多 2 枪，连发 3 枪老鹰太容易被打掉 */
 export function getAIFireCount(est: FireEstimate): number {
-  if (est.brickCount <= 3) return 1
-  if (est.brickCount <= 5) return 2
-  return 3
+  return est.brickCount <= 3 ? 1 : 2
 }
 
 /** 火力阻力：钢块权重远大于砖块 */

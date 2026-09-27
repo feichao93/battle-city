@@ -18,7 +18,6 @@ export interface SessionSnapshot {
   stageIndex: number
   stageName: string
   cleared: boolean
-  aiOnly: boolean
   stageEndAutopilot: boolean[] | null
   players: PlayerSnapshot[]
   /** 首关地图载入之前为 null */

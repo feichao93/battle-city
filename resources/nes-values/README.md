@@ -4,7 +4,7 @@
 每项都注明 NES 原值、换算后的 ms / px、来源地址、可信度，以及与我们当前实现是否一致。
 
 - 1 帧 = 1000/60 ms；1 block = 16px。
-- `docs/values/readme.md` 是早年用网页版实测的笔记，与本目录冲突时以本目录为准。
+- `web-measured.md` 是早年用网页版实测的笔记，与 ROM 调研冲突时以 ROM 调研为准。
 
 ## 文档
 
@@ -25,7 +25,7 @@
 | 3 | 子弹速度 | 玩家 1～3 星 4px/帧；bot fast / armor 2px/帧 | 玩家 1 星起 3px/帧；bot fast / armor 3px/帧 | tank-and-bullet |
 | 4 | 玩家开火 | 按下那一帧开火，无冷却；子弹消失后 9 帧才能再发 | 按住连发，冷却 300 / 200ms | tank-and-bullet |
 | 5 | 加命 | 每名玩家整局只在首次到 20000 分时加一次 | 每 10000 分加一次 | powerups-effects-flow |
-| 6 | 结束流程 | 两种结束方式都先升 GAME OVER，再结算，再显示砖纹画面；老鹰被毁有 39 帧大爆炸 | 老鹰被毁立即结束、不结算；命用完先结算后升字样 | powerups-effects-flow |
+| 6 | 结束流程 | 两种结束方式都先升 GAME OVER，再结算，再显示砖纹画面；老鹰被毁有 39 帧大爆炸 | 老鹰被毁不结算，直接升 GAME OVER，升到位再停 3s；命用完先结算后升字样 | powerups-effects-flow |
 | 7 | 冰面滑行 | 仅玩家：起步 13px 内不能转向和停止，点按一下共滑 29px | 已实现，有意比原版短：起步约 8px 内不能转向，点按共滑约 17px（试玩觉得原版太滑，constants.ts SNOW_SLIDE_*） | tank-and-bullet |
 | 8 | 第 35 关之后 | 进入 36～70 关（地图循环，难度固定按第 35 关），70 关后回第 1 关 | 打完最后一关结束 | powerups-effects-flow |
 | 9 | 道具出现位置与种类 | 16 个固定点，不看地形；star、grenade 各 2/8，其余各 1/8 | 有偏置 | powerups-effects-flow |
@@ -37,7 +37,9 @@
 | 15 | 计分细节 | grenade 炸掉的 bot 不计入结算；满级再吃 star 不加 5000 | 两处相反 | powerups-effects-flow / tank-and-bullet |
 | 16 | armor 颜色 | 两种颜色每帧交替；带道具坦克全场同步闪烁 | 6 帧循环；各自按出场时间 | tank-and-bullet |
 | 17 | 出生点地形 | 出生时把出生点 16×16 清成空地 | 不清除 | spawn-ai |
-| 18 | 其他小项 | 队友误伤僵直约 4.4s；转向那一帧照常走 1px；子弹出生点沿飞行方向差 1～3px；shovel 闪烁少半轮；暂停音只在进入暂停时响 | 1s 等 | tank-and-bullet / powerups-effects-flow |
+| 18 | 出生动画挡路 | 出生中的坦克不挡路，别的坦克可以开进出生点 | 出生闪烁区域挡路，避免和刚出生的坦克叠在一起 | spawn-ai |
+| 19 | bot 打到老鹰外墙之后 | 没有特殊处理 | 打掉老鹰外墙的砖或打中老鹰的那辆 bot，3s 内不朝老鹰开火、不去进攻，各自计时：免得第一发开出缺口、紧接着一发就打掉老鹰 | spawn-ai |
+| 20 | 其他小项 | 队友误伤僵直约 4.4s；转向那一帧照常走 1px；子弹出生点沿飞行方向差 1～3px；shovel 闪烁少半轮；暂停音只在进入暂停时响 | 1s 等 | tank-and-bullet / powerups-effects-flow |
 
 ## 未查到
 

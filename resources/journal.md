@@ -1,5 +1,7 @@
 # 基于 React 的高质量坦克大战复刻版
 
+> 本文写于 0.3.0 版本（React + SVG + redux-saga），文中的实现细节已不适用于 0.4.0 重写版。0.4.0 的设计与实现见 [introduction.md](./introduction.md)。
+
 坦克大战当年红遍大江南北，很多和我一样的九零后应该都有着对这个游戏的记忆。现在显示器分辨率越来越高，使用矢量图来实现像素风格游戏，可以获得非常高的展现质量。[该复刻版](https://shinima.github.io/battle-city/) 是我花了很长时间折腾的坦克大战复刻版本，所有元素都使用矢量图（SVG）进行渲染，针对网页的交互方式重新设计了关卡编辑器，该复刻版新增了关卡选择功能、自定义关卡管理功能等，另外它还包括了一个 Gallery 页面用于展示所有的游戏元素，想必它一定可以勾起你的儿时回忆。
 
 **针对鼠标交互设计的关卡编辑器**
@@ -63,7 +65,7 @@
 
 #### 数值配置
 
-一部分数值配置比较明显，多玩几遍原版游戏就可以找到规律，例如玩家的坦克数量、坦克升级过程、不同类型坦克子弹效果、击毁不同类型坦克的得分等。其他数值配置的获取较为繁琐，例如子弹飞行速度、坦克移动速度、爆炸效果各帧的持续时间，这一部分大都从原版游戏录像中获取。[该文件](https://github.com/shinima/battle-city/blob/master/docs/values.md) 中记录了一些我已经测量好的数值，可供参考。随着游戏的不断完善，该文件也会不断完善。
+一部分数值配置比较明显，多玩几遍原版游戏就可以找到规律，例如玩家的坦克数量、坦克升级过程、不同类型坦克子弹效果、击毁不同类型坦克的得分等。其他数值配置的获取较为繁琐，例如子弹飞行速度、坦克移动速度、爆炸效果各帧的持续时间，这一部分大都从原版游戏录像中获取。[该文件](nes-values/web-measured.md) 中记录了一些我已经测量好的数值，可供参考。随着游戏的不断完善，该文件也会不断完善。
 
 #### 游戏场景
 
@@ -185,7 +187,7 @@ interface State {
 
 ![saga-structure-overview](imgs/saga-structure-overview.png)
 
-[在这里查看上图的高清版本](https://raw.githubusercontent.com/shinima/battle-city/master/docs/imgs/saga-structure-overview.png)。上图中浅红色背景的 saga 在[另一张图片中](https://raw.githubusercontent.com/shinima/battle-city/master/docs/imgs/other-sagas.png)。
+[在这里查看上图的高清版本](imgs/saga-structure-overview.png)。上图中浅红色背景的 saga 在[另一张图片中](imgs/other-sagas.png)。
 
 实现游戏逻辑比较重要的一点是，每一个 saga 实例都需要有明确的生命周期，这意味着我们需要回答下面这些问题：
 

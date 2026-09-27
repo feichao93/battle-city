@@ -74,7 +74,6 @@ export default class GameSession {
 
   /** 本关胜负确定那一刻各玩家是否为托管，结算页和结束页据此标注 CPU；胜负未定时为 null */
   stageEndAutopilot: boolean[] | null = null
-  private hadHumanInput = false
 
   constructor(
     private readonly stages: RawStageConfig[],
@@ -135,11 +134,6 @@ export default class GameSession {
     return this.players.map((p) => p.score)
   }
 
-  /** 开着托管且本局从头到尾没有人按过键：AI 对 AI 的演示局，不更新最高分 */
-  get aiOnly(): boolean {
-    return this.options.autopilot && !this.hadHumanInput
-  }
-
   /** 对局状态的纯数据快照，可直接 JSON 序列化；配合 textView 画成文本 */
   snapshot(): SessionSnapshot {
     return {
@@ -148,7 +142,6 @@ export default class GameSession {
       stageIndex: this.stageIndex,
       stageName: this.stage.name,
       cleared: this.cleared,
-      aiOnly: this.aiOnly,
       stageEndAutopilot: this.stageEndAutopilot,
       players: this.players.map((p) => ({
         lives: p.lives,
@@ -201,7 +194,6 @@ export default class GameSession {
       if (input.touched(player.control) || input.held(player.control)) {
         player.pilot = 'human'
         player.idleTime = 0
-        this.hadHumanInput = true
         if (this.phase === 'playing') {
           player.touchedThisStage = true
         }

@@ -21,7 +21,7 @@ function lanRelay(): Plugin {
   }
 }
 
-// GitHub Pages 部署在 /battle-city/ 子路径下
+// 开发服务器沿用旧版 GitHub Pages 的 /battle-city/ 子路径；打包都用 --base ./，放在哪个路径下都能打开
 export default defineConfig({
   base: '/battle-city/',
   plugins: [react(), lanRelay()],

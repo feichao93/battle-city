@@ -231,7 +231,6 @@ function Battle(props: {
             stageName: s.stage.name,
             scores: s.scores,
             cleared: s.cleared,
-            aiOnly: s.aiOnly,
             autopilot: s.stageEndAutopilot ?? s.players.map(() => false),
           })
           replace(`/gameover${playersSearch(multi)}`)

@@ -498,7 +498,7 @@ describe('fire-estimate', () => {
     ).toBe(2)
     expect(
       getAIFireCount({ source: 0, target: 0, distance: 0, brickCount: 6, steelCount: 0 }),
-    ).toBe(3)
+    ).toBe(2)
   })
   it('getFireResist：钢块权重为 100', () => {
     expect(getFireResist({ source: 0, target: 0, distance: 0, brickCount: 1, steelCount: 1 })).toBe(

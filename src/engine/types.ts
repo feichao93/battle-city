@@ -30,7 +30,7 @@ export interface AudioPort {
   play(name: SoundName): void
 }
 
-/** 音效名（对应 sound/*.ogg） */
+/** 音效名（对应 src/audio/sounds/*.ogg） */
 export type SoundName =
   | 'stage_start'
   | 'game_over'

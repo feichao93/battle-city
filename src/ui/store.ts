@@ -14,8 +14,6 @@ export interface GameResult {
   scores: number[]
   /** 是否打完了全部关卡 */
   cleared: boolean
-  /** 开着托管且全程没有人按过键：AI 对 AI 的演示局，不更新最高分 */
-  aiOnly: boolean
   /** 最后一关胜负确定时各玩家是否为托管，结束页据此标注 cpu */
   autopilot: boolean[]
 }
@@ -80,7 +78,7 @@ export const useUIStore = create<UIState>()(
       setAutopilot: (autopilot) => set({ autopilot }),
       finishGame: (result) =>
         set((s) => {
-          const hiScore = result.aiOnly ? s.hiScore : nextHiScore(s.hiScore, result.scores)
+          const hiScore = nextHiScore(s.hiScore, result.scores)
           return { lastGame: { ...result, newHiScore: hiScore > s.hiScore }, hiScore }
         }),
       recordScores: (scores) => set((s) => ({ hiScore: nextHiScore(s.hiScore, scores) })),

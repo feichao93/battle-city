@@ -59,7 +59,7 @@
 - 可信度：高。[D] D:4632–4637（玩家）、D:4647–4653（敌方）。[M] gameplay.ts:186 与 [V] REVERSE.md 对敌方的描述一致。
 - 玩家速度不受星级影响：`$DC09` 只按帧号判断，不读 `$A8`。
 - timer 道具生效期间（`$0100 ≠ 0`），敌方整个状态处理都被跳过（D:4640–4645），既不动也不做决策。
-- 对 `docs/values/readme.md` 的修正：fast 应为 0.06 px/ms（原文写成 0.6）；power 与 armor 都是 slow（0.03），不是 middle。
+- 对 `web-measured.md` 的修正：fast 应为 0.06 px/ms（原文写成 0.6）；power 与 armor 都是 slow（0.03），不是 middle。
 
 ## 2. 转向对齐
 
@@ -93,7 +93,7 @@
 - 可信度：高。判断顺序是：`$00` → 0；`$C0` → 1；`$60` → 3；其余若 bit7=1（敌方 `$80/$A0/$E0`）→ 0；剩下的 `$20/$40` 落到写 1 的分支。
 - 地形探测频率：属性为 0 的慢弹隔帧探测一次（`(槽位号 xor f)&1`，D:6529–6534），快弹每帧探测。两者都是每飞 4px 探测一次。
 - 来源冲突：[M] gameplay.ts:431 的 `fire()` 只把 `$C0`、`$60` 写成非零，1、2 星玩家得到 0（慢弹）。这与 [D] 的指令不符，判断为 [M] 的转写错误。[V] REVERSE.md:753–757 与本文一致。
-- 对 `docs/values/readme.md` 的修正：原文「Bot basic、Bot fast、Player basic 为 0.12，其他 0.24」漏了 bot armor，armor 也是 0.12。
+- 对 `web-measured.md` 的修正：原文「Bot basic、Bot fast、Player basic 为 0.12，其他 0.24」漏了 bot armor，armor 也是 0.12。
 
 ## 4. 子弹上限、发射间隔、开火概率
 
@@ -231,7 +231,7 @@
 
 可信度：高（[M] NOTES.md:977 给出同一公式）。
 
-对照 `docs/values/readme.md`：
+对照 `web-measured.md`：
 
 | 条目 | readme 记法 | ROM | 结论 |
 |---|---|---|---|
@@ -305,5 +305,5 @@ readme 里的 3 帧段在 ROM 中找不到对应逻辑，推测是当年网页�
 - [D] cyneprepou4uk, *NES-Games-Disassembly / Battle City*, `bank_FF.asm`、`bank_ram.inc`、`CHR_ROM.chr`：<https://github.com/cyneprepou4uk/NES-Games-Disassembly/tree/main/Battle%20City>
 - [M] megabars, *battle-city-port*：`modern/src/gameplay.ts`、`reverse/NOTES.md`、`spec/*.md`：<https://github.com/megabars/battle-city-port>
 - [V] vgrichina, *battlecity* `REVERSE.md`：<https://github.com/vgrichina/battlecity/blob/main/REVERSE.md>
-- 本仓库旧笔记：`docs/values/readme.md`
+- 本仓库旧笔记：`web-measured.md`
 - 本仓库实现：`src/engine/values.ts`、`src/engine/constants.ts`、`src/render/tankColor.ts`、`src/engine/systems/fire.ts`、`src/engine/systems/bullet.ts`、`src/engine/systems/movement.ts`、`src/engine/physics/collision.ts`、`src/engine/ai/env.ts`、`src/engine/ai/bot-brain.ts`、`src/input/InputManager.ts`、`src/engine/BattleScene.ts`

@@ -217,7 +217,6 @@ const SAMPLE_GAMEOVER: LastGame = {
   scores: [12300, 4500],
   cleared: false,
   newHiScore: false,
-  aiOnly: false,
   autopilot: [false, true],
 }
 const SAMPLE_CLEARED: LastGame = {
@@ -225,7 +224,6 @@ const SAMPLE_CLEARED: LastGame = {
   scores: [23400],
   cleared: true,
   newHiScore: true,
-  aiOnly: false,
   autopilot: [false],
 }
 
