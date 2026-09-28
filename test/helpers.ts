@@ -1,10 +1,17 @@
+import {
+  ACTIONS,
+  INTENTS,
+  type Action,
+  type DecisionAnswers,
+  type DecisionClient,
+} from '../src/engine/ai/decision'
 import { STEP_MS } from '../src/engine/Game'
 import GameSession, { type PlayerConfig } from '../src/engine/GameSession'
 import { PLAYER_SPAWN_POS } from '../src/engine/constants'
 import { seededRandom } from '../src/engine/random'
 import InputManager from '../src/input/InputManager'
 import { PLAYER1_CONTROL, PLAYER2_CONTROL } from '../src/input/bindings'
-import type { RawStageConfig, SoundName } from '../src/engine/types'
+import type { Direction, RawStageConfig, SoundName } from '../src/engine/types'
 
 /** overrides 以 "row,col" 指定地形编码，其余为空地，(12, 6) 为老鹰 */
 export function makeStage(
@@ -34,7 +41,40 @@ export const P2: PlayerConfig = {
   spawnPos: PLAYER_SPAWN_POS.player2,
 }
 
-export function setup(stages: RawStageConfig[], players = [P1], autopilot = false) {
+/** 决策模型的返回：action 选中项概率为 1，fire 为四个方向的 P(yes)，单个数字表示四个方向都一样 */
+export function answers(
+  action: Action,
+  fire: number | Partial<Record<Direction, number>> = 0,
+): DecisionAnswers {
+  const p = (d: Direction) => ({
+    type: 'noul' as const,
+    noul: typeof fire === 'number' ? fire : (fire[d] ?? 0),
+  })
+  const one = <T extends string>(options: readonly T[], chosen: T) =>
+    Object.fromEntries(options.map((o) => [o, o === chosen ? 1 : 0])) as Record<T, number>
+  return {
+    action: { type: 'choice', choice: action, confidence: 1, probabilities: one(ACTIONS, action) },
+    fire_up: p('up'),
+    fire_down: p('down'),
+    fire_left: p('left'),
+    fire_right: p('right'),
+    intent: {
+      type: 'choice',
+      choice: 'attack',
+      confidence: 1,
+      probabilities: one(INTENTS, 'attack'),
+    },
+  }
+}
+
+/** 总是原地不动的决策模型；只测托管状态机时用 */
+export const STAY: DecisionClient = () => Promise.resolve(answers('stay'))
+
+export function setup(
+  stages: RawStageConfig[],
+  players = [P1],
+  autopilot: DecisionClient | null = null,
+) {
   const sounds: SoundName[] = []
   const session = new GameSession(
     stages,

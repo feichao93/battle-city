@@ -19,6 +19,8 @@ export interface AIContext {
   /** 本关逻辑时间（ms），即 scene.time */
   time: number
   stageNumber: number
+  /** 还没开始出生的 bot 数 */
+  remainingBots: number
   /** 按玩家下标；不在场为 null */
   players: (Tank | null)[]
   /** 按玩家下标，谁在驾驶 */

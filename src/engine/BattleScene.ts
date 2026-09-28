@@ -29,7 +29,7 @@ import type { CollisionWorld } from './physics/collision'
 import { testCollide, type Rect } from './physics/geometry'
 import BotBrain from './ai/bot-brain'
 import type { AIContext, TankController, TankIntent } from './ai/controller'
-import TeammateBrain from './ai/teammate-brain'
+import DecisionBrain from './ai/decision-brain'
 import { buildSpots, type Spot } from './ai/spots'
 import { updateBullets, type BulletTankHit } from './systems/bullet'
 import { updateAnimations } from './systems/animation'
@@ -415,6 +415,7 @@ export default class BattleScene {
       random: this.options.random,
       time: this.time,
       stageNumber: this.stageNumber,
+      remainingBots: this.remainingBotCount,
       players: this.players.map((slot) => slot.tank),
       pilots: this.players.map((slot) => slot.state.pilot),
     }
@@ -439,7 +440,8 @@ export default class BattleScene {
       slot.brain = null
       return keyboardController(input, slot.state.control)
     }
-    slot.brain ??= new TeammateBrain()
+    // 只有开着托管（autopilot 非 null）时 GameSession 才会把 pilot 切成 autopilot
+    slot.brain ??= new DecisionBrain(this.players.indexOf(slot), this.options.autopilot!)
     return slot.brain
   }
 
@@ -524,7 +526,7 @@ export default class BattleScene {
       time: round(this.time),
       status: this.status,
       loseReason: this.loseReason,
-      remainingBots: this.remainingBots.length,
+      remainingBots: this.remainingBotCount,
       botsFrozen: this.botFreezeTicks > 0,
       terrain: terrainSnapshot(this.map),
       eagle:

@@ -41,7 +41,6 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "arena": "ARENA=1 vitest run test/arena.test.ts",
     "build:npm": "tsc --noEmit && vite build --base ./ --outDir www --emptyOutDir",
     "prepack": "npm run build:npm"
   },

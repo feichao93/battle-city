@@ -42,6 +42,7 @@ function emptyScene(time: number, overrides: Record<string, string> = {}) {
     random: () => 0,
     time,
     stageNumber: 1,
+    remainingBots: 0,
     players: [player],
     pilots: ['human'],
   }

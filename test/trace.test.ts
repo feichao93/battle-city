@@ -33,7 +33,7 @@ function recordTrace(stageName: string, players: PlayerConfig[], seed: number, m
     0,
     players,
     { play: () => {} },
-    { autopilot: false, random: seededRandom(seed) },
+    { autopilot: null, random: seededRandom(seed) },
   )
   const input = new InputManager()
   const hash = createHash('sha1')

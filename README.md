@@ -26,7 +26,7 @@ npx battle-city host       # 局域网联机主机，把打印出的地址发给
 ```bash
 pnpm install
 pnpm dev         # vite 开发服务器
-pnpm test        # 单测；pnpm arena 跑托管 AI 对 bot 的无头对局统计
+pnpm test        # 单测
 pnpm build       # 按相对路径打包到 dist/，放在任意路径下都能打开
 pnpm build:npm   # 按相对路径打包到 www/，npm 包用的就是它
 ```
@@ -44,7 +44,6 @@ pnpm build:npm   # 按相对路径打包到 www/，npm 包用的就是它
 - [x] 局域网联机：`battle-city host` 启动大厅，同一网络里的两人创建或加入房间对战
 - [x] 全键盘操作：标题页、选关、关卡列表、编辑器、画廊和弹窗；Options 页可改键位；Esc 暂停菜单
 - [x] 界面细节：GAME OVER / 通关页展示分数与最高分，双人模式借命提示，页面背景跟随系统亮色 / 暗色主题
-- [x] 无头试打（arena）与对局快照测试，调 AI 时用数据对比
 - [x] npm 包与命令行一键启动
 
 <details>

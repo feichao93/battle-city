@@ -187,7 +187,7 @@ export function LanHostBattle({ stageName }: { stageName: string }) {
         ),
         players,
         port,
-        { autopilot: false, random: Math.random },
+        { autopilot: null, random: Math.random },
       )
       const encoder = new SceneEncoder()
       let lastTick = -1

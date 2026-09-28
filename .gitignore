@@ -8,3 +8,6 @@ node_modules/
 staging/
 www/
 .mcp.json
+
+# 决策模型的 DASHSCOPE_API_KEY 等
+.env

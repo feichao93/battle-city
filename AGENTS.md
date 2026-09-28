@@ -6,7 +6,6 @@
 
 - `pnpm dev`：http://localhost:5173/battle-city/（hash 路由）；`--host` 后局域网可连 `#/lobby`
 - `pnpm test`；`./node_modules/.bin/tsc --noEmit`
-- `pnpm arena`：托管 AI 对 bot 的无头统计；结果对种子敏感，结论换一组 `ARENA_SEEDS` 复核
 - `pnpm build:npm` 构建 `www/` 后，`node bin/battle-city.js host` 起联机主机
 
 ## 目录

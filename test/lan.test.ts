@@ -78,7 +78,7 @@ describe('输入编码', () => {
         { control: REMOTE_CONTROL, color: 'green', spawnPos: PLAYER_SPAWN_POS.player2 },
       ],
       { play: () => {} },
-      { autopilot: false, random: seededRandom(1) },
+      { autopilot: null, random: seededRandom(1) },
     )
     const step = () => {
       session.step(STEP_MS, input)
@@ -146,7 +146,7 @@ describe('画面序列化', () => {
         { control: REMOTE_CONTROL, color: 'green', spawnPos: PLAYER_SPAWN_POS.player2 },
       ],
       { play: () => {} },
-      { autopilot: false, random: seededRandom(3) },
+      { autopilot: null, random: seededRandom(3) },
     )
     const encoder = new SceneEncoder()
     const mirror = new FrameMirror()
@@ -239,7 +239,7 @@ describe('画面序列化', () => {
       0,
       [{ control: PLAYER1_CONTROL, color: 'yellow', spawnPos: PLAYER_SPAWN_POS.player1 }],
       { play: () => {} },
-      { autopilot: false, random: seededRandom(1) },
+      { autopilot: null, random: seededRandom(1) },
     )
     const frames: SceneFrame[] = []
     while (session.scene == null) session.step(STEP_MS, input)

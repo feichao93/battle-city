@@ -10,6 +10,8 @@ import InputManager from '../input/InputManager'
 import Renderer from '../render/Renderer'
 import { sharedAtlas } from '../render/SpriteAtlas'
 import BattleOverlay, { type BattleView } from './BattleOverlay'
+import { decisionClient } from './decisionClient'
+import { useDecisionLog } from './decisionLog'
 import StatisticsScene from './StatisticsScene'
 import { playersSearch, replace, stagePath } from './router'
 import { allStages, useUIStore } from './store'
@@ -109,6 +111,7 @@ function Battle(props: {
     if (container == null) return
 
     const { customStages, bindings, autopilot } = useUIStore.getState()
+    useDecisionLog.getState().clear()
     const stages = allStages(customStages)
 
     let app: Application | null = null
@@ -179,7 +182,7 @@ function Battle(props: {
         stages.findIndex((stage) => stage.name === startStageName),
         players,
         audio,
-        { autopilot, random: Math.random },
+        { autopilot: autopilot ? decisionClient : null, random: Math.random },
       )
 
       let mountedScene: BattleScene | null = null

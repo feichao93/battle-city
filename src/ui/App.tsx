@@ -1,6 +1,7 @@
 import { useLayoutEffect } from 'react'
 import type { RawStageConfig } from '../engine/types'
 import Lobby from '../lan/Lobby'
+import DecisionPanel from './DecisionPanel'
 import GameCanvas from './GameCanvas'
 import { GALLERY_TABS, replace, stagePath, useRoute, type Route } from './router'
 import ChooseStage from './screens/ChooseStage'
@@ -13,7 +14,12 @@ import Title from './screens/Title'
 import { allStages, useUIStore, type GameResult } from './store'
 
 export default function App() {
-  return <CurrentScreen />
+  return (
+    <>
+      <CurrentScreen />
+      <DecisionPanel />
+    </>
+  )
 }
 
 /** 参数缺失或无效时要跳转到的规范路径 */

@@ -5,7 +5,8 @@ import type { PlayerConfig } from '../src/engine/GameSession'
 import type InputManager from '../src/input/InputManager'
 import { PLAYER1_CONTROL, PLAYER2_CONTROL } from '../src/input/bindings'
 import type { RawStageConfig } from '../src/engine/types'
-import { killAllBots, makeStage, P1, P2, runUntilPlaying, setup } from './helpers'
+import type { DecisionClient } from '../src/engine/ai/decision'
+import { killAllBots, makeStage, P1, P2, runUntilPlaying, setup, STAY } from './helpers'
 
 const CONTROLS = [PLAYER1_CONTROL, PLAYER2_CONTROL]
 const key = (type: 'keydown' | 'keyup', code: string) =>
@@ -19,7 +20,7 @@ afterEach(() => {
 function autopilotSetup(
   stages: RawStageConfig[],
   players: PlayerConfig[] = [P1],
-  autopilot = true,
+  autopilot: DecisionClient | null = STAY,
 ) {
   const ctx = setup(stages, players, autopilot)
   ctx.input.attach()
@@ -210,7 +211,7 @@ describe('玩家托管', () => {
   })
 
   it('开关关闭时不计时、不托管', () => {
-    const { run, runUntilControllable, pilots } = autopilotSetup([walledStage('1')], [P1], false)
+    const { run, runUntilControllable, pilots } = autopilotSetup([walledStage('1')], [P1], null)
     runUntilControllable()
     run(20_000)
     expect(pilots()).toEqual(['human'])

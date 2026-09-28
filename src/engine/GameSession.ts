@@ -1,3 +1,4 @@
+import type { DecisionClient } from './ai/decision'
 import BattleScene from './BattleScene'
 import { AUTOPILOT_IDLE, AUTOPILOT_START, frame, INITIAL_LIVES } from './constants'
 import TerrainMap from './map/TerrainMap'
@@ -49,8 +50,8 @@ export type PlayerConfig = Pick<PlayerState, 'control' | 'color' | 'spawnPos'>
 
 /** 开局时确定、整局不变的选项；GameSession 原样传给每一关的 BattleScene */
 export interface SessionOptions {
-  /** Options 页的托管开关；false 时不计空闲、不托管 */
-  autopilot: boolean
+  /** 托管坦克向决策模型要决策的入口；Options 页关掉托管时为 null，不计空闲、不托管 */
+  autopilot: DecisionClient | null
   /** 引擎内所有随机决策的来源；测试传 seededRandom 以便复现 */
   random: () => number
 }
@@ -185,7 +186,7 @@ export default class GameSession {
    * 只有对战中、胜负未定、坦克可以操作时才累计空闲，阵亡等待时暂停不清零
    */
   private updatePilots(delta: number, input: InputManager): void {
-    if (!this.options.autopilot || this.phase === 'ended') {
+    if (this.options.autopilot == null || this.phase === 'ended') {
       return
     }
     const scene = this.scene

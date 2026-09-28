@@ -46,7 +46,14 @@ function describeIntent(intent: TankIntent | null): string {
   return intent.fire ? `${move} + fire` : move
 }
 
-function drawField(scene: SceneSnapshot): string[] {
+/** drawField 用到的战场内容 */
+export type FieldView = Pick<
+  SceneSnapshot,
+  'terrain' | 'eagle' | 'slots' | 'tanks' | 'spawning' | 'bullets' | 'powerUps'
+>
+
+/** 26×26 的战场文本，符号见 textView；self 这辆坦克的编号画成 M */
+export function drawField(scene: FieldView, self: number | null = null): string[] {
   const grid: string[][] = []
   for (let row = 0; row < CELLS; row += 1) {
     grid.push([])
@@ -78,7 +85,8 @@ function drawField(scene: SceneSnapshot): string[] {
   for (const s of scene.spawning) put(s.x, s.y, 'oooo')
   for (const tank of scene.tanks) {
     const slot = scene.slots.findIndex((s) => s.tankId === tank.id)
-    const ch = tank.side === 'bot' ? BOT_CHAR[tank.level] : String(slot + 1)
+    const ch =
+      tank.id === self ? 'M' : tank.side === 'bot' ? BOT_CHAR[tank.level] : String(slot + 1)
     put(tank.x, tank.y, `${ch}${ARROW[tank.direction]}${ch}${ch}`)
   }
   for (const b of scene.bullets) {

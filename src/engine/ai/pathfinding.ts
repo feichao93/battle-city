@@ -11,8 +11,7 @@ export function findPath(
   target: number | ((spot: Spot) => boolean),
   calculateScore: (step: number, spot: Spot) => number = (step) => step,
 ): number[] | null {
-  const stop: (spot: Spot) => boolean =
-    typeof target === 'number' ? (s) => s.t === target : target
+  const stop: (spot: Spot) => boolean = typeof target === 'number' ? (s) => s.t === target : target
 
   const pre = new Array<number>(spots.length).fill(-1)
   const distance = new Array<number>(spots.length).fill(Infinity)
